@@ -2,9 +2,11 @@ import {Account, Connection, PublicKey, sendAndConfirmTransaction, Transaction} 
 import {getHashedName, getNameAccountKey, NameRegistryState} from "@bonfida/spl-name-service";
 import {Token} from "@solana/spl-token"
 import {initializeCreatorInstruction} from "./instruction";
+import {SolcloutCreator} from "./state";
 
 export type CreateSolcloutCreatorParams = {
   programId: PublicKey,
+  tokenProgramId: PublicKey,
   payer: Account,
   solcloutInstance: PublicKey,
   name: string,
@@ -13,7 +15,7 @@ export type CreateSolcloutCreatorParams = {
   nameParent?: PublicKey,
 };
 
-async function createSolcloutCreator(connection: Connection, params: CreateSolcloutCreatorParams): Promise<void> {
+export async function createSolcloutCreator(connection: Connection, params: CreateSolcloutCreatorParams): Promise<void> {
   const hashedName = await getHashedName(params.name)
   const nameKey = await getNameAccountKey(hashedName, params.nameClass, params.nameParent)
   const [solcloutCreator, _] = await PublicKey.findProgramAddress(
@@ -25,14 +27,24 @@ async function createSolcloutCreator(connection: Connection, params: CreateSolcl
     params.programId
   )
 
+  const existing = await connection.getAccountInfo(
+    solcloutCreator,
+    'processed',
+  );
+  if (existing) {
+    throw new Error("Solclout creator already exists")
+  }
+
   const creatorMint = await Token.createMint(
     connection,
     params.payer,
     authority,
     authority,
     9,
-    params.programId
+    params.tokenProgramId
   )
+
+  console.log(`Created creator mint ${creatorMint.publicKey}`)
 
   // If the person has already claimed their twitter handle, set the founder rewards account owner to
   // their wallet. Otherwise, set to the authority so solclout can transfer the account to them later.
@@ -44,6 +56,8 @@ async function createSolcloutCreator(connection: Connection, params: CreateSolcl
     // Do nothing, token owner already properly set
   }
 
+  console.log(`Set founder rewards account owner to ${tokenOwner}`)
+
   const founderRewardsAccount = await creatorMint.createAssociatedTokenAccount(tokenOwner)
   const transaction = new Transaction()
     .add(initializeCreatorInstruction(
@@ -54,7 +68,7 @@ async function createSolcloutCreator(connection: Connection, params: CreateSolcl
       nameKey,
       founderRewardsAccount,
       creatorMint.publicKey,
-      params.founderRewardsPercentage,
+      (params.founderRewardsPercentage / 100) * 10000,
       nonce
     ));
 
@@ -64,4 +78,6 @@ async function createSolcloutCreator(connection: Connection, params: CreateSolcl
     [params.payer],
     { commitment: "singleGossip", preflightCommitment: "singleGossip" }
   );
+
+  console.log(`Created creator with key ${solcloutCreator}, founder rewards account ${founderRewardsAccount}`)
 }

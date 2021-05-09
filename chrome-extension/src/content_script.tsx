@@ -1,6 +1,8 @@
 import UserDecorator from "./user_decorator"
 import TweetDecorator from "./tweet_decorater"
 import {Connection} from "@solana/web3.js"
+import {SOLANA_API_URL} from "./globals";
+import CreatorStore from "./creator_store";
 
 chrome.runtime.onMessage.addListener(function (msg, sender, sendResponse) {
   if (msg.color) {
@@ -23,11 +25,10 @@ function notCached(el: Element): boolean {
   return !cache.has(el)
 }
 
-// const solanaConnection = new Connection("https://devnet.solana.com")
-const solanaConnection = new Connection("https://api.mainnet-beta.solana.com")
+const solanaConnection = new Connection(SOLANA_API_URL)
 
 const userDecorator = new UserDecorator(solanaConnection)
-const tweetDecorator = new TweetDecorator(solanaConnection)
+const tweetDecorator = new TweetDecorator(new CreatorStore(solanaConnection))
 
 function annotate(): void {
   const tweets = getElementsBySelector("div[data-testid=\"tweet\"]")

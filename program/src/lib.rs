@@ -9,4 +9,4 @@ pub mod instruction;
 pub mod processor;
 pub mod state;
 pub mod utils;
-solana_program::declare_id!("metaTA73sFPqA8whreUbBsbn3SLJH2vhrW9fP5dmfdC");
+solana_program::declare_id!("metoTA73sFPqA8whreUbBsbn3SLJH2vhrW9fP5dmfdC");

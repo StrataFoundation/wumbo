@@ -13,7 +13,6 @@ use solana_client::rpc_client::RpcClient;
 use solana_client::rpc_config::RpcSendTransactionConfig;
 use solana_sdk::commitment_config::{CommitmentConfig, CommitmentLevel};
 use solana_sdk::instruction::Instruction;
-use solana_sdk::pubkey::Pubkey;
 use solana_sdk::signature::{Keypair, read_keypair_file, Signer, write_keypair_file};
 use solana_sdk::system_instruction::create_account;
 use solana_sdk::transaction::Transaction;
@@ -26,16 +25,23 @@ use spl_token_swap::curve::base::{CurveType, SwapCurve};
 use spl_token_swap::curve::fees::Fees;
 use spl_token_swap::instruction as token_swap_instruction;
 use spl_token_swap::state::SwapVersion;
+use solana_program::pubkey::Pubkey;
+use spl_token::solana_program::program_pack::{Pack as TokenPack};
+use spl_solclout::instruction::initialize_solclout;
 
 const TOKEN_SWAP_PROGRAM_ID_STR: &str = "F2LtPFtixA8vKbg8ark5zswM4QuJKBn85KZcqrzWNe4K";
 const TOKEN_PROGRAM_ID_STR: &str = "CiBbJADtSJnVQEsgXZpRfLyLNqDjwfvua8EMe9tPhKvo";
+const NAME_PROGRAM_ID_STR: &str = "CiBbJADtSJnVQEsgXZpRfLyLNqDjwfvua8EMe9tPhKvo";
+const SOLCLOUT_PORGRAM_ID_STR: &str = "5ZVrnbCBMoLcmuoJ2pXAS518fvjRQaLeYxpQGeffzE24";
 
 fn main() {
     let default_decimals = &format!("{}", native_mint::DECIMALS);
-    let TOKEN_SWAP_PROGRAM_ID: Pubkey = Pubkey::from_str(TOKEN_SWAP_PROGRAM_ID_STR).unwrap();
+    // let TOKEN_SWAP_PROGRAM_ID: Pubkey = Pubkey::from_str(TOKEN_SWAP_PROGRAM_ID_STR).unwrap();
     // let TOKEN_PROGRAM_ID: Pubkey = Pubkey::from_str(TOKEN_PROGRAM_ID_STR).unwrap();
-    // let TOKEN_SWAP_PROGRAM_ID: Pubkey = spl_token_swap::id();
+    let TOKEN_SWAP_PROGRAM_ID: Pubkey = spl_token_swap::id();
     let TOKEN_PROGRAM_ID: Pubkey = spl_token::id();
+    let NAME_PROGRAM_ID: Pubkey = spl_name_service::id();
+    let SOLCLOUT_PORGRAM_ID: Pubkey = Pubkey::from_str(SOLCLOUT_PORGRAM_ID_STR).unwrap();
 
     let app_matches = App::new(crate_name!())
         .about(crate_description!())
@@ -70,7 +76,7 @@ fn main() {
         )
         .arg(fee_payer_arg().required(false))
         .subcommand(
-            SubCommand::with_name("initialize-solclout-token")
+            SubCommand::with_name("create-solclout-token")
                 .about("Create a new solclout token")
                 .arg(
                     Arg::with_name("decimals")
@@ -101,6 +107,19 @@ fn main() {
                         .index(1)
                         .required(true)
                         .help("The solclout token to make a pool from")
+                )
+        )
+        .subcommand(
+            SubCommand::with_name("create-solclout-instance")
+                .about("Create a solclout instance")
+                .arg(
+                    Arg::with_name("solclout_token")
+                        .validator(is_valid_pubkey)
+                        .value_name("TOKEN_ADDRESS")
+                        .takes_value(true)
+                        .index(1)
+                        .required(true)
+                        .help("The solclout token to make an instance from")
                 )
         )
         .get_matches();
@@ -180,7 +199,7 @@ fn main() {
         (keypair, instructions)
     };
     match (sub_command, sub_matches) {
-        ("initialize-solclout-token", Some(arg_matches)) => {
+        ("create-solclout-token", Some(arg_matches)) => {
             let decimals = value_t_or_exit!(arg_matches, "decimals", u8);
 
             let (token, instructions) =
@@ -273,6 +292,43 @@ fn main() {
             client.send_transaction(&transaction).unwrap();
             println!("Sol x SolClout defined at {}", token_swap_account.pubkey())
         },
+        ("create-solclout-instance", Some(arg_matches)) => {
+            let solclout_token_id = Pubkey::from_str(
+                arg_matches.value_of("solclout_token").unwrap()
+            ).unwrap();
+            let (solclout_instance, _) = Pubkey::find_program_address(&[&solclout_token_id.to_bytes()[..32]], &SOLCLOUT_PORGRAM_ID);
+            let (authority, nonce) = Pubkey::find_program_address(&[&solclout_instance.to_bytes()[..32]], &SOLCLOUT_PORGRAM_ID);
+            let solclout_storage = Keypair::new();
+            let instructions = [
+                create_account(
+                    &fee_payer.pubkey(),
+                    &solclout_storage.pubkey(),
+                    client.get_minimum_balance_for_rent_exemption(Account::LEN).unwrap(),
+                    Account::LEN as u64,
+                    &TOKEN_PROGRAM_ID
+                ),
+                initialize_account(
+                    &TOKEN_PROGRAM_ID,
+                    &solclout_storage.pubkey(),
+                    &solclout_token_id,
+                    &authority
+                ).unwrap(),
+                initialize_solclout(
+                    &SOLCLOUT_PORGRAM_ID,
+                    &fee_payer.pubkey(),
+                    &solclout_instance,
+                    &solclout_storage.pubkey(),
+                    &TOKEN_PROGRAM_ID,
+                    &NAME_PROGRAM_ID,
+                    nonce
+                ),
+            ];
+            let mut transaction = Transaction::new_with_payer(&instructions, Some(&fee_payer.pubkey()));
+            let recent_blockhash = client.get_recent_blockhash().unwrap().0;
+            transaction.sign(&vec![fee_payer.as_ref(), &solclout_storage], recent_blockhash);
+            client.send_transaction(&transaction).unwrap();
+            println!("Solclout instance created at {}", solclout_instance)
+        },
         _ => unreachable!(),
-    }“
+    }
 }

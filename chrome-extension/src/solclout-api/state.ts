@@ -17,19 +17,21 @@ export class SolcloutCreator {
       {
         kind: 'struct',
         fields: [
+          ['key', [1]],
           ['creatorToken', [32]],
           ['solcloutInstance', [32]],
           ['founderRewardsAccount', [32]],
           ['name', [32]],
-          ['founderRewardPercentage', [16]],
+          ['founderRewardPercentage', [2]],
           ['initialized', [1]],
-          ['authorityNonce', [8]],
+          ['authorityNonce', [1]],
         ],
       },
     ],
   ]);
 
   constructor(obj: {
+    key: Uint8Array;
     creatorToken: Uint8Array;
     solcloutInstance: Uint8Array;
     founderRewardsAccount: Uint8Array;
@@ -51,20 +53,20 @@ export class SolcloutCreator {
     connection: Connection,
     solcloutCreator: PublicKey,
   ): Promise<SolcloutCreator> {
-    let nameAccount = await connection.getAccountInfo(
+    let account = await connection.getAccountInfo(
       solcloutCreator,
       'processed',
     );
-    if (!nameAccount) {
-      throw new Error('Invalid name account provided');
+    if (!account) {
+      throw new Error(`Invalid account provided ${solcloutCreator.toString()}`);
     }
 
     return deserializeUnchecked(
       this.schema,
       SolcloutCreator,
-      nameAccount.data,
+      account.data,
     );
   }
 
-  static LEN = 32 * 4 + 2 + 1 + 1
+  static LEN = 1 + 32 * 4 + 2 + 1 + 1
 }

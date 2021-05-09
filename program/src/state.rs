@@ -1,17 +1,22 @@
 use {
     borsh::{BorshDeserialize, BorshSerialize},
-    solana_program::pubkey::Pubkey,
     solana_program::msg,
     solana_program::program_error::ProgramError,
-    solana_program::program_pack::{IsInitialized, Pack, Sealed},
+    solana_program::program_pack::{Pack, Sealed},
+    solana_program::pubkey::Pubkey,
 };
 
-/// prefix used for PDAs to avoid certain collision attacks (https://en.wikipedia.org/wiki/Collision_attack#Chosen-prefix_collision_attack)
-pub const PREFIX: &str = "solclout";
+#[repr(C)]
+#[derive(BorshSerialize, BorshDeserialize, PartialEq, Debug, Clone)]
+pub enum Key {
+    SolcloutInstanceV1,
+    SolcloutCreatorV1,
+}
 
 #[repr(C)]
 #[derive(BorshSerialize, BorshDeserialize, PartialEq, Debug, Clone)]
 pub struct SolcloutInstance {
+    pub key: Key,
     /// Solclout token mint pubkey that can be traded for creator tokens
     pub solclout_token: Pubkey,
     /// Account to hold solclout after people buy
@@ -25,6 +30,7 @@ pub struct SolcloutInstance {
 #[repr(C)]
 #[derive(BorshSerialize, BorshDeserialize, PartialEq, Debug, Clone)]
 pub struct SolcloutCreator {
+    pub key: Key,
     /// Fields not updatable by the user
     /// The creator token mint pubkey
     pub creator_token: Pubkey,
@@ -43,7 +49,7 @@ pub struct SolcloutCreator {
 impl Sealed for SolcloutCreator {}
 
 impl Pack for SolcloutCreator {
-    const LEN: usize = 32 * 4 + 2 + 1 + 1;
+    const LEN: usize = 1 + 32 * 4 + 2 + 1 + 1;
 
     fn pack_into_slice(&self, dst: &mut [u8]) {
         let mut slice = dst;
@@ -62,7 +68,7 @@ impl Pack for SolcloutCreator {
 impl Sealed for SolcloutInstance {}
 
 impl Pack for SolcloutInstance {
-    const LEN: usize = 32 * 4 + 2 + 1;
+    const LEN: usize = 1 + 32 * 4 + 2 + 1;
 
     fn pack_into_slice(&self, dst: &mut [u8]) {
         let mut slice = dst;

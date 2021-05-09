@@ -1,9 +1,15 @@
+use std::convert::TryInto;
+use std::ops::DerefMut;
+
 use num_traits::ToPrimitive;
+use solana_program::program::{invoke, invoke_signed};
 use solana_program::program_error::ProgramError;
 use solana_program::program_pack::IsInitialized;
+use solana_program::system_instruction;
 use solana_program::system_instruction::create_account;
-use solana_sdk::program::{invoke, invoke_signed};
-use solana_sdk::system_instruction;
+use spl_name_service::state::NameRecordHeader;
+use spl_token::native_mint;
+use spl_token::solana_program::program_pack::Pack;
 
 use {
     borsh::{BorshDeserialize, BorshSerialize},
@@ -11,7 +17,7 @@ use {
         error::SolcloutError,
         instruction::SolcloutInstruction,
         state::{
-            PREFIX, SolcloutCreator
+            Key, SolcloutCreator
         }
     },
     solana_program::{
@@ -24,48 +30,51 @@ use {
     },
     spl_token::state::{Account, Mint},
 };
-use spl_token::native_mint;
-use spl_token::solana_program::program_pack::Pack;
 
 use crate::solana_program::sysvar::Sysvar;
 use crate::state::SolcloutInstance;
-use spl_name_service::state::NameRecordHeader;
-use std::convert::TryInto;
-use std::ops::DerefMut;
 
 pub fn process_instruction(
     program_id: &Pubkey,
     accounts: &[AccountInfo],
     input: &[u8],
 ) -> ProgramResult {
+    msg!("Input {}", String::from_utf8_lossy(input));
     let instruction = SolcloutInstruction::try_from_slice(input)?;
     match instruction {
-        SolcloutInstruction::InitializeSolclout(args) => {
+        SolcloutInstruction::InitializeSolclout {
+            token_program_id,
+            name_program_id,
+            nonce
+        } => {
             msg!("Instruction: Initialize Solclout");
             process_initialize_solclout(
                 program_id,
                 accounts,
-                args.token_program_id,
-                args.name_program_id,
-                args.nonce,
+                token_program_id,
+                name_program_id,
+                nonce,
             )
         }
-        SolcloutInstruction::InitializeCreator(args) => {
+        SolcloutInstruction::InitializeCreator {
+            founder_reward_percentage,
+            nonce
+        } => {
             msg!("Instruction: Initialize Creator");
             process_initialize_creator(
                 program_id,
                 accounts,
-                args.founder_reward_percentage,
-                args.nonce
+                founder_reward_percentage,
+                nonce
             )
         }
-        SolcloutInstruction::BuyCreatorCoins(args) => {
+        SolcloutInstruction::BuyCreatorCoins { lamports } => {
             msg!("Instruction: Buy Creator Coins");
-            process_buy_creator_coins(program_id, accounts, args.lamports)
+            process_buy_creator_coins(program_id, accounts, lamports)
         }
-        SolcloutInstruction::SellCreatorCoins(args) => {
+        SolcloutInstruction::SellCreatorCoins { lamports } => {
             msg!("Instruction: Sell Creator Coins");
-            process_sell_creator_coins(program_id, accounts, args.lamports)
+            process_sell_creator_coins(program_id, accounts, lamports)
         }
     }
 }
@@ -93,6 +102,53 @@ pub fn authority_id(
         .or(Err(SolcloutError::InvalidProgramAddress))
 }
 
+/// Create account almost from scratch, lifted from
+/// https://github.com/solana-labs/solana-program-library/blob/7d4873c61721aca25464d42cc5ef651a7923ca79/associated-token-account/program/src/processor.rs#L51-L98
+#[inline(always)]
+pub fn create_or_allocate_account_raw<'a>(
+    program_id: Pubkey,
+    new_account_info: &AccountInfo<'a>,
+    rent_sysvar_info: &AccountInfo<'a>,
+    system_program_info: &AccountInfo<'a>,
+    payer_info: &AccountInfo<'a>,
+    size: usize,
+    signer_seeds: &[&[u8]],
+) -> ProgramResult {
+    let rent = &Rent::from_account_info(rent_sysvar_info)?;
+    let required_lamports = rent
+        .minimum_balance(size)
+        .max(1)
+        .saturating_sub(new_account_info.lamports());
+
+    if required_lamports > 0 {
+        msg!("Transfer {} lamports to the new account", required_lamports);
+        invoke(
+            &system_instruction::transfer(&payer_info.key, new_account_info.key, required_lamports),
+            &[
+                payer_info.clone(),
+                new_account_info.clone(),
+                system_program_info.clone(),
+            ],
+        )?;
+    }
+
+    msg!("Allocate space for the account");
+    invoke_signed(
+        &system_instruction::allocate(new_account_info.key, size.try_into().unwrap()),
+        &[new_account_info.clone(), system_program_info.clone()],
+        &[&signer_seeds],
+    )?;
+
+    msg!("Assign the account to the owning program");
+    invoke_signed(
+        &system_instruction::assign(new_account_info.key, &program_id),
+        &[new_account_info.clone(), system_program_info.clone()],
+        &[&signer_seeds],
+    )?;
+
+    Ok(())
+}
+
 fn process_initialize_solclout(
     program_id: &Pubkey,
     accounts: &[AccountInfo],
@@ -106,7 +162,8 @@ fn process_initialize_solclout(
     let solclout_storage_acc = next_account_info(accounts_iter)?;
     let authority_key = authority_id(program_id, solclout.key, nonce)?;
     let solclout_storage = unpack_token_account(solclout_storage_acc, &token_program_id)?;
-    let rent = &Rent::from_account_info(next_account_info(accounts_iter)?)?;
+    let system_account_info = next_account_info(accounts_iter)?;
+    let rent = next_account_info(accounts_iter)?;
 
     if solclout_storage.owner != authority_key {
         return Err(SolcloutError::InvalidStorageOwner.into());
@@ -121,19 +178,18 @@ fn process_initialize_solclout(
         return Err(SolcloutError::AlreadyInitialized.into());
     }
 
-    invoke_signed(
-        &create_account(
-            &payer.key,
-            &solclout_key,
-            rent.minimum_balance(SolcloutCreator::LEN),
-            SolcloutCreator::LEN as u64,
-            program_id
-        ),
-        accounts,
-        &[&[&solclout_storage.mint.to_bytes()[..32], &[bump]]]
+    create_or_allocate_account_raw(
+        *program_id,
+        solclout,
+        rent,
+        system_account_info,
+        payer,
+        SolcloutInstance::LEN,
+        &[&solclout_storage.mint.to_bytes()[..32], &[bump]],
     )?;
 
     let solclout_instance = SolcloutInstance {
+        key: Key::SolcloutInstanceV1,
         solclout_token: solclout_storage.mint,
         solclout_storage: *solclout_storage_acc.key,
         token_program_id,
@@ -153,6 +209,7 @@ fn process_initialize_creator(
     nonce: u8
 ) -> ProgramResult {
     let accounts_iter =  &mut accounts.into_iter();
+    let payer = next_account_info(accounts_iter)?;
     let mut account = next_account_info(accounts_iter)?;
     let solclout_instance = next_account_info(accounts_iter)?;
     let name_account = next_account_info(accounts_iter)?;
@@ -162,6 +219,8 @@ fn process_initialize_creator(
     let founder_rewards_account_data = Account::unpack(&founder_rewards_account.data.borrow())?;
     let authority = authority_id(program_id, account.key, nonce)?;
     let creator_mint = next_account_info(accounts_iter)?;
+    let system_account_info = next_account_info(accounts_iter)?;
+    let rent = next_account_info(accounts_iter)?;
 
     let name_account_owner = if name_account.data.borrow().len() > 0 {
         let name_record_header =
@@ -170,6 +229,25 @@ fn process_initialize_creator(
     } else {
         Pubkey::default()
     };
+
+    let (account_key, bump) = Pubkey::find_program_address(&[&name_account.key.to_bytes()[..32]], program_id);
+    if account_key != *account.key {
+        return Err(SolcloutError::InvalidProgramAddress.into());
+    }
+
+    if account.data.borrow().len() > 0 && SolcloutCreator::unpack_from_slice(&account.data.borrow())?.initialized {
+        return Err(SolcloutError::AlreadyInitialized.into());
+    }
+
+    create_or_allocate_account_raw(
+        *program_id,
+        account,
+        rent,
+        system_account_info,
+        payer,
+        SolcloutCreator::LEN,
+        &[&name_account.key.to_bytes()[..32], &[bump]],
+    )?;
 
     let rewards_owned_by_founder = founder_rewards_account_data.owner == name_account_owner;
     let rewards_owned_by_program = founder_rewards_account_data.owner == authority;
@@ -207,11 +285,12 @@ fn process_initialize_creator(
         return Err(SolcloutError::InvalidFounderRewardsAccountType.into());
     }
 
-    if !account.is_signer {
+    if !payer.is_signer {
         return Err(SolcloutError::MissingSigner.into())
     }
 
     let new_account_data = SolcloutCreator {
+        key: Key::SolcloutCreatorV1,
         creator_token: *creator_mint.key,
         solclout_instance: *solclout_instance.key,
         founder_rewards_account: *founder_rewards_account.key,
@@ -310,7 +389,7 @@ fn process_buy_creator_coins(program_id: &Pubkey, accounts: &[AccountInfo], lamp
 }
 
 fn process_sell_creator_coins(program_id: &Pubkey, accounts: &[AccountInfo], lamports: u64) -> ProgramResult {
-    todo!()
+    Ok(())
 }
 
 #[cfg(test)]
@@ -319,16 +398,16 @@ mod tests {
         account_info::IntoAccountInfo, clock::Epoch, instruction::Instruction, sysvar::rent,
     };
     use solana_program::rent::Rent;
-    use solana_sdk::account::{Account as SolanaAccount, create_account_for_test, create_is_signer_account_infos, ReadableAccount};
-    use solana_sdk::program_option::COption;
-
+    use spl_name_service::state::NameRecordHeader;
     use spl_token::solana_program::program_pack::Pack;
     use spl_token::state::AccountState;
+
+    use solana_sdk::account::{Account as SolanaAccount, create_account_for_test, create_is_signer_account_infos, ReadableAccount};
+    use solana_sdk::program_option::COption;
 
     use crate::instruction::*;
 
     use super::*;
-    use spl_name_service::state::NameRecordHeader;
 
     fn do_process_instruction(
         instruction: Instruction,
@@ -346,6 +425,10 @@ mod tests {
     }
 
     fn rent_sysvar() -> SolanaAccount {
+        create_account_for_test(&Rent::default())
+    }
+
+    fn program_id_sysvar() -> SolanaAccount {
         create_account_for_test(&Rent::default())
     }
 
@@ -403,7 +486,7 @@ mod tests {
                     &name_program_id,
                     nonce
                 ),
-                vec![&mut payer, &mut instance, &mut account, &mut rent_sysvar()],
+                vec![&mut payer, &mut instance, &mut account, &mut program_id_sysvar(), &mut rent_sysvar()],
             )
         );
 
@@ -422,18 +505,19 @@ mod tests {
         let payer_key = Pubkey::new_unique();
         let mut payer = SolanaAccount::new(100000, 0, &program_id);
 
-        let account_key = Pubkey::new_unique();
+        let (name_key, mut name) = get_account(NameRecordHeader::LEN, &name_program_id);
+        let (account_key, _) = Pubkey::find_program_address(&[&name_key.to_bytes()[..32]], &program_id);
         let mut account = SolanaAccount::new(0, SolcloutCreator::LEN as usize, &program_id);
         let solclout_instance_key = Pubkey::new_unique();
         let mut solclout_instance = SolanaAccount::new(0, SolcloutInstance::LEN as usize, &program_id);
         let token_program_id = Pubkey::new_unique();
-        let (name_key, mut name) = get_account(NameRecordHeader::LEN, &name_program_id);
         let founder_rewards_account_key = Pubkey::new_unique();
         let mut founder_rewards_account = SolanaAccount::new(0, 0, &token_program_id);
         let (authority_key, nonce) = Pubkey::find_program_address(&[&account_key.to_bytes()[..32]], &program_id);
         let creator_mint_key = Pubkey::new_unique();
         let mut creator_mint = SolanaAccount::new(0, Mint::LEN as usize, &token_program_id);
         let solclout_instance_data = SolcloutInstance {
+            key: Key::SolcloutInstanceV1,
             solclout_token: Pubkey::new_unique(),
             solclout_storage: Pubkey::new_unique(),
             name_program_id,
@@ -480,7 +564,7 @@ mod tests {
                     1000,
                     nonce
                 ),
-                vec![&mut payer, &mut account, &mut solclout_instance, &mut name, &mut founder_rewards_account, &mut creator_mint],
+                vec![&mut payer, &mut account, &mut solclout_instance, &mut name, &mut founder_rewards_account, &mut creator_mint, &mut program_id_sysvar(), &mut rent_sysvar()],
             )
         );
 
@@ -505,6 +589,7 @@ mod tests {
         let program_id = Pubkey::new_unique();
         let (solclout_instance_key, mut solclout_instance) = get_account(SolcloutInstance::LEN, &program_id);
         let solclout_instance_data = SolcloutInstance {
+            key: Key::SolcloutInstanceV1,
             solclout_token: Pubkey::new_unique(),
             solclout_storage: Pubkey::new_unique(),
             name_program_id,
@@ -545,6 +630,7 @@ mod tests {
         creator_mint.data = creator_mint_data;
 
         let creator_data = SolcloutCreator {
+            key: Key::SolcloutCreatorV1,
             creator_token: creator_mint_key,
             solclout_instance: solclout_instance_key,
             founder_rewards_account: founder_rewards_account_key,

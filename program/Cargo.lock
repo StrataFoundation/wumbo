@@ -2776,7 +2776,7 @@ checksum = "6e63cff320ae2c57904679ba7cb63280a3dc4613885beafb148ee7bf9aa9042d"
 [[package]]
 name = "spl-name-service"
 version = "0.1.0"
-source = "git+https://github.com/solana-labs/solana-program-library.git#5a5f1296946f6fb58c55b36a0de3eb406336e9e7"
+source = "git+https://github.com/solana-labs/solana-program-library.git#0ac20fcddf2c1af48c1eb99cedd9fcf84120f78d"
 dependencies = [
  "borsh",
  "num-derive",

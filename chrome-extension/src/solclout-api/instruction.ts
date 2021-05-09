@@ -1,4 +1,4 @@
-import {PublicKey, TransactionInstruction} from "@solana/web3.js";
+import {PublicKey, SystemProgram, SYSVAR_RENT_PUBKEY, TransactionInstruction} from "@solana/web3.js";
 import {Numberu16, Numberu8} from "./utils";
 
 export function initializeCreatorInstruction(
@@ -44,9 +44,20 @@ export function initializeCreatorInstruction(
         pubkey: creatorMint,
         isSigner: false,
         isWritable: false,
+      },
+      {
+        pubkey: SystemProgram.programId,
+        isSigner: false,
+        isWritable: false,
+      },
+      {
+        pubkey: SYSVAR_RENT_PUBKEY,
+        isSigner: false,
+        isWritable: false,
       }
     ],
     data: Buffer.concat([
+      Buffer.from(Int8Array.from([1])),
       new Numberu16(nonce).toBuffer(),
       new Numberu8(nonce).toBuffer()
     ])
