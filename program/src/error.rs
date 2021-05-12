@@ -21,8 +21,8 @@ pub enum SolcloutError {
     #[error("Lamport balance below rent-exempt threshold for creating mint")]
     MintNotRentExempt,
 
-    #[error("Token program id did not match that of account")]
-    IncorrectTokenProgramId,
+    #[error("Token program id did not match expected for this solclout instance")]
+    InvalidTokenProgramId,
 
     #[error("Was not able to unpack an Account from the specified token account")]
     ExpectedAccount,
@@ -70,6 +70,9 @@ pub enum SolcloutError {
     #[error("Solclout storage must be owned by authority")]
     InvalidStorageOwner,
 
+    #[error("Invalid solclout storage account, must be the account specified in the solclout instance")]
+    InvalidSolcloutStorage,
+
     #[error("Invalid mint authority")]
     InvalidMintAuthority,
 
@@ -78,6 +81,9 @@ pub enum SolcloutError {
 
     #[error("Founder rewards account must have the creator mint")]
     InvalidFounderRewardsAccountType,
+
+    #[error("Founder rewards account did not match that on the creator")]
+    InvalidFounderRewardsAccount,
 
     #[error("Provided solclout instance is different than the creator")]
     SolcloutInstanceMismatch,

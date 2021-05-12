@@ -28,7 +28,7 @@ pub enum SolcloutInstruction {
     /// full authority of the creator coin mint. No coins will be minted outside of this program
     ///
     ///   0. `[writeable]` Payer
-    ///   0. `[writeable]` Solclout account to create, Program derived address of [Name pkey]
+    ///   0. `[writeable]` Solclout account to create, Program derived address of [Solclout Instance, Name pkey]
     ///   1. `[]` Solclout instance.
     ///   2. `[]` Name service name
     ///   3. `[]` Founder rewards account, token program as owner, initialized in spl-token with creator coin mint.
@@ -47,9 +47,11 @@ pub enum SolcloutInstruction {
     ///   0. `[]` Solclout instance
     ///   1. `[]` Solclout Creator to purchase creator coins of. This should be an initialized acct in solclout
     ///   2. `[]` Solclout Creator coin mint
-    ///   3. `[signer]`  Purchasing account, this is an account owned by the token program with
+    ///   3. `[writeable]` Solclout storage account from the SolcloutInstance
+    ///   4. `[writeable]`  Purchasing account, this is an account owned by the token program with
     ///                            the solclout mint
-    ///   4. `[]`  Destination account, this is an account owned by the token program with
+    ///   5. `[signer]`  Purchasing authority. This must be the authority on the purchasing account
+    ///   6. `[writeable]`  Destination account, this is an account owned by the token program with
     ///                            the creator mint
     BuyCreatorCoins {
         /// Number of lamports to purchase, since creator coins use the same decimal as sol
@@ -129,32 +131,33 @@ pub fn initialize_creator(
     }
 }
 
-/// Buy creator coins
-///   0. `[]` Solclout instance
-///   1. `[]` Solclout Creator to purchase creator coins of. This should be an initialized acct in solclout
-///   2. `[]` Solclout Creator coin mint
-///   3. `[signer]`  Purchasing account, this is an account owned by the token program with
-///                            the solclout mint
-///   4. `[]`  Destination account, this is an account owned by the token program with
-///                            the creator mint
-/// Creates an BuyCreatorCoins instruction
 pub fn buy_creator_coins(
     program_id: &Pubkey,
     solclout_instance: &Pubkey,
     solclout_creator: &Pubkey,
     solclout_creator_mint: &Pubkey,
-    purchaser: &Pubkey,
+    solclout_creator_mint_authority: &Pubkey,
+    solclout_storage_account: &Pubkey,
+    founder_rewards_account: &Pubkey,
+    purchase_account: &Pubkey,
+    purchase_authority: &Pubkey,
     destination: &Pubkey,
+    token_program_id: &Pubkey,
     lamports: u64
 ) -> Instruction {
     Instruction {
         program_id: *program_id,
         accounts: vec![
             AccountMeta::new_readonly(*solclout_instance, false),
-            AccountMeta::new_readonly(*solclout_creator, true),
-            AccountMeta::new(*solclout_creator_mint, true),
-            AccountMeta::new(*purchaser, true),
+            AccountMeta::new_readonly(*solclout_creator, false),
+            AccountMeta::new(*solclout_creator_mint, false),
+            AccountMeta::new_readonly(*solclout_creator_mint_authority, false),
+            AccountMeta::new(*solclout_storage_account, false),
+            AccountMeta::new(*founder_rewards_account, false),
+            AccountMeta::new(*purchase_account, false),
+            AccountMeta::new_readonly(*purchase_authority, true),
             AccountMeta::new(*destination, false),
+            AccountMeta::new_readonly(*token_program_id, false),
         ],
         data: SolcloutInstruction::BuyCreatorCoins {
             lamports

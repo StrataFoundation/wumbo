@@ -1,7 +1,7 @@
 use std::convert::TryInto;
 use std::ops::DerefMut;
 
-use num_traits::ToPrimitive;
+use num_traits::{ToPrimitive, Pow};
 use solana_program::program::{invoke, invoke_signed};
 use solana_program::program_error::ProgramError;
 use solana_program::program_pack::IsInitialized;
@@ -85,7 +85,7 @@ pub fn unpack_token_account(
     token_program_id: &Pubkey,
 ) -> Result<spl_token::state::Account, SolcloutError> {
     if account_info.owner != token_program_id {
-        Err(SolcloutError::IncorrectTokenProgramId)
+        Err(SolcloutError::InvalidTokenProgramId)
     } else {
         spl_token::state::Account::unpack(&account_info.data.borrow())
             .map_err(|_| SolcloutError::ExpectedAccount)
@@ -230,7 +230,7 @@ fn process_initialize_creator(
         Pubkey::default()
     };
 
-    let (account_key, bump) = Pubkey::find_program_address(&[&name_account.key.to_bytes()[..32]], program_id);
+    let (account_key, bump) = Pubkey::find_program_address(&[&solclout_instance.key.to_bytes()[..32], &name_account.key.to_bytes()[..32]], program_id);
     if account_key != *account.key {
         return Err(SolcloutError::InvalidProgramAddress.into());
     }
@@ -246,7 +246,7 @@ fn process_initialize_creator(
         system_account_info,
         payer,
         SolcloutCreator::LEN,
-        &[&name_account.key.to_bytes()[..32], &[bump]],
+        &[&solclout_instance.key.to_bytes()[..32], &name_account.key.to_bytes()[..32], &[bump]],
     )?;
 
     let rewards_owned_by_founder = founder_rewards_account_data.owner == name_account_owner;
@@ -312,9 +312,12 @@ fn process_initialize_creator(
 /// Since both are in lamports, we need to divide again by lamports^3 then multiply by lamports
 /// to get back to lamports output.
 fn price(supply: u64, lamports: u64) -> u64 {
-    let numerator: u128 = (((lamports + supply) as u128).pow(3) - (supply as u128).pow(3));
-    let denominator: u128 = (1000 * (10_u128.pow(native_mint::DECIMALS as u32)).pow(2)) as u128;
-    (numerator / denominator) as u64
+    let lamports_conf = 10_f64.powi(native_mint::DECIMALS as i32);
+    let supplyF: f64 = supply.to_f64().unwrap() / lamports_conf ;
+    let lamportsF = lamports.to_f64().unwrap() / lamports_conf;
+    let numerator: f64 = ((lamportsF + supplyF).powi(3_i32) - supplyF.powi(3_i32));
+    let denominator: f64 = 1000_f64;
+    ((numerator / denominator) * lamports_conf).to_u64().unwrap()
 }
 
 fn process_buy_creator_coins(program_id: &Pubkey, accounts: &[AccountInfo], lamports: u64) -> ProgramResult {
@@ -322,16 +325,23 @@ fn process_buy_creator_coins(program_id: &Pubkey, accounts: &[AccountInfo], lamp
     let solclout_instance = next_account_info(accounts_iter)?;
     let creator = next_account_info(accounts_iter)?;
     let creator_mint = next_account_info(accounts_iter)?;
-    let purchaser = next_account_info(accounts_iter)?;
+    let creator_mint_authority = next_account_info(accounts_iter)?;
+    let solclout_storage_acc = next_account_info(accounts_iter)?;
+    let founder_rewards_acc = next_account_info(accounts_iter)?;
+    let purchase_account = next_account_info(accounts_iter)?;
+    let purchase_authority = next_account_info(accounts_iter)?;
     let destination = next_account_info(accounts_iter)?;
+    let token_program_id = next_account_info(accounts_iter)?;
     let creator_mint_data = Mint::unpack(*creator_mint.data.borrow())?;
-    let (solclout_storage_account_key, _) = Pubkey::find_program_address(&[creator.key.as_ref()], program_id);
 
     let solclout_instance_data: SolcloutInstance = try_from_slice_unchecked(*solclout_instance.data.borrow())?;
-    let token_program_id = solclout_instance_data.token_program_id;
     let creator_data: SolcloutCreator = try_from_slice_unchecked(*creator.data.borrow())?;
     let creator_mint_key = creator_data.creator_token;
-    let authority = authority_id(program_id, solclout_instance.key, creator_data.authority_nonce)?;
+    let authority_key = authority_id(program_id, creator.key, creator_data.authority_nonce)?;
+
+    if *token_program_id.key != solclout_instance_data.token_program_id {
+        return Err(SolcloutError::InvalidTokenProgramId.into());
+    }
 
     if creator_mint_key != *creator_mint.key {
         return Err(SolcloutError::InvalidCreatorMint.into());
@@ -349,41 +359,82 @@ fn process_buy_creator_coins(program_id: &Pubkey, accounts: &[AccountInfo], lamp
         return Err(SolcloutError::InvalidSolcloutInstanceOwner.into());
     }
 
+    if *solclout_storage_acc.key != solclout_instance_data.solclout_storage {
+        return Err(SolcloutError::InvalidSolcloutStorage.into());
+    }
+
+    if creator_data.founder_rewards_account != *founder_rewards_acc.key {
+        return Err(SolcloutError::InvalidFounderRewardsAccount.into());
+    }
+
     let price = price(creator_mint_data.supply, lamports);
-    let founder_cut = 10000 * lamports / (creator_data.founder_reward_percentage as u64);
+
+    let founder_cut = lamports * (creator_data.founder_reward_percentage as u64) / 10000;
     let purchaser_cut = lamports - founder_cut;
 
-    // Suck their money into solclout
+    msg!("Attemption to buy {} creator lamports for {} solclout lamports", lamports, price);
+    msg!("Paying into solclout storage");
     let pay_money = spl_token::instruction::transfer(
-        purchaser.owner,
-        purchaser.key,
-        &solclout_storage_account_key,
-        purchaser.key,
+        &token_program_id.key,
+        purchase_account.key,
+        solclout_storage_acc.key,
+        purchase_authority.key,
         &[],
         price
     )?;
-    invoke_signed(&pay_money, accounts, &[])?;
-
-    let authority_seed = &[&solclout_instance.key.to_bytes()[..32], &[creator_data.authority_nonce]];
+    invoke_signed(
+        &pay_money,
+        &[
+            purchase_account.clone(),
+            solclout_storage_acc.clone(),
+            purchase_authority.clone(),
+            token_program_id.clone()
+        ],
+        &[]
+    )?;
+    msg!("Done");
+    let authority_seed = &[&creator.key.to_bytes()[..32], &[creator_data.authority_nonce]];
     // Mint the required lamports
+    msg!("Paying founder {} creator lamports", founder_cut);
+    msg!("Accs {} {} {}", token_program_id.key, creator_mint_key, founder_rewards_acc.key);
     let give_founder_cut = spl_token::instruction::mint_to(
-        &token_program_id,
+        &token_program_id.key,
         &creator_mint_key,
-        &creator_data.creator_token,
-        &authority,
-        &[&authority],
+        &founder_rewards_acc.key,
+        &creator_mint_authority.key,
+        &[],
         founder_cut
     )?;
-    invoke_signed(&give_founder_cut, accounts, &[authority_seed])?;
+    invoke_signed(
+        &give_founder_cut,
+        &[
+            token_program_id.clone(),
+            creator_mint.clone(),
+            founder_rewards_acc.clone(),
+            creator_mint_authority.clone()
+        ],
+        &[authority_seed]
+    )?;
+    msg!("Done");
+
+    msg!("Receiving  {} creator lamports", purchaser_cut);
     let give_purchaser_cut = spl_token::instruction::mint_to(
-        &token_program_id,
+        &token_program_id.key,
         &creator_mint_key,
         &destination.key,
-        &authority,
-        &[&authority],
+        &creator_mint_authority.key,
+        &[],
         purchaser_cut
     )?;
-    invoke_signed(&give_purchaser_cut, accounts, &[authority_seed])?;
+    invoke_signed(
+        &give_purchaser_cut,
+        &[
+            token_program_id.clone(),
+            creator_mint.clone(),
+            destination.clone(),
+            creator_mint_authority.clone()
+        ],
+        &[authority_seed])?;
 
     Ok(())
 }
@@ -401,7 +452,7 @@ mod tests {
     use spl_name_service::state::NameRecordHeader;
     use spl_token::solana_program::program_pack::Pack;
     use spl_token::state::AccountState;
-
+    use solana_sdk::signature::{Keypair};
     use solana_sdk::account::{Account as SolanaAccount, create_account_for_test, create_is_signer_account_infos, ReadableAccount};
     use solana_sdk::program_option::COption;
 
@@ -505,11 +556,11 @@ mod tests {
         let payer_key = Pubkey::new_unique();
         let mut payer = SolanaAccount::new(100000, 0, &program_id);
 
-        let (name_key, mut name) = get_account(NameRecordHeader::LEN, &name_program_id);
-        let (account_key, _) = Pubkey::find_program_address(&[&name_key.to_bytes()[..32]], &program_id);
-        let mut account = SolanaAccount::new(0, SolcloutCreator::LEN as usize, &program_id);
         let solclout_instance_key = Pubkey::new_unique();
         let mut solclout_instance = SolanaAccount::new(0, SolcloutInstance::LEN as usize, &program_id);
+        let (name_key, mut name) = get_account(NameRecordHeader::LEN, &name_program_id);
+        let (account_key, _) = Pubkey::find_program_address(&[&solclout_instance_key.to_bytes()[..32], &name_key.to_bytes()[..32]], &program_id);
+        let mut account = SolanaAccount::new(0, SolcloutCreator::LEN as usize, &program_id);
         let token_program_id = Pubkey::new_unique();
         let founder_rewards_account_key = Pubkey::new_unique();
         let mut founder_rewards_account = SolanaAccount::new(0, 0, &token_program_id);
@@ -580,18 +631,20 @@ mod tests {
     fn test_price() {
         assert_eq!(price(0, 1000000000), 1000000);
         assert_eq!(price(1000000000, 1000000000), 7000000);
+        assert_eq!(price(10001 * 10_u64.pow(9), 10000), 3000599975);
     }
 
     #[test]
     fn test_buy() {
-        let token_program_id = Pubkey::new_unique();
         let name_program_id = Pubkey::new_unique();
         let program_id = Pubkey::new_unique();
+        let (token_program_id, mut token_program) = get_account(0, &program_id);
         let (solclout_instance_key, mut solclout_instance) = get_account(SolcloutInstance::LEN, &program_id);
+        let (solclout_storage_key, mut solclout_storage) = get_account(Account::LEN, &program_id);
         let solclout_instance_data = SolcloutInstance {
             key: Key::SolcloutInstanceV1,
             solclout_token: Pubkey::new_unique(),
-            solclout_storage: Pubkey::new_unique(),
+            solclout_storage: solclout_storage_key,
             name_program_id,
             token_program_id,
             initialized: true
@@ -641,10 +694,14 @@ mod tests {
         };
         creator.data = creator_data.try_to_vec().unwrap();
 
-        let (purchaser_key, mut purchaser) = get_account(Account::LEN, &token_program_id);
+        let (purchase_key, mut purchase_account) = get_account(Account::LEN, &token_program_id);
+        let (purchase_authority_key, mut purchase_authority) = get_account(0, &token_program_id);
         let (destination_key, mut destination) = get_account(Account::LEN, &token_program_id);
-        initialize_spl_account(&mut purchaser, &token_program_id, &solclout_mint_key, &purchaser_key);
-        initialize_spl_account(&mut destination, &token_program_id, &creator_mint_key, &purchaser_key);
+        initialize_spl_account(&mut purchase_account, &token_program_id, &solclout_mint_key, &purchase_authority_key);
+        initialize_spl_account(&mut destination, &token_program_id, &creator_mint_key, &purchase_key);
+
+        let authority_key = authority_id(&program_id, &creator_key, creator_data.authority_nonce).unwrap();
+        let mut authority = SolanaAccount::new(0, 0, &program_id);
 
         assert_eq!(
             Ok(()),
@@ -654,11 +711,16 @@ mod tests {
                     &solclout_instance_key,
                     &creator_key,
                     &creator_mint_key,
-                    &purchaser_key,
+                    &authority_key,
+                    &solclout_storage_key,
+                    &founder_rewards_account_key,
+                    &purchase_key,
+                    &purchase_authority_key,
                     &destination_key,
+                    &token_program_id,
                     1000000000,
                 ),
-                vec![&mut solclout_instance, &mut creator, &mut creator_mint, &mut purchaser, &mut destination],
+                vec![&mut solclout_instance, &mut creator, &mut creator_mint, &mut authority, &mut solclout_storage, &mut founder_rewards_account, &mut purchase_account, &mut purchase_authority, &mut destination, &mut token_program],
             )
         );
     }

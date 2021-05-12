@@ -18,6 +18,7 @@
   },
   "dependencies": {
     "@bonfida/spl-name-service": "^0.1.4",
+    "@solana/spl-token-swap": "^0.1.0",
     "@solana/web3.js": "^1.10.0",
     "react": "^17.0.1",
     "react-dom": "^17.0.1"

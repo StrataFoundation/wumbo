@@ -1,8 +1,8 @@
 import {Account, Connection, PublicKey, sendAndConfirmTransaction, Transaction} from "@solana/web3.js";
 import {getHashedName, getNameAccountKey, NameRegistryState} from "@bonfida/spl-name-service";
 import {Token} from "@solana/spl-token"
-import {initializeCreatorInstruction} from "./instruction";
-import {SolcloutCreator} from "./state";
+import {buyCreatorCoinsInstruction, initializeCreatorInstruction} from "./instruction";
+import {SolcloutCreator, SolcloutInstance} from "./state";
 
 export type CreateSolcloutCreatorParams = {
   programId: PublicKey,
@@ -15,11 +15,19 @@ export type CreateSolcloutCreatorParams = {
   nameParent?: PublicKey,
 };
 
+export type BuyCreatorCoinsWithWalletParams = {
+  programId: PublicKey,
+  splAssociatedTokenAccountProgramId: PublicKey,
+  solcloutCreator: PublicKey,
+  purchaserWallet: Account,
+  lamports: number
+}
+
 export async function createSolcloutCreator(connection: Connection, params: CreateSolcloutCreatorParams): Promise<void> {
   const hashedName = await getHashedName(params.name)
   const nameKey = await getNameAccountKey(hashedName, params.nameClass, params.nameParent)
   const [solcloutCreator, _] = await PublicKey.findProgramAddress(
-    [nameKey.toBuffer()],
+    [params.solcloutInstance.toBuffer(), nameKey.toBuffer()],
     params.programId
   )
   const [authority, nonce] = await PublicKey.findProgramAddress(
@@ -80,4 +88,76 @@ export async function createSolcloutCreator(connection: Connection, params: Crea
   );
 
   console.log(`Created creator with key ${solcloutCreator}, founder rewards account ${founderRewardsAccount}`)
+}
+
+async function findAssociatedTokenAddress(
+  walletAddress: PublicKey,
+  tokenMintAddress: PublicKey,
+  tokenProgramId: PublicKey,
+  splAssociatedTokenAccountProgramId: PublicKey
+): Promise<PublicKey> {
+  return (await PublicKey.findProgramAddress(
+    [
+      walletAddress.toBuffer(),
+      tokenProgramId.toBuffer(),
+      tokenMintAddress.toBuffer(),
+    ],
+    splAssociatedTokenAccountProgramId
+  ))[0];
+}
+
+export async function buyCreatorCoinsWithWallet(connection: Connection, params: BuyCreatorCoinsWithWalletParams): Promise<void> {
+  const creator = await SolcloutCreator.retrieve(connection, params.solcloutCreator);
+  const solcloutInstance = await SolcloutInstance.retrieve(connection, creator.solcloutInstance);
+  debugger
+  const purchaseAccount = await findAssociatedTokenAddress(
+    params.purchaserWallet.publicKey,
+    solcloutInstance.solcloutToken,
+    solcloutInstance.tokenProgramId,
+    params.splAssociatedTokenAccountProgramId
+  )
+  const destinationAccount = await findAssociatedTokenAddress(
+    params.purchaserWallet.publicKey,
+    creator.creatorToken,
+    solcloutInstance.tokenProgramId,
+  params.splAssociatedTokenAccountProgramId
+  )
+  const acctExists = connection.getAccountInfo(destinationAccount)
+  if (!acctExists) {
+    console.log("Creating destination account...")
+    await new Token(
+      connection,
+      creator.creatorToken,
+      solcloutInstance.tokenProgramId,
+      params.purchaserWallet
+    ).createAssociatedTokenAccount(params.purchaserWallet.publicKey);
+    console.log(`Destination account created: ${destinationAccount}`)
+  }
+
+  const [creatorMintAuthority, _] = await PublicKey.findProgramAddress([params.solcloutCreator.toBuffer()], params.programId)
+
+  const transaction = new Transaction()
+    .add(buyCreatorCoinsInstruction(
+      params.programId,
+      solcloutInstance.tokenProgramId,
+      creator.solcloutInstance,
+      params.solcloutCreator,
+      creator.creatorToken,
+      creatorMintAuthority,
+      solcloutInstance.solcloutStorage,
+      creator.founderRewardsAccount,
+      purchaseAccount,
+      params.purchaserWallet,
+      destinationAccount,
+      params.lamports
+    ))
+
+  await sendAndConfirmTransaction(
+    connection,
+    transaction,
+    [params.purchaserWallet],
+    { commitment: "finalized", preflightCommitment: "finalized" }
+  );
+
+  console.log(`Bought ${params.lamports} creator coins from ${purchaseAccount} to ${destinationAccount}`)
 }
