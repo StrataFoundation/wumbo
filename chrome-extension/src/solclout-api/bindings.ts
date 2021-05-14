@@ -108,8 +108,10 @@ async function findAssociatedTokenAddress(
 
 export async function buyCreatorCoinsWithWallet(connection: Connection, params: BuyCreatorCoinsWithWalletParams): Promise<void> {
   const creator = await SolcloutCreator.retrieve(connection, params.solcloutCreator);
+  if (!creator) {
+    throw new Error("Creator not found")
+  }
   const solcloutInstance = await SolcloutInstance.retrieve(connection, creator.solcloutInstance);
-  debugger
   const purchaseAccount = await findAssociatedTokenAddress(
     params.purchaserWallet.publicKey,
     solcloutInstance.solcloutToken,

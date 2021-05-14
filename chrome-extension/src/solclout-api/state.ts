@@ -1,4 +1,4 @@
-import {Connection, PublicKey} from "@solana/web3.js";
+import {AccountInfo, Connection, PublicKey} from "@solana/web3.js";
 import {deserializeUnchecked, Schema} from "@bonfida/borsh-js";
 import {Numberu16, Numberu8} from "./utils";
 import {MintInfo, MintLayout, u64} from "@solana/spl-token";
@@ -53,44 +53,45 @@ export class SolcloutCreator {
     this.authorityNonce = Numberu8.fromBuffer(Buffer.from(obj.authorityNonce))
     this.initialized = obj.initialized[0] === 1
   }
-
-  static async retrieve(
-    connection: Connection,
-    solcloutCreator: PublicKey,
-  ): Promise<SolcloutCreator> {
-    let account = await connection.getAccountInfo(
-      solcloutCreator,
-      'processed',
-    );
-    if (!account) {
-      throw new Error(`Invalid account provided ${solcloutCreator.toString()}`);
-    }
-
+  
+  static fromAccount(
+    key: PublicKey,
+    account: AccountInfo<Buffer>
+  ): SolcloutCreator {
     const value = deserializeUnchecked(
       this.schema,
       SolcloutCreator,
       account.data,
     );
-    value.publicKey = solcloutCreator
+    value.publicKey = key
 
     return value
   }
 
-  mint?: MintInfo
-  async getMint(connection: Connection): Promise<MintInfo> {
-    if (this.mint) {
-      return this.mint
+  static async retrieve(
+    connection: Connection,
+    solcloutCreator: PublicKey,
+  ): Promise<SolcloutCreator | null> {
+    let account = await connection.getAccountInfo(
+      solcloutCreator,
+      'processed',
+    );
+
+    if (!account) {
+      return account
     }
 
-    const info = await connection.getAccountInfo(this.creatorToken);
-    if (!info) {
-      throw new Error("Invalid mint")
-    }
-    if (info.data.length != MintLayout.span) {
-      throw new Error(`Invalid mint size`);
+    return this.fromAccount(solcloutCreator, account)
+  }
+}
+
+export class Mint {
+  static fromAccount(account: AccountInfo<Buffer>): MintInfo {
+    if (!account) {
+      return account
     }
 
-    const data = Buffer.from(info.data);
+    const data = Buffer.from(account.data);
     const mintInfo = MintLayout.decode(data);
     if (mintInfo.mintAuthorityOption === 0) {
       mintInfo.mintAuthority = null;
@@ -100,9 +101,21 @@ export class SolcloutCreator {
 
     mintInfo.supply = u64.fromBuffer(mintInfo.supply)
 
-    this.mint = mintInfo
-
     return mintInfo
+  }
+
+  static async retrieve(connection: Connection, key: PublicKey): Promise<MintInfo | null> {
+    const info = await connection.getAccountInfo(key);
+
+    if (!info) {
+      return info
+    }
+
+    if (info.data.length != MintLayout.span) {
+      throw new Error(`Invalid mint size`);
+    }
+
+    return this.fromAccount(info)
   }
 }
 
