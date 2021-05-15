@@ -39,6 +39,7 @@ export async function createSolcloutCreator(connection: Connection, params: Crea
     solcloutCreator,
     'processed',
   );
+
   if (existing) {
     throw new Error("Solclout creator already exists")
   }
@@ -111,6 +112,10 @@ export async function buyCreatorCoinsWithWallet(connection: Connection, params: 
   if (!creator) {
     throw new Error("Creator not found")
   }
+  if (params.lamports < 0) {
+    throw new Error("Amount must be positive")
+  }
+
   const solcloutInstance = await SolcloutInstance.retrieve(connection, creator.solcloutInstance);
   const purchaseAccount = await findAssociatedTokenAddress(
     params.purchaserWallet.publicKey,
@@ -122,9 +127,9 @@ export async function buyCreatorCoinsWithWallet(connection: Connection, params: 
     params.purchaserWallet.publicKey,
     creator.creatorToken,
     solcloutInstance.tokenProgramId,
-  params.splAssociatedTokenAccountProgramId
+    params.splAssociatedTokenAccountProgramId
   )
-  const acctExists = connection.getAccountInfo(destinationAccount)
+  const acctExists = await connection.getAccountInfo(destinationAccount)
   if (!acctExists) {
     console.log("Creating destination account...")
     await new Token(
@@ -158,7 +163,7 @@ export async function buyCreatorCoinsWithWallet(connection: Connection, params: 
     connection,
     transaction,
     [params.purchaserWallet],
-    { commitment: "finalized", preflightCommitment: "finalized" }
+    { commitment: "singleGossip", preflightCommitment: "singleGossip" }
   );
 
   console.log(`Bought ${params.lamports} creator coins from ${purchaseAccount} to ${destinationAccount}`)

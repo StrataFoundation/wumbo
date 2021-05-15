@@ -28,8 +28,6 @@ export default () => {
         if (insertDiv) {
           const el = getOrElseUpdate(name, () => <CreatorInfo
             creatorName={name}
-            onBuy={() => {
-            }}
           />)
 
           return ReactDOM.createPortal(

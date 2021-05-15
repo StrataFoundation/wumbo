@@ -22,6 +22,7 @@
     "@solana/spl-token-swap": "^0.1.0",
     "@solana/web3.js": "^1.10.0",
     "antd": "^4.15.5",
+    "bip39": "^3.0.4",
     "react": "16.13.1",
     "react-dom": "16.13.1"
   },
