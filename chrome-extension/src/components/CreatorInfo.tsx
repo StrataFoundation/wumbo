@@ -1,7 +1,6 @@
 import React from 'react'
 import {Button, Dropdown, Menu, Tag} from 'antd';
 import {DownOutlined} from '@ant-design/icons';
-import 'antd/dist/antd.css'
 import {useCreatorInfo} from "../utils/creatorState";
 import Loading from './Loading';
 import {
