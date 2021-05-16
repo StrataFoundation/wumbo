@@ -1,34 +1,33 @@
 import {Account} from "@solana/web3.js";
-
-function polling() {
-  console.log("polling");
-  setTimeout(polling, 1000 * 30);
-}
-
-polling();
+import {AccountInfo as MintAccountInfo} from "@solana/spl-token";
 
 let error: string | null = null
 let account: Account | null = null
+let solcloutAccount: MintAccountInfo | null = null
 
-chrome.runtime.onMessage.addListener(function (msg, sender, sendResponse) {
+
+function setAccount(msg: any) {
   if (msg.type == 'ACCOUNT') {
     error = msg.data.error
     account = msg.data.account
+    solcloutAccount = msg.data.solcloutAccount
   }
-})
+}
+
+chrome.runtime.onMessage.addListener(setAccount)
 
 chrome.runtime.onConnect.addListener(function(port) {
   console.assert(port.name == "popup");
   chrome.runtime.onMessage.addListener(function (msg, sender, sendResponse) {
+    setAccount(msg)
     if (msg.type == 'ACCOUNT') {
-      port.postMessage({account, error})
+      port.postMessage({account, error, solcloutAccount})
     }
   })
 })
 
 chrome.runtime.onMessage.addListener(function (msg, sender, sendResponse) {
   if (msg.type == 'LOAD_ACCOUNT') {
-    error && sendResponse({ data: { error }, type: 'ACCOUNT' })
-    account && sendResponse({ data: { account }, type: 'ACCOUNT' })
+    sendResponse({ data: { account, solcloutAccount, error }, type: 'ACCOUNT' })
   }
 })

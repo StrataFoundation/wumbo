@@ -1,17 +1,17 @@
 import React, {useContext, useEffect, useState} from "react";
-import {Mint, SolcloutCreator} from "../solclout-api/state";
+import {Mint, SolcloutCreator, SolcloutInstance} from "../solclout-api/state";
 import {buyCreatorCoinsWithWallet} from "../solclout-api/bindings";
-import {KEYPAIR, SOLCLOUT_PROGRAM_ID, SPL_ASSOCIATED_TOKEN_ACCOUNT_PROGRAM_ID} from "../globals";
-import {Account} from "@solana/web3.js";
-import {ENDPOINTS, useConnection, useConnectionConfig} from "@oyster/common/lib/contexts/connection"
+import {KEYPAIR, SOLCLOUT_INSTANCE_KEY, SOLCLOUT_PROGRAM_ID, SPL_ASSOCIATED_TOKEN_ACCOUNT_PROGRAM_ID} from "../globals";
+import {Account, Connection} from "@solana/web3.js";
+import {useConnection} from "@oyster/common/lib/contexts/connection"
 import {getED25519Key} from "@toruslabs/openlogin-ed25519"
 import OpenLogin from "@toruslabs/openlogin"
+import {AccountInfo as MintAccountInfo, Token} from "@solana/spl-token";
 
 const getSolanaPrivateKey = (openloginKey: string) => {
   const  { sk } = getED25519Key(openloginKey)
   return sk
 }
-
 
 export interface Action {
   type: string,
@@ -61,6 +61,7 @@ export const useBuyAction = ({ creator }: ActionData): [(amount: number) => Prom
 interface AccountInfo {
   error?: string,
   account?: Account,
+  solcloutAccount?: MintAccountInfo
 }
 
 export const useLoggedInAccount = (): AccountInfo => {
@@ -94,21 +95,21 @@ export const useLoggedInAccount = (): AccountInfo => {
 }
 
 interface LoginState {
-  login: () => Promise<Account | undefined>,
-  error?: string,
-  account?: Account
+  login: () => Promise<void>,
+  logout: () => Promise<void>,
+  accountInfo: AccountInfo
 }
 export const useLoginFromPopup = (): LoginState => {
-  const { account, error } = useLoggedInAccount()
+  const accountInfo = useLoggedInAccount()
 
-  const login = () => {
+  const sendMsg = (type: string) => {
     chrome.tabs.query({active: true, currentWindow: true}, function (tabs) {
       const tab = tabs[0];
       if (tab.id) {
         chrome.tabs.sendMessage(
           tab.id,
           {
-            type: 'LOGIN'
+            type
           }
         );
       }
@@ -118,76 +119,82 @@ export const useLoginFromPopup = (): LoginState => {
   }
 
   return {
-    login,
-    account,
-    error
+    login: () => sendMsg("LOGIN"),
+    logout: () => sendMsg("LOGOUT"),
+    accountInfo
   }
 }
 
+const createAssociatedSolcloutMint = async (connection: Connection, account: Account): Promise<MintAccountInfo> => {
+  const solcloutInstance = await SolcloutInstance.retrieve(connection, SOLCLOUT_INSTANCE_KEY)
+
+  const solcloutMint = new Token(
+    connection,
+    solcloutInstance.solcloutToken,
+    solcloutInstance.tokenProgramId,
+    account
+  )
+
+  return solcloutMint.getOrCreateAssociatedAccountInfo(account.publicKey)
+}
+
 export const useLogin = (): LoginState => {
-  const connectionConfig = useConnectionConfig()
-  connectionConfig.setEndpoint(ENDPOINTS[3].endpoint)
-  connectionConfig.env = "devnet"
+  const connection = useConnection()
+  const [login, setLogin] = useState<() => Promise<void>>(() => Promise.resolve())
+  const [logout, setLogout] = useState<() => Promise<void>>(() => Promise.resolve())
 
-  const { account, error } = useLoggedInAccount()
+  const accountInfo = useLoggedInAccount()
 
-  const customauth = new OpenLogin({
-    clientId: "BHgxWcEBp7kICzfoIUlL9kCmope2NRhrDz7d8ugBucqQqBel1Q7yDvkPfLrgZh140oLxyN0MgpmziL7UG7jZuWk",
-    network: new Set(["devnet", "testnet", "localnet"]).has(connectionConfig.env) ? "testnet" : "mainnet",
-    uxMode: 'popup'
-  });
+  useEffect(() => {
+    const customauth = new OpenLogin({
+      clientId: "BHgxWcEBp7kICzfoIUlL9kCmope2NRhrDz7d8ugBucqQqBel1Q7yDvkPfLrgZh140oLxyN0MgpmziL7UG7jZuWk",
+      network: "testnet",
+      // network: new Set(["devnet", "testnet", "localnet"]).has(connectionConfig.env) ? "testnet" : "mainnet",
+      uxMode: 'popup'
+    });
+    setLogout(() => async () =>{
+      await customauth.logout()
+      chrome.runtime.sendMessage({
+        type: 'ACCOUNT',
+        data: {}
+      })
+    })
+    setLogin( () => async () => {
+      try {
+        await customauth.init()
 
-  const login = async () => {
-    try {
-      await customauth.init()
-
-      if (customauth.privKey) {
-        const privateKey = customauth.privKey;
+        let privateKey: string
+        if (customauth.privKey) {
+          privateKey = customauth.privKey;
+        } else {
+          const {privKey} = await customauth.login();
+          privateKey = privKey
+        }
         const secretKey = getSolanaPrivateKey(privateKey);
         const account = new Account(secretKey)
-        console.log("Sending... in here")
+        const solcloutAccount = await createAssociatedSolcloutMint(connection, account)
         chrome.runtime.sendMessage({
           type: 'ACCOUNT',
           data: {
-            account
+            account,
+            solcloutAccount
           }
         })
-        return account
-      } else {
-        const {privKey} = await customauth.login();
-        const secretKey = getSolanaPrivateKey(privKey);
-        console.log("Sending...")
+      } catch(e) {
+        console.error(e)
         chrome.runtime.sendMessage({
           type: 'ACCOUNT',
           data: {
-            account: new Account(secretKey)
+            error: e
           }
         })
       }
-      // const res = await customauth
-      //   .triggerLogin({
-      //     typeOfLogin: "twitter",
-      //     verifier: "dev-chewingglass",
-      //     clientId: "bdwH3UjEErqOK55fZL7EQnURT13hXMXm",
-      //     jwtParams: { domain: "https://dev-chewingglass.us.auth0.com" },
-      //   })
-      //
-      //   // const userInfo = res.userInfo;
-      // const { sk } = OpenloginUtils.getED25519Key(res.privateKey);
-      // setAccount(new Account(sk))
-    } catch(e) {
-      console.error(e)
-      chrome.runtime.sendMessage({
-        type: 'ACCOUNT',
-        data: {
-          error: e
-        }
-      })
-    }
-  }
+    })
+  }, [connection])
+
   return {
-    account,
-    error,
-    login
+    accountInfo,
+    login,
+    logout
   }
 }
