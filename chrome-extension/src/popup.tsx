@@ -2,7 +2,7 @@ import React from "react";
 import ReactDOM from "react-dom";
 import {Alert, Button, Card, Statistic, Tag} from "antd";
 import {ConnectionProvider} from "@oyster/common/lib/contexts/connection"
-import {useLoginFromPopup} from "./utils/action";
+import {useLoginFromPopup} from "./utils/auth";
 import 'antd/dist/antd.css'
 
 const Popup = () => {
