@@ -19,6 +19,7 @@
   "dependencies": {
     "@bonfida/spl-name-service": "^0.1.4",
     "@oyster/common": "file:../../oyster/packages/common/dist",
+    "@project-serum/serum": "^0.13.34",
     "@solana/spl-token-swap": "^0.1.0",
     "@solana/web3.js": "^1.10.0",
     "@toruslabs/openlogin": "^0.8.5",

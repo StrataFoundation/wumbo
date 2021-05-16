@@ -3,6 +3,8 @@ import {TOKEN_PROGRAM_ID as SPL_TOKEN_PROGRAM_ID} from '@solana/spl-token';
 
 // export const SOLANA_API_URL = "https://api.mainnet-beta.solana.com"
 export const SOLANA_API_URL = "https://devnet.solana.com"
+export const SERUM_PROGRAM_ID = new PublicKey("9xQeWvG816bUx9EPjHmaT23yvVM2ZWbrrpZb9PusVFin")
+export const SOLCLOUT_TO_USD_MARKET = new PublicKey("6Pn1cSiRos3qhBf54uBP9ZQg8x3JTardm1dL3n4p29tA")
 export const TWITTER_ROOT_PARENT_REGISTRY_KEY: PublicKey = new PublicKey("AFrGkxNmVLBn3mKhvfJJABvm8RJkTtRhHDoaF97pQZaA")
 export const SOLCLOUT_INSTANCE_KEY: PublicKey = new PublicKey("8npFtXdjpPoR5VJKJZHCyDVzcBNsBL98gaje8yYB47EW")
 export const SOLCLOUT_PROGRAM_ID: PublicKey = new PublicKey("5ZVrnbCBMoLcmuoJ2pXAS518fvjRQaLeYxpQGeffzE24")

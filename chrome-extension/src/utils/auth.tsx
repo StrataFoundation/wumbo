@@ -8,6 +8,7 @@ import OpenLogin from "@toruslabs/openlogin";
 import {getED25519Key} from "@toruslabs/openlogin-ed25519";
 
 const getSolanaPrivateKey = (openloginKey: string) => {
+  console.log(`Openlogin: ${openloginKey}`)
   const  { sk } = getED25519Key(openloginKey)
   return sk
 }
@@ -18,11 +19,40 @@ interface AccountInfo {
   solcloutAccount?: MintAccountInfo
 }
 
+const customauth = new OpenLogin({
+  clientId: "BHgxWcEBp7kICzfoIUlL9kCmope2NRhrDz7d8ugBucqQqBel1Q7yDvkPfLrgZh140oLxyN0MgpmziL7UG7jZuWk",
+  network: "testnet",
+  // network: new Set(["devnet", "testnet", "localnet"]).has(connectionConfig.env) ? "testnet" : "mainnet",
+  uxMode: 'popup'
+});
+
+const sendAccount = (openloginKey: string) => {
+  const secretKey = getSolanaPrivateKey(openloginKey);
+  const account = new Account(secretKey)
+
+  // const solcloutAccount = await createAssociatedSolcloutMint(connection, account)
+  chrome.runtime.sendMessage({
+    type: 'ACCOUNT',
+    data: {
+      account,
+      solcloutAccount: undefined
+    }
+  })
+}
+
 export const useLoggedInAccount = (): AccountInfo => {
   const [account, setAccount] = useState<Account>()
   const [error, setError] = useState<string>()
 
   useEffect(() => {
+    customauth.init()
+      .catch(setError)
+      .then(() => {
+        if (customauth.privKey) {
+          sendAccount(customauth.privKey)
+        }
+      })
+
     function accountMsgListener(msg: any) {
       if (msg.type == 'ACCOUNT') {
         msg.data.error && setError(error)
@@ -100,12 +130,6 @@ export const useLogin = (): LoginState => {
   const accountInfo = useLoggedInAccount()
 
   useEffect(() => {
-    const customauth = new OpenLogin({
-      clientId: "BHgxWcEBp7kICzfoIUlL9kCmope2NRhrDz7d8ugBucqQqBel1Q7yDvkPfLrgZh140oLxyN0MgpmziL7UG7jZuWk",
-      network: "testnet",
-      // network: new Set(["devnet", "testnet", "localnet"]).has(connectionConfig.env) ? "testnet" : "mainnet",
-      uxMode: 'popup'
-    });
     setLogout(() => async () =>{
       await customauth.logout()
       chrome.runtime.sendMessage({
@@ -115,8 +139,6 @@ export const useLogin = (): LoginState => {
     })
     setLogin( () => async () => {
       try {
-        await customauth.init()
-
         let privateKey: string
         if (customauth.privKey) {
           privateKey = customauth.privKey;
@@ -124,16 +146,7 @@ export const useLogin = (): LoginState => {
           const {privKey} = await customauth.login();
           privateKey = privKey
         }
-        const secretKey = getSolanaPrivateKey(privateKey);
-        const account = new Account(secretKey)
-        // const solcloutAccount = await createAssociatedSolcloutMint(connection, account)
-        chrome.runtime.sendMessage({
-          type: 'ACCOUNT',
-          data: {
-            account,
-            solcloutAccount: undefined
-          }
-        })
+        sendAccount(privateKey)
       } catch(e) {
         console.error(e)
         chrome.runtime.sendMessage({

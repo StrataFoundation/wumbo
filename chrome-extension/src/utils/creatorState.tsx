@@ -6,6 +6,7 @@ import {SolcloutCreator} from "../solclout-api/state";
 import {useConnection} from "@oyster/common/lib/contexts/connection"
 import {useMint} from "./mintState";
 import {Action} from "./action";
+import {useSolcloutUsdPrice} from "./pricing";
 
 export const useCreatorKey = (name: string): PublicKey | undefined => {
   const [key, setKey] = useState<PublicKey>()
@@ -64,6 +65,7 @@ export const useCreator = (name: string): CreatorState => {
 interface CreatorInfo {
   name: string,
   coinPrice: number,
+  coinPriceUsd: number
 }
 interface CreatorInfoState {
   creatorInfo?: CreatorInfo,
@@ -73,6 +75,7 @@ interface CreatorInfoState {
 export const useCreatorInfo = (name: string): CreatorInfoState => {
   const { creator, loading } = useCreator(name)
   const mint = useMint(creator && creator.creatorToken)
+  const solcloutUsdPrice = useSolcloutUsdPrice()
   const [creatorInfo, setCreatorInfo] = useState<CreatorInfoState>({
     loading: true,
     actions: []
@@ -99,6 +102,7 @@ export const useCreatorInfo = (name: string): CreatorInfoState => {
         creatorInfo: {
           name,
           coinPrice: solcloutPrice,
+          coinPriceUsd: solcloutPrice * (solcloutUsdPrice || 0)
         },
         actions: creatorActions,
         loading: false

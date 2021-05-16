@@ -52,7 +52,7 @@ export default ({ creatorName }: CreatorInfoProps) => {
   return <>
     <Dropdown overlay={menu}>
       <Tag onClick={e => e.preventDefault()}>
-        {creatorInfo?.coinPrice.toFixed(2)} <DownOutlined/>
+        ${creatorInfo?.coinPriceUsd.toFixed(2)} <DownOutlined/>
       </Tag>
 
     </Dropdown>
