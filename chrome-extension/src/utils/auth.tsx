@@ -1,5 +1,5 @@
 import {Account, Connection} from "@solana/web3.js";
-import {AccountInfo as MintAccountInfo, Token} from "@solana/spl-token";
+import {AccountInfo as TokenAccountInfo, Token} from "@solana/spl-token";
 import {useEffect, useState} from "react";
 import {SolcloutInstance} from "../solclout-api/state";
 import {SOLCLOUT_INSTANCE_KEY} from "../globals";
@@ -8,15 +8,19 @@ import OpenLogin from "@toruslabs/openlogin";
 import {getED25519Key} from "@toruslabs/openlogin-ed25519";
 
 const getSolanaPrivateKey = (openloginKey: string) => {
-  console.log(`Openlogin: ${openloginKey}`)
   const  { sk } = getED25519Key(openloginKey)
   return sk
+}
+
+const getSolanaAccount = (openloginKey: string) => {
+  const secretKey = getSolanaPrivateKey(openloginKey);
+  return new Account(secretKey)
 }
 
 interface AccountInfo {
   error?: string,
   account?: Account,
-  solcloutAccount?: MintAccountInfo
+  solcloutAccount?: TokenAccountInfo
 }
 
 const customauth = new OpenLogin({
@@ -27,38 +31,36 @@ const customauth = new OpenLogin({
 });
 
 const sendAccount = (openloginKey: string) => {
-  const secretKey = getSolanaPrivateKey(openloginKey);
-  const account = new Account(secretKey)
-
-  // const solcloutAccount = await createAssociatedSolcloutMint(connection, account)
+  console.log(`SENDING OPEN ${openloginKey}`)
   chrome.runtime.sendMessage({
     type: 'ACCOUNT',
     data: {
-      account,
-      solcloutAccount: undefined
+      openloginKey
     }
   })
 }
 
+
 export const useLoggedInAccount = (): AccountInfo => {
   const [account, setAccount] = useState<Account>()
   const [error, setError] = useState<string>()
+  const [solcloutAccount, setSolcloutAccount] = useState<TokenAccountInfo>()
+  const connection = useConnection()
 
   useEffect(() => {
-    customauth.init()
-      .catch(setError)
-      .then(() => {
-        if (customauth.privKey) {
-          sendAccount(customauth.privKey)
-        }
-      })
-
-    function accountMsgListener(msg: any) {
+    async function accountMsgListener(msg: any) {
       if (msg.type == 'ACCOUNT') {
         msg.data.error && setError(error)
-        if (msg.data.account) {
-          const account = msg.data.account
-          setAccount(new Account(account._keypair.privateKey))
+        if (msg.data.openloginKey) {
+          try {
+            const account = getSolanaAccount(msg.data.openloginKey)
+            setAccount(account)
+
+            const solcloutAccountFetched = await getOrCreateAssociatedSolcloutMint(connection, account)
+            setSolcloutAccount(solcloutAccountFetched)
+          } catch (e) {
+            setError(e)
+          }
         }
       }
     }
@@ -74,7 +76,8 @@ export const useLoggedInAccount = (): AccountInfo => {
 
   return {
     account,
-    error
+    error,
+    solcloutAccount
   }
 }
 
@@ -109,7 +112,7 @@ export const useLoginFromPopup = (): LoginState => {
   }
 }
 
-const createAssociatedSolcloutMint = async (connection: Connection, account: Account): Promise<MintAccountInfo> => {
+const getOrCreateAssociatedSolcloutMint = async (connection: Connection, account: Account): Promise<TokenAccountInfo> => {
   const solcloutInstance = await SolcloutInstance.retrieve(connection, SOLCLOUT_INSTANCE_KEY)
 
   const solcloutMint = new Token(
@@ -122,7 +125,21 @@ const createAssociatedSolcloutMint = async (connection: Connection, account: Acc
   return solcloutMint.getOrCreateAssociatedAccountInfo(account.publicKey)
 }
 
+const attemptCachedLogin = () => {
+  useEffect(() => {
+    customauth.init()
+      .then(async () => {
+        if (customauth.privKey) {
+          sendAccount(customauth.privKey)
+        }
+      })
+      .catch((e) => {
+        console.error(e)
+      })
+  }, [])
+}
 export const useLogin = (): LoginState => {
+  attemptCachedLogin()
   const connection = useConnection()
   const [login, setLogin] = useState<() => Promise<void>>(() => Promise.resolve())
   const [logout, setLogout] = useState<() => Promise<void>>(() => Promise.resolve())

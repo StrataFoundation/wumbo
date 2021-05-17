@@ -23,7 +23,7 @@ const Popup = () => {
             <Statistic title="Balance" value={solcloutAccount.amount.toNumber().toFixed(2)}/>
         </Card>
       }
-      { error && <Alert type="error" message={error} /> }
+      { error && <Alert type="error" message={error.toString()} /> }
     </div>
   );
 };

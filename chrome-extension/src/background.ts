@@ -1,16 +1,10 @@
-import {Account} from "@solana/web3.js";
-import {AccountInfo as MintAccountInfo} from "@solana/spl-token";
-
 let error: string | null = null
-let account: Account | null = null
-let solcloutAccount: MintAccountInfo | null = null
-
+let openloginKey: string | null = null
 
 function setAccount(msg: any) {
   if (msg.type == 'ACCOUNT') {
     error = msg.data.error
-    account = msg.data.account
-    solcloutAccount = msg.data.solcloutAccount
+    openloginKey = msg.data.openloginKey
   }
 }
 
@@ -21,13 +15,13 @@ chrome.runtime.onConnect.addListener(function(port) {
   chrome.runtime.onMessage.addListener(function (msg, sender, sendResponse) {
     setAccount(msg)
     if (msg.type == 'ACCOUNT') {
-      port.postMessage({account, error, solcloutAccount})
+      port.postMessage({ openloginKey, error })
     }
   })
 })
 
 chrome.runtime.onMessage.addListener(function (msg, sender, sendResponse) {
   if (msg.type == 'LOAD_ACCOUNT') {
-    sendResponse({ data: { account, solcloutAccount, error }, type: 'ACCOUNT' })
+    sendResponse({ data: { openloginKey, error }, type: 'ACCOUNT' })
   }
 })

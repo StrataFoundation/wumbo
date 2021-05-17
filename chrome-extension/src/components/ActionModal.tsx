@@ -28,6 +28,10 @@ export default ({action, complete}: ActionModalProps) => {
   const ActionComponent = action && actions[action.type]
 
   return <Modal
+    afterClose={() => {
+      // https://github.com/ant-design/ant-design/issues/21539
+      document.body.style.removeProperty('overflow')
+    }}
     bodyStyle={{ overflow: 'visible' }}
     title={`${action?.prettyName} ${action?.data.creatorName}`}
     visible={!!action}
