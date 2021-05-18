@@ -1,4 +1,4 @@
-import {Account, Connection} from "@solana/web3.js";
+import {Account, Connection, PublicKey} from "@solana/web3.js";
 import {AccountInfo as TokenAccountInfo, Token} from "@solana/spl-token";
 import {useEffect, useState} from "react";
 import {SolcloutInstance} from "../solclout-api/state";
@@ -8,7 +8,9 @@ import OpenLogin from "@toruslabs/openlogin";
 import {getED25519Key} from "@toruslabs/openlogin-ed25519";
 
 const getSolanaPrivateKey = (openloginKey: string) => {
-  const  { sk } = getED25519Key(openloginKey)
+  console.log("Open:" + openloginKey)
+  const  { pk, sk } = getED25519Key(openloginKey)
+  console.log(`Key: ${new PublicKey(pk).toBase58()}`)
   return sk
 }
 
@@ -56,6 +58,7 @@ export const useLoggedInAccount = (): AccountInfo => {
             const account = getSolanaAccount(msg.data.openloginKey)
             setAccount(account)
 
+            console.log(account.secretKey)
             const solcloutAccountFetched = await getOrCreateAssociatedSolcloutMint(connection, account)
             setSolcloutAccount(solcloutAccountFetched)
           } catch (e) {

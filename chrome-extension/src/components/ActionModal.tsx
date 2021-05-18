@@ -2,6 +2,7 @@ import React, {FunctionComponent, useEffect} from "react";
 import {Modal} from "antd";
 import {Action, ActionData} from "../utils/action";
 import Buy from "./actions/Buy";
+import Sell from "./actions/Sell";
 
 type Complete = (action: Action | undefined, reason: string) => void
 
@@ -16,7 +17,8 @@ export interface ActionProps {
 }
 
 const actions: Record<string, FunctionComponent<ActionProps>> = {
-  BUY: Buy
+  BUY: Buy,
+  SELL: Sell,
 }
 
 export default ({action, complete}: ActionModalProps) => {

@@ -1,7 +1,7 @@
 import {Account, Connection, PublicKey, sendAndConfirmTransaction, Transaction} from "@solana/web3.js";
 import {getHashedName, getNameAccountKey, NameRegistryState} from "@bonfida/spl-name-service";
 import {Token} from "@solana/spl-token"
-import {buyCreatorCoinsInstruction, initializeCreatorInstruction} from "./instruction";
+import {buyCreatorCoinsInstruction, initializeCreatorInstruction, sellCreatorCoinsInstruction} from "./instruction";
 import {SolcloutCreator, SolcloutInstance} from "./state";
 
 export type CreateSolcloutCreatorParams = {
@@ -20,6 +20,14 @@ export type BuyCreatorCoinsWithWalletParams = {
   splAssociatedTokenAccountProgramId: PublicKey,
   solcloutCreator: PublicKey,
   purchaserWallet: Account,
+  lamports: number
+}
+
+export type SellCreatorCoinsWithWalletParams = {
+  programId: PublicKey,
+  splAssociatedTokenAccountProgramId: PublicKey,
+  solcloutCreator: PublicKey,
+  sellerWallet: Account,
   lamports: number
 }
 
@@ -167,4 +175,65 @@ export async function buyCreatorCoinsWithWallet(connection: Connection, params: 
   );
 
   console.log(`Bought ${params.lamports} creator coins from ${purchaseAccount} to ${destinationAccount}`)
+}
+
+export async function sellCreatorCoinsWithWallet(connection: Connection, params: SellCreatorCoinsWithWalletParams): Promise<void> {
+  const creator = await SolcloutCreator.retrieve(connection, params.solcloutCreator);
+  if (!creator) {
+    throw new Error("Creator not found")
+  }
+  if (params.lamports < 0) {
+    throw new Error("Amount must be positive")
+  }
+
+  const solcloutInstance = await SolcloutInstance.retrieve(connection, creator.solcloutInstance);
+  const sellAccount = await findAssociatedTokenAddress(
+    params.sellerWallet.publicKey,
+    creator.creatorToken,
+    solcloutInstance.tokenProgramId,
+    params.splAssociatedTokenAccountProgramId
+  )
+  const destinationAccount = await findAssociatedTokenAddress(
+    params.sellerWallet.publicKey,
+    solcloutInstance.solcloutToken,
+    solcloutInstance.tokenProgramId,
+    params.splAssociatedTokenAccountProgramId
+  )
+  const acctExists = await connection.getAccountInfo(destinationAccount)
+  if (!acctExists) {
+    console.log("Creating destination account...")
+    await new Token(
+      connection,
+      creator.creatorToken,
+      solcloutInstance.tokenProgramId,
+      params.sellerWallet
+    ).createAssociatedTokenAccount(params.sellerWallet.publicKey);
+    console.log(`Destination account created: ${destinationAccount}`)
+  }
+
+  const [solcloutStorageAuthority, _] = await PublicKey.findProgramAddress([creator.solcloutInstance.toBuffer()], params.programId)
+
+  const transaction = new Transaction()
+    .add(sellCreatorCoinsInstruction(
+      params.programId,
+      solcloutInstance.tokenProgramId,
+      creator.solcloutInstance,
+      params.solcloutCreator,
+      creator.creatorToken,
+      solcloutInstance.solcloutStorage,
+      solcloutStorageAuthority,
+      sellAccount,
+      params.sellerWallet,
+      destinationAccount,
+      params.lamports
+    ))
+
+  await sendAndConfirmTransaction(
+    connection,
+    transaction,
+    [params.sellerWallet],
+    { commitment: "singleGossip", preflightCommitment: "singleGossip" }
+  );
+
+  console.log(`Burned ${params.lamports} creator coins from ${sellAccount} to ${destinationAccount}`)
 }

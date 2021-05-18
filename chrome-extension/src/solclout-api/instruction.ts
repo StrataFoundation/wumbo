@@ -139,3 +139,72 @@ export function buyCreatorCoinsInstruction(
     ])
   })
 }
+
+export function sellCreatorCoinsInstruction(
+  programId: PublicKey,
+  tokenProgramId: PublicKey,
+  solcloutInstance: PublicKey,
+  solcloutCreator: PublicKey,
+  creatorMint: PublicKey,
+  solcloutStorageAccount: PublicKey,
+  solcloutStorageAuthority: PublicKey,
+  sellAccount: PublicKey,
+  sellAuthority: Account,
+  destination: PublicKey,
+  lamports: number
+): TransactionInstruction {
+  return new TransactionInstruction({
+    programId,
+    keys: [
+      {
+        pubkey: solcloutInstance,
+        isSigner: false,
+        isWritable: false,
+      },
+      {
+        pubkey: solcloutCreator,
+        isSigner: false,
+        isWritable: false,
+      },
+      {
+        pubkey: creatorMint,
+        isSigner: false,
+        isWritable: true,
+      },
+      {
+        pubkey: solcloutStorageAccount,
+        isSigner: false,
+        isWritable: true,
+      },
+      {
+        pubkey: solcloutStorageAuthority,
+        isSigner: false,
+        isWritable: false,
+      },
+      {
+        pubkey: sellAccount,
+        isSigner: false,
+        isWritable: true,
+      },
+      {
+        pubkey: sellAuthority.publicKey,
+        isSigner: true,
+        isWritable: false,
+      },
+      {
+        pubkey: destination,
+        isSigner: false,
+        isWritable: true,
+      },
+      {
+        pubkey: tokenProgramId,
+        isSigner: false,
+        isWritable: false,
+      }
+    ],
+    data: Buffer.concat([
+      Buffer.from(Int8Array.from([3])),
+      new Numberu64(lamports).toBuffer()
+    ])
+  })
+}

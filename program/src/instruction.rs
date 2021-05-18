@@ -40,29 +40,39 @@ pub enum SolcloutInstruction {
         /// Percentage Value is (founder_reward_percentage / 10,000) * 100
         founder_reward_percentage: u16,
         /// Nonce used to derive authority program address
-        nonce: u8
+        nonce: u8,
     },
 
     /// Buy creator coins
     ///   0. `[]` Solclout instance
     ///   1. `[]` Solclout Creator to purchase creator coins of. This should be an initialized acct in solclout
-    ///   2. `[]` Solclout Creator coin mint
-    ///   3. `[writeable]` Solclout storage account from the SolcloutInstance
-    ///   4. `[writeable]`  Purchasing account, this is an account owned by the token program with
+    ///   2. `[writeable]` Solclout Creator coin mint
+    ///   3. `[]` Solclout Creator mint authority
+    ///   4. `[writeable]` Solclout storage account from the SolcloutInstance
+    ///   5. `[writeable]` Creator's founder rewards account
+    ///   6. `[writeable]`  Purchasing account, this is an account owned by the token program with
     ///                            the solclout mint
-    ///   5. `[signer]`  Purchasing authority. This must be the authority on the purchasing account
-    ///   6. `[writeable]`  Destination account, this is an account owned by the token program with
+    ///   7. `[signer]`  Purchasing authority. This must be the authority on the purchasing account
+    ///   8. `[writeable]`  Destination account, this is an account owned by the token program with
     ///                            the creator mint
+    ///   9. `[]` Token program id
     BuyCreatorCoins {
         /// Number of lamports to purchase, since creator coins use the same decimal as sol
         lamports: u64,
     },
 
     /// Sell creator coins
-    ///   0. `[]` Account to sell creator coins of. This should be an initialized acct in solclout
-    ///   1. `[writeable signer]`  Selling account, this is an account owned by the token program with
+    ///   0. `[]` Solclout instance
+    ///   1. `[]` Solclout Creator to sell creator coins of. This should be an initialized acct in solclout
+    ///   2. `[]` Solclout Creator coin mint
+    ///   3. `[writeable]` Solclout storage account from the SolcloutInstance
+    ///   4. `[]` Solclout storage authority from the SolcloutInstance
+    ///   5. `[writeable]` Selling account, this is an account owned by the token program with
     ///                            the creator coin mint
-    ///   2. `[]`  Destination account, owned by the token program with the solclout coin mint
+    ///   6. `[signer]`  Selling authority. This must be the authority on the selling account
+    ///   7. `[writeable]`  Destination account, this is an account owned by the token program with
+    ///                            the solclout mint
+    ///   8. `[]` Token program id
     SellCreatorCoins {
         /// Number of lamports to purchase, since creator coins use the same decimal as sol
         lamports: u64,
@@ -77,7 +87,7 @@ pub fn initialize_solclout(
     solclout_storage_account: &Pubkey,
     token_program_id: &Pubkey,
     name_program_id: &Pubkey,
-    nonce: u8
+    nonce: u8,
 ) -> Instruction {
     Instruction {
         program_id: *program_id,
@@ -91,10 +101,10 @@ pub fn initialize_solclout(
         data: SolcloutInstruction::InitializeSolclout {
             token_program_id: *token_program_id,
             name_program_id: *name_program_id,
-            nonce
+            nonce,
         }
-            .try_to_vec()
-            .unwrap(),
+        .try_to_vec()
+        .unwrap(),
     }
 }
 
@@ -108,7 +118,7 @@ pub fn initialize_creator(
     founder_rewards_account: &Pubkey,
     creator_mint: &Pubkey,
     founder_reward_percentage: u16,
-    nonce: u8
+    nonce: u8,
 ) -> Instruction {
     Instruction {
         program_id: *program_id,
@@ -122,9 +132,9 @@ pub fn initialize_creator(
             AccountMeta::new_readonly(solana_program::system_program::id(), false),
             AccountMeta::new_readonly(sysvar::rent::id(), false),
         ],
-        data: SolcloutInstruction::InitializeCreator{
+        data: SolcloutInstruction::InitializeCreator {
             founder_reward_percentage,
-            nonce
+            nonce,
         }
         .try_to_vec()
         .unwrap(),
@@ -143,7 +153,7 @@ pub fn buy_creator_coins(
     purchase_authority: &Pubkey,
     destination: &Pubkey,
     token_program_id: &Pubkey,
-    lamports: u64
+    lamports: u64,
 ) -> Instruction {
     Instruction {
         program_id: *program_id,
@@ -159,9 +169,37 @@ pub fn buy_creator_coins(
             AccountMeta::new(*destination, false),
             AccountMeta::new_readonly(*token_program_id, false),
         ],
-        data: SolcloutInstruction::BuyCreatorCoins {
-            lamports
-        }
+        data: SolcloutInstruction::BuyCreatorCoins { lamports }
+            .try_to_vec()
+            .unwrap(),
+    }
+}
+
+pub fn sell_creator_coins(
+    program_id: &Pubkey,
+    solclout_instance: &Pubkey,
+    solclout_creator: &Pubkey,
+    solclout_creator_mint: &Pubkey,
+    solclout_storage_account: &Pubkey,
+    sell_account: &Pubkey,
+    sell_authority: &Pubkey,
+    destination: &Pubkey,
+    token_program_id: &Pubkey,
+    lamports: u64,
+) -> Instruction {
+    Instruction {
+        program_id: *program_id,
+        accounts: vec![
+            AccountMeta::new_readonly(*solclout_instance, false),
+            AccountMeta::new_readonly(*solclout_creator, false),
+            AccountMeta::new(*solclout_creator_mint, false),
+            AccountMeta::new(*solclout_storage_account, false),
+            AccountMeta::new(*sell_account, false),
+            AccountMeta::new_readonly(*sell_authority, true),
+            AccountMeta::new(*destination, false),
+            AccountMeta::new_readonly(*token_program_id, false),
+        ],
+        data: SolcloutInstruction::SellCreatorCoins { lamports }
             .try_to_vec()
             .unwrap(),
     }
