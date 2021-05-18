@@ -1,75 +1,26 @@
-import React, {useContext, useState} from "react";
-import {Mint, SolcloutCreator} from "../solclout-api/state";
+import React from "react";
+import {SolcloutCreator} from "../solclout-api/state";
 import {buyCreatorCoinsWithWallet, sellCreatorCoinsWithWallet} from "../solclout-api/bindings";
 import {KEYPAIR, SOLCLOUT_PROGRAM_ID, SPL_ASSOCIATED_TOKEN_ACCOUNT_PROGRAM_ID} from "../globals";
-import {Account} from "@solana/web3.js";
-import {useConnection} from "@oyster/common/lib/contexts/connection"
+import {Account, Connection} from "@solana/web3.js";
 
-export interface Action {
-  type: string,
-  prettyName: string,
-  data: ActionData
+
+export const buy = (connection: Connection, creator: SolcloutCreator, amount: number): Promise<void> => {
+  return buyCreatorCoinsWithWallet(connection, {
+    programId: SOLCLOUT_PROGRAM_ID,
+    splAssociatedTokenAccountProgramId: SPL_ASSOCIATED_TOKEN_ACCOUNT_PROGRAM_ID,
+    solcloutCreator: creator.publicKey,
+    purchaserWallet: new Account(KEYPAIR.secretKey),
+    lamports: Math.floor(amount * Math.pow(10, 9))
+  })
 }
 
-export interface ActionData {
-  creator: SolcloutCreator,
-  mint: Mint,
-  creatorName: string
-}
-
-type Dispatch = (action: Action) => void
-export const DispatchActionContext = React.createContext<Dispatch>(() => {})
-
-export const useCreatorActions = () => {
-  const dispatch = useContext(DispatchActionContext)
-
-  return dispatch
-}
-
-export const useBuyAction = ({ creator }: ActionData): [(amount: number) => Promise<void>, string | undefined] => {
-  const [error, setError] = useState<string>()
-  const connection = useConnection()
-
-  return [
-    (amount) => {
-      try {
-        return buyCreatorCoinsWithWallet(connection, {
-          programId: SOLCLOUT_PROGRAM_ID,
-          splAssociatedTokenAccountProgramId: SPL_ASSOCIATED_TOKEN_ACCOUNT_PROGRAM_ID,
-          solcloutCreator: creator.publicKey,
-          purchaserWallet: new Account(KEYPAIR.secretKey),
-          lamports: Math.floor(amount * Math.pow(10, 9))
-        })
-          .catch(err => setError(err.toString()))
-      } catch (e) {
-        setError(e)
-        throw e
-      }
-    },
-    error
-  ]
-}
-
-export const useSellAction = ({ creator }: ActionData): [(amount: number) => Promise<void>, string | undefined] => {
-  const [error, setError] = useState<string>()
-  const connection = useConnection()
-
-  return [
-    (amount) => {
-      try {
-        return sellCreatorCoinsWithWallet(connection, {
-          programId: SOLCLOUT_PROGRAM_ID,
-          splAssociatedTokenAccountProgramId: SPL_ASSOCIATED_TOKEN_ACCOUNT_PROGRAM_ID,
-          solcloutCreator: creator.publicKey,
-          sellerWallet: new Account(KEYPAIR.secretKey),
-          lamports: Math.floor(amount * Math.pow(10, 9))
-        })
-          .catch(err => setError(err.toString()))
-      } catch (e) {
-        setError(e)
-        throw e
-      }
-    },
-    error
-  ]
+export const sell = (connection: Connection, creator: SolcloutCreator, amount: number): Promise<void> => {
+  return sellCreatorCoinsWithWallet(connection, {
+    programId: SOLCLOUT_PROGRAM_ID,
+    splAssociatedTokenAccountProgramId: SPL_ASSOCIATED_TOKEN_ACCOUNT_PROGRAM_ID,
+    solcloutCreator: creator.publicKey,
+    sellerWallet: new Account(KEYPAIR.secretKey),
+    lamports: Math.floor(amount * Math.pow(10, 9))
+  })
 }

@@ -5,8 +5,8 @@ import {AccountInfo, PublicKey} from "@solana/web3.js";
 import {SolcloutCreator} from "../solclout-api/state";
 import {useConnection} from "@oyster/common/lib/contexts/connection"
 import {useMint} from "./mintState";
-import {Action} from "./action";
 import {useSolcloutUsdPrice} from "./pricing";
+import {MintInfo} from "@solana/spl-token";
 
 export const useCreatorKey = (name: string): PublicKey | undefined => {
   const [key, setKey] = useState<PublicKey>()
@@ -64,12 +64,13 @@ export const useCreator = (name: string): CreatorState => {
 
 interface CreatorInfo {
   name: string,
+  coinPriceUsd: number,
   coinPrice: number,
-  coinPriceUsd: number
+  creator: SolcloutCreator,
+  mint: MintInfo,
 }
-interface CreatorInfoState {
+export interface CreatorInfoState {
   creatorInfo?: CreatorInfo,
-  actions: Action[],
   loading: boolean
 }
 export const useCreatorInfo = (name: string): CreatorInfoState => {
@@ -77,38 +78,24 @@ export const useCreatorInfo = (name: string): CreatorInfoState => {
   const mint = useMint(creator && creator.creatorToken)
   const solcloutUsdPrice = useSolcloutUsdPrice()
   const [creatorInfo, setCreatorInfo] = useState<CreatorInfoState>({
-    loading: true,
-    actions: []
+    loading: true
   })
 
   useEffect(() => {
     if (mint && creator) {
       const solcloutPrice = Math.pow(mint.supply.toNumber() / Math.pow(10, 9), 2) / 3000
-      const data = {
-        creator,
-        mint,
-        creatorName: name,
-      }
-      const creatorActions: Action[] = [{
-        type: 'BUY',
-        prettyName: 'Buy',
-        data
-      }, {
-        type: 'SELL',
-        prettyName: 'Sell',
-        data
-      }]
       setCreatorInfo({
         creatorInfo: {
           name,
+          creator,
+          mint,
           coinPrice: solcloutPrice,
           coinPriceUsd: solcloutPrice * (solcloutUsdPrice || 0)
         },
-        actions: creatorActions,
         loading: false
       })
     } else if (!loading) {
-      setCreatorInfo({ loading: false, actions: [] })
+      setCreatorInfo({ loading: false })
     }
   }, [mint, creator, loading])
 

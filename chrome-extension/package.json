@@ -29,6 +29,7 @@
     "antd": "^4.15.5",
     "bip39": "^3.0.4",
     "react": "16.13.1",
+    "react-async-hook": "^3.6.2",
     "react-dom": "16.13.1"
   },
   "devDependencies": {

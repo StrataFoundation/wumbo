@@ -38,7 +38,7 @@ export const useMarketPrice = (marketAddress: PublicKey): number | undefined => 
 
     fetch()
 
-    const interval = setInterval(fetch, 5000)
+    const interval = setInterval(fetch, 30 * 1000)
     return () => clearInterval(interval)
   }, [])
 

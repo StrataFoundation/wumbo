@@ -1,21 +1,28 @@
-import React from 'react';
-import {Button, Form, InputNumber} from "antd";
-import {useSellAction} from '../../utils/action';
-import {ActionProps} from "../ActionModal";
+import React, {useState} from 'react';
+import {Alert, Button, Form, InputNumber} from "antd";
+import {sell} from '../../utils/action';
+import {SolcloutCreator} from "../../solclout-api/state";
+import {useAsyncCallback} from 'react-async-hook';
+import {useConnection} from "@oyster/common/lib/contexts/connection"
 
-const layout = {
-  labelCol: { span: 4 },
-  wrapperCol: { span: 20 },
-};
+interface SellProps {
+  creator: SolcloutCreator
+}
 
-export default ({ data, onComplete}: ActionProps) => {
-  const [buy, error] = useSellAction(data)
+export default ({ creator }: SellProps) => {
+  const connection = useConnection()
+  const { execute, loading, error } = useAsyncCallback(sell)
+  const [success, setSuccess] = useState<string>()
+  const handleFinish = async ({ amount }: { amount: number }) => {
+    await execute(connection, creator, amount)
+    setSuccess(`Sold ${amount} creator coins!`)
+    // Hide the success after a bit
+    setTimeout(() => setSuccess(undefined), 4000)
+  }
+
   return <Form
-    {...layout}
     name="sell"
-    onFinish={({ amount }) => {
-      buy(amount).then(onComplete)
-    }}
+    onFinish={handleFinish}
   >
     <Form.Item
       label="Amount"
@@ -25,8 +32,9 @@ export default ({ data, onComplete}: ActionProps) => {
       <InputNumber style={{ width: '100%' }} min={0} precision={9} step={0.01} />
     </Form.Item>
     <Form.Item>
-      <Button htmlType="submit" type="primary">Sell!</Button>
+      <Button loading={loading} htmlType="submit" type="primary">Sell</Button>
     </Form.Item>
-    <Form.ErrorList errors={[error]} />
+    { error && <Alert type="error" message={error.toString()} />}
+    { success && <Alert type="success" message={success} />}
   </Form>
 }

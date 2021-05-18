@@ -1,7 +1,8 @@
 import React from 'react'
-import {Button, Dropdown, Menu, Tag} from 'antd';
+import {Button, Popover, Tag} from 'antd';
 import {DownOutlined} from '@ant-design/icons';
 import {useCreatorInfo} from "../utils/creatorState";
+import CreatorView from "./CreatorView";
 import Loading from './Loading';
 import {
   KEYPAIR,
@@ -13,24 +14,15 @@ import {
 import {createSolcloutCreator} from "../solclout-api/bindings";
 import {useConnection} from "@oyster/common/lib/contexts/connection"
 import {Account} from "@solana/web3.js";
-import {useCreatorActions} from "../utils/action";
 
 interface CreatorInfoProps {
   creatorName: string
 }
 
 export default ({ creatorName }: CreatorInfoProps) => {
-  const { creatorInfo, loading, actions } = useCreatorInfo(creatorName)
+  const creatorInfoState = useCreatorInfo(creatorName)
+  const { creatorInfo, loading } = creatorInfoState
   const connection = useConnection()
-  const dispatch = useCreatorActions()
-
-  const menu = (
-    <Menu>
-      {actions.map(action =>
-        <Menu.Item key={action.type} onClick={() => dispatch(action)}>{action.prettyName}</Menu.Item>
-      )}
-    </Menu>
-  );
 
   if (loading) {
     return <Loading />
@@ -49,12 +41,18 @@ export default ({ creatorName }: CreatorInfoProps) => {
     return <Button type="link" onClick={createCreator}>Create Coin</Button>
   }
 
-  return <>
-    <Dropdown overlay={menu}>
-      <Tag onClick={e => e.preventDefault()}>
+  return <div
+    style={{ zIndex: 10000 }}
+  >
+    <Popover
+      style={{ width: "300px" }}
+      mouseLeaveDelay={2}
+      placement="bottom"
+      content={() => <CreatorView {...creatorInfoState} />}
+    >
+      <Tag>
         ${creatorInfo?.coinPriceUsd.toFixed(2)} <DownOutlined/>
       </Tag>
-
-    </Dropdown>
-  </>
+    </Popover>
+  </div>
 }
