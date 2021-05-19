@@ -1,11 +1,14 @@
 import React from "react"
-import {useTweets} from "../utils/spotter";
+import { useTweets } from "../utils/spotter"
 import ReactDOM from "react-dom"
-import CreatorInfo from "./CreatorInfo";
-import {ENDPOINTS, useConnectionConfig} from "@oyster/common/lib/contexts/connection"
+import CreatorInfo from "./CreatorInfo"
+import {
+  ENDPOINTS,
+  useConnectionConfig,
+} from "@oyster/common/lib/contexts/connection"
 
 export default () => {
-  const connectionConfig = useConnectionConfig();
+  const connectionConfig = useConnectionConfig()
   connectionConfig.setEndpoint(ENDPOINTS[3].endpoint)
 
   const tweets = useTweets()
@@ -20,35 +23,33 @@ export default () => {
       elCache.set(name, newVal)
       return newVal
     }
-    const tweetEls = tweets.map(tweet => {
-      const nameEl = tweet.querySelector("a")
-      if (nameEl) {
-        const name = nameEl.href.split("/").slice(-1)[0]
-        const insertDiv = tweet.querySelector("time")?.parentNode?.parentNode
-        if (insertDiv) {
-          const el = getOrElseUpdate(name, () => <CreatorInfo
-            creatorName={name}
-          />)
+    const tweetEls = tweets
+      .map((tweet) => {
+        const nameEl = tweet.querySelector("a")
+        if (nameEl) {
+          const name = nameEl.href.split("/").slice(-1)[0]
+          const imgEl = nameEl.querySelector("img")
+          const insertDiv = tweet.querySelector("time")?.parentNode?.parentNode
+          if (insertDiv) {
+            const el = getOrElseUpdate(name, () => (
+              <CreatorInfo creatorName={name} creatorImg={imgEl?.src || ""} />
+            ))
 
-          return ReactDOM.createPortal(
-            <div
-              key={tweet.id}
-              style={{ marginLeft: "4px" }}
-            >
-              { el }
-            </div>,
-            // @ts-ignore
-            insertDiv
-          );
+            return ReactDOM.createPortal(
+              <div key={tweet.id} style={{ marginLeft: "4px" }}>
+                {el}
+              </div>,
+              // @ts-ignore
+              insertDiv
+            )
+          }
         }
-      }
 
-      return null
-    }).filter(Boolean)
+        return null
+      })
+      .filter(Boolean)
 
-    return <>
-      { tweetEls }
-    </>
+    return <>{tweetEls}</>
   }
 
   return null

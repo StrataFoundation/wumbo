@@ -1,0 +1,88 @@
+/**
+* ANT OVERRIDES
+*/
+
+body {
+  font-family: ui-rounded, "SF Pro Rounded", -apple-system, BlinkMacSystemFont,
+    "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji",
+    "Segoe UI Emoji", "Segoe UI Symbol";
+}
+
+.ant-popover-inner {
+  width: 401px;
+  padding: 19.1px 1px 27.9px;
+  border-radius: 6px;
+  box-shadow: 0 3px 23px -10px rgba(255, 255, 255, 0.5);
+  border: solid 1px #232323;
+  background-color: #3d3c40;
+  color: white;
+}
+
+.ant-popover-inner-content {
+  padding: 0px;
+}
+
+.ant-popover-placement-bottom > .ant-popover-content > .ant-popover-arrow {
+  top: 7px;
+  border-top-color: #3d3c40;
+  border-right-color: transparent;
+  border-bottom-color: transparent;
+  border-left-color: #3d3c40;
+  box-shadow: -2px -2px 5px rgb(0 0 0 / 6%);
+}
+
+.ant-form-item-label > label,
+.ant-tabs {
+  color: white;
+}
+
+.ant-tabs-tab.ant-tabs-tab-active .ant-tabs-tab-btn {
+  color: #9596ff;
+}
+
+.ant-tabs-tab:hover {
+  color: #9596ff;
+}
+
+.ant-tabs-ink-bar {
+  background: #9596ff;
+  width: 35px !important;
+}
+
+.ant-tabs-top > .ant-tabs-nav::before {
+  border-bottom: 1px solid #313033;
+}
+
+.ant-tabs-tab {
+  font-size: 12px;
+}
+
+.ant-input-number-handler-wrap {
+  display: none;
+}
+
+.ant-form-item-control-input {
+  min-height: 12px;
+}
+
+.ant-form-item {
+  margin-bottom: 0px;
+}
+
+.ant-input-number-input {
+  font-size: 12px;
+  height: auto;
+  padding: 0px;
+}
+
+.ant-btn-primary {
+  background: #5153ff;
+  border-color: #2323ff;
+  border-radius: 4px;
+  padding: 11px 0px;
+  width: 92px;
+  font-size: 16px;
+  font-weight: normal;
+  color: #ffffff;
+  height: auto;
+}
