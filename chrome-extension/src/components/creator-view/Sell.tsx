@@ -1,10 +1,12 @@
-import React, { useState } from "react"
-import { Alert, Button, Form, InputNumber } from "antd"
-import { sell } from "../../utils/action"
-import { SolcloutCreator } from "../../solclout-api/state"
-import { useAsyncCallback } from "react-async-hook"
-import { useConnection } from "@oyster/common/lib/contexts/connection"
-import { Token } from "./Token"
+import React, {useState} from "react"
+import {Alert, Button, Form, InputNumber} from "antd"
+import {sell} from "../../utils/action"
+import {SolcloutCreator} from "../../solclout-api/state"
+import {useAsyncCallback} from "react-async-hook"
+import {useConnection} from "@oyster/common/lib/contexts/connection"
+import {Token} from "./Token"
+import {useAssociatedAccount} from "../../utils/walletState";
+import {KEYPAIR} from "../../globals";
 
 interface SellProps {
   creator: SolcloutCreator
@@ -25,6 +27,9 @@ export default ({ creator }: SellProps) => {
   const handleChange = (value: number) => {
     setAmount(value)
   }
+
+  const { associatedAccount, loading: accountLoading } = useAssociatedAccount(KEYPAIR.publicKey, creator.creatorToken)
+  const ownAmount = associatedAccount && (associatedAccount.amount.toNumber() / Math.pow(10, 9)).toFixed(2)
 
   return (
     <Form name="sell" onFinish={handleFinish}>
@@ -69,7 +74,7 @@ export default ({ creator }: SellProps) => {
       </div>
 
       <div className="price-block-actions">
-        <span>Own: 0.0 NXX2</span>
+        <span>Own: {ownAmount} NXX2</span>
         <Form.Item>
           <Button loading={loading} htmlType="submit" type="primary">
             Sell

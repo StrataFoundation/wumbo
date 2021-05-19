@@ -8,6 +8,50 @@ import {useMint} from "./mintState";
 import {useSolcloutUsdPrice} from "./pricing";
 import {MintInfo} from "@solana/spl-token";
 
+export interface ReactiveAccountState {
+  account?: AccountInfo<Buffer>,
+  loading: boolean
+}
+export function useReactiveAccount(publicKey?: PublicKey): ReactiveAccountState {
+  const [state, setState] = useState<ReactiveAccountState>({ loading: true })
+  const connection = useConnection()
+
+  useEffect(() => {
+    if (publicKey) {
+      const sub = connection.onAccountChange(
+        publicKey,
+        (accountInfo: AccountInfo<Buffer>) => {
+          setState({ account: accountInfo, loading: false })
+        },
+        "singleGossip"
+      );
+
+      (async () => {
+        if (publicKey) {
+          const account = await connection.getAccountInfo(publicKey, "singleGossip")
+          if (account) {
+            setState({ account, loading: false })
+          } else {
+            setState({ loading: false })
+          }
+        }
+      })()
+
+      return () => {
+        connection.removeAccountChangeListener(sub)
+      }
+    }
+  }, [publicKey])
+
+
+  if (!publicKey) {
+    return { loading: false }
+  }
+
+
+  return state
+}
+
 export const useCreatorKey = (name: string): PublicKey | undefined => {
   const [key, setKey] = useState<PublicKey>()
 
