@@ -1,4 +1,4 @@
-import React from "react"
+import React, { useState } from "react"
 import { Button, Popover, Tag } from "antd"
 import { DownOutlined } from "@ant-design/icons"
 import { useCreatorInfo } from "../utils/creatorState"
@@ -23,6 +23,7 @@ interface CreatorInfoProps {
 export default ({ creatorName, creatorImg }: CreatorInfoProps) => {
   const creatorInfoState = useCreatorInfo(creatorName)
   const { creatorInfo, loading } = creatorInfoState
+  const [creationLoading, setCreationLoading] = useState<boolean>(false)
   const connection = useConnection()
 
   if (loading) {
@@ -30,7 +31,8 @@ export default ({ creatorName, creatorImg }: CreatorInfoProps) => {
   }
 
   if (!loading && !creatorInfo) {
-    const createCreator = () =>
+    const createCreator = () => {
+      setCreationLoading(true)
       createSolcloutCreator(connection, {
         programId: SOLCLOUT_PROGRAM_ID,
         tokenProgramId: TOKEN_PROGRAM_ID,
@@ -40,8 +42,20 @@ export default ({ creatorName, creatorImg }: CreatorInfoProps) => {
         founderRewardsPercentage: 5.5,
         nameParent: TWITTER_ROOT_PARENT_REGISTRY_KEY,
       })
+        .then(() => {
+          setCreationLoading(false)
+        })
+        .catch((err) => {
+          console.error(err)
+          setCreationLoading(false)
+        })
+    }
+
     return (
       <Button type="link" onClick={createCreator}>
+        {creationLoading && (
+          <Loading color="white" fontSize={12} marginRight={4} />
+        )}{" "}
         Create Coin
       </Button>
     )

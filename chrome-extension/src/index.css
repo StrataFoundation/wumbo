@@ -102,7 +102,9 @@ body {
 }
 
 .ant-btn-link,
-.ant-btn-link:hover {
+.ant-btn-link:hover,
+.ant-btn-link:active,
+.ant-btn-link:focus {
   background: #5153ff;
   border-color: #2323ff;
   border-radius: 4px;
