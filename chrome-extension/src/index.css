@@ -86,3 +86,36 @@ body {
   color: #ffffff;
   height: auto;
 }
+
+.ant-tag {
+  padding: 0px 4px;
+  font-size: 12px;
+  line-height: 16px;
+  font-weight: 600px;
+  background: #5bf1a5;
+  border: none;
+  margin-left: 4px;
+}
+
+.ant-tag svg {
+  transform: scale(0.75);
+}
+
+.ant-btn-link,
+.ant-btn-link:hover {
+  background: #5153ff;
+  border-color: #2323ff;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: normal;
+  color: white;
+  height: 20px;
+  color: white;
+  margin-left: 4px;
+  line-height: 1;
+  padding: 0px 4px;
+}
+
+.ant-btn-link:hover {
+  background-image: linear-gradient(#00000010, #00000030);
+}
