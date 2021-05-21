@@ -1,11 +1,11 @@
-import React from "react"
+import React from "react";
 
-import "./Token.css"
+import "./Token.css";
 
 interface TokenProps {
-  name: string
-  size?: "large" | "small"
-  src?: string
+  name: string;
+  size?: "large" | "small";
+  src?: string;
 }
 
 export function Token({ name, size = "large", src }: TokenProps) {
@@ -18,5 +18,5 @@ export function Token({ name, size = "large", src }: TokenProps) {
       </div>
       <span className="token-display-name">{name}</span>
     </div>
-  )
+  );
 }

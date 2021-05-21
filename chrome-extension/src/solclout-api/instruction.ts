@@ -1,4 +1,4 @@
-import {Account, PublicKey, SystemProgram, SYSVAR_RENT_PUBKEY, TransactionInstruction} from "@solana/web3.js";
+import {PublicKey, SystemProgram, SYSVAR_RENT_PUBKEY, TransactionInstruction,} from "@solana/web3.js";
 import {Numberu16, Numberu8} from "./utils";
 import {Numberu64} from "@bonfida/spl-name-service";
 
@@ -55,14 +55,14 @@ export function initializeCreatorInstruction(
         pubkey: SYSVAR_RENT_PUBKEY,
         isSigner: false,
         isWritable: false,
-      }
+      },
     ],
     data: Buffer.concat([
       Buffer.from(Int8Array.from([1])),
       new Numberu16(nonce).toBuffer(),
-      new Numberu8(nonce).toBuffer()
-    ])
-  })
+      new Numberu8(nonce).toBuffer(),
+    ]),
+  });
 }
 
 export function buyCreatorCoinsInstruction(
@@ -75,7 +75,7 @@ export function buyCreatorCoinsInstruction(
   solcloutStorageAccount: PublicKey,
   founderRewardsAccount: PublicKey,
   purchaseAccount: PublicKey,
-  purchaseAuthority: Account,
+  purchaseAuthority: PublicKey,
   destination: PublicKey,
   lamports: number
 ): TransactionInstruction {
@@ -100,7 +100,7 @@ export function buyCreatorCoinsInstruction(
       {
         pubkey: creatorMintAuthority,
         isSigner: false,
-        isWritable: false
+        isWritable: false,
       },
       {
         pubkey: solcloutStorageAccount,
@@ -118,7 +118,7 @@ export function buyCreatorCoinsInstruction(
         isWritable: true,
       },
       {
-        pubkey: purchaseAuthority.publicKey,
+        pubkey: purchaseAuthority,
         isSigner: true,
         isWritable: false,
       },
@@ -131,13 +131,13 @@ export function buyCreatorCoinsInstruction(
         pubkey: tokenProgramId,
         isSigner: false,
         isWritable: false,
-      }
+      },
     ],
     data: Buffer.concat([
       Buffer.from(Int8Array.from([2])),
-      new Numberu64(lamports).toBuffer()
-    ])
-  })
+      new Numberu64(lamports).toBuffer(),
+    ]),
+  });
 }
 
 export function sellCreatorCoinsInstruction(
@@ -149,7 +149,7 @@ export function sellCreatorCoinsInstruction(
   solcloutStorageAccount: PublicKey,
   solcloutStorageAuthority: PublicKey,
   sellAccount: PublicKey,
-  sellAuthority: Account,
+  sellAuthority: PublicKey,
   destination: PublicKey,
   lamports: number
 ): TransactionInstruction {
@@ -187,7 +187,7 @@ export function sellCreatorCoinsInstruction(
         isWritable: true,
       },
       {
-        pubkey: sellAuthority.publicKey,
+        pubkey: sellAuthority,
         isSigner: true,
         isWritable: false,
       },
@@ -200,11 +200,11 @@ export function sellCreatorCoinsInstruction(
         pubkey: tokenProgramId,
         isSigner: false,
         isWritable: false,
-      }
+      },
     ],
     data: Buffer.concat([
       Buffer.from(Int8Array.from([3])),
-      new Numberu64(lamports).toBuffer()
-    ])
-  })
+      new Numberu64(lamports).toBuffer(),
+    ]),
+  });
 }

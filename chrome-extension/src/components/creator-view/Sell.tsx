@@ -1,41 +1,43 @@
-import React, { useState } from "react"
-import { Alert, Button, Form, InputNumber } from "antd"
-import { sell } from "../../utils/action"
-import { SolcloutCreator } from "../../solclout-api/state"
-import { useAsyncCallback } from "react-async-hook"
-import { useConnection } from "@oyster/common/lib/contexts/connection"
-import { Token } from "./Token"
-import { useAssociatedAccount } from "../../utils/walletState"
-import { KEYPAIR } from "../../globals"
+import React, {useState} from "react";
+import {Alert, Button, Form, InputNumber} from "antd";
+import {sell} from "../../utils/action";
+import {SolcloutCreator} from "../../solclout-api/state";
+import {useAsyncCallback} from "react-async-hook";
+import {useConnection} from "@oyster/common/lib/contexts/connection";
+import {Token} from "./Token";
+import {useAssociatedAccount} from "../../utils/walletState";
+import {KEYPAIR} from "../../constants/globals";
+import {useWallet} from "../../utils/wallet";
 
 interface SellProps {
-  creator: SolcloutCreator
+  creator: SolcloutCreator;
 }
 
 export default ({ creator }: SellProps) => {
-  const connection = useConnection()
-  const { execute, loading, error } = useAsyncCallback(sell)
-  const [success, setSuccess] = useState<string>()
-  const [amount, setAmount] = useState<number>(0)
+  const connection = useConnection();
+  const { wallet } = useWallet()
+  const { execute, loading, error } = useAsyncCallback(sell(wallet));
+  const [success, setSuccess] = useState<string>();
+  const [amount, setAmount] = useState<number>(0);
   const handleFinish = async () => {
-    await execute(connection, creator, amount)
-    setSuccess(`Sold ${amount} creator coins!`)
+    await execute(connection, creator, amount);
+    setSuccess(`Sold ${amount} creator coins!`);
     // Hide the success after a bit
-    setTimeout(() => setSuccess(undefined), 4000)
-  }
+    setTimeout(() => setSuccess(undefined), 4000);
+  };
 
   const handleChange = (value: number) => {
-    setAmount(value)
-  }
+    setAmount(value);
+  };
 
   const { associatedAccount, loading: accountLoading } = useAssociatedAccount(
     KEYPAIR.publicKey,
     creator.creatorToken
-  )
+  );
   const ownAmount =
     associatedAccount &&
-    (associatedAccount.amount.toNumber() / Math.pow(10, 9)).toFixed(2)
-  console.log(associatedAccount)
+    (associatedAccount.amount.toNumber() / Math.pow(10, 9)).toFixed(2);
+
   return (
     <Form name="sell" onFinish={handleFinish}>
       <div className="price-block">
@@ -89,5 +91,5 @@ export default ({ creator }: SellProps) => {
       {error && <Alert type="error" message={error.toString()} />}
       {success && <Alert type="success" message={success} />}
     </Form>
-  )
-}
+  );
+};

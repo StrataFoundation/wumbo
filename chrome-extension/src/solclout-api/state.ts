@@ -14,22 +14,22 @@ export class SolcloutCreator {
   initialized: boolean;
   authorityNonce: number;
 
-  static LEN = 1 + 32 * 4 + 2 + 1 + 1
+  static LEN = 1 + 32 * 4 + 2 + 1 + 1;
 
   static schema: Schema = new Map([
     [
       SolcloutCreator,
       {
-        kind: 'struct',
+        kind: "struct",
         fields: [
-          ['key', [1]],
-          ['creatorToken', [32]],
-          ['solcloutInstance', [32]],
-          ['founderRewardsAccount', [32]],
-          ['name', [32]],
-          ['founderRewardPercentage', [2]],
-          ['initialized', [1]],
-          ['authorityNonce', [1]],
+          ["key", [1]],
+          ["creatorToken", [32]],
+          ["solcloutInstance", [32]],
+          ["founderRewardsAccount", [32]],
+          ["name", [32]],
+          ["founderRewardPercentage", [2]],
+          ["initialized", [1]],
+          ["authorityNonce", [1]],
         ],
       },
     ],
@@ -43,17 +43,19 @@ export class SolcloutCreator {
     name: Uint8Array;
     founderRewardPercentage: Uint8Array;
     initialized: Uint8Array;
-    authorityNonce: Uint8Array
+    authorityNonce: Uint8Array;
   }) {
     this.creatorToken = new PublicKey(obj.creatorToken);
     this.solcloutInstance = new PublicKey(obj.solcloutInstance);
     this.founderRewardsAccount = new PublicKey(obj.founderRewardsAccount);
     this.name = new PublicKey(obj.name);
-    this.founderRewardPercentage = Numberu16.fromBuffer(Buffer.from(obj.founderRewardPercentage))
-    this.authorityNonce = Numberu8.fromBuffer(Buffer.from(obj.authorityNonce))
-    this.initialized = obj.initialized[0] === 1
+    this.founderRewardPercentage = Numberu16.fromBuffer(
+      Buffer.from(obj.founderRewardPercentage)
+    );
+    this.authorityNonce = Numberu8.fromBuffer(Buffer.from(obj.authorityNonce));
+    this.initialized = obj.initialized[0] === 1;
   }
-  
+
   static fromAccount(
     key: PublicKey,
     account: AccountInfo<Buffer>
@@ -61,34 +63,31 @@ export class SolcloutCreator {
     const value = deserializeUnchecked(
       this.schema,
       SolcloutCreator,
-      account.data,
+      account.data
     );
-    value.publicKey = key
+    value.publicKey = key;
 
-    return value
+    return value;
   }
 
   static async retrieve(
     connection: Connection,
-    solcloutCreator: PublicKey,
+    solcloutCreator: PublicKey
   ): Promise<SolcloutCreator | null> {
-    let account = await connection.getAccountInfo(
-      solcloutCreator,
-      'processed',
-    );
+    let account = await connection.getAccountInfo(solcloutCreator, "max");
 
     if (!account) {
-      return account
+      return account;
     }
 
-    return this.fromAccount(solcloutCreator, account)
+    return this.fromAccount(solcloutCreator, account);
   }
 }
 
 export class Mint {
   static fromAccount(account: AccountInfo<Buffer>): MintInfo {
     if (!account) {
-      return account
+      return account;
     }
 
     const data = Buffer.from(account.data);
@@ -99,23 +98,26 @@ export class Mint {
       mintInfo.mintAuthority = new PublicKey(mintInfo.mintAuthority);
     }
 
-    mintInfo.supply = u64.fromBuffer(mintInfo.supply)
+    mintInfo.supply = u64.fromBuffer(mintInfo.supply);
 
-    return mintInfo
+    return mintInfo;
   }
 
-  static async retrieve(connection: Connection, key: PublicKey): Promise<MintInfo | null> {
+  static async retrieve(
+    connection: Connection,
+    key: PublicKey
+  ): Promise<MintInfo | null> {
     const info = await connection.getAccountInfo(key);
 
     if (!info) {
-      return info
+      return info;
     }
 
     if (info.data.length != MintLayout.span) {
       throw new Error(`Invalid mint size`);
     }
 
-    return this.fromAccount(info)
+    return this.fromAccount(info);
   }
 }
 
@@ -130,14 +132,14 @@ export class SolcloutInstance {
     [
       SolcloutInstance,
       {
-        kind: 'struct',
+        kind: "struct",
         fields: [
-          ['key', [1]],
-          ['solcloutToken', [32]],
-          ['solcloutStorage', [32]],
-          ['tokenProgramId', [32]],
-          ['nameProgramId', [32]],
-          ['initialized', [1]],
+          ["key", [1]],
+          ["solcloutToken", [32]],
+          ["solcloutStorage", [32]],
+          ["tokenProgramId", [32]],
+          ["nameProgramId", [32]],
+          ["initialized", [1]],
         ],
       },
     ],
@@ -155,27 +157,22 @@ export class SolcloutInstance {
     this.solcloutStorage = new PublicKey(obj.solcloutStorage);
     this.tokenProgramId = new PublicKey(obj.tokenProgramId);
     this.nameProgramId = new PublicKey(obj.nameProgramId);
-    this.initialized = obj.initialized[0] === 1
+    this.initialized = obj.initialized[0] === 1;
   }
 
   static async retrieve(
     connection: Connection,
-    solcloutInstance: PublicKey,
+    solcloutInstance: PublicKey
   ): Promise<SolcloutInstance> {
-    let account = await connection.getAccountInfo(
-      solcloutInstance,
-      'processed',
-    );
+    let account = await connection.getAccountInfo(solcloutInstance, "max");
     if (!account) {
-      throw new Error(`Invalid account provided ${solcloutInstance.toString()}`);
+      throw new Error(
+        `Invalid account provided ${solcloutInstance.toString()}`
+      );
     }
 
-    return deserializeUnchecked(
-      this.schema,
-      SolcloutInstance,
-      account.data,
-    );
+    return deserializeUnchecked(this.schema, SolcloutInstance, account.data);
   }
 
-  static LEN = 1 + 32 * 4 + 2 + 1
+  static LEN = 1 + 32 * 4 + 2 + 1;
 }
