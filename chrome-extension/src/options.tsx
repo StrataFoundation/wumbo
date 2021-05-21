@@ -71,7 +71,7 @@ const Options = () => {
 
 ReactDOM.render(
   <React.StrictMode>
-    <Options/>
+    <Options />
   </React.StrictMode>,
   document.getElementById("root")
 );

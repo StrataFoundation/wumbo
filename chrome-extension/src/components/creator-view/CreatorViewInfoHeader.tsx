@@ -1,12 +1,12 @@
-import React from "react"
-import { Token } from "./Token"
+import React from "react";
+import {Token} from "./Token";
 
-import "./CreatorViewInfoHeader.css"
+import "./CreatorViewInfoHeader.css";
 
 interface CreatorViewInfoHeaderProps {
-  creatorImg: string
-  creatorName: string
-  creatorPrice: number
+  creatorImg: string;
+  creatorName: string;
+  creatorPrice: number;
 }
 
 export function CreatorViewInfoHeader({
@@ -42,5 +42,5 @@ export function CreatorViewInfoHeader({
         </div>
       </div>
     </div>
-  )
+  );
 }

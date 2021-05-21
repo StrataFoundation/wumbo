@@ -1,18 +1,18 @@
-import React from "react"
-import { Tabs } from "antd"
-import { CreatorInfoState } from "../../utils/creatorState"
-import { CreatorViewInfoHeader } from "./CreatorViewInfoHeader"
-import { CoinDetails } from "./CoinDetails"
-import Loading from "../Loading"
-import Buy from "./Buy"
-import Sell from "./Sell"
+import React from "react";
+import {Tabs} from "antd";
+import {CreatorInfoState} from "../../utils/creatorState";
+import {CreatorViewInfoHeader} from "./CreatorViewInfoHeader";
+import {CoinDetails} from "./CoinDetails";
+import Loading from "../Loading";
+import Buy from "./Buy";
+import Sell from "./Sell";
 
-import "./CreatorView.css"
+import "./CreatorView.css";
 
-const { TabPane } = Tabs
+const { TabPane } = Tabs;
 
 interface CreatorViewProps {
-  creatorImg: string
+  creatorImg: string;
 }
 
 export default ({
@@ -21,7 +21,7 @@ export default ({
   loading,
 }: CreatorInfoState & CreatorViewProps) => {
   if (loading) {
-    return <Loading />
+    return <Loading />;
   }
 
   return (
@@ -47,5 +47,5 @@ export default ({
         </Tabs>
       </div>
     </>
-  )
-}
+  );
+};

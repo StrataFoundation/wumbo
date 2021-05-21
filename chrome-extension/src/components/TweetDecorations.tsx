@@ -1,39 +1,36 @@
-import React from "react"
-import { useTweets } from "../utils/spotter"
-import ReactDOM from "react-dom"
-import CreatorInfo from "./CreatorInfo"
-import {
-  ENDPOINTS,
-  useConnectionConfig,
-} from "@oyster/common/lib/contexts/connection"
+import React from "react";
+import {useTweets} from "../utils/spotter";
+import ReactDOM from "react-dom";
+import CreatorInfo from "./CreatorInfo";
+import {ENDPOINTS, useConnectionConfig,} from "@oyster/common/lib/contexts/connection";
 
 export default () => {
-  const connectionConfig = useConnectionConfig()
-  connectionConfig.setEndpoint(ENDPOINTS[3].endpoint)
+  const connectionConfig = useConnectionConfig();
+  connectionConfig.setEndpoint(ENDPOINTS[3].endpoint);
 
-  const tweets = useTweets()
+  const tweets = useTweets();
   if (tweets) {
-    const elCache = new Map<string, JSX.Element>()
+    const elCache = new Map<string, JSX.Element>();
     function getOrElseUpdate(name: string, updateFn: () => JSX.Element) {
       if (elCache.has(name)) {
-        return elCache.get(name)
+        return elCache.get(name);
       }
 
-      const newVal = updateFn()
-      elCache.set(name, newVal)
-      return newVal
+      const newVal = updateFn();
+      elCache.set(name, newVal);
+      return newVal;
     }
     const tweetEls = tweets
       .map((tweet) => {
-        const nameEl = tweet.querySelector("a")
+        const nameEl = tweet.querySelector("a");
         if (nameEl) {
-          const name = nameEl.href.split("/").slice(-1)[0]
-          const imgEl = nameEl.querySelector("img")
-          const insertDiv = tweet.querySelector("time")?.parentNode?.parentNode
+          const name = nameEl.href.split("/").slice(-1)[0];
+          const imgEl = nameEl.querySelector("img");
+          const insertDiv = tweet.querySelector("time")?.parentNode?.parentNode;
           if (insertDiv) {
             const el = getOrElseUpdate(name, () => (
               <CreatorInfo creatorName={name} creatorImg={imgEl?.src || ""} />
-            ))
+            ));
 
             return ReactDOM.createPortal(
               <div key={tweet.id} style={{ marginLeft: "4px" }}>
@@ -41,16 +38,16 @@ export default () => {
               </div>,
               // @ts-ignore
               insertDiv
-            )
+            );
           }
         }
 
-        return null
+        return null;
       })
-      .filter(Boolean)
+      .filter(Boolean);
 
-    return <>{tweetEls}</>
+    return <>{tweetEls}</>;
   }
 
-  return null
-}
+  return null;
+};

@@ -1,11 +1,8 @@
 import React from "react";
-import ReactDOM from "react-dom"
+import ReactDOM from "react-dom";
 import App from "./components/App";
 
-const mountElem = document.createElement("div")
-document.body.append(mountElem)
+const mountElem = document.createElement("div");
+document.body.append(mountElem);
 
-ReactDOM.render(
-  <App />,
-  mountElem
-)
+ReactDOM.render(<App />, mountElem);

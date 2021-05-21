@@ -1,6 +1,6 @@
-import React from "react"
+import React from "react";
 
-import "./CoinDetails.css"
+import "./CoinDetails.css";
 
 export function CoinDetails() {
   return (
@@ -18,5 +18,5 @@ export function CoinDetails() {
         <span>$51.807k</span>
       </div>
     </div>
-  )
+  );
 }
