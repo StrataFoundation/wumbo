@@ -11,9 +11,9 @@ import {
   TOKEN_PROGRAM_ID,
   TWITTER_ROOT_PARENT_REGISTRY_KEY,
 } from "../constants/globals";
-import {createSolcloutCreator} from "../solclout-api/bindings";
-import {useConnection} from "@oyster/common/lib/contexts/connection";
-import {Account} from "@solana/web3.js";
+import { createSolcloutCreator } from "../solclout-api/bindings";
+import { useConnection } from "@oyster/common/lib/contexts/connection";
+import { Account } from "@solana/web3.js";
 
 interface CreatorInfoProps {
   creatorName: string;

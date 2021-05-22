@@ -1,9 +1,15 @@
 import React from "react";
-import {SolcloutCreator} from "../solclout-api/state";
-import {buyCreatorCoinsWithWallet, sellCreatorCoinsWithWallet,} from "../solclout-api/bindings";
-import {SOLCLOUT_PROGRAM_ID, SPL_ASSOCIATED_TOKEN_ACCOUNT_PROGRAM_ID,} from "../constants/globals";
-import {Connection} from "@solana/web3.js";
-import {WalletAdapter} from "@solana/wallet-base";
+import { SolcloutCreator } from "../solclout-api/state";
+import {
+  buyCreatorCoinsWithWallet,
+  sellCreatorCoinsWithWallet,
+} from "../solclout-api/bindings";
+import {
+  SOLCLOUT_PROGRAM_ID,
+  SPL_ASSOCIATED_TOKEN_ACCOUNT_PROGRAM_ID,
+} from "../constants/globals";
+import { Connection } from "@solana/web3.js";
+import { WalletAdapter } from "@solana/wallet-base";
 
 export const buy = (wallet?: WalletAdapter) => (
   connection: Connection,
@@ -20,7 +26,7 @@ export const buy = (wallet?: WalletAdapter) => (
     });
   }
 
-  return Promise.resolve()
+  return Promise.resolve();
 };
 
 export const sell = (wallet?: WalletAdapter) => (
@@ -38,5 +44,5 @@ export const sell = (wallet?: WalletAdapter) => (
     });
   }
 
-  return Promise.resolve()
+  return Promise.resolve();
 };

@@ -1,8 +1,11 @@
 import React from "react";
-import {useTweets} from "../utils/spotter";
+import { useTweets } from "../utils/spotter";
 import ReactDOM from "react-dom";
 import CreatorInfo from "./CreatorInfo";
-import {ENDPOINTS, useConnectionConfig,} from "@oyster/common/lib/contexts/connection";
+import {
+  ENDPOINTS,
+  useConnectionConfig,
+} from "@oyster/common/lib/contexts/connection";
 
 export default () => {
   const connectionConfig = useConnectionConfig();

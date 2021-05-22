@@ -1,10 +1,10 @@
-import {SolongWalletAdapter} from "@oyster/common/lib/wallet-adapters/solong";
-import {PhantomWalletAdapter} from "@oyster/common/lib/wallet-adapters/phantom";
-import {LedgerWalletAdapter} from "@solana/wallet-ledger";
-import {MathWalletAdapter} from "@oyster/common/lib/wallet-adapters/mathWallet";
+import { SolongWalletAdapter } from "@oyster/common/lib/wallet-adapters/solong";
+import { PhantomWalletAdapter } from "@oyster/common/lib/wallet-adapters/phantom";
+import { LedgerWalletAdapter } from "@solana/wallet-ledger";
+import { MathWalletAdapter } from "@oyster/common/lib/wallet-adapters/mathWallet";
 // @ts-ignore
 import SolletAdapter from "@project-serum/sol-wallet-adapter";
-import {WalletProvider} from "@solana/wallet-base";
+import { WalletProvider } from "@solana/wallet-base";
 
 const ASSETS_URL =
   "https://raw.githubusercontent.com/solana-labs/oyster/main/assets/wallets/";

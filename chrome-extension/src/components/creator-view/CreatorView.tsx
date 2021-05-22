@@ -1,8 +1,8 @@
 import React from "react";
-import {Tabs} from "antd";
-import {CreatorInfoState} from "../../utils/creatorState";
-import {CreatorViewInfoHeader} from "./CreatorViewInfoHeader";
-import {CoinDetails} from "./CoinDetails";
+import { Tabs } from "antd";
+import { CreatorInfoState } from "../../utils/creatorState";
+import { CreatorViewInfoHeader } from "./CreatorViewInfoHeader";
+import { CoinDetails } from "./CoinDetails";
 import Loading from "../Loading";
 import Buy from "./Buy";
 import Sell from "./Sell";

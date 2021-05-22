@@ -1,5 +1,5 @@
-import {Keypair, PublicKey} from "@solana/web3.js";
-import {TOKEN_PROGRAM_ID as SPL_TOKEN_PROGRAM_ID} from "@solana/spl-token";
+import { Keypair, PublicKey } from "@solana/web3.js";
+import { TOKEN_PROGRAM_ID as SPL_TOKEN_PROGRAM_ID } from "@solana/spl-token";
 
 // export const SOLANA_API_URL = "https://api.mainnet-beta.solana.com"
 export const SOLANA_API_URL = "https://devnet.solana.com";
