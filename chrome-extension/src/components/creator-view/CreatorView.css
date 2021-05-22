@@ -1,0 +1,70 @@
+.creator-view-width-constraint {
+  padding: 0px 44px;
+}
+
+/*
+*  Buy/Sell Form
+*/
+
+.price-block {
+  display: flex;
+  flex: 1;
+  padding: 10px;
+  border-radius: 4px;
+  border: solid 1px #232323;
+  background-color: #313033;
+  flex-direction: column;
+}
+
+.price-block-header {
+  display: flex;
+  flex: 0;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.price-block-header span {
+  color: #ffffff;
+  font-size: 10px;
+  font-weight: normal;
+}
+
+.price-block-body {
+  display: flex;
+  flex: 1;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 5px;
+}
+
+.price-block-body span,
+.price-block-body input {
+  font-size: 12px;
+  font-weight: normal;
+  color: white;
+}
+
+.price-block-arrow {
+  display: flex;
+  flex: 1;
+  margin: 5px 0px;
+  align-items: center;
+  justify-content: center;
+}
+
+.price-block-actions {
+  display: flex;
+  flex: 0;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 20px;
+}
+
+.price-block-actions > span {
+  font-size: 16px;
+  font-weight: normal;
+  color: #ffffff;
+}
