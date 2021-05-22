@@ -5,13 +5,20 @@ import {Transaction} from "@solana/web3.js";
 
 let publicKey: Buffer | null = null;
 let walletAdapter: WalletAdapter | null = null;
+let providerUrl: string | null = null;
 
 function sendWallet() {
-  const msg = { data: { publicKey: publicKey }, type: "WALLET" };
-  chrome.runtime.sendMessage(msg, () => {});
+  const msg = { data: { publicKey: publicKey, providerUrl }, type: "WALLET" };
+  chrome.runtime.sendMessage(msg, () => {})
+  chrome.tabs.query({}, function(tabs) {
+    tabs.forEach(tab =>
+      tab.id && chrome.tabs.sendMessage(tab.id, msg, () => {})
+    )
+  });
 }
 
 chrome.runtime.onMessage.addListener((msg, _, sendResponse) => {
+  // @ts-ignore
   (async () => {
     if (msg.type == "WALLET_CONNECT") {
       const adapter = WALLET_PROVIDERS.find(
@@ -24,7 +31,9 @@ chrome.runtime.onMessage.addListener((msg, _, sendResponse) => {
         return;
       }
 
-      // @ts-ignore
+      providerUrl = msg.data.providerUrl
+
+        // @ts-ignore
       walletAdapter = new adapter.adapter(
         adapter.url,
         msg.data.endpoint
@@ -58,10 +67,10 @@ chrome.runtime.onMessage.addListener((msg, _, sendResponse) => {
         sendResponse({ error: new Error(`No wallet connected`) });
         return;
       }
-      const transaction = await walletAdapter.signTransaction(
-        Transaction.from(msg.data.transaction)
-      );
-      sendResponse(transaction.serialize());
+
+      const unsigned = Transaction.from(msg.data.transaction.data)
+      const transaction = await walletAdapter.signTransaction(unsigned);
+      sendResponse(transaction.serialize({ verifySignatures: false, requireAllSignatures: false }));
     }
 
     if (msg.type == "SIGN_TRANSACTIONS") {
@@ -69,9 +78,9 @@ chrome.runtime.onMessage.addListener((msg, _, sendResponse) => {
         sendResponse({ error: new Error(`No wallet connected`) });
         return;
       }
-      const transactions = msg.data.transactions.map(Transaction.from);
+      const transactions = msg.data.transactions.map((t: any) => Transaction.from(t.data));
       const ret = await walletAdapter.signAllTransactions(transactions);
-      sendResponse(ret.map((transaction) => transaction.serialize()));
+      sendResponse(ret.map((transaction) => transaction.serialize({ verifySignatures: false, requireAllSignatures: false })));
     }
   })();
 
@@ -96,7 +105,7 @@ chrome.runtime.onConnect.addListener(function (port) {
 
 chrome.runtime.onMessage.addListener(function (msg, sender, sendResponse) {
   if (msg.type == "LOAD_WALLET") {
-    sendResponse({ type: "WALLET", data: { publicKey } });
+    sendResponse({ type: "WALLET", data: { publicKey, providerUrl } });
   }
   return true;
 });

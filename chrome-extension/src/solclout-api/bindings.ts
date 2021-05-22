@@ -2,6 +2,7 @@ import {
   Account,
   Connection,
   PublicKey,
+  sendAndConfirmRawTransaction,
   sendAndConfirmTransaction,
   Transaction,
   TransactionInstruction,
@@ -38,6 +39,25 @@ export type SellCreatorCoinsWithWalletParams = {
   sellerWallet: WalletAdapter;
   lamports: number;
 };
+
+async function sendTransaction(
+  connection: Connection,
+  instructions: TransactionInstruction[],
+  wallet: WalletAdapter
+): Promise<void> {
+  const transaction = new Transaction({
+    feePayer: wallet.publicKey || undefined,
+    recentBlockhash: (await connection.getRecentBlockhash()).blockhash
+  })
+  transaction.instructions = instructions
+
+  const signed = await wallet.signTransaction(transaction)
+
+  await sendAndConfirmRawTransaction(
+    connection,
+    signed.serialize()
+  )
+}
 
 export async function createSolcloutCreator(
   connection: Connection,
@@ -205,6 +225,10 @@ export async function buyCreatorCoinsWithWallet(
     ))
   }
 
+  console.log(
+    `Attempting to buy ${params.lamports} creator coins from ${purchaseAccount} to ${destinationAccount}`
+  );
+
   const [creatorMintAuthority, _] = await PublicKey.findProgramAddress(
     [params.solcloutCreator.toBuffer()],
     params.programId
@@ -224,15 +248,12 @@ export async function buyCreatorCoinsWithWallet(
     destinationAccount,
     params.lamports
   ))
-  const transaction = new Transaction().add(...instructions)
-  const signedTransaction = await params.purchaserWallet.signTransaction(transaction)
 
-  await sendAndConfirmTransaction(
+  await sendTransaction(
     connection,
-    signedTransaction,
-    [],
-    { commitment: "singleGossip", preflightCommitment: "singleGossip" }
-  );
+    instructions,
+    params.purchaserWallet
+  )
 
   console.log(
     `Bought ${params.lamports} creator coins from ${purchaseAccount} to ${destinationAccount}`
@@ -303,16 +324,11 @@ export async function sellCreatorCoinsWithWallet(
     destinationAccount,
     params.lamports
   ))
-  const transaction = new Transaction().add(...instructions);
-  const signedTransaction = await params.sellerWallet.signTransaction(transaction)
-
-  await sendAndConfirmTransaction(
+  await sendTransaction(
     connection,
-    transaction,
-    [],
-    { commitment: "singleGossip", preflightCommitment: "singleGossip" }
+    instructions,
+    params.sellerWallet,
   );
-
   console.log(
     `Burned ${params.lamports} creator coins from ${sellAccount} to ${destinationAccount}`
   );

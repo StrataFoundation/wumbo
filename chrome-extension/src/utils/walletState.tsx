@@ -18,12 +18,12 @@ interface AssocState {
   result?: PublicKey;
 }
 export function useAssociatedTokenAddress(
-  wallet: PublicKey,
+  wallet: PublicKey | undefined,
   mint: PublicKey
 ): AssocState {
   const [state, setState] = useState<AssocState>({ loading: true });
   useEffect(() => {
-    fetch(wallet, mint).then((result) => {
+    wallet && fetch(wallet, mint).then((result) => {
       if (!state.result || result.toString() != state.result.toString()) {
         setState({ result, loading: false });
       }
@@ -38,7 +38,7 @@ export interface AssociatedAccountState {
   loading: boolean;
 }
 export function useAssociatedAccount(
-  wallet: PublicKey,
+  wallet: PublicKey | undefined,
   mint: PublicKey
 ): AssociatedAccountState {
   const {
