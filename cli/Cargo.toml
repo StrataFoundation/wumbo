@@ -1,0 +1,32 @@
+[package]
+authors = ["Solana Maintainers <maintainers@solana.foundation>"]
+description = "SPL-SolClout Command-line Utility"
+edition = "2018"
+license = "Apache-2.0"
+name = "spl-solclout-cli"
+repository = "https://github.com/solana-labs/solana-program-library"
+version = "0.0.1"
+
+[dependencies]
+clap = "2.33.3"
+console = "0.14.0"
+serde_json = "1.0.62"
+solana-account-decoder = "=1.6.7"
+solana-clap-utils = "=1.6.7"
+solana-cli-config = "=1.6.7"
+solana-cli-output = "=1.6.7"
+solana-client = "=1.6.7"
+solana-logger = "=1.6.7"
+solana-remote-wallet = "=1.6.7"
+solana-sdk = "=1.6.7"
+solana-program = "=1.6.7"
+spl-solclout = { version = "0.0.1", path="../program", features = [ "no-entrypoint" ] }
+spl-name-service = { version = "0.1.0", git = "https://github.com/solana-labs/solana-program-library.git", features = [ "no-entrypoint" ] }
+spl-associated-token-account = "1.0"
+spl-token = "3.1.0"
+spl-token-swap = "2.1.0"
+
+
+[[bin]]
+name = "spl-solclout"
+path = "src/main.rs"
