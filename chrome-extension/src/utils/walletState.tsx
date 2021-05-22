@@ -1,9 +1,12 @@
-import {PublicKey} from "@solana/web3.js";
-import {AccountInfo as TokenAccountInfo, Token} from "@solana/spl-token";
-import {useReactiveAccount} from "./creatorState";
-import {useEffect, useState} from "react";
-import {SPL_ASSOCIATED_TOKEN_ACCOUNT_PROGRAM_ID, TOKEN_PROGRAM_ID,} from "../constants/globals";
-import {TokenAccountParser} from "@oyster/common/lib/contexts/accounts";
+import { PublicKey } from "@solana/web3.js";
+import { AccountInfo as TokenAccountInfo, Token } from "@solana/spl-token";
+import { useReactiveAccount } from "./creatorState";
+import { useEffect, useState } from "react";
+import {
+  SPL_ASSOCIATED_TOKEN_ACCOUNT_PROGRAM_ID,
+  TOKEN_PROGRAM_ID,
+} from "../constants/globals";
+import { TokenAccountParser } from "@oyster/common/lib/contexts/accounts";
 
 const fetch = (wallet: PublicKey, mint: PublicKey) =>
   Token.getAssociatedTokenAddress(
@@ -23,11 +26,12 @@ export function useAssociatedTokenAddress(
 ): AssocState {
   const [state, setState] = useState<AssocState>({ loading: true });
   useEffect(() => {
-    wallet && fetch(wallet, mint).then((result) => {
-      if (!state.result || result.toString() != state.result.toString()) {
-        setState({ result, loading: false });
-      }
-    });
+    wallet &&
+      fetch(wallet, mint).then((result) => {
+        if (!state.result || result.toString() != state.result.toString()) {
+          setState({ result, loading: false });
+        }
+      });
   }, [wallet, mint]);
 
   return state;

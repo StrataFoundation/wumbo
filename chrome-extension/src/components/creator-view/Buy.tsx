@@ -1,12 +1,12 @@
-import React, {useState} from "react";
-import {Alert, Button, Form, InputNumber} from "antd";
-import {buy} from "../../utils/action";
-import {SolcloutCreator} from "../../solclout-api/state";
-import {useAsyncCallback} from "react-async-hook";
-import {useConnection} from "@oyster/common/lib/contexts/connection";
-import {Token} from "./Token";
-import {useAssociatedAccount} from "../../utils/walletState";
-import {useWallet} from "../../utils/wallet";
+import React, { useState } from "react";
+import { Alert, Button, Form, InputNumber } from "antd";
+import { buy } from "../../utils/action";
+import { SolcloutCreator } from "../../solclout-api/state";
+import { useAsyncCallback } from "react-async-hook";
+import { useConnection } from "@oyster/common/lib/contexts/connection";
+import { Token } from "./Token";
+import { useAssociatedAccount } from "../../utils/walletState";
+import { useWallet } from "../../utils/wallet";
 
 interface BuyProps {
   creator: SolcloutCreator;
@@ -14,7 +14,7 @@ interface BuyProps {
 
 export default ({ creator }: BuyProps) => {
   const connection = useConnection();
-  const { wallet, awaitingApproval } = useWallet()
+  const { wallet, awaitingApproval } = useWallet();
   const { execute, loading, error } = useAsyncCallback(buy(wallet));
   const [success, setSuccess] = useState<string>();
   const [amount, setAmount] = useState<number>(0);
@@ -81,10 +81,12 @@ export default ({ creator }: BuyProps) => {
       <div className="price-block-actions">
         <span>Own: {ownAmount} NXX2</span>
         <Form.Item>
-          { wallet && wallet.publicKey && <Button loading={loading} htmlType="submit" type="primary">
-            { awaitingApproval && "Awaiting Approval" }
-            { !awaitingApproval && "Buy" }
-          </Button> }
+          {wallet && wallet.publicKey && (
+            <Button loading={loading} htmlType="submit" type="primary">
+              {awaitingApproval && "Awaiting Approval"}
+              {!awaitingApproval && "Buy"}
+            </Button>
+          )}
         </Form.Item>
       </div>
       {error && <Alert type="error" message={error.toString()} />}

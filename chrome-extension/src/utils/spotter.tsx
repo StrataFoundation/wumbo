@@ -1,4 +1,4 @@
-import {useEffect, useState} from "react";
+import { useEffect, useState } from "react";
 
 function getElementsBySelector(selector: string): Element[] {
   return Array.from(document.querySelectorAll(selector).entries()).map(

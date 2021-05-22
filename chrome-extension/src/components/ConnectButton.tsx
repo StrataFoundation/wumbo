@@ -1,7 +1,7 @@
-import {Button, Dropdown, Menu} from "antd";
-import {ButtonProps} from "antd/lib/button";
+import { Button, Dropdown, Menu } from "antd";
+import { ButtonProps } from "antd/lib/button";
 import React from "react";
-import {useWallet} from "../utils/wallet";
+import { useWallet } from "../utils/wallet";
 
 export interface ConnectButtonProps
   extends ButtonProps,

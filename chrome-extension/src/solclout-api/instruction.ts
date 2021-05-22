@@ -1,6 +1,11 @@
-import {PublicKey, SystemProgram, SYSVAR_RENT_PUBKEY, TransactionInstruction,} from "@solana/web3.js";
-import {Numberu16, Numberu8} from "./utils";
-import {Numberu64} from "@bonfida/spl-name-service";
+import {
+  PublicKey,
+  SystemProgram,
+  SYSVAR_RENT_PUBKEY,
+  TransactionInstruction,
+} from "@solana/web3.js";
+import { Numberu16, Numberu8 } from "./utils";
+import { Numberu64 } from "@bonfida/spl-name-service";
 
 export function initializeCreatorInstruction(
   programId: PublicKey,

@@ -1,13 +1,13 @@
-import React, {useState} from "react";
-import {Alert, Button, Form, InputNumber} from "antd";
-import {sell} from "../../utils/action";
-import {SolcloutCreator} from "../../solclout-api/state";
-import {useAsyncCallback} from "react-async-hook";
-import {useConnection} from "@oyster/common/lib/contexts/connection";
-import {Token} from "./Token";
-import {useAssociatedAccount} from "../../utils/walletState";
-import {KEYPAIR} from "../../constants/globals";
-import {useWallet} from "../../utils/wallet";
+import React, { useState } from "react";
+import { Alert, Button, Form, InputNumber } from "antd";
+import { sell } from "../../utils/action";
+import { SolcloutCreator } from "../../solclout-api/state";
+import { useAsyncCallback } from "react-async-hook";
+import { useConnection } from "@oyster/common/lib/contexts/connection";
+import { Token } from "./Token";
+import { useAssociatedAccount } from "../../utils/walletState";
+import { KEYPAIR } from "../../constants/globals";
+import { useWallet } from "../../utils/wallet";
 
 interface SellProps {
   creator: SolcloutCreator;
@@ -15,7 +15,7 @@ interface SellProps {
 
 export default ({ creator }: SellProps) => {
   const connection = useConnection();
-  const { wallet } = useWallet()
+  const { wallet } = useWallet();
   const { execute, loading, error } = useAsyncCallback(sell(wallet));
   const [success, setSuccess] = useState<string>();
   const [amount, setAmount] = useState<number>(0);

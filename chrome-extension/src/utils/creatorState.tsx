@@ -1,12 +1,16 @@
-import {useEffect, useState} from "react";
-import {getHashedName, getNameAccountKey} from "@bonfida/spl-name-service";
-import {SOLCLOUT_INSTANCE_KEY, SOLCLOUT_PROGRAM_ID, TWITTER_ROOT_PARENT_REGISTRY_KEY,} from "../constants/globals";
-import {AccountInfo, PublicKey} from "@solana/web3.js";
-import {SolcloutCreator} from "../solclout-api/state";
-import {useConnection} from "@oyster/common/lib/contexts/connection";
-import {useMint} from "./mintState";
-import {useSolcloutUsdPrice} from "./pricing";
-import {MintInfo} from "@solana/spl-token";
+import { useEffect, useState } from "react";
+import { getHashedName, getNameAccountKey } from "@bonfida/spl-name-service";
+import {
+  SOLCLOUT_INSTANCE_KEY,
+  SOLCLOUT_PROGRAM_ID,
+  TWITTER_ROOT_PARENT_REGISTRY_KEY,
+} from "../constants/globals";
+import { AccountInfo, PublicKey } from "@solana/web3.js";
+import { SolcloutCreator } from "../solclout-api/state";
+import { useConnection } from "@oyster/common/lib/contexts/connection";
+import { useMint } from "./mintState";
+import { useSolcloutUsdPrice } from "./pricing";
+import { MintInfo } from "@solana/spl-token";
 
 export interface ReactiveAccountState {
   account?: AccountInfo<Buffer>;

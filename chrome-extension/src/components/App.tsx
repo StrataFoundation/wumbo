@@ -1,11 +1,11 @@
 import React from "react";
-import {ConnectionProvider} from "@oyster/common/lib/contexts/connection";
+import { ConnectionProvider } from "@oyster/common/lib/contexts/connection";
 import TweetDecorations from "./TweetDecorations";
 import "antd/dist/antd.css";
-import {UsdSolcloutPriceProvider} from "../utils/pricing";
+import { UsdSolcloutPriceProvider } from "../utils/pricing";
 
 import "../index.css";
-import {WalletProvider} from "../utils/wallet";
+import { WalletProvider } from "../utils/wallet";
 
 export default () => {
   return (

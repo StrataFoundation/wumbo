@@ -7,11 +7,19 @@ import {
   Transaction,
   TransactionInstruction,
 } from "@solana/web3.js";
-import {getHashedName, getNameAccountKey, NameRegistryState,} from "@bonfida/spl-name-service";
-import {Token} from "@solana/spl-token";
-import {buyCreatorCoinsInstruction, initializeCreatorInstruction, sellCreatorCoinsInstruction,} from "./instruction";
-import {SolcloutCreator, SolcloutInstance} from "./state";
-import {WalletAdapter} from "@solana/wallet-base";
+import {
+  getHashedName,
+  getNameAccountKey,
+  NameRegistryState,
+} from "@bonfida/spl-name-service";
+import { Token } from "@solana/spl-token";
+import {
+  buyCreatorCoinsInstruction,
+  initializeCreatorInstruction,
+  sellCreatorCoinsInstruction,
+} from "./instruction";
+import { SolcloutCreator, SolcloutInstance } from "./state";
+import { WalletAdapter } from "@solana/wallet-base";
 
 export type CreateSolcloutCreatorParams = {
   programId: PublicKey;
@@ -47,16 +55,13 @@ async function sendTransaction(
 ): Promise<void> {
   const transaction = new Transaction({
     feePayer: wallet.publicKey || undefined,
-    recentBlockhash: (await connection.getRecentBlockhash()).blockhash
-  })
-  transaction.instructions = instructions
+    recentBlockhash: (await connection.getRecentBlockhash()).blockhash,
+  });
+  transaction.instructions = instructions;
 
-  const signed = await wallet.signTransaction(transaction)
+  const signed = await wallet.signTransaction(transaction);
 
-  await sendAndConfirmRawTransaction(
-    connection,
-    signed.serialize()
-  )
+  await sendAndConfirmRawTransaction(connection, signed.serialize());
 }
 
 export async function createSolcloutCreator(
@@ -160,14 +165,14 @@ async function createAssociatedTokenAccountInstruction(
   mint: PublicKey,
   owner: PublicKey,
   tokenProgramId: PublicKey,
-  associatedTokenProgramId: PublicKey,
+  associatedTokenProgramId: PublicKey
 ): Promise<TransactionInstruction> {
   const associatedToken = await Token.getAssociatedTokenAddress(
     associatedTokenProgramId,
     tokenProgramId,
     mint,
     owner
-  )
+  );
 
   return Token.createAssociatedTokenAccountInstruction(
     associatedTokenProgramId,
@@ -176,8 +181,7 @@ async function createAssociatedTokenAccountInstruction(
     associatedToken,
     owner,
     owner
-  )
-
+  );
 }
 export async function buyCreatorCoinsWithWallet(
   connection: Connection,
@@ -191,7 +195,7 @@ export async function buyCreatorCoinsWithWallet(
     throw new Error("Creator not found");
   }
   if (!params.purchaserWallet.publicKey) {
-    throw new Error("Purchaser not logged in")
+    throw new Error("Purchaser not logged in");
   }
   if (params.lamports < 0) {
     throw new Error("Amount must be positive");
@@ -214,15 +218,17 @@ export async function buyCreatorCoinsWithWallet(
     params.splAssociatedTokenAccountProgramId
   );
   const acctExists = await connection.getAccountInfo(destinationAccount);
-  let instructions = []
+  let instructions = [];
   if (!acctExists) {
-    instructions.push(await createAssociatedTokenAccountInstruction(
-      connection,
-      creator.creatorToken,
-      params.purchaserWallet.publicKey,
-      solcloutInstance.tokenProgramId,
-      params.splAssociatedTokenAccountProgramId
-    ))
+    instructions.push(
+      await createAssociatedTokenAccountInstruction(
+        connection,
+        creator.creatorToken,
+        params.purchaserWallet.publicKey,
+        solcloutInstance.tokenProgramId,
+        params.splAssociatedTokenAccountProgramId
+      )
+    );
   }
 
   console.log(
@@ -234,26 +240,24 @@ export async function buyCreatorCoinsWithWallet(
     params.programId
   );
 
-  instructions.push(buyCreatorCoinsInstruction(
-    params.programId,
-    solcloutInstance.tokenProgramId,
-    creator.solcloutInstance,
-    params.solcloutCreator,
-    creator.creatorToken,
-    creatorMintAuthority,
-    solcloutInstance.solcloutStorage,
-    creator.founderRewardsAccount,
-    purchaseAccount,
-    params.purchaserWallet.publicKey,
-    destinationAccount,
-    params.lamports
-  ))
+  instructions.push(
+    buyCreatorCoinsInstruction(
+      params.programId,
+      solcloutInstance.tokenProgramId,
+      creator.solcloutInstance,
+      params.solcloutCreator,
+      creator.creatorToken,
+      creatorMintAuthority,
+      solcloutInstance.solcloutStorage,
+      creator.founderRewardsAccount,
+      purchaseAccount,
+      params.purchaserWallet.publicKey,
+      destinationAccount,
+      params.lamports
+    )
+  );
 
-  await sendTransaction(
-    connection,
-    instructions,
-    params.purchaserWallet
-  )
+  await sendTransaction(connection, instructions, params.purchaserWallet);
 
   console.log(
     `Bought ${params.lamports} creator coins from ${purchaseAccount} to ${destinationAccount}`
@@ -265,7 +269,7 @@ export async function sellCreatorCoinsWithWallet(
   params: SellCreatorCoinsWithWalletParams
 ): Promise<void> {
   if (!params.sellerWallet.publicKey) {
-    throw new Error("Seller not logged in")
+    throw new Error("Seller not logged in");
   }
 
   const creator = await SolcloutCreator.retrieve(
@@ -296,39 +300,39 @@ export async function sellCreatorCoinsWithWallet(
     params.splAssociatedTokenAccountProgramId
   );
   const acctExists = await connection.getAccountInfo(destinationAccount);
-  let instructions = []
+  let instructions = [];
   if (!acctExists) {
-    instructions.push(await createAssociatedTokenAccountInstruction(
-      connection,
-      creator.creatorToken,
-      params.sellerWallet.publicKey,
-      solcloutInstance.tokenProgramId,
-      params.splAssociatedTokenAccountProgramId
-    ))
+    instructions.push(
+      await createAssociatedTokenAccountInstruction(
+        connection,
+        creator.creatorToken,
+        params.sellerWallet.publicKey,
+        solcloutInstance.tokenProgramId,
+        params.splAssociatedTokenAccountProgramId
+      )
+    );
   }
   const [solcloutStorageAuthority, _] = await PublicKey.findProgramAddress(
     [creator.solcloutInstance.toBuffer()],
     params.programId
   );
 
-  instructions.push(sellCreatorCoinsInstruction(
-    params.programId,
-    solcloutInstance.tokenProgramId,
-    creator.solcloutInstance,
-    params.solcloutCreator,
-    creator.creatorToken,
-    solcloutInstance.solcloutStorage,
-    solcloutStorageAuthority,
-    sellAccount,
-    params.sellerWallet.publicKey,
-    destinationAccount,
-    params.lamports
-  ))
-  await sendTransaction(
-    connection,
-    instructions,
-    params.sellerWallet,
+  instructions.push(
+    sellCreatorCoinsInstruction(
+      params.programId,
+      solcloutInstance.tokenProgramId,
+      creator.solcloutInstance,
+      params.solcloutCreator,
+      creator.creatorToken,
+      solcloutInstance.solcloutStorage,
+      solcloutStorageAuthority,
+      sellAccount,
+      params.sellerWallet.publicKey,
+      destinationAccount,
+      params.lamports
+    )
   );
+  await sendTransaction(connection, instructions, params.sellerWallet);
   console.log(
     `Burned ${params.lamports} creator coins from ${sellAccount} to ${destinationAccount}`
   );

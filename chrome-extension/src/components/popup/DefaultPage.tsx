@@ -1,7 +1,7 @@
 import ConnectButton from "../ConnectButton";
-import {Alert, Card, Tag} from "antd";
+import { Alert, Card, Tag } from "antd";
 import React from "react";
-import {useWallet} from "../../utils/wallet";
+import { useWallet } from "../../utils/wallet";
 
 export default ({ selectWallet }: { selectWallet: () => void }) => {
   // const { login, logout, accountInfo: { account, error, solcloutAccount  } } = useLoginFromPopup()

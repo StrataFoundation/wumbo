@@ -1,8 +1,8 @@
 import React from "react";
-import {useWallet} from "../../utils/wallet";
-import {WALLET_PROVIDERS} from "../../constants/walletProviders";
-import {Button} from "antd";
-import {WalletProvider} from "@solana/wallet-base";
+import { useWallet } from "../../utils/wallet";
+import { WALLET_PROVIDERS } from "../../constants/walletProviders";
+import { Button } from "antd";
+import { WalletProvider } from "@solana/wallet-base";
 
 export default () => {
   const { setProviderUrl, setAutoConnect } = useWallet();
