@@ -6,7 +6,6 @@ import {useAsyncCallback} from "react-async-hook";
 import {useConnection} from "@oyster/common/lib/contexts/connection";
 import {Token} from "./Token";
 import {useAssociatedAccount} from "../../utils/walletState";
-import {KEYPAIR} from "../../constants/globals";
 import {useWallet} from "../../utils/wallet";
 
 interface BuyProps {
@@ -15,12 +14,12 @@ interface BuyProps {
 
 export default ({ creator }: BuyProps) => {
   const connection = useConnection();
-  const { wallet } = useWallet()
+  const { wallet, awaitingApproval } = useWallet()
   const { execute, loading, error } = useAsyncCallback(buy(wallet));
   const [success, setSuccess] = useState<string>();
   const [amount, setAmount] = useState<number>(0);
   const { associatedAccount, loading: accountLoading } = useAssociatedAccount(
-    KEYPAIR.publicKey,
+    wallet?.publicKey || undefined,
     creator.creatorToken
   );
   const ownAmount =
@@ -83,7 +82,8 @@ export default ({ creator }: BuyProps) => {
         <span>Own: {ownAmount} NXX2</span>
         <Form.Item>
           { wallet && wallet.publicKey && <Button loading={loading} htmlType="submit" type="primary">
-            Buy
+            { awaitingApproval && "Awaiting Approval" }
+            { !awaitingApproval && "Buy" }
           </Button> }
         </Form.Item>
       </div>
