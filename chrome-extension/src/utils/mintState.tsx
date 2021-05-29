@@ -2,7 +2,7 @@ import { AccountInfo, PublicKey } from "@solana/web3.js";
 import { useEffect, useState } from "react";
 import { MintInfo } from "@solana/spl-token";
 import { useConnection } from "@oyster/common/lib/contexts/connection";
-import { Mint } from "../solclout-api/state";
+import { Mint } from "../wumbo-api/state";
 
 export function useMint(key: PublicKey | undefined): MintInfo | undefined {
   const [mint, setMint] = useState<MintInfo>();

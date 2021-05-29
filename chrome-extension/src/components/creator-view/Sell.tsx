@@ -1,16 +1,17 @@
 import React, { useState } from "react";
 import { Alert, Button, Form, InputNumber } from "antd";
 import { sell } from "../../utils/action";
-import { SolcloutCreator } from "../../solclout-api/state";
+import { WumboCreator } from "../../wumbo-api/state";
 import { useAsyncCallback } from "react-async-hook";
 import { useConnection } from "@oyster/common/lib/contexts/connection";
 import { Token } from "./Token";
 import { useAssociatedAccount } from "../../utils/walletState";
-import { KEYPAIR } from "../../constants/globals";
+import { useAccount } from "../../utils/account";
+import { TokenBondingV0 } from "../../spl-token-bonding-api/state";
 import { useWallet } from "../../utils/wallet";
 
 interface SellProps {
-  creator: SolcloutCreator;
+  creator: WumboCreator;
 }
 
 export default ({ creator }: SellProps) => {
@@ -29,15 +30,18 @@ export default ({ creator }: SellProps) => {
   const handleChange = (value: number) => {
     setAmount(value);
   };
+  const { info: creatorTokenBonding } = useAccount(
+    creator.tokenBonding,
+    TokenBondingV0.fromAccount
+  );
 
   const { associatedAccount, loading: accountLoading } = useAssociatedAccount(
-    KEYPAIR.publicKey,
-    creator.creatorToken
+    wallet?.publicKey,
+    creatorTokenBonding?.targetMint
   );
   const ownAmount =
     associatedAccount &&
     (associatedAccount.amount.toNumber() / Math.pow(10, 9)).toFixed(2);
-
   return (
     <Form name="sell" onFinish={handleFinish}>
       <div className="price-block">

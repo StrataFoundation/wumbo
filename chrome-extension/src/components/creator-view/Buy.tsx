@@ -1,15 +1,17 @@
 import React, { useState } from "react";
 import { Alert, Button, Form, InputNumber } from "antd";
 import { buy } from "../../utils/action";
-import { SolcloutCreator } from "../../solclout-api/state";
+import { WumboCreator } from "../../wumbo-api/state";
 import { useAsyncCallback } from "react-async-hook";
 import { useConnection } from "@oyster/common/lib/contexts/connection";
 import { Token } from "./Token";
 import { useAssociatedAccount } from "../../utils/walletState";
+import { TokenBondingV0 } from "../../spl-token-bonding-api/state";
+import { useAccount } from "../../utils/account";
 import { useWallet } from "../../utils/wallet";
 
 interface BuyProps {
-  creator: SolcloutCreator;
+  creator: WumboCreator;
 }
 
 export default ({ creator }: BuyProps) => {
@@ -18,9 +20,13 @@ export default ({ creator }: BuyProps) => {
   const { execute, loading, error } = useAsyncCallback(buy(wallet));
   const [success, setSuccess] = useState<string>();
   const [amount, setAmount] = useState<number>(0);
+  const { info: creatorTokenBonding } = useAccount(
+    creator.tokenBonding,
+    TokenBondingV0.fromAccount
+  );
   const { associatedAccount, loading: accountLoading } = useAssociatedAccount(
     wallet?.publicKey || undefined,
-    creator.creatorToken
+    creatorTokenBonding?.targetMint
   );
   const ownAmount =
     associatedAccount &&

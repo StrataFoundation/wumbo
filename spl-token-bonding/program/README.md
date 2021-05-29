@@ -1,5 +1,5 @@
 ---
-title: SolClout
+title: Spl Token Bonding
 ---
 
 ## Background
@@ -12,17 +12,16 @@ document are available at:
 
 ## Source
 
-SolClout's Program's source is available on
+Spl Token Bonding's Program's source is available on
 [github](https://github.com/solana-labs/solana-program-library)
 
 ## Interface
 
 The on-chain Token Metadata program is written in Rust and available on crates.io as
 [spl-solclout](https://crates.io/crates/solclout) and
-[docs.rs](https://docs.rs/spl-token-metadata).
+[docs.rs](https://docs.rs/spl-token-bonding).
 
 The crate provides the following instructions:
-
 
 ## Operational overview
 

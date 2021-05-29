@@ -1,16 +1,18 @@
 import { useEffect, useState } from "react";
 import { getHashedName, getNameAccountKey } from "@bonfida/spl-name-service";
 import {
-  SOLCLOUT_INSTANCE_KEY,
-  SOLCLOUT_PROGRAM_ID,
+  WUMBO_INSTANCE_KEY,
+  WUMBO_PROGRAM_ID,
   TWITTER_ROOT_PARENT_REGISTRY_KEY,
 } from "../constants/globals";
 import { AccountInfo, PublicKey } from "@solana/web3.js";
-import { SolcloutCreator } from "../solclout-api/state";
+import { WumboCreator } from "../wumbo-api/state";
 import { useConnection } from "@oyster/common/lib/contexts/connection";
 import { useMint } from "./mintState";
-import { useSolcloutUsdPrice } from "./pricing";
+import { useWumboUsdPrice } from "./pricing";
 import { MintInfo } from "@solana/spl-token";
+import { useAccount, UseAccountState } from "./account";
+import { LogCurveV0, TokenBondingV0 } from "../spl-token-bonding-api/state";
 
 export interface ReactiveAccountState {
   account?: AccountInfo<Buffer>;
@@ -70,12 +72,16 @@ export const useCreatorKey = (name: string): PublicKey | undefined => {
         undefined,
         TWITTER_ROOT_PARENT_REGISTRY_KEY
       );
-      const [solcloutCreatorKey, _] = await PublicKey.findProgramAddress(
-        [SOLCLOUT_INSTANCE_KEY.toBuffer(), twitterHandleRegistryKey.toBuffer()],
-        SOLCLOUT_PROGRAM_ID
+      const [wumboCreatorKey, _] = await PublicKey.findProgramAddress(
+        [
+          Buffer.from("creator", "utf-8"),
+          WUMBO_INSTANCE_KEY.toBuffer(),
+          twitterHandleRegistryKey.toBuffer(),
+        ],
+        WUMBO_PROGRAM_ID
       );
 
-      setKey(solcloutCreatorKey);
+      setKey(wumboCreatorKey);
     })();
   }, [name]);
 
@@ -83,51 +89,24 @@ export const useCreatorKey = (name: string): PublicKey | undefined => {
 };
 
 interface CreatorState {
-  creator?: SolcloutCreator;
+  creator?: WumboCreator;
   loading: boolean;
 }
 
-export const useCreator = (name: string): CreatorState => {
+export const useCreator = (name: string): UseAccountState<WumboCreator> => {
   const key = useCreatorKey(name);
   const connection = useConnection();
-  const [creator, setCreator] = useState<CreatorState>({ loading: true });
 
-  useEffect(() => {
-    if (key) {
-      const sub = connection.onAccountChange(
-        key,
-        (accountInfo: AccountInfo<Buffer>) => {
-          setCreator({
-            creator: SolcloutCreator.fromAccount(key, accountInfo),
-            loading: false,
-          });
-        },
-        "singleGossip"
-      );
-
-      (async () => {
-        const creator = await SolcloutCreator.retrieve(connection, key);
-        if (creator) {
-          setCreator({ creator: creator, loading: false });
-        } else {
-          setCreator({ loading: false });
-        }
-      })();
-
-      return () => {
-        connection.removeAccountChangeListener(sub);
-      };
-    }
-  }, [key]);
-
-  return creator;
+  return useAccount(key, WumboCreator.fromAccount);
 };
 
 interface CreatorInfo {
   name: string;
   coinPriceUsd: number;
   coinPrice: number;
-  creator: SolcloutCreator;
+  creator: WumboCreator;
+  tokenBonding: TokenBondingV0;
+  curve: LogCurveV0;
   mint: MintInfo;
 }
 export interface CreatorInfoState {
@@ -135,31 +114,41 @@ export interface CreatorInfoState {
   loading: boolean;
 }
 export const useCreatorInfo = (name: string): CreatorInfoState => {
-  const { creator, loading } = useCreator(name);
-  const mint = useMint(creator && creator.creatorToken);
-  const solcloutUsdPrice = useSolcloutUsdPrice();
+  const { info: creator, loading } = useCreator(name);
+  const { info: tokenBonding } = useAccount(
+    creator?.tokenBonding,
+    TokenBondingV0.fromAccount
+  );
+  const { info: curve } = useAccount(
+    tokenBonding?.curve,
+    LogCurveV0.fromAccount
+  );
+  const mint = useMint(creator && tokenBonding?.targetMint);
+  const wumboUsdPrice = useWumboUsdPrice();
   const [creatorInfo, setCreatorInfo] = useState<CreatorInfoState>({
     loading: true,
   });
 
   useEffect(() => {
-    if (mint && creator) {
-      const solcloutPrice =
+    if (curve && tokenBonding && mint && creator) {
+      const wumboPrice =
         Math.pow(mint.supply.toNumber() / Math.pow(10, 9), 2) / 3000;
       setCreatorInfo({
         creatorInfo: {
           name,
           creator,
           mint,
-          coinPrice: solcloutPrice,
-          coinPriceUsd: solcloutPrice * (solcloutUsdPrice || 0),
+          tokenBonding,
+          curve,
+          coinPrice: wumboPrice,
+          coinPriceUsd: wumboPrice * (wumboUsdPrice || 0),
         },
         loading: false,
       });
     } else if (!loading) {
       setCreatorInfo({ loading: false });
     }
-  }, [mint, creator, loading]);
+  }, [curve, tokenBonding, mint, creator, loading]);
 
   return creatorInfo;
 };

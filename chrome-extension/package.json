@@ -14,7 +14,7 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/ChewingGlassFund/solclout"
+    "url": "https://github.com/ChewingGlassFund/wumbo"
   },
   "dependencies": {
     "@bonfida/spl-name-service": "^0.1.4",

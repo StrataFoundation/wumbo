@@ -5,15 +5,20 @@ import { useCreatorInfo } from "../utils/creatorState"
 import CreatorView from "./creator-view/CreatorView"
 import Loading from "./Loading"
 import {
-  KEYPAIR,
-  SOLCLOUT_INSTANCE_KEY,
-  SOLCLOUT_PROGRAM_ID,
+  WUMBO_INSTANCE_KEY,
+  WUMBO_PROGRAM_ID,
   TOKEN_PROGRAM_ID,
   TWITTER_ROOT_PARENT_REGISTRY_KEY,
+  TOKEN_BONDING_PROGRAM_ID,
+  SPL_NAME_SERVICE_PROGRAM_ID,
+  SPL_ASSOCIATED_TOKEN_ACCOUNT_PROGRAM_ID,
 } from "../constants/globals";
-import { createSolcloutCreator } from "../solclout-api/bindings";
+import { createWumboCreator } from "../wumbo-api/bindings";
 import { useConnection } from "@oyster/common/lib/contexts/connection";
 import { Account } from "@solana/web3.js";
+import { useAccount } from "../utils/account";
+import { WumboInstance } from "../wumbo-api/state";
+import { useWallet } from "../utils/wallet";
 
 interface CreatorInfoProps {
   creatorName: string;
@@ -45,21 +50,30 @@ const ClickInterceptor = ({ onClick, children, ...rest }: InterceptorProps) => {
 export default ({ creatorName, creatorImg }: CreatorInfoProps) => {
   const creatorInfoState = useCreatorInfo(creatorName);
   const { creatorInfo, loading } = creatorInfoState;
+  const { wallet } = useWallet();
   const [creationLoading, setCreationLoading] = useState<boolean>(false);
   const connection = useConnection();
+  const { info: wumboInstance } = useAccount(
+    WUMBO_INSTANCE_KEY,
+    WumboInstance.fromAccount
+  );
 
   if (loading) {
     return <Loading />;
   }
 
-  if (!loading && !creatorInfo) {
+  if (!loading && !creatorInfo && wumboInstance && wallet) {
     const createCreator = () => {
       setCreationLoading(true);
-      createSolcloutCreator(connection, {
-        programId: SOLCLOUT_PROGRAM_ID,
-        tokenProgramId: TOKEN_PROGRAM_ID,
-        payer: new Account(KEYPAIR.secretKey),
-        solcloutInstance: SOLCLOUT_INSTANCE_KEY,
+      createWumboCreator(connection, {
+        splTokenBondingProgramId: TOKEN_BONDING_PROGRAM_ID,
+        splAssociatedTokenAccountProgramId: SPL_ASSOCIATED_TOKEN_ACCOUNT_PROGRAM_ID,
+        splTokenProgramId: TOKEN_PROGRAM_ID,
+        splWumboProgramId: WUMBO_PROGRAM_ID,
+        splNameServicePogramId: SPL_NAME_SERVICE_PROGRAM_ID,
+        wumboInstance: WUMBO_INSTANCE_KEY,
+        payer: wallet,
+        baseMint: wumboInstance.wumboMint,
         name: creatorName,
         founderRewardsPercentage: 5.5,
         nameParent: TWITTER_ROOT_PARENT_REGISTRY_KEY,

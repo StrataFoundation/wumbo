@@ -3,33 +3,27 @@ import { deserializeUnchecked, Schema } from "@bonfida/borsh-js";
 import { Numberu16, Numberu8 } from "./utils";
 import { MintInfo, MintLayout, u64 } from "@solana/spl-token";
 
-export class SolcloutCreator {
+export class WumboCreator {
   // @ts-ignore
   publicKey: PublicKey; // Gets set on retrieve
-  creatorToken: PublicKey;
-  solcloutInstance: PublicKey;
-  founderRewardsAccount: PublicKey;
+  wumboInstance: PublicKey;
+  tokenBonding: PublicKey;
   name: PublicKey;
-  founderRewardPercentage: number;
   initialized: boolean;
-  authorityNonce: number;
 
   static LEN = 1 + 32 * 4 + 2 + 1 + 1;
 
   static schema: Schema = new Map([
     [
-      SolcloutCreator,
+      WumboCreator,
       {
         kind: "struct",
         fields: [
           ["key", [1]],
-          ["creatorToken", [32]],
-          ["solcloutInstance", [32]],
-          ["founderRewardsAccount", [32]],
+          ["wumboInstance", [32]],
+          ["tokenBonding", [32]],
           ["name", [32]],
-          ["founderRewardPercentage", [2]],
           ["initialized", [1]],
-          ["authorityNonce", [1]],
         ],
       },
     ],
@@ -37,32 +31,24 @@ export class SolcloutCreator {
 
   constructor(obj: {
     key: Uint8Array;
-    creatorToken: Uint8Array;
-    solcloutInstance: Uint8Array;
-    founderRewardsAccount: Uint8Array;
+    wumboInstance: Uint8Array;
+    tokenBonding: Uint8Array;
     name: Uint8Array;
-    founderRewardPercentage: Uint8Array;
     initialized: Uint8Array;
-    authorityNonce: Uint8Array;
   }) {
-    this.creatorToken = new PublicKey(obj.creatorToken);
-    this.solcloutInstance = new PublicKey(obj.solcloutInstance);
-    this.founderRewardsAccount = new PublicKey(obj.founderRewardsAccount);
+    this.wumboInstance = new PublicKey(obj.wumboInstance);
+    this.tokenBonding = new PublicKey(obj.tokenBonding);
     this.name = new PublicKey(obj.name);
-    this.founderRewardPercentage = Numberu16.fromBuffer(
-      Buffer.from(obj.founderRewardPercentage)
-    );
-    this.authorityNonce = Numberu8.fromBuffer(Buffer.from(obj.authorityNonce));
     this.initialized = obj.initialized[0] === 1;
   }
 
   static fromAccount(
     key: PublicKey,
     account: AccountInfo<Buffer>
-  ): SolcloutCreator {
+  ): WumboCreator {
     const value = deserializeUnchecked(
-      this.schema,
-      SolcloutCreator,
+      WumboCreator.schema,
+      WumboCreator,
       account.data
     );
     value.publicKey = key;
@@ -72,15 +58,15 @@ export class SolcloutCreator {
 
   static async retrieve(
     connection: Connection,
-    solcloutCreator: PublicKey
-  ): Promise<SolcloutCreator | null> {
-    let account = await connection.getAccountInfo(solcloutCreator, "max");
+    wumboCreator: PublicKey
+  ): Promise<WumboCreator | null> {
+    let account = await connection.getAccountInfo(wumboCreator);
 
     if (!account) {
       return account;
     }
 
-    return this.fromAccount(solcloutCreator, account);
+    return this.fromAccount(wumboCreator, account);
   }
 }
 
@@ -121,23 +107,21 @@ export class Mint {
   }
 }
 
-export class SolcloutInstance {
-  solcloutToken: PublicKey;
-  solcloutStorage: PublicKey;
-  tokenProgramId: PublicKey;
+export class WumboInstance {
+  wumboMint: PublicKey;
+  baseCurve: PublicKey;
   nameProgramId: PublicKey;
   initialized: boolean;
 
   static schema: Schema = new Map([
     [
-      SolcloutInstance,
+      WumboInstance,
       {
         kind: "struct",
         fields: [
           ["key", [1]],
-          ["solcloutToken", [32]],
-          ["solcloutStorage", [32]],
-          ["tokenProgramId", [32]],
+          ["wumboMint", [32]],
+          ["baseCurve", [32]],
           ["nameProgramId", [32]],
           ["initialized", [1]],
         ],
@@ -147,31 +131,41 @@ export class SolcloutInstance {
 
   constructor(obj: {
     key: Uint8Array;
-    solcloutToken: Uint8Array;
-    solcloutStorage: Uint8Array;
-    tokenProgramId: Uint8Array;
+    wumboMint: Uint8Array;
+    baseCurve: Uint8Array;
     nameProgramId: Uint8Array;
     initialized: Uint8Array;
   }) {
-    this.solcloutToken = new PublicKey(obj.solcloutToken);
-    this.solcloutStorage = new PublicKey(obj.solcloutStorage);
-    this.tokenProgramId = new PublicKey(obj.tokenProgramId);
+    this.wumboMint = new PublicKey(obj.wumboMint);
+    this.baseCurve = new PublicKey(obj.baseCurve);
     this.nameProgramId = new PublicKey(obj.nameProgramId);
     this.initialized = obj.initialized[0] === 1;
   }
 
+  static fromAccount(
+    key: PublicKey,
+    account: AccountInfo<Buffer>
+  ): WumboInstance {
+    const value = deserializeUnchecked(
+      WumboInstance.schema,
+      WumboInstance,
+      account.data
+    );
+    value.publicKey = key;
+
+    return value;
+  }
+
   static async retrieve(
     connection: Connection,
-    solcloutInstance: PublicKey
-  ): Promise<SolcloutInstance> {
-    let account = await connection.getAccountInfo(solcloutInstance, "max");
+    wumboInstance: PublicKey
+  ): Promise<WumboInstance> {
+    let account = await connection.getAccountInfo(wumboInstance);
     if (!account) {
-      throw new Error(
-        `Invalid account provided ${solcloutInstance.toString()}`
-      );
+      throw new Error(`Invalid account provided ${wumboInstance.toString()}`);
     }
 
-    return deserializeUnchecked(this.schema, SolcloutInstance, account.data);
+    return this.fromAccount(wumboInstance, account);
   }
 
   static LEN = 1 + 32 * 4 + 2 + 1;

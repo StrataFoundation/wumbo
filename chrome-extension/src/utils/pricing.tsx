@@ -1,27 +1,25 @@
 import { Market } from "@project-serum/serum";
 import { Connection, PublicKey } from "@solana/web3.js";
 import React, { useContext, useEffect, useState } from "react";
-import { SERUM_PROGRAM_ID, SOLCLOUT_TO_USD_MARKET } from "../constants/globals";
+import { SERUM_PROGRAM_ID, WUMBO_TO_USD_MARKET } from "../constants/globals";
 import { Order } from "@project-serum/serum/lib/market";
 
 // TODO: Use actual connection. But this can't happen in dev
 let connection = new Connection("https://api.mainnet-beta.solana.com");
 
-const UsdSolcloutPriceContext = React.createContext<number | undefined>(
-  undefined
-);
+const UsdWumboPriceContext = React.createContext<number | undefined>(undefined);
 
-export const UsdSolcloutPriceProvider = ({ children = undefined as any }) => {
-  const price = useMarketPrice(SOLCLOUT_TO_USD_MARKET);
+export const UsdWumboPriceProvider = ({ children = undefined as any }) => {
+  const price = useMarketPrice(WUMBO_TO_USD_MARKET);
   return (
-    <UsdSolcloutPriceContext.Provider value={price}>
+    <UsdWumboPriceContext.Provider value={price}>
       {children}
-    </UsdSolcloutPriceContext.Provider>
+    </UsdWumboPriceContext.Provider>
   );
 };
 
-export const useSolcloutUsdPrice = () => {
-  return useContext(UsdSolcloutPriceContext);
+export const useWumboUsdPrice = () => {
+  return useContext(UsdWumboPriceContext);
 };
 
 export const useMarketPrice = (

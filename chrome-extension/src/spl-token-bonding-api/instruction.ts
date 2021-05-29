@@ -1,22 +1,24 @@
 import {
+  Account,
   PublicKey,
   SystemProgram,
   SYSVAR_RENT_PUBKEY,
   TransactionInstruction,
 } from "@solana/web3.js";
-import { Numberu16, Numberu8 } from "./utils";
+import { Numberu16 } from "./utils";
 import { Numberu64 } from "@bonfida/spl-name-service";
 
-export function initializeCreatorInstruction(
+export function initializeTokenBondingV0Instruction(
   programId: PublicKey,
   payer: PublicKey,
-  solcloutAccount: PublicKey,
-  solcloutInstance: PublicKey,
-  name: PublicKey,
-  founderRewardsAccount: PublicKey,
-  creatorMint: PublicKey,
-  founderRewardPercentage: number,
-  nonce: number
+  tokenBondingAccount: PublicKey,
+  tokenBondingAuthority: PublicKey,
+  curve: PublicKey,
+  baseMint: PublicKey,
+  targetMint: PublicKey,
+  founderRewards: PublicKey,
+  baseStorage: PublicKey,
+  founderRewardsPercentage: number
 ): TransactionInstruction {
   return new TransactionInstruction({
     programId,
@@ -27,27 +29,37 @@ export function initializeCreatorInstruction(
         isWritable: true,
       },
       {
-        pubkey: solcloutAccount,
-        isSigner: false,
+        pubkey: tokenBondingAccount,
+        isSigner: true,
         isWritable: true,
       },
       {
-        pubkey: solcloutInstance,
+        pubkey: tokenBondingAuthority,
         isSigner: false,
         isWritable: false,
       },
       {
-        pubkey: name,
+        pubkey: curve,
         isSigner: false,
         isWritable: false,
       },
       {
-        pubkey: founderRewardsAccount,
+        pubkey: baseMint,
         isSigner: false,
         isWritable: false,
       },
       {
-        pubkey: creatorMint,
+        pubkey: targetMint,
+        isSigner: false,
+        isWritable: false,
+      },
+      {
+        pubkey: founderRewards,
+        isSigner: false,
+        isWritable: false,
+      },
+      {
+        pubkey: baseStorage,
         isSigner: false,
         isWritable: false,
       },
@@ -64,56 +76,61 @@ export function initializeCreatorInstruction(
     ],
     data: Buffer.concat([
       Buffer.from(Int8Array.from([1])),
-      new Numberu16(nonce).toBuffer(),
-      new Numberu8(nonce).toBuffer(),
+      new Numberu16(founderRewardsPercentage).toBuffer(),
     ]),
   });
 }
 
-export function buyCreatorCoinsInstruction(
+export function buyV0Instruction(
   programId: PublicKey,
   tokenProgramId: PublicKey,
-  solcloutInstance: PublicKey,
-  solcloutCreator: PublicKey,
-  creatorMint: PublicKey,
-  creatorMintAuthority: PublicKey,
-  solcloutStorageAccount: PublicKey,
-  founderRewardsAccount: PublicKey,
+  tokenBonding: PublicKey,
+  curve: PublicKey,
+  baseMint: PublicKey,
+  targetMint: PublicKey,
+  targetMintAuthority: PublicKey,
+  founderRewards: PublicKey,
+  baseStorage: PublicKey,
   purchaseAccount: PublicKey,
   purchaseAuthority: PublicKey,
   destination: PublicKey,
-  lamports: number
+  amount: number
 ): TransactionInstruction {
   return new TransactionInstruction({
     programId,
     keys: [
       {
-        pubkey: solcloutInstance,
+        pubkey: tokenBonding,
         isSigner: false,
         isWritable: false,
       },
       {
-        pubkey: solcloutCreator,
+        pubkey: curve,
         isSigner: false,
         isWritable: false,
       },
       {
-        pubkey: creatorMint,
+        pubkey: baseMint,
+        isSigner: false,
+        isWritable: false,
+      },
+      {
+        pubkey: targetMint,
         isSigner: false,
         isWritable: true,
       },
       {
-        pubkey: creatorMintAuthority,
+        pubkey: targetMintAuthority,
         isSigner: false,
         isWritable: false,
       },
       {
-        pubkey: solcloutStorageAccount,
+        pubkey: founderRewards,
         isSigner: false,
         isWritable: true,
       },
       {
-        pubkey: founderRewardsAccount,
+        pubkey: baseStorage,
         isSigner: false,
         isWritable: true,
       },
@@ -140,49 +157,55 @@ export function buyCreatorCoinsInstruction(
     ],
     data: Buffer.concat([
       Buffer.from(Int8Array.from([2])),
-      new Numberu64(lamports).toBuffer(),
+      new Numberu64(amount).toBuffer(),
     ]),
   });
 }
 
-export function sellCreatorCoinsInstruction(
+export function sellV0Instruction(
   programId: PublicKey,
   tokenProgramId: PublicKey,
-  solcloutInstance: PublicKey,
-  solcloutCreator: PublicKey,
-  creatorMint: PublicKey,
-  solcloutStorageAccount: PublicKey,
-  solcloutStorageAuthority: PublicKey,
+  tokenBonding: PublicKey,
+  curve: PublicKey,
+  baseMint: PublicKey,
+  targetMint: PublicKey,
+  baseStorage: PublicKey,
+  baseStorageAuthority: PublicKey,
   sellAccount: PublicKey,
   sellAuthority: PublicKey,
   destination: PublicKey,
-  lamports: number
+  amount: number
 ): TransactionInstruction {
   return new TransactionInstruction({
     programId,
     keys: [
       {
-        pubkey: solcloutInstance,
+        pubkey: tokenBonding,
         isSigner: false,
         isWritable: false,
       },
       {
-        pubkey: solcloutCreator,
+        pubkey: curve,
         isSigner: false,
         isWritable: false,
       },
       {
-        pubkey: creatorMint,
+        pubkey: baseMint,
+        isSigner: false,
+        isWritable: false,
+      },
+      {
+        pubkey: targetMint,
         isSigner: false,
         isWritable: true,
       },
       {
-        pubkey: solcloutStorageAccount,
+        pubkey: baseStorage,
         isSigner: false,
         isWritable: true,
       },
       {
-        pubkey: solcloutStorageAuthority,
+        pubkey: baseStorageAuthority,
         isSigner: false,
         isWritable: false,
       },
@@ -209,7 +232,7 @@ export function sellCreatorCoinsInstruction(
     ],
     data: Buffer.concat([
       Buffer.from(Int8Array.from([3])),
-      new Numberu64(lamports).toBuffer(),
+      new Numberu64(amount).toBuffer(),
     ]),
   });
 }
