@@ -121,3 +121,10 @@ body {
 .ant-btn-link:hover {
   background-image: linear-gradient(#00000010, #00000030);
 }
+
+.interceptor-button {
+  cursor: pointer;
+  background: none;
+  padding: 0px;
+  border: 0px;
+}

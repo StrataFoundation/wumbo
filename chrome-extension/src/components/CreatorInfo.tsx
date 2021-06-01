@@ -1,4 +1,4 @@
-import React, { useState } from "react"
+import React, { useState, useRef, useEffect } from "react"
 import { Button, Popover, Tag } from "antd"
 import { DownOutlined } from "@ant-design/icons"
 import { useCreatorInfo } from "../utils/creatorState"
@@ -18,6 +18,28 @@ import { Account } from "@solana/web3.js"
 interface CreatorInfoProps {
   creatorName: string
   creatorImg: string
+}
+
+interface InterceptorProps {
+  onClick?: any
+  children: any
+}
+
+const ClickInterceptor = ({ onClick, children, ...rest }: InterceptorProps) => {
+  const handleClick = (e: React.MouseEvent<HTMLButtonElement>) => {
+    e.preventDefault()
+    e.stopPropagation()
+    if (onClick) {
+      onClick()
+    }
+  }
+  return (
+    <button className="interceptor-button" onClick={handleClick} tabIndex={0}>
+      <Tag>
+        ${children} <DownOutlined />
+      </Tag>
+    </button>
+  )
 }
 
 export default ({ creatorName, creatorImg }: CreatorInfoProps) => {
@@ -62,18 +84,16 @@ export default ({ creatorName, creatorImg }: CreatorInfoProps) => {
   }
 
   return (
-    <div style={{ zIndex: 10000 }}>
-      <Popover
-        mouseLeaveDelay={2}
-        placement="bottom"
-        content={() => (
-          <CreatorView creatorImg={creatorImg} {...creatorInfoState} />
-        )}
-      >
-        <Tag>
-          ${creatorInfo?.coinPriceUsd.toFixed(2)} <DownOutlined />
-        </Tag>
-      </Popover>
-    </div>
+    <Popover
+      placement="bottom"
+      trigger="click"
+      content={() => (
+        <CreatorView creatorImg={creatorImg} {...creatorInfoState} />
+      )}
+    >
+      <ClickInterceptor>
+        ${creatorInfo?.coinPriceUsd.toFixed(2)}
+      </ClickInterceptor>
+    </Popover>
   )
 }
