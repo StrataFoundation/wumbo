@@ -36,7 +36,7 @@ const ClickInterceptor = ({ onClick, children, ...rest }: InterceptorProps) => {
   return (
     <button className="interceptor-button" onClick={handleClick} tabIndex={0}>
       <Tag>
-        ${children} <DownOutlined />
+        {children} <DownOutlined />
       </Tag>
     </button>
   )
