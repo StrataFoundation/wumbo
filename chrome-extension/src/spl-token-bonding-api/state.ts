@@ -1,7 +1,8 @@
 import { Numberu16, Numberu8 } from "./utils";
 import { AccountInfo, Connection, PublicKey } from "@solana/web3.js";
 import { deserializeUnchecked, Schema } from "@bonfida/borsh-js";
-import { Numberu64 } from "@solana/spl-token-swap";
+import { u64 } from "@solana/spl-token";
+import { Numberu64 } from "@bonfida/spl-name-service";
 
 export class TokenBondingV0 {
   // @ts-ignore
@@ -94,13 +95,14 @@ export class LogCurveV0 {
   numerator: Numberu64;
   denominator: Numberu64;
   c: Numberu64;
+  isBaseRelative: boolean;
   initialized: boolean;
 
   static LEN = 1 + 32 * 4 + 2 + 1 + 1;
 
   static schema: Schema = new Map([
     [
-      TokenBondingV0,
+      LogCurveV0,
       {
         kind: "struct",
         fields: [
@@ -121,16 +123,17 @@ export class LogCurveV0 {
     c: Uint8Array;
     initialized: Uint8Array;
   }) {
-    this.numerator = new Numberu64(obj.numerator);
-    this.denominator = new Numberu64(obj.numerator);
-    this.c = new Numberu64(obj.numerator);
+    this.isBaseRelative = obj.key[0] == 2
+    this.numerator = new Numberu64(obj.numerator, 'le');
+    this.denominator = new Numberu64(obj.numerator, 'le');
+    this.c = new Numberu64(obj.numerator, 'le');
     this.initialized = obj.initialized[0] === 1;
   }
 
   static fromAccount(key: PublicKey, account: AccountInfo<Buffer>): LogCurveV0 {
     const value = deserializeUnchecked(
       LogCurveV0.schema,
-      TokenBondingV0,
+      LogCurveV0,
       account.data
     );
     value.publicKey = key;

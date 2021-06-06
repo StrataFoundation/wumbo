@@ -59,6 +59,7 @@ pub enum TokenBondingInstruction {
     ///   9. `[writeable]`  Destination account, this is an account owned by the token program with
     ///                            the target coin mint
     ///   10. `[]` Token program id
+    ///   11. `[]` System Program
     BuyV0 {
         /// Number to purchase. This is including the decimal value. So 1 is the lowest possible fraction of a coin
         amount: u64,
@@ -147,6 +148,7 @@ pub fn buy_creator_coins(
             AccountMeta::new_readonly(*purchase_authority, true),
             AccountMeta::new(*destination, false),
             AccountMeta::new_readonly(*token_program_id, false),
+            AccountMeta::new_readonly(solana_program::system_program::id(), false),
         ],
         data: TokenBondingInstruction::BuyV0 { amount }
             .try_to_vec()

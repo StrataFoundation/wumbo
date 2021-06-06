@@ -70,10 +70,44 @@ pub struct LogCurveV0 {
 }
 impl Sealed for LogCurveV0 {}
 
+/// Raw transmutation to `u32`.
+///
+/// Transmutes the given `f32` into it's raw memory representation.
+/// Similar to `f32::to_bits` but even more raw.
+#[inline]
+pub fn to_bits(x: f32) -> u32 {
+    unsafe { ::std::mem::transmute::<f32, u32>(x) }
+}
+
+/// Raw transmutation from `u32`.
+///
+/// Converts the given `u32` containing the float's raw memory representation into the `f32` type.
+/// Similar to `f32::from_bits` but even more raw.
+#[inline]
+pub fn from_bits(x: u32) -> f32 {
+    unsafe { ::std::mem::transmute::<u32, f32>(x) }
+}
+
+/// Base 2 logarithm.
+#[inline]
+pub fn log2(x: f32) -> f32 {
+    let vx = to_bits(x);
+    let mx = from_bits((vx & 0x007FFFFF_u32) | 0x3f000000);
+    let mut y = vx as f32;
+    y *= 1.1920928955078125e-7_f32;
+    y - 124.22551499_f32 - 1.498030302_f32 * mx - 1.72587999_f32 / (0.3520887068_f32 + mx)
+}
+
+/// Natural logarithm.
+#[inline]
+pub fn ln(x: f32) -> f32 {
+    0.69314718_f32 * log2(x)
+}
+
 /// Integral of c * log(1 + g * x) dx from a to b Here g = numerator / denominator
 /// https://www.wolframalpha.com/input/?i=c+*+log%281+%2B+g+*+x%29+dx
 fn log_curve(c: f64, g: f64, a: f64, b: f64) -> f64 {
-    let general = |x: f64| c * ((((1_f64 / g) + x) * ((g * x) + 1_f64).ln()) - x);
+    let general = |x: f64| c * ((((1_f64 / g) + x) * ln(1_f32 + (g * x) as f32) as f64) - x);
     general(b) - general(a)
 }
 
@@ -84,12 +118,12 @@ impl Curve for LogCurveV0 {
 
     fn price(&self, base_supply: u64, target_supply: u64, amount: u64) -> u64 {
         let g: f64 = if self.key == Key::BaseRelativeLogCurveV0 {
-            (self.numerator as f64) / (self.denominator as f64 * base_supply as f64)
+            (self.numerator as f64) / (self.denominator as f64 * ((1_u64 + base_supply) as f64))
         } else {
             (self.numerator as f64) / (self.denominator as f64)
         };
         let fvalue = log_curve(self.c as f64, g as f64, target_supply as f64, target_supply as f64 + amount as f64);
-        fvalue.round() as u64
+        fvalue as u64
     }
 }
 

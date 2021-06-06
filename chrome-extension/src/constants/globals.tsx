@@ -1,9 +1,11 @@
 import { Keypair, PublicKey } from "@solana/web3.js";
-import { TOKEN_PROGRAM_ID as SPL_TOKEN_PROGRAM_ID } from "@solana/spl-token";
+import { Token, TOKEN_PROGRAM_ID as SPL_TOKEN_PROGRAM_ID } from "@solana/spl-token";
 
 // export const SOLANA_API_URL = "https://api.mainnet-beta.solana.com"
-const WUM_BONDING = "6vomBNaspUfYDbkWwxR2N4xCLf6s466PchDWESrsCKvt";
-const WUM_TOKEN = "bDYz78Px4d7epP62KzURwi52YNbxGXF2uiWYBgAGALK";
+export const WUM_REWARDS_PERCENTAGE = 1000
+export const WUM_BONDING = new PublicKey("6vomBNaspUfYDbkWwxR2N4xCLf6s466PchDWESrsCKvt");
+export const WUM_TOKEN = new PublicKey("bDYz78Px4d7epP62KzURwi52YNbxGXF2uiWYBgAGALK");
+export const SOL_TOKEN = new PublicKey("So11111111111111111111111111111111111111112")
 
 export const SPL_NAME_SERVICE_PROGRAM_ID = new PublicKey(
   "CiBbJADtSJnVQEsgXZpRfLyLNqDjwfvua8EMe9tPhKvo"

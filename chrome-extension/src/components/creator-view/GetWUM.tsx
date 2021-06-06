@@ -7,51 +7,52 @@ import { useConnection } from "@oyster/common/lib/contexts/connection";
 import { useAssociatedAccount } from "../../utils/walletState";
 import { useWallet } from "../../utils/wallet";
 import Swap from "./Swap";
+import { useMint } from "../../utils/mintState"
 import { CreatorInfo, CreatorInfoState } from "../../utils/creatorState";
 import { inverseLogCurve, logCurve } from "../../utils/pricing";
-import { useMint } from "@oyster/common/lib/contexts/accounts";
+import { SOL_TOKEN, WUM_BONDING, WUM_REWARDS_PERCENTAGE, WUM_TOKEN } from "../../constants/globals";
+import { useAccount } from "../../utils/account";
+import { LogCurveV0, TokenBondingV0 } from "../../spl-token-bonding-api/state";
 
-interface BuyProps {
-  creatorInfo: CreatorInfo;
-}
-
-export default ({ creatorInfo }: BuyProps) => {
+export default () => {
   const connection = useConnection();
-  const baseMint = useMint(creatorInfo.tokenBonding.baseMint)
-  const targetMint = useMint(creatorInfo.tokenBonding.targetMint)
+  const baseMint = useMint(SOL_TOKEN)
+  const targetMint = useMint(WUM_TOKEN)
+  const { info: tokenBonding } = useAccount(WUM_BONDING, TokenBondingV0.fromAccount)
+  const { info: curve } = useAccount(tokenBonding?.curve, LogCurveV0.fromAccount)
   const { wallet, awaitingApproval } = useWallet();
   const doBuy = async (baseAmount: number, targetAmount: number) => {
     await buy(wallet)(
       connection,
-      creatorInfo.tokenBonding.publicKey,
-      targetAmount
+      WUM_BONDING,
+      targetAmount,
     )
   }
-  const { execute } = useAsyncCallback(doBuy);
-
-  if (!baseMint || !targetMint) {
+  const { execute, loading, error } = useAsyncCallback(doBuy);
+  
+  if (!curve || !baseMint || !targetMint) {
     return <div>Loading...</div>
   }
 
   return <Swap
     base={{
-      key: creatorInfo.tokenBonding.baseMint,
-      name: 'WUM',
+      key: SOL_TOKEN,
+      name: 'SOL',
       price: logCurve(
-        creatorInfo.curve, 
+        curve, 
         baseMint,
         targetMint, 
-        creatorInfo.tokenBonding.founderRewardPercentage
+        WUM_REWARDS_PERCENTAGE
       )
     }}
     target={{
-      key: creatorInfo.tokenBonding.targetMint,
+      key: WUM_TOKEN,
       name: "NXX2",
       price: inverseLogCurve(
-        creatorInfo.curve, 
+        curve, 
         baseMint,
         targetMint, 
-        creatorInfo.tokenBonding.founderRewardPercentage
+        WUM_REWARDS_PERCENTAGE
       )
     }}
     swap={execute}

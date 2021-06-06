@@ -1,0 +1,45 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Debug executable 'spl-wumbo'",
+            "cargo": {
+                "args": [
+                    "build",
+                    "--bin=spl-wumbo",
+                    "--package=spl-wumbo-cli"
+                ],
+                "filter": {
+                    "name": "spl-wumbo",
+                    "kind": "bin"
+                }
+            },
+            "args": ["create-wumbo-instance", "bDYz78Px4d7epP62KzURwi52YNbxGXF2uiWYBgAGALK", "G2fZhrY9LqVyuxouiD4nX56441MZDghH9oyDmjnCRJeL"],
+            "cwd": "${workspaceFolder}"
+        },
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Debug unit tests in executable 'spl-wumbo'",
+            "cargo": {
+                "args": [
+                    "test",
+                    "--no-run",
+                    "--bin=spl-wumbo",
+                    "--package=spl-wumbo-cli"
+                ],
+                "filter": {
+                    "name": "spl-wumbo",
+                    "kind": "bin"
+                }
+            },
+            "args": [],
+            "cwd": "${workspaceFolder}"
+        }
+    ]
+}

@@ -100,7 +100,7 @@ export const useCreator = (name: string): UseAccountState<WumboCreator> => {
   return useAccount(key, WumboCreator.fromAccount);
 };
 
-interface CreatorInfo {
+export interface CreatorInfo {
   name: string;
   coinPriceUsd: number;
   coinPrice: number;

@@ -8,6 +8,7 @@ import Buy from "./Buy";
 import Sell from "./Sell";
 
 import "./CreatorView.css";
+import GetWUM from "./GetWUM";
 
 const { TabPane } = Tabs;
 
@@ -37,10 +38,13 @@ export default ({
           {creatorInfo?.creator && (
             <>
               <TabPane tab="Buy" key="buy">
-                <Buy creator={creatorInfo?.creator} />
+                <Buy creatorInfo={creatorInfo} />
               </TabPane>
               <TabPane tab="Sell" key="sell">
-                <Sell creator={creatorInfo?.creator} />
+                <Sell creatorInfo={creatorInfo} />
+              </TabPane>
+              <TabPane tab="Get WUM" key="wum">
+                <GetWUM />
               </TabPane>
             </>
           )}

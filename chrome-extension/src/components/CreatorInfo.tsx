@@ -1,9 +1,9 @@
-import React, { useState, useRef, useEffect } from "react"
-import { Button, Popover, Tag } from "antd"
-import { DownOutlined } from "@ant-design/icons"
-import { useCreatorInfo } from "../utils/creatorState"
-import CreatorView from "./creator-view/CreatorView"
-import Loading from "./Loading"
+import React, { useState, useRef, useEffect } from "react";
+import { Button, Popover, Tag } from "antd";
+import { DownOutlined } from "@ant-design/icons";
+import { useCreatorInfo } from "../utils/creatorState";
+import CreatorView from "./creator-view/CreatorView";
+import Loading from "./Loading";
 import {
   WUMBO_INSTANCE_KEY,
   WUMBO_PROGRAM_ID,
@@ -26,26 +26,26 @@ interface CreatorInfoProps {
 }
 
 interface InterceptorProps {
-  onClick?: any
-  children: any
+  onClick?: any;
+  children: any;
 }
 
 const ClickInterceptor = ({ onClick, children, ...rest }: InterceptorProps) => {
   const handleClick = (e: React.MouseEvent<HTMLButtonElement>) => {
-    e.preventDefault()
-    e.stopPropagation()
+    e.preventDefault();
+    e.stopPropagation();
     if (onClick) {
-      onClick()
+      onClick();
     }
-  }
+  };
   return (
     <button className="interceptor-button" onClick={handleClick} tabIndex={0}>
       <Tag>
         {children} <DownOutlined />
       </Tag>
     </button>
-  )
-}
+  );
+};
 
 export default ({ creatorName, creatorImg }: CreatorInfoProps) => {
   const creatorInfoState = useCreatorInfo(creatorName);
@@ -109,5 +109,5 @@ export default ({ creatorName, creatorImg }: CreatorInfoProps) => {
         ${creatorInfo?.coinPriceUsd.toFixed(2)}
       </ClickInterceptor>
     </Popover>
-  )
-}
+  );
+};

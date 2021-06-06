@@ -15,7 +15,7 @@ import {
 } from "@bonfida/spl-name-service";
 import { Token, MintLayout, AccountLayout } from "@solana/spl-token";
 import { initializeCreatorInstruction } from "./instruction";
-import { WumboCreator, WumboInstance } from "./state";
+import { Mint, WumboCreator, WumboInstance } from "./state";
 import { initializeTokenBondingV0Instruction } from "../spl-token-bonding-api/instruction";
 import {
   buyV0Instruction,
@@ -23,6 +23,8 @@ import {
 } from "../spl-token-bonding-api/instruction";
 import { TokenBondingV0 } from "../spl-token-bonding-api/state";
 import { WalletAdapter } from "@solana/wallet-base";
+
+export const SOL_TOKEN = new PublicKey("So11111111111111111111111111111111111111112")
 
 export type CreateWumboCreatorParams = {
   splWumboProgramId: PublicKey;
@@ -39,20 +41,20 @@ export type CreateWumboCreatorParams = {
   nameParent?: PublicKey;
 };
 
-export type BuyCreatorCoinsWithWalletParams = {
+export type BuyBondingWithWalletParams = {
   splTokenBondingProgramId: PublicKey;
   splAssociatedTokenAccountProgramId: PublicKey;
   splTokenProgramId: PublicKey;
-  wumboCreator: PublicKey;
+  tokenBonding: PublicKey;
   purchaserWallet: WalletAdapter;
   amount: number;
 };
 
-export type SellCreatorCoinsWithWalletParams = {
+export type SellBondingWithWalletParams = {
   splTokenBondingProgramId: PublicKey;
   splAssociatedTokenAccountProgramId: PublicKey;
   splTokenProgramId: PublicKey;
-  wumboCreator: PublicKey;
+  tokenBonding: PublicKey;
   sellerWallet: WalletAdapter;
   amount: number;
 };
@@ -286,63 +288,63 @@ async function createAssociatedTokenAccountInstruction(
     owner
   );
 }
-export async function buyCreatorCoinsWithWallet(
+
+export async function buyBondingWithWallet(
   connection: Connection,
-  params: BuyCreatorCoinsWithWalletParams
+  params: BuyBondingWithWalletParams
 ): Promise<void> {
   if (!params.purchaserWallet.publicKey) {
     throw new Error("Invalid purchaser wallet");
   }
 
-  const creator = await WumboCreator.retrieve(connection, params.wumboCreator);
-  if (!creator) {
-    throw new Error("Creator not found");
-  }
   if (params.amount < 0) {
     throw new Error("Amount must be positive");
   }
 
   const tokenBonding = await TokenBondingV0.retrieve(
     connection,
-    creator.tokenBonding
+    params.tokenBonding
   );
 
   if (!tokenBonding) {
-    throw new Error(`No token bonding at ${creator.tokenBonding}`);
+    throw new Error(`No token bonding at ${params.tokenBonding}`);
   }
 
   const instructions = [];
+  const getAssociatedAccountOrCreate = async (mint: PublicKey) => {
+    if (!params.purchaserWallet.publicKey) {
+      throw new Error("Invalid purchaser wallet");
+    }
 
-  const wumboInstance = await WumboInstance.retrieve(
-    connection,
-    creator.wumboInstance
-  );
+    if (tokenBonding.baseMint.toBase58() == SOL_TOKEN.toBase58()) {
+      return params.purchaserWallet.publicKey;
+    }
 
-  const purchaseAccount = await findAssociatedTokenAddress(
-    params.purchaserWallet.publicKey,
-    wumboInstance.wumboMint,
-    params.splTokenProgramId,
-    params.splAssociatedTokenAccountProgramId
-  );
-  const destinationAccount = await findAssociatedTokenAddress(
-    params.purchaserWallet.publicKey,
-    tokenBonding.targetMint,
-    params.splTokenProgramId,
-    params.splAssociatedTokenAccountProgramId
-  );
-  const acctExists = await connection.getAccountInfo(destinationAccount);
-  if (!acctExists) {
-    console.log("Creating destination account...");
-    instructions.push(
-      await createAssociatedTokenAccountInstruction(
-        connection,
-        tokenBonding.targetMint,
-        params.purchaserWallet.publicKey,
-        params.splTokenProgramId,
-        params.splAssociatedTokenAccountProgramId
-      )
+    const account = await findAssociatedTokenAddress(
+      params.purchaserWallet.publicKey,
+      mint,
+      params.splTokenProgramId,
+      params.splAssociatedTokenAccountProgramId
     );
+    const acctExists = await connection.getAccountInfo(account);
+    if (!acctExists) {
+      console.log(`Creating account ${account.toBase58()}`);
+      instructions.push(
+        await createAssociatedTokenAccountInstruction(
+          connection,
+          mint,
+          params.purchaserWallet.publicKey,
+          params.splTokenProgramId,
+          params.splAssociatedTokenAccountProgramId
+        )
+      );
+    }
+
+    return account
   }
+
+  const purchaseAccount = await getAssociatedAccountOrCreate(tokenBonding.baseMint);
+  const destinationAccount = await getAssociatedAccountOrCreate(tokenBonding.targetMint);
 
   const [targetMintAuthority] = await PublicKey.findProgramAddress(
     [
@@ -356,9 +358,9 @@ export async function buyCreatorCoinsWithWallet(
     buyV0Instruction(
       params.splTokenBondingProgramId,
       params.splTokenProgramId,
-      creator.tokenBonding,
+      params.tokenBonding,
       tokenBonding.curve,
-      wumboInstance.wumboMint,
+      tokenBonding.baseMint,
       tokenBonding.targetMint,
       targetMintAuthority,
       tokenBonding.founderRewards,
@@ -373,65 +375,66 @@ export async function buyCreatorCoinsWithWallet(
   await sendTransaction(connection, instructions, params.purchaserWallet);
 
   console.log(
-    `Bought ${params.amount} creator coins from ${purchaseAccount} to ${destinationAccount}`
+    `Bought ${params.amount} coins from ${purchaseAccount} to ${destinationAccount}`
   );
 }
 
-export async function sellCreatorCoinsWithWallet(
+export async function sellBondingWithWallet(
   connection: Connection,
-  params: SellCreatorCoinsWithWalletParams
+  params: SellBondingWithWalletParams
 ): Promise<void> {
   if (!params.sellerWallet.publicKey) {
     throw new Error("Invalid seller wallet");
   }
 
-  const creator = await WumboCreator.retrieve(connection, params.wumboCreator);
-  if (!creator) {
-    throw new Error("Creator not found");
-  }
   if (params.amount < 0) {
     throw new Error("Amount must be positive");
   }
 
   const tokenBonding = await TokenBondingV0.retrieve(
     connection,
-    creator.tokenBonding
+    params.tokenBonding
   );
 
   if (!tokenBonding) {
-    throw new Error(`No token bonding at ${creator.tokenBonding}`);
+    throw new Error(`No token bonding at ${params.tokenBonding}`);
   }
 
   const instructions = [];
+  const getAssociatedAccountOrCreate = async (mint: PublicKey) => {
+    if (!params.sellerWallet.publicKey) {
+      throw new Error("Invalid purchaser wallet");
+    }
 
-  const wumboInstance = await WumboInstance.retrieve(
-    connection,
-    creator.wumboInstance
-  );
-  const sellAccount = await findAssociatedTokenAddress(
-    params.sellerWallet.publicKey,
-    tokenBonding.targetMint,
-    params.splTokenProgramId,
-    params.splAssociatedTokenAccountProgramId
-  );
-  const destinationAccount = await findAssociatedTokenAddress(
-    params.sellerWallet.publicKey,
-    wumboInstance.wumboMint,
-    params.splTokenProgramId,
-    params.splAssociatedTokenAccountProgramId
-  );
-  const acctExists = await connection.getAccountInfo(destinationAccount);
-  if (!acctExists) {
-    instructions.push(
-      await createAssociatedTokenAccountInstruction(
-        connection,
-        wumboInstance.wumboMint,
-        params.sellerWallet.publicKey,
-        params.splTokenProgramId,
-        params.splAssociatedTokenAccountProgramId
-      )
+    if (mint.toBase58() == SOL_TOKEN.toBase58()) {
+      return params.sellerWallet.publicKey
+    }
+
+    const account = await findAssociatedTokenAddress(
+      params.sellerWallet.publicKey,
+      mint,
+      params.splTokenProgramId,
+      params.splAssociatedTokenAccountProgramId
     );
+    const acctExists = await connection.getAccountInfo(account);
+    if (!acctExists) {
+      console.log(`Creating account ${account.toBase58()}`);
+      instructions.push(
+        await createAssociatedTokenAccountInstruction(
+          connection,
+          mint,
+          params.sellerWallet.publicKey,
+          params.splTokenProgramId,
+          params.splAssociatedTokenAccountProgramId
+        )
+      );
+    }
+
+    return account
   }
+
+  const sellAccount = await getAssociatedAccountOrCreate(tokenBonding.targetMint)
+  const destinationAccount = await getAssociatedAccountOrCreate(tokenBonding.baseMint)
 
   const [baseStorageAuthority, _] = await PublicKey.findProgramAddress(
     [
@@ -445,9 +448,9 @@ export async function sellCreatorCoinsWithWallet(
     sellV0Instruction(
       params.splTokenBondingProgramId,
       params.splTokenProgramId,
-      creator.tokenBonding,
+      params.tokenBonding,
       tokenBonding.curve,
-      wumboInstance.wumboMint,
+      tokenBonding.baseMint,
       tokenBonding.targetMint,
       tokenBonding.baseStorage,
       baseStorageAuthority,
@@ -461,6 +464,6 @@ export async function sellCreatorCoinsWithWallet(
   await sendTransaction(connection, instructions, params.sellerWallet);
 
   console.log(
-    `Burned ${params.amount} creator coins from ${sellAccount} to ${destinationAccount}`
+    `Burned ${params.amount} coins from ${sellAccount} to ${destinationAccount}`
   );
 }

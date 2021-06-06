@@ -2,7 +2,7 @@ use std::convert::TryInto;
 
 use solana_program::program::{invoke, invoke_signed};
 use solana_program::{program_error::ProgramError, system_instruction};
-use spl_token::solana_program::program_pack::Pack;
+use spl_token::{native_mint, solana_program::program_pack::Pack};
 
 use {
     crate::{
@@ -62,19 +62,6 @@ pub fn process_instruction(
             msg!("Instruction: Sell V0");
             process_sell_v0(program_id, accounts, amount)
         }
-    }
-}
-
-/// Unpacks a spl_token `Account`.
-pub fn unpack_token_account(
-    account_info: &AccountInfo,
-    token_program_id: &Pubkey,
-) -> Result<spl_token::state::Account, TokenBondingError> {
-    if account_info.owner != token_program_id {
-        Err(TokenBondingError::InvalidTokenProgramId)
-    } else {
-        spl_token::state::Account::unpack(&account_info.data.borrow())
-            .map_err(|_| TokenBondingError::ExpectedAccount)
     }
 }
 
@@ -299,13 +286,12 @@ fn process_buy_v0(program_id: &Pubkey, accounts: &[AccountInfo], amount: u64) ->
     let destination = next_account_info(accounts_iter)?;
     let token_program = next_account_info(accounts_iter)?;
     let token_program_id = token_program.key;
+    let system_account_info = next_account_info(accounts_iter)?;
 
     let token_bonding_data: TokenBondingV0 =
         try_from_slice_unchecked(*token_bonding.data.borrow())?;
     let target_mint_key = token_bonding_data.target_mint;
     let (target_mint_authority_key, bump) = target_authority(program_id, target_mint.key);
-
-    let purchase_account_data = unpack_token_account(purchase_account, token_program_id)?;
 
     if target_mint_key != *target_mint.key {
         return Err(TokenBondingError::InvalidTargetMint.into());
@@ -335,12 +321,18 @@ fn process_buy_v0(program_id: &Pubkey, accounts: &[AccountInfo], amount: u64) ->
         return Err(TokenBondingError::InvalidTargetMint.into());
     }
 
-    if token_bonding_data.base_mint != purchase_account_data.mint {
-        return Err(TokenBondingError::InvalidTargetMint.into());
-    }
-
-    let price = curve_data.price(base_mint_data.supply, target_mint_data.supply, amount);
-    let founder_cut = amount * (token_bonding_data.founder_reward_percentage as u64) / 10000;
+    let base_supply = if *base_mint.key == native_mint::id() {
+        1036191464675693800_u64 // TODO: Actually get supply
+    } else {
+        base_mint_data.supply
+    };
+    let price = curve_data.price(base_supply, target_mint_data.supply, amount);
+    let founder_rewards_decimal = if token_bonding_data.founder_reward_percentage == 0 {
+        1
+    } else {
+        (token_bonding_data.founder_reward_percentage as u64) / 10000
+    };
+    let founder_cut = amount * founder_rewards_decimal;
     let purchaser_cut = amount - founder_cut;
 
     msg!(
@@ -349,24 +341,43 @@ fn process_buy_v0(program_id: &Pubkey, accounts: &[AccountInfo], amount: u64) ->
         price
     );
     msg!("Paying into base storage");
-    let pay_money = spl_token::instruction::transfer(
-        &token_program_id,
-        purchase_account.key,
-        base_storage.key,
-        purchase_authority.key,
-        &[],
-        price,
-    )?;
-    invoke_signed(
-        &pay_money,
-        &[
-            purchase_account.clone(),
-            base_storage.clone(),
-            purchase_authority.clone(),
-            token_program.clone(),
-        ],
-        &[],
-    )?;
+    if *base_mint.key == native_mint::id() {
+        let pay_money = system_instruction::transfer(
+           purchase_account.key, 
+           base_storage.key, 
+           price
+        );
+        invoke_signed(
+            &pay_money,
+            &[
+                purchase_account.clone(),
+                base_storage.clone(),
+                system_account_info.clone(),
+            ],
+            &[],
+        )?;
+    } else { 
+        let pay_money = spl_token::instruction::transfer(
+            &token_program_id,
+            purchase_account.key,
+            base_storage.key,
+            purchase_authority.key,
+            &[],
+            price,
+        )?;
+        invoke_signed(
+            &pay_money,
+            &[
+                purchase_account.clone(),
+                base_storage.clone(),
+                purchase_authority.clone(),
+                token_program.clone(),
+            ],
+            &[],
+        )?;
+    };
+     
+    
     msg!("Done");
 
     let target_mint_authority_seed: &[&[u8]] = &[
@@ -780,7 +791,7 @@ mod tests {
             c: 3,
             initialized: true,
         };
-        assert_eq!(curve.price(4, 0, 1000), 11625);
+        assert_eq!(curve.price(4, 0, 1000), 10983);
     }
 
     #[test]

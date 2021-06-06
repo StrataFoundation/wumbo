@@ -154,6 +154,11 @@ export function buyV0Instruction(
         isSigner: false,
         isWritable: false,
       },
+      {
+        pubkey: SystemProgram.programId,
+        isSigner: false,
+        isWritable: false,
+      },
     ],
     data: Buffer.concat([
       Buffer.from(Int8Array.from([2])),
