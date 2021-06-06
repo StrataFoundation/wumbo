@@ -62,6 +62,7 @@ export default ({ creatorName, creatorImg }: CreatorInfoProps) => {
     return <Loading />;
   }
 
+  console.log(`Loading ${loading}, creator info ${creatorInfo}, wumbo ${wumboInstance}, wallet ${wallet}`)
   if (!loading && !creatorInfo && wumboInstance && wallet) {
     const createCreator = () => {
       setCreationLoading(true);

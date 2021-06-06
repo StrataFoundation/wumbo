@@ -11,17 +11,17 @@ use {
 pub enum TokenBondingInstruction {
     /// Initialize a log curve.
     /// 
-    /// If normal log curve, c * log(1 + (numerator * x) / denominator)
-    /// If base relative, c * log(1 + (numerator * x) / (denominator * base_supply))
+    /// If normal log curve, c * log(1 + (g * x))
+    /// If base relative, c * log(1 + (g * x) / (base_supply))
     ///
     ///   0. `[signer]` Payer
     ///   1. `[signer writeable]` Curve to create
     ///   2. `[]` Program id
     ///   3. `[]` Rent sysvar
     CreateLogCurveV0 {
-        numerator: u64,
-        denominator: u64,
-        c: u64,
+        g: f64,
+        base: f64,
+        c: f64,
         is_base_relative: bool
     },
 
@@ -194,9 +194,9 @@ pub fn create_log_curve_v0(
     program_id: &Pubkey,
     payer: &Pubkey,
     curve: &Pubkey,
-    numerator: u64,
-    denominator: u64,
-    c: u64,
+    g: f64,
+    base: f64,
+    c: f64,
     is_base_relative: bool,
 ) -> Instruction {
     Instruction {
@@ -208,8 +208,8 @@ pub fn create_log_curve_v0(
             AccountMeta::new_readonly(sysvar::rent::id(), false),
         ],
         data: TokenBondingInstruction::CreateLogCurveV0 {
-                numerator,
-                denominator,
+                g,
+                base,
                 c,
                 is_base_relative
             }

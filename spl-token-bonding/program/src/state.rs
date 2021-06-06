@@ -58,15 +58,15 @@ pub trait Curve {
     fn price(&self, base_supply: f64, target_supply: f64, amount: f64) -> f64;
 }
 
-/// If normal log curve, c * log(1 + (numerator * x) / denominator)
-/// If base relative, c * log(1 + (numerator * x) / (denominator * base_supply))
+/// If normal log curve, base + c * log(1 + (g * x))
+/// If base relative, base + c * log(1 + (g * x) / (1 + base_supply))
 #[repr(C)]
 #[derive(BorshSerialize, BorshDeserialize, PartialEq, Debug, Clone)]
 pub struct LogCurveV0 {
     pub key: Key,
-    pub numerator: u64,
-    pub denominator: u64,
-    pub c: u64,
+    pub g: f64,
+    pub base: f64,
+    pub c: f64,
     pub initialized: bool
 }
 impl Sealed for LogCurveV0 {}
@@ -105,15 +105,15 @@ pub fn ln(x: f32) -> f32 {
     0.69314718_f32 * log2(x)
 }
 
-/// Integral of c * log(1 + g * x) dx from a to b Here g = numerator / denominator
+/// Integral of base + c * log(1 + g * x) dx from a to b
 /// https://www.wolframalpha.com/input/?i=c+*+log%281+%2B+g+*+x%29+dx
-fn log_curve(c: f64, g: f64, a: f64, b: f64) -> f64 {
+fn log_curve(c: f64, g: f64, base: f64, a: f64, b: f64) -> f64 {
     let general = |x: f64| {
         let inv_g = 1_f64 / g;
         let inside = (1_f64 + (g * x)) as f32;
         let log = ln(inside) as f64;
         let log_mult = (inv_g + x) * log;
-        c * (log_mult - x)
+        (base * x) + c * (log_mult - x)
     };
     general(b) - general(a)
 }
@@ -125,11 +125,11 @@ impl Curve for LogCurveV0 {
 
     fn price(&self, base_supply: f64, target_supply: f64, amount: f64) -> f64 {
         let g: f64 = if self.key == Key::BaseRelativeLogCurveV0 {
-            (self.numerator as f64) / (self.denominator as f64 * (1_f64 + base_supply))
+            self.g / (1_f64 + base_supply)
         } else {
-            (self.numerator as f64) / (self.denominator as f64)
+            self.g
         };
-        let fvalue = log_curve(self.c as f64, g as f64, target_supply, target_supply + amount);
+        let fvalue = log_curve(self.c as f64, g as f64, self.base as f64, target_supply, target_supply + amount);
         fvalue
     }
 }

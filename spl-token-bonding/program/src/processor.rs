@@ -33,17 +33,17 @@ pub fn process_instruction(
     let instruction = TokenBondingInstruction::try_from_slice(input)?;
     match instruction {
         TokenBondingInstruction::CreateLogCurveV0 {
-            numerator,
-            denominator,
+            g,
             is_base_relative,
+            base,
             c,
         } => {
             msg!("Instruction: Create Log Curve V0");
             process_create_log_curve_v0(
                 program_id,
                 accounts,
-                numerator,
-                denominator,
+                g,
+                base,
                 c,
                 is_base_relative,
             )
@@ -145,9 +145,9 @@ fn unpack_curve(program_id: &Pubkey, curve: &AccountInfo) -> Result<Box<dyn Curv
 fn process_create_log_curve_v0(
     program_id: &Pubkey,
     accounts: &[AccountInfo],
-    numerator: u64,
-    denominator: u64,
-    c: u64,
+    g: f64,
+    base: f64,
+    c: f64,
     is_base_relative: bool,
 ) -> ProgramResult {
     let accounts_iter = &mut accounts.into_iter();
@@ -159,15 +159,20 @@ fn process_create_log_curve_v0(
     if !payer.is_signer {
         return Err(TokenBondingError::MissingSigner.into());
     }
-    create_or_allocate_account_raw(
-        *program_id,
-        curve,
-        rent,
-        system_account_info,
-        payer,
-        LogCurveV0::LEN,
-        &[],
-    )?;
+
+    if *curve.owner != *program_id {
+        return Err(TokenBondingError::InvalidOwner.into());
+    }
+
+    let rent = &Rent::from_account_info(rent)?;
+    let required_lamports = rent
+        .minimum_balance(LogCurveV0::LEN)
+        .max(1)
+        .saturating_sub(curve.lamports());
+
+    if required_lamports > 0 {
+        return Err(TokenBondingError::NotRentExempt.into());
+    }
 
     let new_account_data = LogCurveV0 {
         key: if is_base_relative {
@@ -175,8 +180,8 @@ fn process_create_log_curve_v0(
         } else {
             Key::LogCurveV0
         },
-        numerator,
-        denominator,
+        g,
+        base,
         c,
         initialized: true,
     };
@@ -218,12 +223,14 @@ fn process_initialize_token_bonding_v0(
         return Err(TokenBondingError::InvalidAuthority.into());
     }
         
+    msg!("3");
     if token_bonding_account.data.borrow().len() > 0
         && TokenBondingV0::unpack_unchecked(&token_bonding_account.data.borrow())?.initialized
     {
         return Err(TokenBondingError::AlreadyInitialized.into());
     }
 
+    msg!("4");
     if *target_mint.owner != *base_mint.owner
         || *founder_rewards.owner != *base_mint.owner
         || *base_storage.owner != *founder_rewards.owner
@@ -231,6 +238,7 @@ fn process_initialize_token_bonding_v0(
         return Err(TokenBondingError::InvalidTokenProgramId.into());
     }
 
+    msg!("5");
     if founder_rewards_data.mint != *target_mint.key {
         return Err(TokenBondingError::InvalidTargetMint.into());
     }
@@ -243,16 +251,23 @@ fn process_initialize_token_bonding_v0(
         return Err(TokenBondingError::InvalidAuthority.into());
     }
 
-    create_or_allocate_account_raw(
-        *program_id,
-        token_bonding_account,
-        rent,
-        system_account_info,
-        payer,
-        TokenBondingV0::LEN,
-        &[],
-    )?;
+    if *token_bonding_account.owner != *program_id {
+        return Err(TokenBondingError::InvalidOwner.into());
+    }
 
+    msg!("6");
+
+    let rent = &Rent::from_account_info(rent)?;
+    let required_lamports = rent
+        .minimum_balance(TokenBondingV0::LEN)
+        .max(1)
+        .saturating_sub(token_bonding_account.lamports());
+
+    if required_lamports > 0 {
+        return Err(TokenBondingError::NotRentExempt.into());
+    }
+
+    msg!("7");
     let new_account_data = TokenBondingV0 {
         key: Key::TokenBondingV0,
         target_mint: *target_mint.key,
@@ -730,9 +745,9 @@ mod tests {
                 &fixture.program_id,
                 &fixture.payer_key,
                 &fixture.curve_key,
-                1,
-                2,
-                3,
+                1_f64,
+                2_f64,
+                3_f64,
                 true,
             ),
             vec![
@@ -780,9 +795,9 @@ mod tests {
         assert_eq!(Ok(()), create_curve(&mut fixture));
 
         let res: LogCurveV0 = try_from_slice_unchecked::<LogCurveV0>(&fixture.curve.data).unwrap();
-        assert_eq!(res.numerator, 1);
-        assert_eq!(res.denominator, 2);
-        assert_eq!(res.c, 3);
+        assert_eq!(res.g, 1_f64);
+        assert_eq!(res.base, 2_f64);
+        assert_eq!(res.c, 3_f64);
         assert_eq!(res.key, Key::BaseRelativeLogCurveV0);
     }
 
@@ -804,12 +819,12 @@ mod tests {
     fn test_price() {
         let curve = LogCurveV0 {
             key: Key::BaseRelativeLogCurveV0,
-            numerator: 1,
-            denominator: 2,
-            c: 3,
+            g: 1_f64,
+            base: 2_f64,
+            c: 3_f64,
             initialized: true,
         };
-        assert_eq!(curve.price(4.0, 0.0, 1000.0), 10983.719536767996);
+        assert_eq!(curve.price(4.0, 0.0, 1000.0), 14989.378789418239);
         // assert_eq!(curve.price(1036191464.675693800_f64, 0_f64, 143954.401024911_f64), 1.000000000_f64)
     }
 
@@ -880,7 +895,8 @@ mod tests {
                     &mut purchase_account,
                     &mut purchase_authority,
                     &mut destination,
-                    &mut token_program
+                    &mut token_program,
+                    &mut program_id_sysvar()
                 ],
             )
         );

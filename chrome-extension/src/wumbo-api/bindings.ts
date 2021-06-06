@@ -208,7 +208,17 @@ export async function createWumboCreator(
     connection,
     params.wumboInstance
   );
+  const balance = await connection.getMinimumBalanceForRentExemption(TokenBondingV0.LEN)
 
+  instructions.push(
+    SystemProgram.createAccount({
+      fromPubkey: params.payer.publicKey,
+      newAccountPubkey: tokenBonding.publicKey,
+      lamports: balance,
+      space: TokenBondingV0.LEN,
+      programId: params.splTokenBondingProgramId
+    })
+  )
   instructions.push(
     initializeTokenBondingV0Instruction(
       params.splTokenBondingProgramId,

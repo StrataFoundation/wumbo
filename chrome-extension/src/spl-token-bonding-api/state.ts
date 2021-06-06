@@ -1,8 +1,15 @@
-import { Numberu16, Numberu8 } from "./utils";
+import { Numberu16 } from "./utils";
 import { AccountInfo, Connection, PublicKey } from "@solana/web3.js";
-import { deserializeUnchecked, Schema } from "@bonfida/borsh-js";
-import { u64 } from "@solana/spl-token";
+import { deserializeUnchecked,deserialize, Schema } from "@bonfida/borsh-js";
 import { Numberu64 } from "@bonfida/spl-name-service";
+
+function decodef64(arg: Uint8Array): number {
+  const x = new ArrayBuffer(8);
+  const y = new DataView(x);
+  arg.forEach((i: any, idx: number) => y.setUint8(idx, i));
+
+  return y.getFloat64(0, true);
+}
 
 export class TokenBondingV0 {
   // @ts-ignore
@@ -16,7 +23,7 @@ export class TokenBondingV0 {
   curve: PublicKey;
   initialized: boolean;
 
-  static LEN = 1 + 32 * 4 + 2 + 1 + 1;
+  static LEN = 1 + 32 * 6 + 2 + 1;
 
   static schema: Schema = new Map([
     [
@@ -92,9 +99,9 @@ export class TokenBondingV0 {
 export class LogCurveV0 {
   // @ts-ignore
   publicKey: PublicKey; // Gets set on retrieve
-  numerator: Numberu64;
-  denominator: Numberu64;
-  c: Numberu64;
+  g: number;
+  base: number;
+  c: number;
   isBaseRelative: boolean;
   initialized: boolean;
 
@@ -106,11 +113,11 @@ export class LogCurveV0 {
       {
         kind: "struct",
         fields: [
-          ["key", [1]],
-          ["numerator", [8]],
-          ["denominator", [8]],
+          ["key", 'u8'],
+          ["g", [8]],
+          ["base", [8]],
           ["c", [8]],
-          ["initialized", [1]],
+          ["initialized", 'u8'],
         ],
       },
     ],
@@ -118,20 +125,21 @@ export class LogCurveV0 {
 
   constructor(obj: {
     key: Uint8Array;
-    numerator: Uint8Array;
-    denominator: Uint8Array;
+    g: Uint8Array;
+    base: Uint8Array;
     c: Uint8Array;
     initialized: Uint8Array;
   }) {
+    const u64 = Numberu64;
     this.isBaseRelative = obj.key[0] == 2;
-    this.numerator = new Numberu64(obj.numerator, "le");
-    this.denominator = new Numberu64(obj.numerator, "le");
-    this.c = new Numberu64(obj.numerator, "le");
+    this.g = decodef64(obj.g);
+    this.base = decodef64(obj.base);
+    this.c = decodef64(obj.c);
     this.initialized = obj.initialized[0] === 1;
   }
 
   static fromAccount(key: PublicKey, account: AccountInfo<Buffer>): LogCurveV0 {
-    const value = deserializeUnchecked(
+    const value = deserialize(
       LogCurveV0.schema,
       LogCurveV0,
       account.data

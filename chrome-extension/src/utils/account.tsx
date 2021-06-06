@@ -55,7 +55,10 @@ export function useAccount<T>(
           account: acc.account,
         })
       )
-      .catch((err) => console.log(err));
+      .catch((err) => {
+        console.log(err)
+        setState({ loading: false })
+      });
 
     const dispose = cache.emitter.onCache((e) => {
       const event = e;

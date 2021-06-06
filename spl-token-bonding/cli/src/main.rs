@@ -23,12 +23,14 @@ use spl_token::state::{Mint, Account};
 use spl_token_bonding::{
     instruction::{create_log_curve_v0, initialize_token_bonding_v0},
     processor::{target_authority, storage_authority},
+    state::{LogCurveV0, TokenBondingV0}
 };
 
 const TOKEN_SWAP_PROGRAM_ID_STR: &str = "F2LtPFtixA8vKbg8ark5zswM4QuJKBn85KZcqrzWNe4K";
 const TOKEN_PROGRAM_ID_STR: &str = "CiBbJADtSJnVQEsgXZpRfLyLNqDjwfvua8EMe9tPhKvo";
 const NAME_PROGRAM_ID_STR: &str = "CiBbJADtSJnVQEsgXZpRfLyLNqDjwfvua8EMe9tPhKvo";
-const TOKEN_BONDING_PROGRAM_ID_STR: &str = "G6ibxBmysVJtEyQJ2smdbSXSMVpTMzAWQVThpPPPdVdD";
+// const TOKEN_BONDING_PROGRAM_ID_STR: &str = "G6ibxBmysVJtEyQJ2smdbSXSMVpTMzAWQVThpPPPdVdD";
+const TOKEN_BONDING_PROGRAM_ID_STR: &str = "4nLkwgHWLqsQscwxwSMwWKL43433mfG8ZYr9UFMYQ8eg";
 
 fn main() {
     let default_decimals = &format!("{}", native_mint::DECIMALS);
@@ -74,22 +76,22 @@ fn main() {
             SubCommand::with_name("create-log-curve")
                 .about("Create a new log curve")
                 .arg(
-                    Arg::with_name("numerator")
-                        .long("numerator")
+                    Arg::with_name("g")
+                        .long("g")
                         .validator(is_parsable::<u8>)
-                        .value_name("NUMERATOR")
+                        .value_name("g")
                         .takes_value(true)
                         .index(1)
-                        .help("Numerator in the log equation"),
+                        .help("g in the log equation"),
                 )
                 .arg(
-                    Arg::with_name("denominator")
-                        .long("denominator")
-                        .validator(is_parsable::<u8>)
+                    Arg::with_name("base")
+                        .long("base")
+                        .validator(is_parsable::<f64>)
                         .value_name("DENOMINATOR")
                         .takes_value(true)
                         .index(2)
-                        .help("Denominator in the log equation"),
+                        .help("Base in the log equation"),
                 )
                 .arg(
                     Arg::with_name("c")
@@ -197,20 +199,30 @@ fn main() {
 
     match (sub_command, sub_matches) {
         ("create-log-curve", Some(arg_matches)) => {
-            let numerator = value_t_or_exit!(arg_matches, "numerator", u64);
-            let denominator = value_t_or_exit!(arg_matches, "denominator", u64);
-            let c = value_t_or_exit!(arg_matches, "c", u64);
+            let g = value_t_or_exit!(arg_matches, "g", f64);
+            let base = value_t_or_exit!(arg_matches, "base", f64);
+            let c = value_t_or_exit!(arg_matches, "c", f64);
             let is_base_relative = value_t_or_exit!(arg_matches, "base-relative", bool);
             let curve = Keypair::new();
             let curve_key = curve.pubkey();
+            let balance = client
+                .get_minimum_balance_for_rent_exemption(LogCurveV0::LEN)
+                .unwrap();
 
             let instructions = [
+                create_account(
+                    &fee_payer.pubkey(),
+                    &curve_key,
+                    balance,
+                    LogCurveV0::LEN as u64,
+                    &TOKEN_BONDING_PROGRAM_ID,
+                ),
                 create_log_curve_v0(
                     &TOKEN_BONDING_PROGRAM_ID,
                     &fee_payer.pubkey(),
                     &curve_key,
-                    numerator,
-                    denominator,
+                    g,
+                    base,
                     c,
                     is_base_relative,
                 ),
@@ -251,7 +263,18 @@ fn main() {
 
             let token_bonding = Keypair::new();
             let token_bonding_key = token_bonding.pubkey();
-            let create_instructions: Vec<Instruction> = vec![initialize_token_bonding_v0(
+            let balance = client
+                .get_minimum_balance_for_rent_exemption(TokenBondingV0::LEN)
+                .unwrap();
+            let create_instructions: Vec<Instruction> = vec![
+                create_account(
+                    &fee_payer.pubkey(),
+                    &token_bonding_key,
+                    balance,
+                    TokenBondingV0::LEN as u64,
+                    &TOKEN_BONDING_PROGRAM_ID,
+                ),
+                initialize_token_bonding_v0(
                 &TOKEN_BONDING_PROGRAM_ID,
                 &fee_payer.pubkey(),
                 &token_bonding_key,

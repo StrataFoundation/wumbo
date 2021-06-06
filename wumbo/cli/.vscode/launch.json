@@ -19,7 +19,7 @@
                     "kind": "bin"
                 }
             },
-            "args": ["create-wumbo-instance", "bDYz78Px4d7epP62KzURwi52YNbxGXF2uiWYBgAGALK", "G2fZhrY9LqVyuxouiD4nX56441MZDghH9oyDmjnCRJeL"],
+            "args": ["create-wumbo-instance", "J8uYVk8Xf8n6TZpeY9j9kpQrUBsuqXodJt9SLyp5JP4h", "AeL3bFcAZ7Chwf99pRes4RgBLymu4t9tdoQqNsg822Tk"],
             "cwd": "${workspaceFolder}"
         },
         {

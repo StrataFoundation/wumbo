@@ -20,13 +20,13 @@ let connection = new Connection("https://api.mainnet-beta.solana.com");
 
 const UsdWumboPriceContext = React.createContext<number | undefined>(undefined);
 
-function generalLogCurve(c: number, g: number, x: number): number {
-  return c * ((1 / g + x) * Math.log(1 + g * x) - x);
+function generalLogCurve(c: number, g: number, base: number, x: number): number {
+  return (base * x) + c * ((1 / g + x) * Math.log(1 + g * x) - x);
 }
-/// Integral of c * log(1 + g * x) dx from a to b Here g = numerator / denominator
+/// Integral of base + c * log(1 + g * x) dx from a to b 
 /// https://www.wolframalpha.com/input/?i=c+*+log%281+%2B+g+*+x%29+dx
-function logCurveRange(c: number, g: number, a: number, b: number): number {
-  return generalLogCurve(c, g, b) - generalLogCurve(c, g, a);
+function logCurveRange(c: number, g: number, base: number, a: number, b: number): number {
+  return generalLogCurve(c, g, base, b) - generalLogCurve(c, g, base, a);
 }
 
 function supplyAsNum(mint: MintInfo): number {
@@ -48,15 +48,15 @@ export const inverseLogCurve = (
   target: MintInfo,
   founderRewardsPercentage: number
 ) => (baseAmount: number): number => {
-  const c = curve.c.toNumber();
-  const gNonBaseRel = curve.numerator.toNumber() / curve.denominator.toNumber();
+  const c = curve.c;
+  const gNonBaseRel = curve.g;
   const g = curve.isBaseRelative
     ? gNonBaseRel / (1.0 + supplyAsNum(base))
     : gNonBaseRel;
   const s = supplyAsNum(target);
   const rewardsDecimal =
     founderRewardsPercentage == 0 ? 1 : founderRewardsPercentage / 10000;
-  const k = baseAmount / rewardsDecimal + generalLogCurve(c, g, s);
+  const k = (baseAmount / rewardsDecimal + generalLogCurve(c, g, curve.base, s) - (curve.base * s)) / (1 + curve.base);
   const exp = gsl_sf_lambert_Wm1((g * k - c) / (c * Math.E)) + 1;
 
   return Math.abs((Math.pow(Math.E, exp) - g * s - 1) / g);
@@ -68,8 +68,8 @@ export const logCurve = (
   target: MintInfo,
   founderRewardsPercentage: number
 ) => (targetAmount: number): number => {
-  const c = curve.c.toNumber();
-  const gNonBaseRel = curve.numerator.toNumber() / curve.denominator.toNumber();
+  const c = curve.c;
+  const gNonBaseRel = curve.g;
   const g = curve.isBaseRelative
     ? gNonBaseRel / (1.0 + supplyAsNum(base))
     : gNonBaseRel;
@@ -80,6 +80,7 @@ export const logCurve = (
     logCurveRange(
       c,
       g,
+      curve.base,
       supplyAsNum(target),
       supplyAsNum(target) + targetAmount
     ) * rewardsDecimal

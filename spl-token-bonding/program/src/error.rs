@@ -27,8 +27,8 @@ pub enum TokenBondingError {
     CurveNotInitialized,
 
     /// Lamport balance below rent-exempt threshold for creating mint.
-    #[error("Lamport balance below rent-exempt threshold for creating mint")]
-    MintNotRentExempt,
+    #[error("Lamport balance below rent-exempt threshold for creating token bonding")]
+    NotRentExempt,
 
     #[error("Token program id mismatch between mints")]
     InvalidTokenProgramId,
