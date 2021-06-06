@@ -6,6 +6,7 @@ use {
     solana_program::pubkey::Pubkey,
 };
 
+
 pub const TARGET_AUTHORITY: &str = "target-authority";
 pub const BASE_STORAGE_AUTHORITY: &str = "base-storage-authority";
 
@@ -54,7 +55,7 @@ impl Pack for TokenBondingV0 {
 
 pub trait Curve {
     fn initialized(&self) -> bool;
-    fn price(&self, base_supply: u64, target_supply: u64, amount: u64) -> u64;
+    fn price(&self, base_supply: f64, target_supply: f64, amount: f64) -> f64;
 }
 
 /// If normal log curve, c * log(1 + (numerator * x) / denominator)
@@ -107,7 +108,13 @@ pub fn ln(x: f32) -> f32 {
 /// Integral of c * log(1 + g * x) dx from a to b Here g = numerator / denominator
 /// https://www.wolframalpha.com/input/?i=c+*+log%281+%2B+g+*+x%29+dx
 fn log_curve(c: f64, g: f64, a: f64, b: f64) -> f64 {
-    let general = |x: f64| c * ((((1_f64 / g) + x) * ln(1_f32 + (g * x) as f32) as f64) - x);
+    let general = |x: f64| {
+        let inv_g = 1_f64 / g;
+        let inside = (1_f64 + (g * x)) as f32;
+        let log = ln(inside) as f64;
+        let log_mult = (inv_g + x) * log;
+        c * (log_mult - x)
+    };
     general(b) - general(a)
 }
 
@@ -116,14 +123,14 @@ impl Curve for LogCurveV0 {
         self.initialized
     }
 
-    fn price(&self, base_supply: u64, target_supply: u64, amount: u64) -> u64 {
+    fn price(&self, base_supply: f64, target_supply: f64, amount: f64) -> f64 {
         let g: f64 = if self.key == Key::BaseRelativeLogCurveV0 {
-            (self.numerator as f64) / (self.denominator as f64 * ((1_u64 + base_supply) as f64))
+            (self.numerator as f64) / (self.denominator as f64 * (1_f64 + base_supply))
         } else {
             (self.numerator as f64) / (self.denominator as f64)
         };
-        let fvalue = log_curve(self.c as f64, g as f64, target_supply as f64, target_supply as f64 + amount as f64);
-        fvalue as u64
+        let fvalue = log_curve(self.c as f64, g as f64, target_supply, target_supply + amount);
+        fvalue
     }
 }
 

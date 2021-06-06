@@ -269,6 +269,18 @@ fn process_initialize_token_bonding_v0(
     Ok(())
 }
 
+fn supply_f(mint: Mint) -> f64 {
+    supply_f_amt(mint.supply, mint)
+}
+
+fn supply_f_amt(amt: u64, mint: Mint) -> f64 {
+    (amt as f64) / (10_u32.pow(mint.decimals as u32) as f64)
+}
+
+fn to_lamports(amt: f64, mint: Mint) -> u64 {
+    (amt * (10_u32.pow(mint.decimals as u32) as f64)) as u64
+}
+
 fn process_buy_v0(program_id: &Pubkey, accounts: &[AccountInfo], amount: u64) -> ProgramResult {
     let accounts_iter = &mut accounts.into_iter();
     let token_bonding = next_account_info(accounts_iter)?;
@@ -322,11 +334,14 @@ fn process_buy_v0(program_id: &Pubkey, accounts: &[AccountInfo], amount: u64) ->
     }
 
     let base_supply = if *base_mint.key == native_mint::id() {
-        1036191464675693800_u64 // TODO: Actually get supply
+        1036191464.675693800_f64 // TODO: Actually get supply
     } else {
-        base_mint_data.supply
+        supply_f(base_mint_data)
     };
-    let price = curve_data.price(base_supply, target_mint_data.supply, amount);
+    let price = to_lamports(
+        curve_data.price(base_supply, supply_f(target_mint_data), supply_f_amt(amount, target_mint_data)),
+        base_mint_data
+    );
     let founder_rewards_decimal = if token_bonding_data.founder_reward_percentage == 0 {
         1
     } else {
@@ -336,7 +351,7 @@ fn process_buy_v0(program_id: &Pubkey, accounts: &[AccountInfo], amount: u64) ->
     let purchaser_cut = amount - founder_cut;
 
     msg!(
-        "Attempting to buy {} creator lamports for {} solclout lamports",
+        "Attempting to buy {} target lamports for {} base lamports",
         amount,
         price
     );
@@ -387,7 +402,7 @@ fn process_buy_v0(program_id: &Pubkey, accounts: &[AccountInfo], amount: u64) ->
     ];
 
     // Mint the required lamports
-    msg!("Paying founders {} creator lamports", founder_cut);
+    msg!("Paying founders {} target lamports", founder_cut);
     let give_founder_cut = spl_token::instruction::mint_to(
         &token_program_id,
         &target_mint_key,
@@ -408,7 +423,7 @@ fn process_buy_v0(program_id: &Pubkey, accounts: &[AccountInfo], amount: u64) ->
     )?;
     msg!("Done");
 
-    msg!("Receiving {} creator lamports", purchaser_cut);
+    msg!("Receiving {} target lamports", purchaser_cut);
     let give_purchaser_cut = spl_token::instruction::mint_to(
         &token_program_id,
         &target_mint_key,
@@ -474,14 +489,17 @@ fn process_sell_v0(program_id: &Pubkey, accounts: &[AccountInfo], amount: u64) -
         return Err(TokenBondingError::InvalidTokenBonding.into());
     }
 
-    let reclaimed_amount = curve_data.price(
-        base_mint_data.supply,
-        target_mint_data.supply - amount,
-        amount,
+    let reclaimed_amount = to_lamports(
+        curve_data.price(
+        supply_f(base_mint_data),
+        supply_f(target_mint_data) - supply_f_amt(amount, target_mint_data),
+        supply_f_amt(amount, target_mint_data),
+         ),
+        base_mint_data
     );
 
     msg!(
-        "Attempting to burn {} creator lamports for {} solclout lamports",
+        "Attempting to burn {} target lamports for {} base lamports",
         amount,
         reclaimed_amount
     );
@@ -511,7 +529,7 @@ fn process_sell_v0(program_id: &Pubkey, accounts: &[AccountInfo], amount: u64) -
     )?;
     msg!("Done");
     // Burn the required lamports
-    msg!("Burning  {} creator coins (including decimal)", amount);
+    msg!("Burning  {} target coins (including decimal)", amount);
     let burn = spl_token::instruction::burn(
         &token_program_id.key,
         &sell_account.key,
@@ -791,7 +809,8 @@ mod tests {
             c: 3,
             initialized: true,
         };
-        assert_eq!(curve.price(4, 0, 1000), 10983);
+        assert_eq!(curve.price(4.0, 0.0, 1000.0), 10983.719536767996);
+        // assert_eq!(curve.price(1036191464.675693800_f64, 0_f64, 143954.401024911_f64), 1.000000000_f64)
     }
 
     #[test]
@@ -835,7 +854,7 @@ mod tests {
         assert_eq!(
             Ok(()),
             do_process_instruction(
-                buy_creator_coins(
+                buy_v0_instruction(
                     &fixture.program_id,
                     &fixture.token_bonding_key,
                     &fixture.curve_key,

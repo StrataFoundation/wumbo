@@ -123,10 +123,10 @@ export class LogCurveV0 {
     c: Uint8Array;
     initialized: Uint8Array;
   }) {
-    this.isBaseRelative = obj.key[0] == 2
-    this.numerator = new Numberu64(obj.numerator, 'le');
-    this.denominator = new Numberu64(obj.numerator, 'le');
-    this.c = new Numberu64(obj.numerator, 'le');
+    this.isBaseRelative = obj.key[0] == 2;
+    this.numerator = new Numberu64(obj.numerator, "le");
+    this.denominator = new Numberu64(obj.numerator, "le");
+    this.c = new Numberu64(obj.numerator, "le");
     this.initialized = obj.initialized[0] === 1;
   }
 

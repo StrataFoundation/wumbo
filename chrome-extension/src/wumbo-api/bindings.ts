@@ -24,7 +24,9 @@ import {
 import { TokenBondingV0 } from "../spl-token-bonding-api/state";
 import { WalletAdapter } from "@solana/wallet-base";
 
-export const SOL_TOKEN = new PublicKey("So11111111111111111111111111111111111111112")
+export const SOL_TOKEN = new PublicKey(
+  "So11111111111111111111111111111111111111112"
+);
 
 export type CreateWumboCreatorParams = {
   splWumboProgramId: PublicKey;
@@ -316,7 +318,7 @@ export async function buyBondingWithWallet(
       throw new Error("Invalid purchaser wallet");
     }
 
-    if (tokenBonding.baseMint.toBase58() == SOL_TOKEN.toBase58()) {
+    if (mint.toBase58() == SOL_TOKEN.toBase58()) {
       return params.purchaserWallet.publicKey;
     }
 
@@ -340,11 +342,15 @@ export async function buyBondingWithWallet(
       );
     }
 
-    return account
-  }
+    return account;
+  };
 
-  const purchaseAccount = await getAssociatedAccountOrCreate(tokenBonding.baseMint);
-  const destinationAccount = await getAssociatedAccountOrCreate(tokenBonding.targetMint);
+  const purchaseAccount = await getAssociatedAccountOrCreate(
+    tokenBonding.baseMint
+  );
+  const destinationAccount = await getAssociatedAccountOrCreate(
+    tokenBonding.targetMint
+  );
 
   const [targetMintAuthority] = await PublicKey.findProgramAddress(
     [
@@ -407,7 +413,7 @@ export async function sellBondingWithWallet(
     }
 
     if (mint.toBase58() == SOL_TOKEN.toBase58()) {
-      return params.sellerWallet.publicKey
+      return params.sellerWallet.publicKey;
     }
 
     const account = await findAssociatedTokenAddress(
@@ -430,11 +436,15 @@ export async function sellBondingWithWallet(
       );
     }
 
-    return account
-  }
+    return account;
+  };
 
-  const sellAccount = await getAssociatedAccountOrCreate(tokenBonding.targetMint)
-  const destinationAccount = await getAssociatedAccountOrCreate(tokenBonding.baseMint)
+  const sellAccount = await getAssociatedAccountOrCreate(
+    tokenBonding.targetMint
+  );
+  const destinationAccount = await getAssociatedAccountOrCreate(
+    tokenBonding.baseMint
+  );
 
   const [baseStorageAuthority, _] = await PublicKey.findProgramAddress(
     [

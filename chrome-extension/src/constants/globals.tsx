@@ -1,11 +1,20 @@
 import { Keypair, PublicKey } from "@solana/web3.js";
-import { Token, TOKEN_PROGRAM_ID as SPL_TOKEN_PROGRAM_ID } from "@solana/spl-token";
+import {
+  Token,
+  TOKEN_PROGRAM_ID as SPL_TOKEN_PROGRAM_ID,
+} from "@solana/spl-token";
 
 // export const SOLANA_API_URL = "https://api.mainnet-beta.solana.com"
-export const WUM_REWARDS_PERCENTAGE = 1000
-export const WUM_BONDING = new PublicKey("6vomBNaspUfYDbkWwxR2N4xCLf6s466PchDWESrsCKvt");
-export const WUM_TOKEN = new PublicKey("bDYz78Px4d7epP62KzURwi52YNbxGXF2uiWYBgAGALK");
-export const SOL_TOKEN = new PublicKey("So11111111111111111111111111111111111111112")
+export const WUM_REWARDS_PERCENTAGE = 1000;
+export const WUM_BONDING = new PublicKey(
+  "6vomBNaspUfYDbkWwxR2N4xCLf6s466PchDWESrsCKvt"
+);
+export const WUM_TOKEN = new PublicKey(
+  "bDYz78Px4d7epP62KzURwi52YNbxGXF2uiWYBgAGALK"
+);
+export const SOL_TOKEN = new PublicKey(
+  "So11111111111111111111111111111111111111112"
+);
 
 export const SPL_NAME_SERVICE_PROGRAM_ID = new PublicKey(
   "CiBbJADtSJnVQEsgXZpRfLyLNqDjwfvua8EMe9tPhKvo"
@@ -17,8 +26,8 @@ export const SOLANA_API_URL = "https://devnet.solana.com";
 export const SERUM_PROGRAM_ID = new PublicKey(
   "9xQeWvG816bUx9EPjHmaT23yvVM2ZWbrrpZb9PusVFin"
 );
-export const WUMBO_TO_USD_MARKET = new PublicKey(
-  "6Pn1cSiRos3qhBf54uBP9ZQg8x3JTardm1dL3n4p29tA"
+export const SOL_TO_USD_MARKET = new PublicKey(
+  "9wFFyRfZBsuAha4YcuxcXLKwMxJR43S7fPfQLusDBzvT"
 );
 export const TWITTER_ROOT_PARENT_REGISTRY_KEY: PublicKey = new PublicKey(
   "AFrGkxNmVLBn3mKhvfJJABvm8RJkTtRhHDoaF97pQZaA"

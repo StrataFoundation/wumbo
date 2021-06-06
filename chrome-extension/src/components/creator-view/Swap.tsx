@@ -21,45 +21,50 @@ interface SwapProps {
   swap(base: number, target: number): Promise<void>;
 }
 function getOwnedUIAmount(account: TokenAccountInfo | undefined): string {
-  return account ? (account.amount.toNumber() / Math.pow(10, 9)).toFixed(2) : ""
+  return account
+    ? (account.amount.toNumber() / Math.pow(10, 9)).toFixed(2)
+    : "";
 }
 export default ({ swap, base, target }: SwapProps) => {
   const connection = useConnection();
   const { wallet, awaitingApproval } = useWallet();
   const { execute, loading, error } = useAsyncCallback(swap);
   const [success, setSuccess] = useState<string>();
-  const [{ baseAmount, targetAmount }, setAmounts] = useState<{ baseAmount: number, targetAmount: number}>({
+  const [{ baseAmount, targetAmount }, setAmounts] = useState<{
+    baseAmount: number;
+    targetAmount: number;
+  }>({
     baseAmount: 0,
-    targetAmount: 0
+    targetAmount: 0,
   });
-  const { associatedAccount: targetAccount, loading: targetAccountLoading } = useAssociatedAccount(
-    wallet?.publicKey || undefined,
-    target.key
-  );
-  const { associatedAccount: baseAccount, loading: baseAccountLoading } = useAssociatedAccount(
-    wallet?.publicKey || undefined,
-    base.key
-  );
+  const {
+    associatedAccount: targetAccount,
+    loading: targetAccountLoading,
+  } = useAssociatedAccount(wallet?.publicKey || undefined, target.key);
+  const {
+    associatedAccount: baseAccount,
+    loading: baseAccountLoading,
+  } = useAssociatedAccount(wallet?.publicKey || undefined, base.key);
 
-  error && console.error(error)
+  error && console.error(error);
 
   const setBase = (amount: number) => {
     try {
       setAmounts({
         baseAmount: amount,
-        targetAmount: target.price(amount)
-      })
-    } catch(e) {
-      console.error(e)
+        targetAmount: target.price(amount),
+      });
+    } catch (e) {
+      console.error(e);
     }
-  }
+  };
 
   const setTarget = (amount: number) => {
     setAmounts({
       targetAmount: amount,
-      baseAmount: base.price(amount)
-    })
-  }
+      baseAmount: base.price(amount),
+    });
+  };
 
   const handleFinish = async () => {
     await execute(baseAmount, targetAmount);
@@ -87,13 +92,7 @@ export default ({ swap, base, target }: SwapProps) => {
               onChange={setBase}
             />
           </Form.Item>
-          { 
-            <Token
-              name={base.name}
-              src={base.src}
-              size="small"
-            /> 
-          }
+          {<Token name={base.name} src={base.src} size="small" />}
         </div>
       </div>
 
@@ -118,17 +117,13 @@ export default ({ swap, base, target }: SwapProps) => {
               onChange={setTarget}
             />
           </Form.Item>
-          { 
-            <Token
-              name={target.name}
-              src={target.src}
-              size="small"
-            /> 
-          }
+          {<Token name={target.name} src={target.src} size="small" />}
         </div>
       </div>
       <div className="price-block-actions">
-        <span>Own: {getOwnedUIAmount(targetAccount)} {target.name}</span>
+        <span>
+          Own: {getOwnedUIAmount(targetAccount)} {target.name}
+        </span>
         <Form.Item>
           {wallet && wallet.publicKey && (
             <Button loading={loading} htmlType="submit" type="primary">

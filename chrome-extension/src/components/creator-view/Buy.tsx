@@ -17,43 +17,45 @@ interface BuyProps {
 
 export default ({ creatorInfo }: BuyProps) => {
   const connection = useConnection();
-  const baseMint = useMint(creatorInfo.tokenBonding.baseMint)
-  const targetMint = useMint(creatorInfo.tokenBonding.targetMint)
+  const baseMint = useMint(creatorInfo.tokenBonding.baseMint);
+  const targetMint = useMint(creatorInfo.tokenBonding.targetMint);
   const { wallet, awaitingApproval } = useWallet();
   const doBuy = async (baseAmount: number, targetAmount: number) => {
     await buy(wallet)(
       connection,
       creatorInfo.tokenBonding.publicKey,
       targetAmount
-    )
-  }
+    );
+  };
   const { execute } = useAsyncCallback(doBuy);
 
   if (!baseMint || !targetMint) {
-    return <div>Loading...</div>
+    return <div>Loading...</div>;
   }
 
-  return <Swap
-    base={{
-      key: creatorInfo.tokenBonding.baseMint,
-      name: 'WUM',
-      price: logCurve(
-        creatorInfo.curve, 
-        baseMint,
-        targetMint, 
-        creatorInfo.tokenBonding.founderRewardPercentage
-      )
-    }}
-    target={{
-      key: creatorInfo.tokenBonding.targetMint,
-      name: "NXX2",
-      price: inverseLogCurve(
-        creatorInfo.curve, 
-        baseMint,
-        targetMint, 
-        creatorInfo.tokenBonding.founderRewardPercentage
-      )
-    }}
-    swap={execute}
-  />
+  return (
+    <Swap
+      base={{
+        key: creatorInfo.tokenBonding.baseMint,
+        name: "WUM",
+        price: logCurve(
+          creatorInfo.curve,
+          baseMint,
+          targetMint,
+          creatorInfo.tokenBonding.founderRewardPercentage
+        ),
+      }}
+      target={{
+        key: creatorInfo.tokenBonding.targetMint,
+        name: "NXX2",
+        price: inverseLogCurve(
+          creatorInfo.curve,
+          baseMint,
+          targetMint,
+          creatorInfo.tokenBonding.founderRewardPercentage
+        ),
+      }}
+      swap={execute}
+    />
+  );
 };

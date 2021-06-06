@@ -119,7 +119,7 @@ pub fn initialize_token_bonding_v0(
     }
 }
 
-pub fn buy_creator_coins(
+pub fn buy_v0_instruction(
     program_id: &Pubkey,
     token_bonding: &Pubkey,
     curve: &Pubkey,
@@ -156,7 +156,7 @@ pub fn buy_creator_coins(
     }
 }
 
-pub fn sell_creator_coins(
+pub fn sell_v0_instruction(
     program_id: &Pubkey,
     token_bonding: &Pubkey,
     base_mint: &Pubkey,
