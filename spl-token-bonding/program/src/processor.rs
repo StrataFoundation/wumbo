@@ -22,7 +22,7 @@ use {
     spl_token::state::{Account, Mint},
 };
 
-use crate::{solana_program::sysvar::Sysvar, state::BASE_STORAGE_AUTHORITY};
+use crate::{solana_program::sysvar::Sysvar, state::{ConstantProductV0, BASE_STORAGE_AUTHORITY}};
 
 pub fn process_instruction(
     program_id: &Pubkey,
@@ -35,7 +35,6 @@ pub fn process_instruction(
         TokenBondingInstruction::CreateLogCurveV0 {
             g,
             is_base_relative,
-            base,
             c,
         } => {
             msg!("Instruction: Create Log Curve V0");
@@ -43,8 +42,21 @@ pub fn process_instruction(
                 program_id,
                 accounts,
                 g,
-                base,
                 c,
+                is_base_relative,
+            )
+        }
+        TokenBondingInstruction::CreateConstantProductCurveV0 {
+            m,
+            b,
+            is_base_relative,
+        } => {
+            msg!("Instruction: Create Log Curve V0");
+            process_create_constant_product_curve_v0(
+                program_id,
+                accounts,
+                m,
+                b,
                 is_base_relative,
             )
         }
@@ -146,7 +158,6 @@ fn process_create_log_curve_v0(
     program_id: &Pubkey,
     accounts: &[AccountInfo],
     g: f64,
-    base: f64,
     c: f64,
     is_base_relative: bool,
 ) -> ProgramResult {
@@ -181,7 +192,6 @@ fn process_create_log_curve_v0(
             Key::LogCurveV0
         },
         g,
-        base,
         c,
         initialized: true,
     };
@@ -189,6 +199,53 @@ fn process_create_log_curve_v0(
 
     Ok(())
 }
+
+fn process_create_constant_product_curve_v0(
+    program_id: &Pubkey,
+    accounts: &[AccountInfo],
+    m: f64,
+    b: f64,
+    is_base_relative: bool,
+) -> ProgramResult {
+    let accounts_iter = &mut accounts.into_iter();
+    let payer = next_account_info(accounts_iter)?;
+    let curve = next_account_info(accounts_iter)?;
+    let system_account_info = next_account_info(accounts_iter)?;
+    let rent = next_account_info(accounts_iter)?;
+
+    if !payer.is_signer {
+        return Err(TokenBondingError::MissingSigner.into());
+    }
+
+    if *curve.owner != *program_id {
+        return Err(TokenBondingError::InvalidOwner.into());
+    }
+
+    let rent = &Rent::from_account_info(rent)?;
+    let required_lamports = rent
+        .minimum_balance(ConstantProductV0::LEN)
+        .max(1)
+        .saturating_sub(curve.lamports());
+
+    if required_lamports > 0 {
+        return Err(TokenBondingError::NotRentExempt.into());
+    }
+
+    let new_account_data = ConstantProductV0 {
+        key: if is_base_relative {
+            Key::BaseRelativeLogCurveV0
+        } else {
+            Key::LogCurveV0
+        },
+        m,
+        b,
+        initialized: true,
+    };
+    new_account_data.serialize(&mut *curve.try_borrow_mut_data()?)?;
+
+    Ok(())
+}
+
 
 fn process_initialize_token_bonding_v0(
     program_id: &Pubkey,
@@ -223,14 +280,12 @@ fn process_initialize_token_bonding_v0(
         return Err(TokenBondingError::InvalidAuthority.into());
     }
         
-    msg!("3");
     if token_bonding_account.data.borrow().len() > 0
         && TokenBondingV0::unpack_unchecked(&token_bonding_account.data.borrow())?.initialized
     {
         return Err(TokenBondingError::AlreadyInitialized.into());
     }
 
-    msg!("4");
     if *target_mint.owner != *base_mint.owner
         || *founder_rewards.owner != *base_mint.owner
         || *base_storage.owner != *founder_rewards.owner
@@ -238,7 +293,6 @@ fn process_initialize_token_bonding_v0(
         return Err(TokenBondingError::InvalidTokenProgramId.into());
     }
 
-    msg!("5");
     if founder_rewards_data.mint != *target_mint.key {
         return Err(TokenBondingError::InvalidTargetMint.into());
     }
@@ -255,8 +309,6 @@ fn process_initialize_token_bonding_v0(
         return Err(TokenBondingError::InvalidOwner.into());
     }
 
-    msg!("6");
-
     let rent = &Rent::from_account_info(rent)?;
     let required_lamports = rent
         .minimum_balance(TokenBondingV0::LEN)
@@ -267,7 +319,6 @@ fn process_initialize_token_bonding_v0(
         return Err(TokenBondingError::NotRentExempt.into());
     }
 
-    msg!("7");
     let new_account_data = TokenBondingV0 {
         key: Key::TokenBondingV0,
         target_mint: *target_mint.key,
@@ -747,7 +798,6 @@ mod tests {
                 &fixture.curve_key,
                 1_f64,
                 2_f64,
-                3_f64,
                 true,
             ),
             vec![
@@ -796,7 +846,6 @@ mod tests {
 
         let res: LogCurveV0 = try_from_slice_unchecked::<LogCurveV0>(&fixture.curve.data).unwrap();
         assert_eq!(res.g, 1_f64);
-        assert_eq!(res.base, 2_f64);
         assert_eq!(res.c, 3_f64);
         assert_eq!(res.key, Key::BaseRelativeLogCurveV0);
     }
@@ -820,12 +869,10 @@ mod tests {
         let curve = LogCurveV0 {
             key: Key::BaseRelativeLogCurveV0,
             g: 1_f64,
-            base: 2_f64,
-            c: 3_f64,
+            c: 2_f64,
             initialized: true,
         };
         assert_eq!(curve.price(4.0, 0.0, 1000.0), 14989.378789418239);
-        // assert_eq!(curve.price(1036191464.675693800_f64, 0_f64, 143954.401024911_f64), 1.000000000_f64)
     }
 
     #[test]

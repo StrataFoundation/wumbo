@@ -11,7 +11,7 @@ import { Order } from "@project-serum/serum/lib/market";
 import { LogCurveV0, TokenBondingV0 } from "../spl-token-bonding-api/state";
 import { MintInfo, u64 } from "@solana/spl-token";
 // @ts-ignore
-import { gsl_sf_lambert_Wm1 } from "./lambertw";
+import { gsl_sf_lambert_W0 } from "./lambertw";
 import { useAccount } from "./account";
 import { useMint } from "./mintState";
 
@@ -20,20 +20,21 @@ let connection = new Connection("https://api.mainnet-beta.solana.com");
 
 const UsdWumboPriceContext = React.createContext<number | undefined>(undefined);
 
-function generalLogCurve(c: number, g: number, base: number, x: number): number {
-  return (base * x) + c * ((1 / g + x) * Math.log(1 + g * x) - x);
+function generalLogCurve(c: number, g: number, x: number): number {
+  return c * ((((1 / g) + x) * Math.log(1 + (g * x))) - x);
 }
-/// Integral of base + c * log(1 + g * x) dx from a to b 
+/// Integral of c * log(1 + g * x) dx from a to b 
 /// https://www.wolframalpha.com/input/?i=c+*+log%281+%2B+g+*+x%29+dx
-function logCurveRange(c: number, g: number, base: number, a: number, b: number): number {
-  return generalLogCurve(c, g, base, b) - generalLogCurve(c, g, base, a);
+function logCurveRange(c: number, g: number, a: number, b: number): number {
+  return generalLogCurve(c, g, b) - generalLogCurve(c, g, a);
 }
 
-function supplyAsNum(mint: MintInfo): number {
+export function supplyAsNum(mint: MintInfo): number {
   return mint.supply
     .div(new u64(Math.pow(10, mint.decimals).toString()))
     .toNumber();
 }
+
 // baseAmount = curve(supply + ret) * founder_rewards_percent
 // baseAmount / founder_rewards_percent = curve(supply + ret)
 /*
@@ -56,18 +57,18 @@ export const inverseLogCurve = (
   const s = supplyAsNum(target);
   const rewardsDecimal =
     founderRewardsPercentage == 0 ? 1 : founderRewardsPercentage / 10000;
-  const k = (baseAmount / rewardsDecimal + generalLogCurve(c, g, curve.base, s) - (curve.base * s)) / (1 + curve.base);
-  const exp = gsl_sf_lambert_Wm1((g * k - c) / (c * Math.E)) + 1;
+  const k = (baseAmount / rewardsDecimal) + generalLogCurve(c, g, s)
+  const exp = (gsl_sf_lambert_W0(((g * k) - c) / (c * Math.E)) + 1)
+  const orig = logCurve(curve, base, target, founderRewardsPercentage);
 
-  return Math.abs((Math.pow(Math.E, exp) - g * s - 1) / g);
+  return Math.abs((Math.pow(Math.E, exp) - (g * s) - 1) / g)
 };
 
-export const logCurve = (
+const startFinishLogCurve = (
   curve: LogCurveV0,
   base: MintInfo,
-  target: MintInfo,
   founderRewardsPercentage: number
-) => (targetAmount: number): number => {
+) => (start: number, finish: number) => {
   const c = curve.c;
   const gNonBaseRel = curve.g;
   const g = curve.isBaseRelative
@@ -80,25 +81,66 @@ export const logCurve = (
     logCurveRange(
       c,
       g,
-      curve.base,
-      supplyAsNum(target),
-      supplyAsNum(target) + targetAmount
+      start,
+      finish
     ) * rewardsDecimal
-  );
+  )
+}
+
+export const logCurve = (
+  curve: LogCurveV0,
+  base: MintInfo,
+  target: MintInfo,
+  founderRewardsPercentage: number
+) => (targetAmount: number): number => {
+    return startFinishLogCurve(curve, base, founderRewardsPercentage)(supplyAsNum(target), supplyAsNum(target) + targetAmount)
 };
+
+interface PricingState {
+  loading: boolean;
+  // How much to buy this much of the target coin in terms of base
+  curve(targetAmount: number): number;
+  // How many target coins we'll get for this base amount
+  inverseCurve(baseAmount: number): number;
+  // General from some start supply to finish supply
+  general(start: number, finish: number): number;
+  // The current price
+  current: number;
+}
+export function usePricing(tokenBonding: PublicKey | undefined): PricingState {
+  const [state, setState] = useState<PricingState>({
+    loading: true,
+    curve: () => 0,
+    inverseCurve: () => 0,
+    general: () => 0,
+    current: 0
+  })
+  const { info: bonding } = useAccount(tokenBonding, TokenBondingV0.fromAccount);
+  const { info: curve } = useAccount(bonding?.curve, LogCurveV0.fromAccount);
+  
+  const base = useMint(bonding?.baseMint);
+  const target = useMint(bonding?.targetMint);
+  useEffect(() => {
+    if (curve && base && target && bonding) {
+      setState({
+        loading: false,
+        curve: logCurve(curve, base, target, bonding.founderRewardPercentage),
+        inverseCurve: inverseLogCurve(curve, base, target, bonding.founderRewardPercentage),
+        general: startFinishLogCurve(curve, base, bonding.founderRewardPercentage),
+        current: curve.c * Math.log(1 + curve.g * supplyAsNum(target) / (curve.isBaseRelative ? supplyAsNum(base): 1))
+      })
+    }
+  }, [curve, base, target, bonding])
+
+  return state;
+}
 
 export const UsdWumboPriceProvider = ({ children = undefined as any }) => {
   const price = useMarketPrice(SOL_TO_USD_MARKET);
-  const { info: bonding } = useAccount(WUM_BONDING, TokenBondingV0.fromAccount);
-  const { info: curve } = useAccount(bonding?.curve, LogCurveV0.fromAccount);
-  const base = useMint(bonding?.baseMint);
-  const target = useMint(bonding?.targetMint);
-  const curveImpl =
-    curve && base && target
-      ? logCurve(curve, base, target, WUM_REWARDS_PERCENTAGE)
-      : () => null;
+  const { curve } = usePricing(WUM_BONDING);
+
   return (
-    <UsdWumboPriceContext.Provider value={curveImpl(1) || 0}>
+    <UsdWumboPriceContext.Provider value={(price || 0) * curve(1)}>
       {children}
     </UsdWumboPriceContext.Provider>
   );

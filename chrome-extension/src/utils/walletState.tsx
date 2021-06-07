@@ -1,12 +1,13 @@
 import { PublicKey } from "@solana/web3.js";
 import { AccountInfo as TokenAccountInfo, Token } from "@solana/spl-token";
-import { useReactiveAccount } from "./creatorState";
 import { useEffect, useState } from "react";
 import {
   SPL_ASSOCIATED_TOKEN_ACCOUNT_PROGRAM_ID,
   TOKEN_PROGRAM_ID,
 } from "../constants/globals";
 import { TokenAccountParser } from "@oyster/common/lib/contexts/accounts";
+import { useAccount } from "./account";
+import { AccountInfo } from "@solana/web3.js";
 
 const fetch = (wallet: PublicKey, mint: PublicKey) =>
   Token.getAssociatedTokenAddress(
@@ -52,17 +53,12 @@ export function useAssociatedAccount(
     result: associatedTokenAddress,
     loading: associatedTokenLoading,
   } = useAssociatedTokenAddress(wallet, mint);
-  const { account, loading } = useReactiveAccount(associatedTokenAddress);
-  const [state, setState] = useState<TokenAccountInfo>();
-
-  useEffect(() => {
-    associatedTokenAddress &&
-      account &&
-      setState(TokenAccountParser(associatedTokenAddress, account).info);
-  }, [associatedTokenAddress, account]);
+  const { info: associatedAccount, loading } = useAccount(associatedTokenAddress, (pubkey: PublicKey, acct: AccountInfo<Buffer>) => {
+    return TokenAccountParser(pubkey, acct).info
+  });
 
   return {
-    loading: loading || associatedTokenLoading,
-    associatedAccount: state,
-  };
+    associatedAccount,
+    loading
+  }
 }

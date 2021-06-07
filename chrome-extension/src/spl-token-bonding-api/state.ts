@@ -100,12 +100,11 @@ export class LogCurveV0 {
   // @ts-ignore
   publicKey: PublicKey; // Gets set on retrieve
   g: number;
-  base: number;
   c: number;
   isBaseRelative: boolean;
   initialized: boolean;
 
-  static LEN = 1 + 32 * 4 + 2 + 1 + 1;
+  static LEN = 1 + 32 * 2 + 1;
 
   static schema: Schema = new Map([
     [
@@ -115,7 +114,6 @@ export class LogCurveV0 {
         fields: [
           ["key", 'u8'],
           ["g", [8]],
-          ["base", [8]],
           ["c", [8]],
           ["initialized", 'u8'],
         ],
@@ -126,14 +124,12 @@ export class LogCurveV0 {
   constructor(obj: {
     key: Uint8Array;
     g: Uint8Array;
-    base: Uint8Array;
     c: Uint8Array;
     initialized: Uint8Array;
   }) {
     const u64 = Numberu64;
     this.isBaseRelative = obj.key[0] == 2;
     this.g = decodef64(obj.g);
-    this.base = decodef64(obj.base);
     this.c = decodef64(obj.c);
     this.initialized = obj.initialized[0] === 1;
   }

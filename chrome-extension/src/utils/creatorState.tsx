@@ -9,57 +9,10 @@ import { AccountInfo, PublicKey } from "@solana/web3.js";
 import { WumboCreator } from "../wumbo-api/state";
 import { useConnection } from "@oyster/common/lib/contexts/connection";
 import { useMint } from "./mintState";
-import { useWumboUsdPrice } from "./pricing";
+import { usePricing, useWumboUsdPrice } from "./pricing";
 import { MintInfo } from "@solana/spl-token";
 import { useAccount, UseAccountState } from "./account";
 import { LogCurveV0, TokenBondingV0 } from "../spl-token-bonding-api/state";
-
-export interface ReactiveAccountState {
-  account?: AccountInfo<Buffer>;
-  loading: boolean;
-}
-export function useReactiveAccount(
-  publicKey?: PublicKey
-): ReactiveAccountState {
-  const [state, setState] = useState<ReactiveAccountState>({ loading: true });
-  const connection = useConnection();
-
-  useEffect(() => {
-    if (publicKey) {
-      const sub = connection.onAccountChange(
-        publicKey,
-        (accountInfo: AccountInfo<Buffer>) => {
-          setState({ account: accountInfo, loading: false });
-        },
-        "singleGossip"
-      );
-
-      (async () => {
-        if (publicKey) {
-          const account = await connection.getAccountInfo(
-            publicKey,
-            "singleGossip"
-          );
-          if (account) {
-            setState({ account, loading: false });
-          } else {
-            setState({ loading: false });
-          }
-        }
-      })();
-
-      return () => {
-        connection.removeAccountChangeListener(sub);
-      };
-    }
-  }, [publicKey]);
-
-  if (!publicKey) {
-    return { loading: false };
-  }
-
-  return state;
-}
 
 export const useCreatorKey = (name: string): PublicKey | undefined => {
   const [key, setKey] = useState<PublicKey>();
@@ -128,11 +81,10 @@ export const useCreatorInfo = (name: string): CreatorInfoState => {
   const [creatorInfo, setCreatorInfo] = useState<CreatorInfoState>({
     loading: true,
   });
+  const { current } = usePricing(creator?.tokenBonding)
 
   useEffect(() => {
     if (curve && tokenBonding && mint && creator) {
-      const wumboPrice =
-        Math.pow(mint.supply.toNumber() / Math.pow(10, 9), 2) / 3000;
       setCreatorInfo({
         creatorInfo: {
           name,
@@ -140,15 +92,15 @@ export const useCreatorInfo = (name: string): CreatorInfoState => {
           mint,
           tokenBonding,
           curve,
-          coinPrice: wumboPrice,
-          coinPriceUsd: wumboPrice * (wumboUsdPrice || 0),
+          coinPrice: current,
+          coinPriceUsd: current * (wumboUsdPrice || 0),
         },
         loading: false,
       });
     } else if (!loading) {
       setCreatorInfo({ loading: false });
     }
-  }, [curve, tokenBonding, mint, creator, loading]);
+  }, [current, curve, tokenBonding, mint, creator, loading]);
 
   return creatorInfo;
 };

@@ -32,6 +32,7 @@
     "@toruslabs/torus-direct-web-sdk": "^4.13.2",
     "antd": "^4.15.5",
     "bip39": "^3.0.4",
+    "lambert-w-function": "^2.0.0",
     "react": "16.13.1",
     "react-async-hook": "^3.6.2",
     "react-dom": "16.13.1"

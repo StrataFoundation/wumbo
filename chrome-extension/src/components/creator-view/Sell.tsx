@@ -8,8 +8,8 @@ import { useAssociatedAccount } from "../../utils/walletState";
 import { useWallet } from "../../utils/wallet";
 import Swap from "./Swap";
 import { CreatorInfo, CreatorInfoState } from "../../utils/creatorState";
-import { inverseLogCurve, logCurve } from "../../utils/pricing";
 import { useMint } from "@oyster/common/lib/contexts/accounts";
+import { inverseLogCurve, logCurve, usePricing } from "../../utils/pricing";
 
 interface SellProps {
   creatorInfo: CreatorInfo;
@@ -17,8 +17,7 @@ interface SellProps {
 
 export default ({ creatorInfo }: SellProps) => {
   const connection = useConnection();
-  const baseMint = useMint(creatorInfo.tokenBonding.baseMint);
-  const targetMint = useMint(creatorInfo.tokenBonding.targetMint);
+  const { curve, inverseCurve, loading } = usePricing(creatorInfo.tokenBonding.publicKey);
   const { wallet } = useWallet();
   const doSell = async (baseAmount: number, targetAmount: number) => {
     await sell(wallet)(
@@ -29,7 +28,7 @@ export default ({ creatorInfo }: SellProps) => {
   };
   const { execute } = useAsyncCallback(doSell);
 
-  if (!baseMint || !targetMint) {
+  if (loading) {
     return <div>Loading...</div>;
   }
 
@@ -38,22 +37,12 @@ export default ({ creatorInfo }: SellProps) => {
       base={{
         key: creatorInfo.tokenBonding.targetMint,
         name: "NXX2",
-        price: inverseLogCurve(
-          creatorInfo.curve,
-          baseMint,
-          targetMint,
-          creatorInfo.tokenBonding.founderRewardPercentage
-        ),
+        price: curve,
       }}
       target={{
         key: creatorInfo.tokenBonding.baseMint,
         name: "WUM",
-        price: logCurve(
-          creatorInfo.curve,
-          baseMint,
-          targetMint,
-          creatorInfo.tokenBonding.founderRewardPercentage
-        ),
+        price: inverseCurve,
       }}
       swap={execute}
     />

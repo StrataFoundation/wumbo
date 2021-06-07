@@ -78,28 +78,19 @@ fn main() {
                 .arg(
                     Arg::with_name("g")
                         .long("g")
-                        .validator(is_parsable::<u8>)
+                        .validator(is_parsable::<f64>)
                         .value_name("g")
                         .takes_value(true)
                         .index(1)
                         .help("g in the log equation"),
                 )
                 .arg(
-                    Arg::with_name("base")
-                        .long("base")
-                        .validator(is_parsable::<f64>)
-                        .value_name("DENOMINATOR")
-                        .takes_value(true)
-                        .index(2)
-                        .help("Base in the log equation"),
-                )
-                .arg(
                     Arg::with_name("c")
                         .long("c")
-                        .validator(is_parsable::<u8>)
+                        .validator(is_parsable::<f64>)
                         .value_name("C")
                         .takes_value(true)
-                        .index(3)
+                        .index(2)
                         .help("c in the log equation"),
                 )
                 .arg(
@@ -200,7 +191,6 @@ fn main() {
     match (sub_command, sub_matches) {
         ("create-log-curve", Some(arg_matches)) => {
             let g = value_t_or_exit!(arg_matches, "g", f64);
-            let base = value_t_or_exit!(arg_matches, "base", f64);
             let c = value_t_or_exit!(arg_matches, "c", f64);
             let is_base_relative = value_t_or_exit!(arg_matches, "base-relative", bool);
             let curve = Keypair::new();
@@ -209,6 +199,7 @@ fn main() {
                 .get_minimum_balance_for_rent_exemption(LogCurveV0::LEN)
                 .unwrap();
 
+            let len = LogCurveV0::LEN;
             let instructions = [
                 create_account(
                     &fee_payer.pubkey(),
@@ -222,7 +213,6 @@ fn main() {
                     &fee_payer.pubkey(),
                     &curve_key,
                     g,
-                    base,
                     c,
                     is_base_relative,
                 ),

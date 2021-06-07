@@ -1,32 +1,32 @@
 import React, { useState } from "react";
 import { Alert, Button, Form, InputNumber } from "antd";
-import { buy } from "../../utils/action";
+import { sell } from "../../utils/action";
 import { WumboCreator, WumboInstance } from "../../wumbo-api/state";
 import { useAsyncCallback } from "react-async-hook";
 import { useConnection } from "@oyster/common/lib/contexts/connection";
 import { useAssociatedAccount } from "../../utils/walletState";
 import { useWallet } from "../../utils/wallet";
 import Swap from "./Swap";
+import { useMint } from "../../utils/mintState";
 import { CreatorInfo, CreatorInfoState } from "../../utils/creatorState";
-import { inverseLogCurve, logCurve, usePricing } from "../../utils/pricing";
-import { useMint } from "@oyster/common/lib/contexts/accounts";
+import { usePricing } from "../../utils/pricing";
+import {
+  SOL_TOKEN,
+  WUM_BONDING,
+  WUM_REWARDS_PERCENTAGE,
+  WUM_TOKEN,
+} from "../../constants/globals";
+import { useAccount } from "../../utils/account";
+import { LogCurveV0, TokenBondingV0 } from "../../spl-token-bonding-api/state";
 
-interface BuyProps {
-  creatorInfo: CreatorInfo;
-}
-
-export default ({ creatorInfo }: BuyProps) => {
+export default () => {
   const connection = useConnection();
-  const { curve, inverseCurve, loading } = usePricing(creatorInfo.tokenBonding.publicKey);
+  const { curve, inverseCurve, loading } = usePricing(WUM_BONDING);
   const { wallet, awaitingApproval } = useWallet();
-  const doBuy = async (baseAmount: number, targetAmount: number) => {
-    await buy(wallet)(
-      connection,
-      creatorInfo.tokenBonding.publicKey,
-      targetAmount
-    );
+  const doSell = async (baseAmount: number, targetAmount: number) => {
+    await sell(wallet)(connection, WUM_BONDING, targetAmount);
   };
-  const { execute } = useAsyncCallback(doBuy);
+  const { execute, error } = useAsyncCallback(doSell);
 
   if (loading) {
     return <div>Loading...</div>;
@@ -35,14 +35,14 @@ export default ({ creatorInfo }: BuyProps) => {
   return (
     <Swap
       base={{
-        key: creatorInfo.tokenBonding.baseMint,
+        key: WUM_TOKEN,
         name: "WUM",
-        price: curve
+        price: inverseCurve,
       }}
       target={{
-        key: creatorInfo.tokenBonding.targetMint,
-        name: "NXX2",
-        price: inverseCurve,
+        key: SOL_TOKEN,
+        name: "SOL",
+        price: curve,
       }}
       swap={execute}
     />

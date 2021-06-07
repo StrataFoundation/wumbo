@@ -19,7 +19,7 @@ export type TypedAccountParser<T> = (
 ) => T;
 
 export function useAccount<T>(
-  key: undefined | string | PublicKey,
+  key: undefined | PublicKey,
   parser: TypedAccountParser<T>
 ): UseAccountState<T> {
   const connection = useConnection();
@@ -57,6 +57,18 @@ export function useAccount<T>(
       )
       .catch((err) => {
         console.log(err)
+        // Oyster's cache, while great, explodes and doesn't watch accounts that don't exist. Shim it in
+        if (key) {
+          let subId: number;
+          function addToCache(acc: AccountInfo<Buffer>) {
+            if (key) {
+              cache.add(key, acc, parsedAccountBaseParser)
+            }
+            connection.removeAccountChangeListener(subId);
+          }
+          subId = connection.onAccountChange(key, addToCache);
+        }
+
         setState({ loading: false })
       });
 

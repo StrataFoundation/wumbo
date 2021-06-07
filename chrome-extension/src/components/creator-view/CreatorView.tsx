@@ -9,6 +9,7 @@ import Sell from "./Sell";
 
 import "./CreatorView.css";
 import GetWUM from "./GetWUM";
+import SellWUM from "./SellWUM";
 
 const { TabPane } = Tabs;
 
@@ -32,7 +33,7 @@ export default ({
         creatorName={creatorInfo?.name || ""}
         creatorPrice={creatorInfo?.coinPriceUsd || 0.0}
       />
-      <CoinDetails />
+      <CoinDetails creatorInfo={creatorInfo} />
       <div className="creator-view-width-constraint">
         <Tabs defaultActiveKey="buy">
           {creatorInfo?.creator && (
@@ -43,8 +44,11 @@ export default ({
               <TabPane tab="Sell" key="sell">
                 <Sell creatorInfo={creatorInfo} />
               </TabPane>
-              <TabPane tab="Get WUM" key="wum">
+              <TabPane tab="Get WUM" key="get_wum">
                 <GetWUM />
+              </TabPane>
+              <TabPane tab="Sell WUM" key="sell_wum">
+                <SellWUM />
               </TabPane>
             </>
           )}

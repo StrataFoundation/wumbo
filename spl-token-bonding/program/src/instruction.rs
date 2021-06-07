@@ -20,7 +20,6 @@ pub enum TokenBondingInstruction {
     ///   3. `[]` Rent sysvar
     CreateLogCurveV0 {
         g: f64,
-        base: f64,
         c: f64,
         is_base_relative: bool
     },
@@ -81,6 +80,18 @@ pub enum TokenBondingInstruction {
     SellV0 {
         /// Number to sell. This is including the decimal value. So 1 is the lowest possible fraction of a coin
         amount: u64,
+    },
+
+    /// Initialize a constant product curve.
+    /// 
+    ///   0. `[signer]` Payer
+    ///   1. `[signer writeable]` Curve to create
+    ///   2. `[]` Program id
+    ///   3. `[]` Rent sysvar
+    CreateConstantProductCurveV0 {
+        m: f64,
+        b: f64,
+        is_base_relative: bool
     },
 }
 
@@ -195,7 +206,6 @@ pub fn create_log_curve_v0(
     payer: &Pubkey,
     curve: &Pubkey,
     g: f64,
-    base: f64,
     c: f64,
     is_base_relative: bool,
 ) -> Instruction {
@@ -209,8 +219,33 @@ pub fn create_log_curve_v0(
         ],
         data: TokenBondingInstruction::CreateLogCurveV0 {
                 g,
-                base,
                 c,
+                is_base_relative
+            }
+            .try_to_vec()
+            .unwrap(),
+    }
+}
+
+pub fn create_constant_product_curve_v0(
+    program_id: &Pubkey,
+    payer: &Pubkey,
+    curve: &Pubkey,
+    m: f64,
+    b: f64,
+    is_base_relative: bool,
+) -> Instruction {
+    Instruction {
+        program_id: *program_id,
+        accounts: vec![
+            AccountMeta::new(*payer, true),
+            AccountMeta::new(*curve, true),
+            AccountMeta::new_readonly(solana_program::system_program::id(), false),
+            AccountMeta::new_readonly(sysvar::rent::id(), false),
+        ],
+        data: TokenBondingInstruction::CreateConstantProductCurveV0 {
+                m,
+                b,
                 is_base_relative
             }
             .try_to_vec()

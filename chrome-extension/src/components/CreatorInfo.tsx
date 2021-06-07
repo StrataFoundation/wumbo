@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from "react";
 import { Button, Popover, Tag } from "antd";
 import { DownOutlined } from "@ant-design/icons";
-import { useCreatorInfo } from "../utils/creatorState";
+import { useCreatorInfo, useCreatorKey } from "../utils/creatorState";
 import CreatorView from "./creator-view/CreatorView";
 import Loading from "./Loading";
 import {
@@ -17,9 +17,11 @@ import { createWumboCreator } from "../wumbo-api/bindings";
 import { useConnection } from "@oyster/common/lib/contexts/connection";
 import { Account } from "@solana/web3.js";
 import { useAccount } from "../utils/account";
-import { WumboInstance } from "../wumbo-api/state";
+import { WumboCreator, WumboInstance } from "../wumbo-api/state";
 import { useWallet } from "../utils/wallet";
-
+import {
+  cache
+} from "@oyster/common/lib/contexts/accounts";
 interface CreatorInfoProps {
   creatorName: string;
   creatorImg: string;
@@ -48,6 +50,7 @@ const ClickInterceptor = ({ onClick, children, ...rest }: InterceptorProps) => {
 };
 
 export default ({ creatorName, creatorImg }: CreatorInfoProps) => {
+  const key = useCreatorKey(creatorName);
   const creatorInfoState = useCreatorInfo(creatorName);
   const { creatorInfo, loading } = creatorInfoState;
   const { wallet } = useWallet();
@@ -62,7 +65,6 @@ export default ({ creatorName, creatorImg }: CreatorInfoProps) => {
     return <Loading />;
   }
 
-  console.log(`Loading ${loading}, creator info ${creatorInfo}, wumbo ${wumboInstance}, wallet ${wallet}`)
   if (!loading && !creatorInfo && wumboInstance && wallet) {
     const createCreator = () => {
       setCreationLoading(true);
@@ -79,7 +81,7 @@ export default ({ creatorName, creatorImg }: CreatorInfoProps) => {
         founderRewardsPercentage: 5.5,
         nameParent: TWITTER_ROOT_PARENT_REGISTRY_KEY,
       })
-        .then(() => {
+        .then(async () => {
           setCreationLoading(false);
         })
         .catch((err) => {

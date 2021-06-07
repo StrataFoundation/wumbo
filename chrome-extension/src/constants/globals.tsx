@@ -7,10 +7,16 @@ import {
 // export const SOLANA_API_URL = "https://api.mainnet-beta.solana.com"
 export const WUM_REWARDS_PERCENTAGE = 1000;
 export const WUM_BONDING = new PublicKey(
-  "DQb9amGEkUFngjgLQjDw2tHdqZkdmZhBqCRFHypQ3SfL"
+  "D7iHvkgHd42ELw6EKyU2WVEQNE1NpDBsxkubRgHHusvD"
 );
 export const WUM_TOKEN = new PublicKey(
-  "J8uYVk8Xf8n6TZpeY9j9kpQrUBsuqXodJt9SLyp5JP4h"
+  "BMMWcaY3HT65hSnV7gY6pQ4oUbX14uwWt7kEAhkG2fpN"
+);
+export const WUMBO_INSTANCE_KEY: PublicKey = new PublicKey(
+  "DjHuAh61TdexqUp4U2ZEgykSUCPuZiGSMsqb9AVshJX8"
+);
+export const WUMBO_PROGRAM_ID: PublicKey = new PublicKey(
+  "99VRjWhw6241SYkgv4iisLKqYUUuFY7DN3ccRnKT56Xt"
 );
 export const SOL_TOKEN = new PublicKey(
   "So11111111111111111111111111111111111111112"
@@ -31,12 +37,6 @@ export const SOL_TO_USD_MARKET = new PublicKey(
 );
 export const TWITTER_ROOT_PARENT_REGISTRY_KEY: PublicKey = new PublicKey(
   "AFrGkxNmVLBn3mKhvfJJABvm8RJkTtRhHDoaF97pQZaA"
-);
-export const WUMBO_INSTANCE_KEY: PublicKey = new PublicKey(
-  "2rBxvRhznK6asTbuzuceiqNh2ivVPftuf5FKXbqWn5rD"
-);
-export const WUMBO_PROGRAM_ID: PublicKey = new PublicKey(
-  "99VRjWhw6241SYkgv4iisLKqYUUuFY7DN3ccRnKT56Xt"
 );
 export const TOKEN_PROGRAM_ID: PublicKey = SPL_TOKEN_PROGRAM_ID;
 
