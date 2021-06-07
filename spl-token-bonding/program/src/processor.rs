@@ -867,12 +867,12 @@ mod tests {
     #[test]
     fn test_price() {
         let curve = LogCurveV0 {
-            key: Key::BaseRelativeLogCurveV0,
-            g: 1_f64,
-            c: 2_f64,
+            key: Key::LogCurveV0,
+            g: 0.01_f64,
+            c: 1_f64,
             initialized: true,
         };
-        assert_eq!(curve.price(4.0, 0.0, 1000.0), 14989.378789418239);
+        assert_eq!(curve.price(0.0, 0.0, 10.0), 0.47320254147052765);
     }
 
     #[test]
