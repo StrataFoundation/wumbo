@@ -1,5 +1,5 @@
 import React, { useState } from "react"
-import { Alert, Button, Form, InputNumber } from "antd"
+import { Alert, Button, Form, InputNumber, Dropdown, Menu } from "antd"
 import { useAsyncCallback } from "react-async-hook"
 import { useConnection } from "@oyster/common/lib/contexts/connection"
 import { Token } from "./Token"
@@ -20,11 +20,18 @@ interface SwapProps {
   target: TokenInfo
   swap(base: number, target: number): Promise<void>
   setShowWalletConnect: any
+  setSwapped: any
 }
 function getOwnedUIAmount(account: TokenAccountInfo | undefined): string {
   return account ? (account.amount.toNumber() / Math.pow(10, 9)).toFixed(2) : ""
 }
-export default ({ swap, base, target, setShowWalletConnect }: SwapProps) => {
+export default ({
+  swap,
+  base,
+  target,
+  setShowWalletConnect,
+  setSwapped,
+}: SwapProps) => {
   const connection = useConnection()
   const { wallet, awaitingApproval } = useWallet()
   const { execute, loading, error } = useAsyncCallback(swap)
@@ -72,13 +79,48 @@ export default ({ swap, base, target, setShowWalletConnect }: SwapProps) => {
     setTimeout(() => setSuccess(undefined), 4000)
   }
 
+  const LeftMenu = (
+    <Menu theme="dark">
+      <Menu.Item
+        key="1"
+        onClick={() => {
+          setSwapped((swapped: boolean) => !swapped)
+        }}
+      >
+        <Token name={target.name} src={target.src} size="small" />
+      </Menu.Item>
+    </Menu>
+  )
+
+  const RightMenu = (
+    <Menu theme="dark">
+      <Menu.Item
+        key="1"
+        onClick={() => {
+          setSwapped((swapped: boolean) => !swapped)
+        }}
+      >
+        <Token name={base.name} src={base.src} size="small" />
+      </Menu.Item>
+    </Menu>
+  )
+
   return (
     <Form onFinish={handleFinish} className="price-form">
       <div className="prices">
         <div className="price-side">
           <div className="price-block">
             <div className="price-block-header">
-              {<Token name={base.name} src={base.src} size="small" />}
+              <Dropdown overlay={LeftMenu}>
+                <div>
+                  <Token
+                    name={base.name}
+                    src={base.src}
+                    size="small"
+                    arrow={true}
+                  />
+                </div>
+              </Dropdown>
             </div>
             <div className="price-block-body">
               <span>From</span>
@@ -106,7 +148,16 @@ export default ({ swap, base, target, setShowWalletConnect }: SwapProps) => {
         <div className="price-side">
           <div className="price-block">
             <div className="price-block-header">
-              {<Token name={target.name} src={target.src} size="small" />}
+              <Dropdown overlay={RightMenu}>
+                <div>
+                  <Token
+                    name={target.name}
+                    src={target.src}
+                    size="small"
+                    arrow={true}
+                  />
+                </div>
+              </Dropdown>
             </div>
             <div className="price-block-body">
               <span>To</span>

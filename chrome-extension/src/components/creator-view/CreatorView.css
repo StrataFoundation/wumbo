@@ -26,6 +26,12 @@
   flex-direction: column;
 }
 
+.ant-dropdown-menu-dark,
+.ant-dropdown-menu-dark .ant-dropdown-menu {
+  background-color: #232323 !important;
+  border: solid 1px #232323;
+}
+
 .price-block-balance {
   color: white;
   font-size: 10px;

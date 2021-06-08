@@ -1,4 +1,5 @@
 import React from "react"
+import { DownOutlined } from "@ant-design/icons"
 
 import "./Token.css"
 
@@ -6,9 +7,10 @@ interface TokenProps {
   name: string
   size?: "large" | "small"
   src?: string
+  arrow?: boolean
 }
 
-export function Token({ name, size = "large", src }: TokenProps) {
+export function Token({ name, size = "large", src, arrow }: TokenProps) {
   if (name === "WUM") {
     src =
       "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABMAAAATCAMAAABFjsb+AAAABGdBTUEAALGPC/xhBQAAAAFzUkdCAK7OHOkAAACrUExURUdwTFdL/ZVC/GNL/WBB+UZH/1JI/mhD93ZI+2ZL/T9B/2lG/05K/5JA9j0//2pJ+3lG+npG+ZRB949C+IND+IpD+UZI/4ZE+IhD94xD+JJB9lVP/ktM/1BO/4hD+HpG+kdJ/2tJ/HBG+kRF/4ND+H5F+WFL/VxN/VdN/v///49C+d3Y/rii/ZN9/Gdc/XJm/fn4/5Fm+vDt/721/qqj/n1V+tDH/ZqY/ls++1WXiUsAAAAcdFJOUwCh/W0Y10sO/v5eB8Bejnvow47bSqHr1ei70OMV23o/AAAA5ElEQVQY01XQ2VaDMBAA0EH2AtpauqgJNBSBEHZo9f+/zExIjzqP98wOgGGZu21+fosseIRrbr30M0+Seh+5mgzGMsQ8qetXdyXfZ1mmM58UmmVR/MVItv+oNKYrvrtg0qoqu4Kxm0xMsGUMIaV0Ee13K5qsEaPEAxwJJTMXveDT2EyjLN/DhRDaTYMYOL97N9USjohfnPN5GFo1/AThVWIn+L2beaOGH2BzReyXvuqXFu9JY7BshZTimnjkTh6CiRdlpVydeTHe+/wPXwJ4oK72VwIINrbG0Al+v+oYNrENZ/3oD9oEJBED4wt3AAAAAElFTkSuQmCC"
@@ -25,6 +27,7 @@ export function Token({ name, size = "large", src }: TokenProps) {
         {src ? <img src={src} /> : <span>{name.substr(0, 2)}</span>}
       </div>
       <span className="token-display-name">{name}</span>
+      {arrow && <DownOutlined />}
     </div>
   )
 }

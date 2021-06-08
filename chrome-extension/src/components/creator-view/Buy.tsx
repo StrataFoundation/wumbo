@@ -14,9 +14,14 @@ import { useMint } from "@oyster/common/lib/contexts/accounts"
 interface BuyProps {
   creatorInfo: CreatorInfo
   setShowWalletConnect: any
+  setSwapped: any
 }
 
-export default ({ creatorInfo, setShowWalletConnect }: BuyProps) => {
+export default ({
+  creatorInfo,
+  setShowWalletConnect,
+  setSwapped,
+}: BuyProps) => {
   const connection = useConnection()
   const { curve, inverseCurve, loading } = usePricing(
     creatorInfo.tokenBonding.publicKey
@@ -37,6 +42,7 @@ export default ({ creatorInfo, setShowWalletConnect }: BuyProps) => {
 
   return (
     <Swap
+      setSwapped={setSwapped}
       setShowWalletConnect={setShowWalletConnect}
       base={{
         key: creatorInfo.tokenBonding.baseMint,
