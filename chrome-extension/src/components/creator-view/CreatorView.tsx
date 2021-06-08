@@ -50,6 +50,7 @@ export default ({
   }
   const [showWalletConnect, setShowWalletConnect] = useState<boolean>(false)
   const [creationLoading, setCreationLoading] = useState<boolean>(false)
+  const [showDetails, setShowDetails] = useState<boolean>(false)
 
   useEffect(() => {
     if (wallet && wallet.publicKey) {
@@ -91,10 +92,11 @@ export default ({
         creatorImg={creatorImg}
         creatorName={creatorName || ""}
         creatorPrice={creatorInfo?.coinPriceUsd || 0.0}
+        details={{ showDetails, setShowDetails }}
       />
       {creatorInfo?.creator ? (
         <>
-          <CoinDetails creatorInfo={creatorInfo} />
+          {showDetails && <CoinDetails creatorInfo={creatorInfo} />}
           <div className="creator-view-width-constraint">
             <Tabs defaultActiveKey="buy">
               {creatorInfo?.creator && (

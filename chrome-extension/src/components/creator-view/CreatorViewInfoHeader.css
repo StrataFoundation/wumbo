@@ -68,3 +68,11 @@
 .creator-view-info-header-subdetails span.subdetails-percent {
   color: #5bf1a5;
 }
+
+.creator-view-info-header-subdetails span.subdetails-toggle {
+  cursor: pointer;
+}
+
+.creator-view-info-header-subdetails span.subdetails-toggle img {
+  margin-left: 4px;
+}

@@ -73,50 +73,59 @@ export default ({ swap, base, target, setShowWalletConnect }: SwapProps) => {
   }
 
   return (
-    <Form onFinish={handleFinish}>
-      <div className="price-block">
-        <div className="price-block-header">
-          <span>From</span>
-          <span>Balance: {getOwnedUIAmount(baseAccount)}</span>
+    <Form onFinish={handleFinish} className="price-form">
+      <div className="prices">
+        <div className="price-side">
+          <div className="price-block">
+            <div className="price-block-header">
+              {<Token name={base.name} src={base.src} size="small" />}
+            </div>
+            <div className="price-block-body">
+              <span>From</span>
+              <Form.Item rules={[{ required: true }]}>
+                <InputNumber
+                  bordered={false}
+                  min={0}
+                  precision={9}
+                  step={0.01}
+                  defaultValue={baseAmount}
+                  value={baseAmount}
+                  onChange={setBase}
+                />
+              </Form.Item>
+            </div>
+          </div>
+          <div className="price-block-balance">
+            <span>Balance: {getOwnedUIAmount(baseAccount)}</span>
+          </div>
         </div>
-        <div className="price-block-body">
-          <Form.Item rules={[{ required: true }]}>
-            <InputNumber
-              bordered={false}
-              min={0}
-              precision={9}
-              step={0.01}
-              defaultValue={baseAmount}
-              value={baseAmount}
-              onChange={setBase}
-            />
-          </Form.Item>
-          {<Token name={base.name} src={base.src} size="small" />}
-        </div>
-      </div>
 
-      <div className="price-block-arrow">
-        <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAwAAAALBAMAAAC5XnFsAAAABGdBTUEAALGPC/xhBQAAAAFzUkdCAK7OHOkAAAAtUExURZWW/0dwTJWX/5WW/5qa/5aY/5+f/5WX/5eX/5mZ/5aW/5aX/5aW/5WW/5WW/7hJc2AAAAAPdFJOU+0AlP0nXQ/Weh46uqPbzObatoYAAAA5SURBVAjXYxAUFAoUFGQQFBRQxEVFACnJIwzN2wQUF7AwiJo7qNo6MgguYHi8DahEstgIrDIdqBIAYfcLSE0T1vMAAAAASUVORK5CYII=" />
-      </div>
-
-      <div className="price-block">
-        <div className="price-block-header">
-          <span>To</span>
-          <span>Balance: {getOwnedUIAmount(targetAccount)}</span>
+        <div className="price-block-arrow">
+          <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABIAAAANBAMAAABWYCMqAAAABGdBTUEAALGPC/xhBQAAAAFzUkdCAK7OHOkAAAAhUExURUdwTJaW/5aX/5WW/7y8/5aX/5aX/5eX/7a2/5aY/5WW/51dQm0AAAAKdFJOUwDAZtoDrZdCB353Bo3RAAAASklEQVQI12Ng4EhngALXxQ4QBkvUKgUIi23VKhMIa9aqVYsFgUCIQVEQAoQY0EFZA5TBYhUCZTGtWgo11HnVqgSIXqtVq1YiTAEAz3MQNZe/tSIAAAAASUVORK5CYII=" />
         </div>
-        <div className="price-block-body">
-          <Form.Item rules={[{ required: true }]}>
-            <InputNumber
-              bordered={false}
-              min={0}
-              precision={9}
-              step={0.01}
-              defaultValue={targetAmount}
-              value={targetAmount}
-              onChange={setTarget}
-            />
-          </Form.Item>
-          {<Token name={target.name} src={target.src} size="small" />}
+        <div className="price-side">
+          <div className="price-block">
+            <div className="price-block-header">
+              {<Token name={target.name} src={target.src} size="small" />}
+            </div>
+            <div className="price-block-body">
+              <span>To</span>
+              <Form.Item rules={[{ required: true }]}>
+                <InputNumber
+                  bordered={false}
+                  min={0}
+                  precision={9}
+                  step={0.01}
+                  defaultValue={targetAmount}
+                  value={targetAmount}
+                  onChange={setTarget}
+                />
+              </Form.Item>
+            </div>
+          </div>
+          <div className="price-block-balance">
+            <span>Balance: {getOwnedUIAmount(targetAccount)}</span>
+          </div>
         </div>
       </div>
       <div className="price-block-actions">
