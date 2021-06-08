@@ -62,12 +62,10 @@ pub trait Curve {
     fn price(&self, base_supply: f64, target_supply: f64, amount: f64) -> f64;
 }
 
+const n: i32 = 15;
+
 // Hack: Taylor series approx since no log curve. Todo, probably don't want floats anyway.
-fn ln(x: f64, point_five: f64) -> f64 {
-    if x > 1.0 {
-        return ln(x/2_f64, point_five) - point_five; // ln(2) = -ln(1/2)
-    }
-    let n= 10;
+fn ln_small(x: f64) -> f64 {
     let mut s: f64 = 0.0;
     for i in 1..n {
         let sign = (-1_f64).powi(i+1_i32);
@@ -76,6 +74,22 @@ fn ln(x: f64, point_five: f64) -> f64 {
         );
     }
     return s
+}
+
+fn ln_big(x: f64) -> f64 {
+    let mut s: f64 = 0.0;
+    for i in 1..n {
+        s += ((x - 1_f64) / x).powi(n) / (n as f64)
+    }
+    return s
+}
+
+fn ln(x: f64) -> f64 {
+    if x <= 2_f64 {
+        ln_small(x)
+    } else {
+        ln_big(x)
+    }
 }
 
 /// If normal log curve, base + c * log(1 + (g * x))
@@ -93,15 +107,13 @@ impl Sealed for LogCurveV0 {}
 /// Integral of base + c * log(1 + g * x) dx from a to b
 /// https://www.wolframalpha.com/input/?i=c+*+log%281+%2B+g+*+x%29+dx
 pub fn log_curve(c: f64, g: f64, a: f64, b: f64) -> f64 {
-    let point_five: f64 = - ln(0.5, 0.0);
-
     let general = |x: f64| {
       let inv_g = 1_f64 / g;
         let inside = (1_f64 + (g * x));
         let log = if (g * x) == 0_f64 {
             0_f64
         } else {
-            ln(inside, point_five) as f64
+            ln(inside)
         };
         let log_mult = (inv_g + x) * log;
         msg!("x: {}, Log: {}, mult: {}, g {}, c {}, a {}, b {}", x, log, log_mult, g, c, a, b);
