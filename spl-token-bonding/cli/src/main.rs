@@ -22,7 +22,7 @@ use spl_token::native_mint;
 use spl_token::state::{Mint, Account};
 use spl_token_bonding::{
     instruction::{create_log_curve_v0, initialize_token_bonding_v0},
-    processor::{target_authority, storage_authority},
+    processor::{target_authority, storage_authority, storage_key},
     state::{LogCurveV0, TokenBondingV0}
 };
 
@@ -30,7 +30,7 @@ const TOKEN_SWAP_PROGRAM_ID_STR: &str = "F2LtPFtixA8vKbg8ark5zswM4QuJKBn85KZcqrz
 const TOKEN_PROGRAM_ID_STR: &str = "CiBbJADtSJnVQEsgXZpRfLyLNqDjwfvua8EMe9tPhKvo";
 const NAME_PROGRAM_ID_STR: &str = "CiBbJADtSJnVQEsgXZpRfLyLNqDjwfvua8EMe9tPhKvo";
 // const TOKEN_BONDING_PROGRAM_ID_STR: &str = "G6ibxBmysVJtEyQJ2smdbSXSMVpTMzAWQVThpPPPdVdD";
-const TOKEN_BONDING_PROGRAM_ID_STR: &str = "4nLkwgHWLqsQscwxwSMwWKL43433mfG8ZYr9UFMYQ8eg";
+const TOKEN_BONDING_PROGRAM_ID_STR: &str = "CBvX6GXQ7CfoqWNG99wW22zzufz1owyH2tPSfEyus7JV";
 
 fn main() {
     let default_decimals = &format!("{}", native_mint::DECIMALS);
@@ -230,15 +230,6 @@ fn main() {
             let target_key = target.pubkey();
             let curve_key = Pubkey::from_str(arg_matches.value_of("curve").unwrap()).unwrap();
 
-            let base_storage_keypair = Keypair::new();
-            let (storage_authority_key, _) =
-                storage_authority(&TOKEN_BONDING_PROGRAM_ID, &base_storage_keypair.pubkey());
-            let base_storage_instructions: Vec<Instruction> = create_token_account(
-                &base_storage_keypair.pubkey(),
-                fee_payer.as_ref(),
-                &storage_authority_key,
-                &base_key,
-            );
             let (target_authority_key, _) =
                 target_authority(&TOKEN_BONDING_PROGRAM_ID, &target_key);
             let create_token_instructions = create_token(&target.pubkey(), fee_payer.as_ref(), &target_authority_key, 9);
@@ -256,6 +247,10 @@ fn main() {
             let balance = client
                 .get_minimum_balance_for_rent_exemption(TokenBondingV0::LEN)
                 .unwrap();
+            let (base_storage_key, _) = storage_key(&TOKEN_BONDING_PROGRAM_ID, &token_bonding_key);
+            let (storage_authority_key, _) =
+                storage_authority(&TOKEN_BONDING_PROGRAM_ID, &base_storage_key);
+
             let create_instructions: Vec<Instruction> = vec![
                 create_account(
                     &fee_payer.pubkey(),
@@ -265,20 +260,22 @@ fn main() {
                     &TOKEN_BONDING_PROGRAM_ID,
                 ),
                 initialize_token_bonding_v0(
-                &TOKEN_BONDING_PROGRAM_ID,
-                &fee_payer.pubkey(),
-                &token_bonding_key,
-                &Pubkey::new_unique(),
-                &curve_key,
-                &base_key,
-                &target_key,
-                &founder_rewards_key,
-                &base_storage_keypair.pubkey(),
-                1000,
-            )];
-            let instructions: Vec<Instruction> = base_storage_instructions
+                    &TOKEN_BONDING_PROGRAM_ID,
+                    &TOKEN_PROGRAM_ID,
+                    &fee_payer.pubkey(),
+                    &token_bonding_key,
+                    &fee_payer.pubkey(),
+                    &curve_key,
+                    &base_key,
+                    &target_key,
+                    &founder_rewards_key,
+                    &base_storage_key,
+                    &storage_authority_key,
+                    1000,
+                )
+            ];
+            let instructions: Vec<Instruction> = create_token_instructions
                 .into_iter()
-                .chain(create_token_instructions.into_iter())
                 .chain(founder_rewards_instructions.into_iter())
                 .chain(create_instructions.into_iter())
                 .collect();
@@ -287,7 +284,7 @@ fn main() {
                 Transaction::new_with_payer(&instructions, Some(&fee_payer.pubkey()));
             let recent_blockhash = client.get_recent_blockhash().unwrap().0;
             transaction.sign(
-                &vec![fee_payer.as_ref(), &token_bonding, &base_storage_keypair, &target],
+                &vec![fee_payer.as_ref(), &token_bonding, &target],
                 recent_blockhash,
             );
             client.send_transaction(&transaction).unwrap();

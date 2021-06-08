@@ -172,33 +172,6 @@ export async function createWumboCreator(
     )
   );
 
-  // Create base storage
-  const baseStorage = new Account();
-  const [storageAuthority, storageNonce] = await PublicKey.findProgramAddress(
-    [
-      Buffer.from("base-storage-authority", "utf8"),
-      baseStorage.publicKey.toBuffer(),
-    ],
-    params.splTokenBondingProgramId
-  );
-  instructions.push(
-    SystemProgram.createAccount({
-      fromPubkey: params.payer.publicKey,
-      newAccountPubkey: baseStorage.publicKey,
-      lamports: await Token.getMinBalanceRentForExemptAccount(connection),
-      space: AccountLayout.span,
-      programId: params.splTokenProgramId,
-    })
-  );
-  instructions.push(
-    Token.createInitAccountInstruction(
-      params.splTokenProgramId,
-      params.baseMint,
-      baseStorage.publicKey,
-      storageAuthority
-    )
-  );
-
   const tokenBonding = new Account();
   const [tokenBondingAuthority, _] = await PublicKey.findProgramAddress(
     [Buffer.from("bonding-authority", "utf-8"), creator.toBuffer()],
@@ -219,9 +192,27 @@ export async function createWumboCreator(
       programId: params.splTokenBondingProgramId
     })
   )
+
+    // Setup base storage
+    const [baseStorageKey] = await PublicKey.findProgramAddress(
+      [
+        Buffer.from("base-storage-key", "utf8"),
+        tokenBonding.publicKey.toBuffer()
+      ],
+      params.splTokenBondingProgramId
+    );
+    const [storageAuthority, storageNonce] = await PublicKey.findProgramAddress(
+      [
+        Buffer.from("base-storage-authority", "utf8"),
+        baseStorageKey.toBuffer(),
+      ],
+      params.splTokenBondingProgramId
+    );
+
   instructions.push(
     initializeTokenBondingV0Instruction(
       params.splTokenBondingProgramId,
+      params.splTokenProgramId,
       params.payer.publicKey,
       tokenBonding.publicKey,
       tokenBondingAuthority,
@@ -229,7 +220,8 @@ export async function createWumboCreator(
       params.baseMint,
       targetMint.publicKey,
       associatedFounderRewardsAddress,
-      baseStorage.publicKey,
+      baseStorageKey,
+      storageAuthority,
       (params.founderRewardsPercentage / 100) * 10000
     )
   );
@@ -249,7 +241,6 @@ export async function createWumboCreator(
   );
 
   await sendTransaction(connection, instructions, params.payer, [
-    baseStorage,
     targetMint,
     tokenBonding,
   ]);

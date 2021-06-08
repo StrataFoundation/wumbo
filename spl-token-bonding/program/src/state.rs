@@ -4,12 +4,13 @@ use {
     solana_program::program_error::ProgramError,
     solana_program::program_pack::{Pack, Sealed},
     solana_program::pubkey::Pubkey,
-    fastapprox::fast::ln
+    fastapprox::bits::{from_bits, to_bits}
 };
 
 
 pub const TARGET_AUTHORITY: &str = "target-authority";
 pub const BASE_STORAGE_AUTHORITY: &str = "base-storage-authority";
+pub const BASE_STORAGE_KEY: &str = "base-storage-key";
 
 #[repr(C)]
 #[derive(BorshSerialize, BorshDeserialize, PartialEq, Debug, Clone)]
@@ -61,6 +62,22 @@ pub trait Curve {
     fn price(&self, base_supply: f64, target_supply: f64, amount: f64) -> f64;
 }
 
+// Hack: Taylor series approx since no log curve. Todo, probably don't want floats anyway.
+fn ln(x: f64, point_five: f64) -> f64 {
+    if x > 1.0 {
+        return ln(x/2_f64, point_five) - point_five; // ln(2) = -ln(1/2)
+    }
+    let n= 10;
+    let mut s: f64 = 0.0;
+    for i in 1..n {
+        let sign = (-1_f64).powi(i+1_i32);
+        s += (
+            sign * ((x - 1_f64).powi(i))/(i as f64)
+        );
+    }
+    return s
+}
+
 /// If normal log curve, base + c * log(1 + (g * x))
 /// If base relative, base + c * log(1 + (g * x) / (1 + base_supply))
 #[repr(C)]
@@ -75,16 +92,19 @@ impl Sealed for LogCurveV0 {}
 
 /// Integral of base + c * log(1 + g * x) dx from a to b
 /// https://www.wolframalpha.com/input/?i=c+*+log%281+%2B+g+*+x%29+dx
-fn log_curve(c: f64, g: f64, a: f64, b: f64) -> f64 {
+pub fn log_curve(c: f64, g: f64, a: f64, b: f64) -> f64 {
+    let point_five: f64 = - ln(0.5, 0.0);
+
     let general = |x: f64| {
-        let inv_g = 1_f64 / g;
-        let inside = (1_f64 + (g * x)) as f32;
+      let inv_g = 1_f64 / g;
+        let inside = (1_f64 + (g * x));
         let log = if (g * x) == 0_f64 {
             0_f64
         } else {
-            ln(inside) as f64
+            ln(inside, point_five) as f64
         };
         let log_mult = (inv_g + x) * log;
+        msg!("x: {}, Log: {}, mult: {}, g {}, c {}, a {}, b {}", x, log, log_mult, g, c, a, b);
         c * (log_mult - x)
     };
     general(b) - general(a)
@@ -102,7 +122,7 @@ impl Curve for LogCurveV0 {
             self.g
         };
         let fvalue = log_curve(self.c as f64, g as f64, target_supply, target_supply + amount);
-        fvalue
+        fvalue.abs()
     }
 }
 

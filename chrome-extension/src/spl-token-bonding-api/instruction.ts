@@ -10,6 +10,7 @@ import { Numberu64 } from "@bonfida/spl-name-service";
 
 export function initializeTokenBondingV0Instruction(
   programId: PublicKey,
+  tokenProgramId: PublicKey,
   payer: PublicKey,
   tokenBondingAccount: PublicKey,
   tokenBondingAuthority: PublicKey,
@@ -18,6 +19,7 @@ export function initializeTokenBondingV0Instruction(
   targetMint: PublicKey,
   founderRewards: PublicKey,
   baseStorage: PublicKey,
+  baseStorageAuthority: PublicKey,
   founderRewardsPercentage: number
 ): TransactionInstruction {
   return new TransactionInstruction({
@@ -60,6 +62,16 @@ export function initializeTokenBondingV0Instruction(
       },
       {
         pubkey: baseStorage,
+        isSigner: false,
+        isWritable: true,
+      },
+      {
+        pubkey: baseStorageAuthority,
+        isSigner: false,
+        isWritable: false,
+      },
+      {
+        pubkey: tokenProgramId,
         isSigner: false,
         isWritable: false,
       },
@@ -231,6 +243,11 @@ export function sellV0Instruction(
       },
       {
         pubkey: tokenProgramId,
+        isSigner: false,
+        isWritable: false,
+      },
+      {
+        pubkey: SystemProgram.programId,
         isSigner: false,
         isWritable: false,
       },

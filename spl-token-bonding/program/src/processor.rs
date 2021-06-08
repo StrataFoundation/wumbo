@@ -8,7 +8,7 @@ use {
     crate::{
         error::TokenBondingError,
         instruction::TokenBondingInstruction,
-        state::{Curve, Key, LogCurveV0, TokenBondingV0, TARGET_AUTHORITY},
+        state::{Curve, Key, LogCurveV0, TokenBondingV0, TARGET_AUTHORITY, log_curve},
     },
     borsh::{BorshDeserialize, BorshSerialize},
     solana_program::{
@@ -22,7 +22,10 @@ use {
     spl_token::state::{Account, Mint},
 };
 
-use crate::{solana_program::sysvar::Sysvar, state::{ConstantProductV0, BASE_STORAGE_AUTHORITY}};
+use crate::{
+    solana_program::sysvar::Sysvar,
+    state::{ConstantProductV0, BASE_STORAGE_AUTHORITY, BASE_STORAGE_KEY},
+};
 
 pub fn process_instruction(
     program_id: &Pubkey,
@@ -38,13 +41,7 @@ pub fn process_instruction(
             c,
         } => {
             msg!("Instruction: Create Log Curve V0");
-            process_create_log_curve_v0(
-                program_id,
-                accounts,
-                g,
-                c,
-                is_base_relative,
-            )
+            process_create_log_curve_v0(program_id, accounts, g, c, is_base_relative)
         }
         TokenBondingInstruction::CreateConstantProductCurveV0 {
             m,
@@ -52,13 +49,7 @@ pub fn process_instruction(
             is_base_relative,
         } => {
             msg!("Instruction: Create Log Curve V0");
-            process_create_constant_product_curve_v0(
-                program_id,
-                accounts,
-                m,
-                b,
-                is_base_relative,
-            )
+            process_create_constant_product_curve_v0(program_id, accounts, m, b, is_base_relative)
         }
         TokenBondingInstruction::InitializeTokenBondingV0 {
             founder_reward_percentage,
@@ -134,6 +125,11 @@ pub fn storage_authority(program_id: &Pubkey, base_storage: &Pubkey) -> (Pubkey,
     Pubkey::find_program_address(seeds, program_id)
 }
 
+pub fn storage_key(program_id: &Pubkey, token_bonding: &Pubkey) -> (Pubkey, u8) {
+    let seeds: &[&[u8]] = &[&BASE_STORAGE_KEY.as_bytes(), &token_bonding.to_bytes()];
+    Pubkey::find_program_address(seeds, program_id)
+}
+
 fn unpack_curve(program_id: &Pubkey, curve: &AccountInfo) -> Result<Box<dyn Curve>, ProgramError> {
     if *curve.owner != *program_id {
         return Err(TokenBondingError::InvalidOwner.into());
@@ -143,7 +139,7 @@ fn unpack_curve(program_id: &Pubkey, curve: &AccountInfo) -> Result<Box<dyn Curv
         1 | 2 => {
             let curve = LogCurveV0::unpack_from_slice(&curve.data.borrow())?;
             Ok::<Box<dyn Curve>, ProgramError>(Box::new(curve))
-        },
+        }
         _ => Err(TokenBondingError::InvalidCurveKey.into()),
     }?;
 
@@ -246,7 +242,6 @@ fn process_create_constant_product_curve_v0(
     Ok(())
 }
 
-
 fn process_initialize_token_bonding_v0(
     program_id: &Pubkey,
     accounts: &[AccountInfo],
@@ -264,11 +259,53 @@ fn process_initialize_token_bonding_v0(
     let founder_rewards = next_account_info(accounts_iter)?;
     let founder_rewards_data = Account::unpack(*founder_rewards.data.borrow())?;
     let base_storage = next_account_info(accounts_iter)?;
-    let base_storage_data = Account::unpack(&base_storage.data.borrow())?;
+    let base_storage_authority = next_account_info(accounts_iter)?;
     let (target_mint_authority, _) = target_authority(program_id, target_mint.key);
     let (base_storage_authority_key, _) = storage_authority(program_id, base_storage.key);
-    let system_account_info = next_account_info(accounts_iter)?;
+    let token_program = next_account_info(accounts_iter)?;
+    let system_program_info = next_account_info(accounts_iter)?;
     let rent = next_account_info(accounts_iter)?;
+
+    let (storage_key, storage_key_nonce) = storage_key(program_id, token_bonding_account.key);
+
+    if storage_key != *base_storage.key {
+        return Err(TokenBondingError::InvalidBaseStorageAccountKey.into());
+    }
+
+    if *base_storage_authority.key != base_storage_authority_key {
+        return Err(TokenBondingError::InvalidAuthority.into());
+    }
+
+    let storage_seed = &[
+        BASE_STORAGE_KEY.as_bytes(),
+        &token_bonding_account.key.to_bytes(),
+        &[storage_key_nonce],
+    ];
+    create_or_allocate_account_raw(
+        *token_program.key,
+        base_storage,
+        rent,
+        system_program_info,
+        payer,
+        Account::LEN,
+        storage_seed,
+    )?;
+    invoke_signed(
+        &spl_token::instruction::initialize_account(
+            token_program.key,
+            &storage_key,
+            base_mint.key,
+            &base_storage_authority_key,
+        )?,
+        &[
+            token_program.clone(),
+            base_storage.clone(),
+            base_mint.clone(),
+            base_storage_authority.clone(),
+            rent.clone(),
+        ],
+        &[],
+    )?;
 
     if !payer.is_signer {
         return Err(TokenBondingError::MissingSigner.into());
@@ -279,30 +316,22 @@ fn process_initialize_token_bonding_v0(
     {
         return Err(TokenBondingError::InvalidAuthority.into());
     }
-        
+
     if token_bonding_account.data.borrow().len() > 0
         && TokenBondingV0::unpack_unchecked(&token_bonding_account.data.borrow())?.initialized
     {
         return Err(TokenBondingError::AlreadyInitialized.into());
     }
 
-    if *target_mint.owner != *base_mint.owner
-        || *founder_rewards.owner != *base_mint.owner
-        || *base_storage.owner != *founder_rewards.owner
+    if *target_mint.owner != *token_program.key
+        || *base_mint.owner != *token_program.key
+        || *founder_rewards.owner != *token_program.key
     {
         return Err(TokenBondingError::InvalidTokenProgramId.into());
     }
 
     if founder_rewards_data.mint != *target_mint.key {
         return Err(TokenBondingError::InvalidTargetMint.into());
-    }
-
-    if base_storage_data.mint != *base_mint.key {
-        return Err(TokenBondingError::InvalidBaseStorageAccountType.into());
-    }
-
-    if base_storage_data.owner != base_storage_authority_key {
-        return Err(TokenBondingError::InvalidAuthority.into());
     }
 
     if *token_bonding_account.owner != *program_id {
@@ -404,9 +433,16 @@ fn process_buy_v0(program_id: &Pubkey, accounts: &[AccountInfo], amount: u64) ->
     } else {
         supply_f(base_mint_data)
     };
+    let target_supply = supply_f(target_mint_data);
+    let p = curve_data.price(
+        base_supply,
+        target_supply,
+        supply_f_amt(amount, target_mint_data),
+    );
+    msg!("Price is {}", p);
     let price = to_lamports(
-        curve_data.price(base_supply, supply_f(target_mint_data), supply_f_amt(amount, target_mint_data)),
-        base_mint_data
+        p,
+        base_mint_data,
     );
     let founder_rewards_decimal = if token_bonding_data.founder_reward_percentage == 0 {
         1
@@ -423,11 +459,8 @@ fn process_buy_v0(program_id: &Pubkey, accounts: &[AccountInfo], amount: u64) ->
     );
     msg!("Paying into base storage");
     if *base_mint.key == native_mint::id() {
-        let pay_money = system_instruction::transfer(
-           purchase_account.key, 
-           base_storage.key, 
-           price
-        );
+        msg!("Base is the native mint, issueing a native transfer");
+        let pay_money = system_instruction::transfer(purchase_account.key, base_storage.key, price);
         invoke_signed(
             &pay_money,
             &[
@@ -437,7 +470,7 @@ fn process_buy_v0(program_id: &Pubkey, accounts: &[AccountInfo], amount: u64) ->
             ],
             &[],
         )?;
-    } else { 
+    } else {
         let pay_money = spl_token::instruction::transfer(
             &token_program_id,
             purchase_account.key,
@@ -457,8 +490,7 @@ fn process_buy_v0(program_id: &Pubkey, accounts: &[AccountInfo], amount: u64) ->
             &[],
         )?;
     };
-     
-    
+
     msg!("Done");
 
     let target_mint_authority_seed: &[&[u8]] = &[
@@ -525,6 +557,7 @@ fn process_sell_v0(program_id: &Pubkey, accounts: &[AccountInfo], amount: u64) -
     let sell_authority = next_account_info(accounts_iter)?;
     let destination = next_account_info(accounts_iter)?;
     let token_program_id = next_account_info(accounts_iter)?;
+    let system_account_info = next_account_info(accounts_iter)?;
 
     let (_, base_storage_nonce) = storage_authority(&program_id, base_storage.key);
     let target_mint_data = Mint::unpack(*target_mint.data.borrow())?;
@@ -557,11 +590,11 @@ fn process_sell_v0(program_id: &Pubkey, accounts: &[AccountInfo], amount: u64) -
 
     let reclaimed_amount = to_lamports(
         curve_data.price(
-        supply_f(base_mint_data),
-        supply_f(target_mint_data) - supply_f_amt(amount, target_mint_data),
-        supply_f_amt(amount, target_mint_data),
-         ),
-        base_mint_data
+            supply_f(target_mint_data) - supply_f_amt(amount, target_mint_data),
+            supply_f(base_mint_data),
+            supply_f_amt(amount, target_mint_data),
+        ),
+        base_mint_data,
     );
 
     msg!(
@@ -570,29 +603,51 @@ fn process_sell_v0(program_id: &Pubkey, accounts: &[AccountInfo], amount: u64) -
         reclaimed_amount
     );
     msg!("Paying from base storage");
-    let pay_money = spl_token::instruction::transfer(
-        &token_program_id.key,
-        base_storage.key,
-        destination.key,
-        base_storage_authority.key,
-        &[],
-        reclaimed_amount,
-    )?;
-    let authority_seed = &[
-        BASE_STORAGE_AUTHORITY.as_bytes(),
-        &base_storage.key.to_bytes(),
-        &[base_storage_nonce],
-    ];
-    invoke_signed(
-        &pay_money,
-        &[
-            destination.clone(),
-            base_storage.clone(),
-            base_storage_authority.clone(),
-            token_program_id.clone(),
-        ],
-        &[authority_seed],
-    )?;
+    if *base_mint.key == native_mint::id() {
+        msg!("Base is the native mint, issueing a native transfer");
+        let (_, acct_nonce) = storage_key(&program_id, token_bonding.key);
+        let acct_seed = &[
+            BASE_STORAGE_KEY.as_bytes(),
+            &token_bonding.key.to_bytes(),
+            &[acct_nonce],
+        ];
+        let pay_money =
+            system_instruction::transfer(base_storage.key, destination.key, reclaimed_amount);
+        invoke_signed(
+            &pay_money,
+            &[
+                destination.clone(),
+                base_storage.clone(),
+                system_account_info.clone(),
+            ],
+            &[acct_seed],
+        )?;
+    } else {
+        let authority_seed = &[
+            BASE_STORAGE_AUTHORITY.as_bytes(),
+            &base_storage.key.to_bytes(),
+            &[base_storage_nonce],
+        ];
+        let pay_money = spl_token::instruction::transfer(
+            &token_program_id.key,
+            base_storage.key,
+            destination.key,
+            base_storage_authority.key,
+            &[],
+            reclaimed_amount,
+        )?;
+        invoke_signed(
+            &pay_money,
+            &[
+                destination.clone(),
+                base_storage.clone(),
+                base_storage_authority.clone(),
+                token_program_id.clone(),
+            ],
+            &[authority_seed],
+        )?;
+    };
+
     msg!("Done");
     // Burn the required lamports
     msg!("Burning  {} target coins (including decimal)", amount);
@@ -656,7 +711,7 @@ mod tests {
 
     fn get_account(space: usize, owner: &Pubkey) -> (Pubkey, SolanaAccount) {
         let key = Pubkey::new_unique();
-        (key, SolanaAccount::new(0, space, owner))
+        (key, SolanaAccount::new(1000000000, space, owner))
     }
 
     fn get_loaded_mint(program_id: &Pubkey, mint: Mint) -> (Pubkey, SolanaAccount) {
@@ -679,6 +734,7 @@ mod tests {
 
     pub struct Fixture {
         pub token_program_id: Pubkey,
+        pub token_program: Box<SolanaAccount>,
         pub program_id: Pubkey,
         pub payer_key: Pubkey,
         pub payer: Box<SolanaAccount>,
@@ -747,25 +803,16 @@ mod tests {
             },
         );
 
-        let base_storage_key = Pubkey::new_unique();
+        let (base_storage_key, _) = storage_key(&program_id, &token_bonding_key);
+        let (_, base_storage) = get_account(Account::LEN, &program_id);
         let (base_storage_authority_key, _) = storage_authority(&program_id, &base_storage_key);
         let base_storage_authority = SolanaAccount::new(0, 0, &program_id);
-        let (_, base_storage) = get_loaded_mint_account(
-            &token_program_id,
-            Account {
-                mint: base_mint_key,
-                owner: base_storage_authority_key,
-                amount: 20,
-                delegate: COption::None,
-                state: AccountState::Initialized,
-                is_native: COption::None,
-                delegated_amount: 0,
-                close_authority: COption::None,
-            },
-        );
+
+        let token_program = SolanaAccount::new(0, 0, &program_id);
 
         Fixture {
             token_program_id,
+            token_program: Box::new(token_program),
             program_id,
             payer_key,
             payer: Box::new(payer),
@@ -813,6 +860,7 @@ mod tests {
         do_process_instruction(
             initialize_token_bonding_v0(
                 &fixture.program_id,
+                &fixture.token_program_id,
                 &fixture.payer_key,
                 &fixture.token_bonding_key,
                 &fixture.token_bonding_authority_key,
@@ -821,6 +869,7 @@ mod tests {
                 &fixture.target_mint_key,
                 &fixture.founder_rewards_key,
                 &fixture.base_storage_key,
+                &fixture.base_storage_authority_key,
                 1000,
             ),
             vec![
@@ -832,6 +881,8 @@ mod tests {
                 &mut fixture.target_mint,
                 &mut fixture.founder_rewards,
                 &mut fixture.base_storage,
+                &mut fixture.base_storage_authority,
+                &mut fixture.token_program,
                 &mut program_id_sysvar(),
                 &mut rent_sysvar(),
             ],
@@ -846,7 +897,7 @@ mod tests {
 
         let res: LogCurveV0 = try_from_slice_unchecked::<LogCurveV0>(&fixture.curve.data).unwrap();
         assert_eq!(res.g, 1_f64);
-        assert_eq!(res.c, 3_f64);
+        assert_eq!(res.c, 2_f64);
         assert_eq!(res.key, Key::BaseRelativeLogCurveV0);
     }
 
@@ -872,7 +923,9 @@ mod tests {
             c: 1_f64,
             initialized: true,
         };
-        assert_eq!(curve.price(0.0, 0.0, 10.0), 0.47320254147052765);
+        // log_curve(1.0, 0.01, 225048.399385, 225049.399385);
+        // assert_eq!(curve.price(0.0, 0.0, 10.0), 0.47320254147052765);
+        assert_eq!(curve.price(0.0, 225048.399385, 2.0), 15.438698544166982);
     }
 
     #[test]
@@ -929,7 +982,7 @@ mod tests {
                     &purchase_authority_key,
                     &destination_key,
                     &fixture.token_program_id,
-                    1000000000,
+                    100000000000,
                 ),
                 vec![
                     &mut fixture.token_bonding,

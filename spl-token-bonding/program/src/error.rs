@@ -82,8 +82,8 @@ pub enum TokenBondingError {
     #[error("Invalid freeze authority")]
     InvalidFreezeAuthority,
 
-    #[error("Base storage account must have the base mint")]
-    InvalidBaseStorageAccountType,
+    #[error("Base storage account must be keyed by ['base-storage-key', token_bonding.key] pda")]
+    InvalidBaseStorageAccountKey,
 
     #[error("Founder rewards account did not match that on the creator")]
     InvalidFounderRewardsAccount,
