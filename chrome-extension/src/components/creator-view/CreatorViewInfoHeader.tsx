@@ -1,19 +1,22 @@
-import React from "react";
-import { Token } from "./Token";
+import React from "react"
+import { Token } from "./Token"
 
-import "./CreatorViewInfoHeader.css";
+import "./CreatorViewInfoHeader.css"
 
 interface CreatorViewInfoHeaderProps {
-  creatorImg: string;
-  creatorName: string;
-  creatorPrice: number;
+  creatorImg: string
+  creatorName: string
+  creatorPrice: number
+  details: any
 }
 
 export function CreatorViewInfoHeader({
   creatorImg,
   creatorName,
   creatorPrice,
+  details,
 }: CreatorViewInfoHeaderProps) {
+  let { showDetails, setShowDetails } = details
   return (
     <div className="creator-view-info-header">
       <div className="creator-view-info-column">
@@ -35,12 +38,22 @@ export function CreatorViewInfoHeader({
             <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAgAAAAEAgMAAADOo5ZjAAAABGdBTUEAALGPC/xhBQAAAAFzUkdCAK7OHOkAAAAMUExURVvypUdwTF3zplzzp7bXEmMAAAAEdFJOU/4AP39NTkGfAAAAFElEQVQI12OIUGVI4GRoYGKo/wsADQgC5XmIHcEAAAAASUVORK5CYII=" />
             +0.48%
           </span>
-          <span className="subdetails-key">
-            <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAsAAAALCAMAAACecocUAAAABGdBTUEAALGPC/xhBQAAAAFzUkdCAK7OHOkAAACBUExURUdwTNfY2ObDYOzBO72QMdqrIfLXX76levHQSQAu/+zixem/J/TWeLiLNO7HOrqMIriRStChIauHRcuaIbqSOJpyK6eEQraGRdy5a8qeNPrhNtKxWPfOHPrYQfbJONSsOOO+R/vgReO0HsaUHNSiHtuoGvvPGdCgHvPDG+y+Hf/bFsS6aYkAAAAidFJOUwAJUK+w71QjegUN2CKPieZa7nPvxLiLiVitqYLenI7RrLyY7s45AAAAXklEQVQI1z3MVw6AIBAE0FVUwN57B0G9/wEFjM7Xm2R3AHR8sk2hEVj9Pc7oLZ4QBMhqHJ9XQIJFk6Jd5RjMicu5ZJ2vaLvScaLU0sxYgqn5awuW43caSlZ/hKb6+QB5gwU0Rq9Q3gAAAABJRU5ErkJggg==" />
-            YOD3aM4N..
+          <span
+            className="subdetails-toggle"
+            onClick={() => {
+              setShowDetails((d: boolean) => !d)
+            }}
+          >
+            {showDetails ? "Less details" : "More details"}
+            <img
+              src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAkAAAAFBAMAAABlfdtYAAAABGdBTUEAALGPC/xhBQAAAAFzUkdCAK7OHOkAAAAwUExURUdwTP///////////////////////////////////////////////////////////0Q+7AIAAAAQdFJOUwD+tGRvQIQg18Ex6w9Zlo8y0SfKAAAAJUlEQVQI12MwY2Dg/cDgqMOQqMDALLFIjoGBIVrQAUiyT2VgAABHaARF7/S8BQAAAABJRU5ErkJggg=="
+              style={{
+                transform: `rotate(${showDetails ? "180deg" : "0deg"})`,
+              }}
+            />
           </span>
         </div>
       </div>
     </div>
-  );
+  )
 }

@@ -14,9 +14,14 @@ import { inverseLogCurve, logCurve, usePricing } from "../../utils/pricing"
 interface SellProps {
   creatorInfo: CreatorInfo
   setShowWalletConnect: any
+  setSwapped: any
 }
 
-export default ({ creatorInfo, setShowWalletConnect }: SellProps) => {
+export default ({
+  creatorInfo,
+  setShowWalletConnect,
+  setSwapped,
+}: SellProps) => {
   const connection = useConnection()
   const { curve, inverseCurve, loading } = usePricing(
     creatorInfo.tokenBonding.publicKey
@@ -37,6 +42,7 @@ export default ({ creatorInfo, setShowWalletConnect }: SellProps) => {
 
   return (
     <Swap
+      setSwapped={setSwapped}
       setShowWalletConnect={setShowWalletConnect}
       base={{
         key: creatorInfo.tokenBonding.targetMint,

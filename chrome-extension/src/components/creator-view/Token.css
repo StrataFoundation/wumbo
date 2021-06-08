@@ -5,6 +5,10 @@
   align-items: center;
 }
 
+.token-display .anticon {
+  margin-left: 4px;
+}
+
 .token-display .token-display-icon {
   border-radius: 50%;
   display: flex;

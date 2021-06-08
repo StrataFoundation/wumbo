@@ -25,6 +25,7 @@ import GetWUM from "./GetWUM"
 import SellWUM from "./SellWUM"
 import { Banner } from "../Banner"
 import { WalletSelect } from "../WalletSelect"
+import { SideSwap } from "./SideSwap"
 
 const { TabPane } = Tabs
 
@@ -50,6 +51,7 @@ export default ({
   }
   const [showWalletConnect, setShowWalletConnect] = useState<boolean>(false)
   const [creationLoading, setCreationLoading] = useState<boolean>(false)
+  const [showDetails, setShowDetails] = useState<boolean>(false)
 
   useEffect(() => {
     if (wallet && wallet.publicKey) {
@@ -91,31 +93,48 @@ export default ({
         creatorImg={creatorImg}
         creatorName={creatorName || ""}
         creatorPrice={creatorInfo?.coinPriceUsd || 0.0}
+        details={{ showDetails, setShowDetails }}
       />
       {creatorInfo?.creator ? (
         <>
-          <CoinDetails creatorInfo={creatorInfo} />
+          {showDetails && <CoinDetails creatorInfo={creatorInfo} />}
           <div className="creator-view-width-constraint">
-            <Tabs defaultActiveKey="buy">
+            <Tabs defaultActiveKey="creatorCoin">
               {creatorInfo?.creator && (
                 <>
-                  <TabPane tab="Buy" key="buy">
-                    <Buy
-                      creatorInfo={creatorInfo}
-                      setShowWalletConnect={setShowWalletConnect}
+                  <TabPane tab="Creator Coin" key="creatorCoin">
+                    <SideSwap
+                      first={(setSwapped) => (
+                        <Buy
+                          creatorInfo={creatorInfo}
+                          setShowWalletConnect={setShowWalletConnect}
+                          setSwapped={setSwapped}
+                        />
+                      )}
+                      second={(setSwapped) => (
+                        <Sell
+                          creatorInfo={creatorInfo}
+                          setShowWalletConnect={setShowWalletConnect}
+                          setSwapped={setSwapped}
+                        />
+                      )}
                     />
                   </TabPane>
-                  <TabPane tab="Sell" key="sell">
-                    <Sell
-                      creatorInfo={creatorInfo}
-                      setShowWalletConnect={setShowWalletConnect}
+                  <TabPane tab="Get/Sell WUM" key="wum">
+                    <SideSwap
+                      first={(setSwapped) => (
+                        <GetWUM
+                          setShowWalletConnect={setShowWalletConnect}
+                          setSwapped={setSwapped}
+                        />
+                      )}
+                      second={(setSwapped) => (
+                        <SellWUM
+                          setShowWalletConnect={setShowWalletConnect}
+                          setSwapped={setSwapped}
+                        />
+                      )}
                     />
-                  </TabPane>
-                  <TabPane tab="Get WUM" key="get_wum">
-                    <GetWUM setShowWalletConnect={setShowWalletConnect} />
-                  </TabPane>
-                  <TabPane tab="Sell WUM" key="sell_wum">
-                    <SellWUM setShowWalletConnect={setShowWalletConnect} />
                   </TabPane>
                 </>
               )}

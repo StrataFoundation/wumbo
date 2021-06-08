@@ -6,6 +6,16 @@
 *  Buy/Sell Form
 */
 
+.prices {
+  display: flex;
+}
+
+.price-form {
+  flex: 1;
+  flex-direction: column;
+  display: flex;
+}
+
 .price-block {
   display: flex;
   flex: 1;
@@ -14,6 +24,19 @@
   border: solid 1px #232323;
   background-color: #313033;
   flex-direction: column;
+}
+
+.ant-dropdown-menu-dark,
+.ant-dropdown-menu-dark .ant-dropdown-menu {
+  background-color: #232323 !important;
+  border: solid 1px #232323;
+}
+
+.price-block-balance {
+  color: white;
+  font-size: 10px;
+  margin-top: 5px;
+  padding-left: 2px;
 }
 
 .price-block-header {
@@ -31,12 +54,8 @@
 }
 
 .price-block-body {
-  display: flex;
   flex: 1;
-  flex-direction: row;
-  justify-content: space-between;
-  align-items: center;
-  margin-top: 5px;
+  margin-top: 10px;
 }
 
 .price-block-body span,
@@ -46,10 +65,19 @@
   color: white;
 }
 
+.price-block-body span {
+  font-size: 10px;
+}
+
+.price-side {
+  flex: 1;
+}
+
 .price-block-arrow {
   display: flex;
-  flex: 1;
-  margin: 5px 0px;
+  flex: 0;
+  height: 85px;
+  margin: 5px 14px;
   align-items: center;
   justify-content: center;
 }

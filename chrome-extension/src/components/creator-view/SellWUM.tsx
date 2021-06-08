@@ -21,6 +21,7 @@ import { LogCurveV0, TokenBondingV0 } from "../../spl-token-bonding-api/state"
 
 interface Props {
   setShowWalletConnect: any
+  setSwapped: any
 }
 
 export default (props: Props) => {

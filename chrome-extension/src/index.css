@@ -46,7 +46,6 @@ body {
 
 .ant-tabs-ink-bar {
   background: #9596ff;
-  width: 35px !important;
 }
 
 .ant-tabs-top > .ant-tabs-nav::before {
