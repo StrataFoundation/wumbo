@@ -7,13 +7,13 @@ import {
 // export const SOLANA_API_URL = "https://api.mainnet-beta.solana.com"
 export const WUM_REWARDS_PERCENTAGE = 1000;
 export const WUM_BONDING = new PublicKey(
-  "Geg6vTPxktGT869XMgLcR3pmim3teghWevd8GiX5uv1u"
+  "D7k9khqLQqbu5NaoyCHSkvRj5PnhfHksZuP2siphTnrQ"
 );
 export const WUM_TOKEN = new PublicKey(
-  "8YstbUbbaBDjC2C7xEMYuLmm8rQxezyErFjdTRKJ9dob"
+  "7i9R5R9Fr98DrPz29rJDXwRVRnzFzy77amixbyFy5cJ7"
 );
 export const WUMBO_INSTANCE_KEY: PublicKey = new PublicKey(
-  "BMcmWeL5nGTHzbTkZnZpiPaoc9YB9CfAD77rcerq8cVR"
+  "7dwwCuQUdAp3hJZNRsgeUn5q2kEGjmw4ZrKcryyY7Bz4"
 );
 export const WUMBO_PROGRAM_ID: PublicKey = new PublicKey(
   "AVYYDfjDiQU6rixuNe9LmKAZY1f7cbYexEMVAMpCAaoP"
@@ -26,7 +26,7 @@ export const SPL_NAME_SERVICE_PROGRAM_ID = new PublicKey(
   "CiBbJADtSJnVQEsgXZpRfLyLNqDjwfvua8EMe9tPhKvo"
 );
 export const TOKEN_BONDING_PROGRAM_ID = new PublicKey(
-  "CBvX6GXQ7CfoqWNG99wW22zzufz1owyH2tPSfEyus7JV"
+  "JA285FMDWsNVCnbUbzKFJgyC6xUHXBq6mrQkrKH6Ru5s"
 );
 export const SOLANA_API_URL = "https://devnet.solana.com";
 export const SERUM_PROGRAM_ID = new PublicKey(

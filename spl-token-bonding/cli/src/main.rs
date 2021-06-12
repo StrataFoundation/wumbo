@@ -29,8 +29,8 @@ use spl_token_bonding::{
 const TOKEN_SWAP_PROGRAM_ID_STR: &str = "F2LtPFtixA8vKbg8ark5zswM4QuJKBn85KZcqrzWNe4K";
 const TOKEN_PROGRAM_ID_STR: &str = "CiBbJADtSJnVQEsgXZpRfLyLNqDjwfvua8EMe9tPhKvo";
 const NAME_PROGRAM_ID_STR: &str = "CiBbJADtSJnVQEsgXZpRfLyLNqDjwfvua8EMe9tPhKvo";
-// const TOKEN_BONDING_PROGRAM_ID_STR: &str = "G6ibxBmysVJtEyQJ2smdbSXSMVpTMzAWQVThpPPPdVdD";
-const TOKEN_BONDING_PROGRAM_ID_STR: &str = "CBvX6GXQ7CfoqWNG99wW22zzufz1owyH2tPSfEyus7JV";
+const TOKEN_BONDING_PROGRAM_ID_STR: &str = "JA285FMDWsNVCnbUbzKFJgyC6xUHXBq6mrQkrKH6Ru5s";
+// const TOKEN_BONDING_PROGRAM_ID_STR: &str = "CBvX6GXQ7CfoqWNG99wW22zzufz1owyH2tPSfEyus7JV";
 
 fn main() {
     let default_decimals = &format!("{}", native_mint::DECIMALS);

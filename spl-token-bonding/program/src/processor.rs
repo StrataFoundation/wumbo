@@ -281,31 +281,42 @@ fn process_initialize_token_bonding_v0(
         &token_bonding_account.key.to_bytes(),
         &[storage_key_nonce],
     ];
-    create_or_allocate_account_raw(
-        *token_program.key,
+    let is_native = *base_mint.key == native_mint::id();
+   create_or_allocate_account_raw(
+        if is_native {
+            *program_id
+        } else {
+            *token_program.key
+        },
         base_storage,
         rent,
         system_program_info,
         payer,
-        Account::LEN,
+        if is_native {
+            0
+        } else {
+            Account::LEN
+        },
         storage_seed,
     )?;
-    invoke_signed(
-        &spl_token::instruction::initialize_account(
-            token_program.key,
-            &storage_key,
-            base_mint.key,
-            &base_storage_authority_key,
-        )?,
-        &[
-            token_program.clone(),
-            base_storage.clone(),
-            base_mint.clone(),
-            base_storage_authority.clone(),
-            rent.clone(),
-        ],
-        &[],
-    )?;
+    if !is_native {
+        invoke_signed(
+            &spl_token::instruction::initialize_account(
+                token_program.key,
+                &storage_key,
+                base_mint.key,
+                &base_storage_authority_key,
+            )?,
+            &[
+                token_program.clone(),
+                base_storage.clone(),
+                base_mint.clone(),
+                base_storage_authority.clone(),
+                rent.clone(),
+            ],
+            &[],
+        )?;
+    }
 
     if !payer.is_signer {
         return Err(TokenBondingError::MissingSigner.into());
@@ -616,8 +627,8 @@ fn process_sell_v0(program_id: &Pubkey, accounts: &[AccountInfo], amount: u64) -
         invoke_signed(
             &pay_money,
             &[
-                destination.clone(),
                 base_storage.clone(),
+                destination.clone(),
                 system_account_info.clone(),
             ],
             &[acct_seed],

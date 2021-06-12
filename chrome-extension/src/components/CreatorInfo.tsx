@@ -47,10 +47,6 @@ export default ({ creatorName, creatorImg }: CreatorInfoProps) => {
     WumboInstance.fromAccount
   )
 
-  if (loading) {
-    return <Loading />
-  }
-
   if (!loading && !creatorInfo && wumboInstance && wallet) {
     return (
       <Popover
@@ -70,6 +66,10 @@ export default ({ creatorName, creatorImg }: CreatorInfoProps) => {
         <Button type="link">Create Coin</Button>
       </Popover>
     )
+  }
+
+  if (loading || !creatorInfo || !wumboInstance) {
+    return <Loading />
   }
 
   return (
