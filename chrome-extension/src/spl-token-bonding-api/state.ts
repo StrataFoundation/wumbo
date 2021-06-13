@@ -3,12 +3,17 @@ import { AccountInfo, Connection, PublicKey } from "@solana/web3.js";
 import { deserializeUnchecked,deserialize, Schema } from "@bonfida/borsh-js";
 import { Numberu64 } from "@bonfida/spl-name-service";
 
-function decodef64(arg: Uint8Array): number {
-  const x = new ArrayBuffer(8);
+function decodeu128asf64(arg: Uint8Array): number {
+  const x = new ArrayBuffer(16);
   const y = new DataView(x);
   arg.forEach((i: any, idx: number) => y.setUint8(idx, i));
 
-  return y.getFloat64(0, true);
+  // 40 bits to represent the decimal
+  const decimalWithPotentialExtra = ((y.getUint32(0, true) + (y.getUint8(4) *  Math.pow(2, 32))) / Math.pow(10, 12))
+  const decimal = decimalWithPotentialExtra % 1
+  const afterDecimal = (decimalWithPotentialExtra - decimal) + (Number(y.getBigUint64(5)) *  Math.pow(2, 40)) + (y.getUint16(8) * Math.pow(2, 104)) + (y.getUint8(10) * Math.pow(2, 120));
+
+  return afterDecimal + decimal;
 }
 
 export class TokenBondingV0 {
@@ -62,7 +67,7 @@ export class TokenBondingV0 {
     this.baseStorage = new PublicKey(obj.baseStorage);
     this.founderRewards = new PublicKey(obj.founderRewards);
     this.founderRewardPercentage = new Numberu16(
-      obj.founderRewardPercentage
+      obj.founderRewardPercentage.reverse()
     ).toNumber();
     this.curve = new PublicKey(obj.curve);
     this.initialized = obj.initialized[0] === 1;
@@ -104,7 +109,7 @@ export class LogCurveV0 {
   isBaseRelative: boolean;
   initialized: boolean;
 
-  static LEN = 1 + 32 * 2 + 1;
+  static LEN = 1 + 16 * 2 + 2 + 1;
 
   static schema: Schema = new Map([
     [
@@ -113,8 +118,9 @@ export class LogCurveV0 {
         kind: "struct",
         fields: [
           ["key", 'u8'],
-          ["g", [8]],
-          ["c", [8]],
+          ["g", [16]],
+          ["c", [16]],
+          ["taylor_iterations", [2]],
           ["initialized", 'u8'],
         ],
       },
@@ -127,10 +133,9 @@ export class LogCurveV0 {
     c: Uint8Array;
     initialized: Uint8Array;
   }) {
-    const u64 = Numberu64;
     this.isBaseRelative = obj.key[0] == 2;
-    this.g = decodef64(obj.g);
-    this.c = decodef64(obj.c);
+    this.g = decodeu128asf64(obj.g);
+    this.c = decodeu128asf64(obj.c);
     this.initialized = obj.initialized[0] === 1;
   }
 

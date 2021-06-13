@@ -57,11 +57,11 @@ export const inverseLogCurve = (
   const s = supplyAsNum(target);
   const rewardsDecimal =
     founderRewardsPercentage == 0 ? 1 : founderRewardsPercentage / 10000;
-  const k = (baseAmount / rewardsDecimal) + generalLogCurve(c, g, s)
+  const k = baseAmount + generalLogCurve(c, g, s)
   const exp = (gsl_sf_lambert_W0(((g * k) - c) / (c * Math.E)) + 1)
   const orig = logCurve(curve, base, target, founderRewardsPercentage);
 
-  return Math.abs((Math.pow(Math.E, exp) - (g * s) - 1) / g)
+  return Math.abs((Math.pow(Math.E, exp) - (g * s) - 1) / ((1 + rewardsDecimal) * g))
 };
 
 const startFinishLogCurve = (
@@ -82,8 +82,8 @@ const startFinishLogCurve = (
       c,
       g,
       start,
-      finish
-    ) * rewardsDecimal
+      finish * (1 + rewardsDecimal)
+    )
   )
 }
 

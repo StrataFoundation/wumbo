@@ -21,6 +21,7 @@ export default ({
   creatorInfo,
   setShowWalletConnect,
   setSwapped,
+  swapped
 }: SellProps) => {
   const connection = useConnection()
   const { curve, inverseCurve, loading } = usePricing(

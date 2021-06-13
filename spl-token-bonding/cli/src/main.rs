@@ -78,7 +78,7 @@ fn main() {
                 .arg(
                     Arg::with_name("g")
                         .long("g")
-                        .validator(is_parsable::<f64>)
+                        .validator(is_parsable::<u128>)
                         .value_name("g")
                         .takes_value(true)
                         .index(1)
@@ -87,11 +87,20 @@ fn main() {
                 .arg(
                     Arg::with_name("c")
                         .long("c")
-                        .validator(is_parsable::<f64>)
+                        .validator(is_parsable::<u128>)
                         .value_name("C")
                         .takes_value(true)
                         .index(2)
                         .help("c in the log equation"),
+                )
+                .arg(
+                    Arg::with_name("max_iterations")
+                        .long("max_iterations")
+                        .validator(is_parsable::<u128>)
+                        .value_name("MAX_ITERATIONS")
+                        .takes_value(true)
+                        .index(3)
+                        .help("Max taylor expansion iterations on the log function"),
                 )
                 .arg(
                     Arg::with_name("base-relative")
@@ -190,8 +199,9 @@ fn main() {
 
     match (sub_command, sub_matches) {
         ("create-log-curve", Some(arg_matches)) => {
-            let g = value_t_or_exit!(arg_matches, "g", f64);
-            let c = value_t_or_exit!(arg_matches, "c", f64);
+            let g = value_t_or_exit!(arg_matches, "g", u128);
+            let c = value_t_or_exit!(arg_matches, "c", u128);
+            let taylor_iterations = value_t_or_exit!(arg_matches, "max_iterations", u16);
             let is_base_relative = value_t_or_exit!(arg_matches, "base-relative", bool);
             let curve = Keypair::new();
             let curve_key = curve.pubkey();
@@ -214,6 +224,7 @@ fn main() {
                     &curve_key,
                     g,
                     c,
+                    taylor_iterations,
                     is_base_relative,
                 ),
             ];

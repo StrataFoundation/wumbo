@@ -1,3 +1,7 @@
+use num_traits::ops::inv;
+use spl_math::precise_number::PreciseNumber;
+use crate::ln::{InnerUint, NaturalLog, one};
+
 use {
     borsh::{BorshDeserialize, BorshSerialize},
     solana_program::msg,
@@ -18,8 +22,6 @@ pub enum Key {
     TokenBondingV0,
     LogCurveV0,
     BaseRelativeLogCurveV0,
-    ConstantProductV0,
-    BaseRelativeConstantProductV0,
 }
 
 #[repr(C)]
@@ -59,37 +61,7 @@ impl Pack for TokenBondingV0 {
 
 pub trait Curve {
     fn initialized(&self) -> bool;
-    fn price(&self, base_supply: f64, target_supply: f64, amount: f64) -> f64;
-}
-
-const n: i32 = 15;
-
-// Hack: Taylor series approx since no log curve. Todo, probably don't want floats anyway.
-fn ln_small(x: f64) -> f64 {
-    let mut s: f64 = 0.0;
-    for i in 1..n {
-        let sign = (-1_f64).powi(i+1_i32);
-        s += (
-            sign * ((x - 1_f64).powi(i))/(i as f64)
-        );
-    }
-    return s
-}
-
-fn ln_big(x: f64) -> f64 {
-    let mut s: f64 = 0.0;
-    for i in 1..n {
-        s += ((x - 1_f64) / x).powi(n) / (n as f64)
-    }
-    return s
-}
-
-fn ln(x: f64) -> f64 {
-    if x <= 2_f64 {
-        ln_small(x)
-    } else {
-        ln_big(x)
-    }
+    fn price(&self, base_supply: &PreciseNumber, target_supply: &PreciseNumber, amount: &PreciseNumber) -> Option<PreciseNumber>;
 }
 
 /// If normal log curve, base + c * log(1 + (g * x))
@@ -98,28 +70,28 @@ fn ln(x: f64) -> f64 {
 #[derive(BorshSerialize, BorshDeserialize, PartialEq, Debug, Clone)]
 pub struct LogCurveV0 {
     pub key: Key,
-    pub g: f64,
-    pub c: f64,
+    // Fixed precision decimal with 12 decimal places. So 1 would be 1_000_000_000_000. 1.5 is 1_500_000_000_000
+    pub g: u128,
+    // Fixed precision decimal with 12 decimal places. So 1 would be 1_000_000_000_000. 1.5 is 1_500_000_000_000
+    pub c: u128,
+    pub taylor_iterations: u16,
     pub initialized: bool
 }
 impl Sealed for LogCurveV0 {}
 
-/// Integral of base + c * log(1 + g * x) dx from a to b
 /// https://www.wolframalpha.com/input/?i=c+*+log%281+%2B+g+*+x%29+dx
-pub fn log_curve(c: f64, g: f64, a: f64, b: f64) -> f64 {
-    let general = |x: f64| {
-      let inv_g = 1_f64 / g;
-        let inside = (1_f64 + (g * x));
-        let log = if (g * x) == 0_f64 {
-            0_f64
-        } else {
-            ln(inside)
-        };
-        let log_mult = (inv_g + x) * log;
-        msg!("x: {}, Log: {}, mult: {}, g {}, c {}, a {}, b {}", x, log, log_mult, g, c, a, b);
-        c * (log_mult - x)
+pub fn log_curve(c: &PreciseNumber, g: &PreciseNumber, a: &PreciseNumber, b: &PreciseNumber, log_num_iterations: u16) -> Option<PreciseNumber> {
+    let one_prec = PreciseNumber { value: one() };
+
+    let general = |x: &PreciseNumber| {
+      let inv_g = one_prec.checked_div(g)?;
+      let inside = one_prec.checked_add(&g.checked_mul(&x)?)?;
+      let log = inside.ln(log_num_iterations)?;
+      let log_mult = log.checked_mul(&inv_g.checked_add(&x)?)?;
+      Some(c.checked_mul(&log_mult.checked_sub(&x)?)?)
     };
-    general(b) - general(a)
+
+    general(b)?.checked_sub(&general(a)?)
 }
 
 impl Curve for LogCurveV0 {
@@ -127,19 +99,26 @@ impl Curve for LogCurveV0 {
         self.initialized
     }
 
-    fn price(&self, base_supply: f64, target_supply: f64, amount: f64) -> f64 {
-        let g: f64 = if self.key == Key::BaseRelativeLogCurveV0 {
-            self.g / (1_f64 + base_supply)
+    fn price(&self, base_supply: &PreciseNumber, target_supply: &PreciseNumber, amount: &PreciseNumber) -> Option<PreciseNumber> {
+        let one_prec = PreciseNumber { value: one() };
+        let g_prec = PreciseNumber { value: InnerUint::from(self.g) };
+        let g = if self.key == Key::BaseRelativeLogCurveV0 {
+            g_prec.checked_div(&one_prec.checked_add(base_supply)?)?
         } else {
-            self.g
+            g_prec
         };
-        let fvalue = log_curve(self.c as f64, g as f64, target_supply, target_supply + amount);
-        fvalue.abs()
+        log_curve(
+            &PreciseNumber { value: InnerUint::from(self.c) },
+            &g, 
+            target_supply, 
+            &target_supply.checked_add(&amount)?,
+            self.taylor_iterations
+        )
     }
 }
 
 impl Pack for LogCurveV0 {
-    const LEN: usize = 1 + 8 * 2 + 1;
+    const LEN: usize = 1 + 16 * 2 + 2 + 1;
 
     fn pack_into_slice(&self, dst: &mut [u8]) {
         let mut slice = dst;
@@ -152,66 +131,5 @@ impl Pack for LogCurveV0 {
             msg!("Failed to deserialize log curve record");
             ProgramError::InvalidAccountData
         })
-    }
-}
-
-/// If normal constant produt curve, price = m * supply * x + b
-/// If base relative, price = ((m / base_supply) * x) + b
-#[repr(C)]
-#[derive(BorshSerialize, BorshDeserialize, PartialEq, Debug, Clone)]
-pub struct ConstantProductV0 {
-    pub key: Key,
-    pub m: f64,
-    pub b: f64,
-    pub initialized: bool
-}
-impl Sealed for ConstantProductV0 {}
-
-impl<T> From<T> for Box<dyn Curve>
-where
-    T: Curve + 'static,
-{
-    fn from(curve: T) -> Self {
-        Box::new(curve)
-    }
-}
-
-impl Pack for ConstantProductV0 {
-    const LEN: usize = 1 + 8 * 2 + 1;
-
-    fn pack_into_slice(&self, dst: &mut [u8]) {
-        let mut slice = dst;
-        self.serialize(&mut slice).unwrap()
-    }
-
-    fn unpack_from_slice(src: &[u8]) -> Result<Self, ProgramError> {
-        let mut p = src;
-        ConstantProductV0::deserialize(&mut p).map_err(|_| {
-            msg!("Failed to deserialize constant curve record");
-            ProgramError::InvalidAccountData
-        })
-    }
-}
-
-fn constant_product(m: f64, b: f64, start: f64, finish: f64) -> f64 {
-    let general = |x: f64| {
-        m * x.powi(2) + b * x
-    };
-
-    general(finish) - general(start)
-}
-
-impl Curve for ConstantProductV0 {
-    fn initialized(&self) -> bool {
-        self.initialized
-    }
-
-    fn price(&self, base_supply: f64, target_supply: f64, amount: f64) -> f64 {
-        let m: f64 = if self.key == Key::BaseRelativeConstantProductV0 {
-            self.m / (1_f64 + base_supply)
-        } else {
-            self.m
-        };
-        return constant_product(m, self.b, target_supply, target_supply + amount);
     }
 }

@@ -2,10 +2,12 @@ use std::convert::TryInto;
 
 use solana_program::program::{invoke, invoke_signed};
 use solana_program::{program_error::ProgramError, system_instruction};
+use spl_math::precise_number::PreciseNumber;
 use spl_token::{native_mint, solana_program::program_pack::Pack};
 
 use {
     crate::{
+        ln::{InnerUint},
         error::TokenBondingError,
         instruction::TokenBondingInstruction,
         state::{Curve, Key, LogCurveV0, TokenBondingV0, TARGET_AUTHORITY, log_curve},
@@ -24,7 +26,7 @@ use {
 
 use crate::{
     solana_program::sysvar::Sysvar,
-    state::{ConstantProductV0, BASE_STORAGE_AUTHORITY, BASE_STORAGE_KEY},
+    state::{BASE_STORAGE_AUTHORITY, BASE_STORAGE_KEY},
 };
 
 pub fn process_instruction(
@@ -39,17 +41,10 @@ pub fn process_instruction(
             g,
             is_base_relative,
             c,
+            taylor_iterations
         } => {
             msg!("Instruction: Create Log Curve V0");
-            process_create_log_curve_v0(program_id, accounts, g, c, is_base_relative)
-        }
-        TokenBondingInstruction::CreateConstantProductCurveV0 {
-            m,
-            b,
-            is_base_relative,
-        } => {
-            msg!("Instruction: Create Log Curve V0");
-            process_create_constant_product_curve_v0(program_id, accounts, m, b, is_base_relative)
+            process_create_log_curve_v0(program_id, accounts, g, c, taylor_iterations, is_base_relative)
         }
         TokenBondingInstruction::InitializeTokenBondingV0 {
             founder_reward_percentage,
@@ -153,8 +148,9 @@ fn unpack_curve(program_id: &Pubkey, curve: &AccountInfo) -> Result<Box<dyn Curv
 fn process_create_log_curve_v0(
     program_id: &Pubkey,
     accounts: &[AccountInfo],
-    g: f64,
-    c: f64,
+    g: u128,
+    c: u128,
+    taylor_iterations: u16,
     is_base_relative: bool,
 ) -> ProgramResult {
     let accounts_iter = &mut accounts.into_iter();
@@ -189,52 +185,7 @@ fn process_create_log_curve_v0(
         },
         g,
         c,
-        initialized: true,
-    };
-    new_account_data.serialize(&mut *curve.try_borrow_mut_data()?)?;
-
-    Ok(())
-}
-
-fn process_create_constant_product_curve_v0(
-    program_id: &Pubkey,
-    accounts: &[AccountInfo],
-    m: f64,
-    b: f64,
-    is_base_relative: bool,
-) -> ProgramResult {
-    let accounts_iter = &mut accounts.into_iter();
-    let payer = next_account_info(accounts_iter)?;
-    let curve = next_account_info(accounts_iter)?;
-    let system_account_info = next_account_info(accounts_iter)?;
-    let rent = next_account_info(accounts_iter)?;
-
-    if !payer.is_signer {
-        return Err(TokenBondingError::MissingSigner.into());
-    }
-
-    if *curve.owner != *program_id {
-        return Err(TokenBondingError::InvalidOwner.into());
-    }
-
-    let rent = &Rent::from_account_info(rent)?;
-    let required_lamports = rent
-        .minimum_balance(ConstantProductV0::LEN)
-        .max(1)
-        .saturating_sub(curve.lamports());
-
-    if required_lamports > 0 {
-        return Err(TokenBondingError::NotRentExempt.into());
-    }
-
-    let new_account_data = ConstantProductV0 {
-        key: if is_base_relative {
-            Key::BaseRelativeLogCurveV0
-        } else {
-            Key::LogCurveV0
-        },
-        m,
-        b,
+        taylor_iterations,
         initialized: true,
     };
     new_account_data.serialize(&mut *curve.try_borrow_mut_data()?)?;
@@ -375,16 +326,20 @@ fn process_initialize_token_bonding_v0(
     Ok(())
 }
 
-fn supply_f(mint: Mint) -> f64 {
-    supply_f_amt(mint.supply, mint)
+fn precise_supply(mint: Mint) -> PreciseNumber {
+    precise_supply_amt(mint.supply, mint)
 }
 
-fn supply_f_amt(amt: u64, mint: Mint) -> f64 {
-    (amt as f64) / (10_u32.pow(mint.decimals as u32) as f64)
+fn precise_supply_amt(amt: u64, mint: Mint) -> PreciseNumber {
+    PreciseNumber {
+        value: InnerUint::from((amt as u128) * 10_u128.pow(12_u32 - mint.decimals as u32))
+    }
 }
 
-fn to_lamports(amt: f64, mint: Mint) -> u64 {
-    (amt * (10_u32.pow(mint.decimals as u32) as f64)) as u64
+fn to_lamports(amt: &PreciseNumber, mint: Mint) -> u64 {
+    amt.checked_mul(
+        &PreciseNumber::new(10_u128).unwrap().checked_pow(mint.decimals as u128).unwrap()
+    ).unwrap().to_imprecise().unwrap() as u64
 }
 
 fn process_buy_v0(program_id: &Pubkey, accounts: &[AccountInfo], amount: u64) -> ProgramResult {
@@ -438,30 +393,40 @@ fn process_buy_v0(program_id: &Pubkey, accounts: &[AccountInfo], amount: u64) ->
     if token_bonding_data.target_mint != *target_mint.key {
         return Err(TokenBondingError::InvalidTargetMint.into());
     }
+    let founder_rewards_decimal = if token_bonding_data.founder_reward_percentage == 0 {
+        PreciseNumber::new(1).unwrap()
+    } else {
+        PreciseNumber::new(1).unwrap().checked_add(
+            &PreciseNumber::new(token_bonding_data.founder_reward_percentage as u128).unwrap()
+                .checked_div(&PreciseNumber::new(10000_u128).unwrap()).unwrap()
+        ).unwrap()
+    };
+    let amount_prec = precise_supply_amt(amount, target_mint_data);
+    let amount_with_rewards = founder_rewards_decimal.checked_mul(&amount_prec).unwrap();
 
     let base_supply = if *base_mint.key == native_mint::id() {
-        1036191464.675693800_f64 // TODO: Actually get supply
+        PreciseNumber { value: InnerUint::from(1036191464_675693800000_u128) }// TODO: Actually get supply
     } else {
-        supply_f(base_mint_data)
+        precise_supply(base_mint_data)
     };
-    let target_supply = supply_f(target_mint_data);
+    let target_supply = precise_supply(target_mint_data);
+    
     let p = curve_data.price(
-        base_supply,
-        target_supply,
-        supply_f_amt(amount, target_mint_data),
-    );
-    msg!("Price is {}", p);
+        &base_supply,
+        &target_supply,
+        &amount_with_rewards,
+    ).unwrap();
     let price = to_lamports(
-        p,
+        &p,
         base_mint_data,
     );
-    let founder_rewards_decimal = if token_bonding_data.founder_reward_percentage == 0 {
-        1
-    } else {
-        (token_bonding_data.founder_reward_percentage as u64) / 10000
-    };
-    let founder_cut = amount * founder_rewards_decimal;
-    let purchaser_cut = amount - founder_cut;
+    msg!("Price is {}", price);
+
+    let founder_cut = to_lamports(
+        &amount_with_rewards.checked_sub(&amount_prec).unwrap(),
+        target_mint_data
+    );
+    let purchaser_cut = amount;
 
     msg!(
         "Attempting to buy {} target lamports for {} base lamports",
@@ -600,11 +565,11 @@ fn process_sell_v0(program_id: &Pubkey, accounts: &[AccountInfo], amount: u64) -
     }
 
     let reclaimed_amount = to_lamports(
-        curve_data.price(
-            supply_f(target_mint_data) - supply_f_amt(amount, target_mint_data),
-            supply_f(base_mint_data),
-            supply_f_amt(amount, target_mint_data),
-        ),
+        &curve_data.price(
+            &precise_supply(target_mint_data).checked_sub(&precise_supply_amt(amount, target_mint_data)).unwrap(),
+            &precise_supply(base_mint_data),
+            &precise_supply_amt(amount, target_mint_data),
+        ).unwrap(),
         base_mint_data,
     );
 
@@ -690,10 +655,12 @@ mod tests {
         create_account_for_test, create_is_signer_account_infos, Account as SolanaAccount,
     };
     use solana_sdk::program_option::COption;
+    use spl_math::precise_number::PreciseNumber;
     use spl_token::solana_program::program_pack::Pack;
     use spl_token::state::AccountState;
 
     use crate::instruction::*;
+    use crate::ln::InnerUint;
 
     use super::*;
 
@@ -854,8 +821,9 @@ mod tests {
                 &fixture.program_id,
                 &fixture.payer_key,
                 &fixture.curve_key,
-                1_f64,
-                2_f64,
+                1_000000000000_u128,
+                2_000000000000_u128,
+                100,
                 true,
             ),
             vec![
@@ -907,8 +875,8 @@ mod tests {
         assert_eq!(Ok(()), create_curve(&mut fixture));
 
         let res: LogCurveV0 = try_from_slice_unchecked::<LogCurveV0>(&fixture.curve.data).unwrap();
-        assert_eq!(res.g, 1_f64);
-        assert_eq!(res.c, 2_f64);
+        assert_eq!(res.g, 1_000000000000_u128);
+        assert_eq!(res.c, 2_000000000000_u128);
         assert_eq!(res.key, Key::BaseRelativeLogCurveV0);
     }
 
@@ -930,15 +898,51 @@ mod tests {
     fn test_price() {
         let curve = LogCurveV0 {
             key: Key::LogCurveV0,
-            g: 0.01_f64,
-            c: 1_f64,
+            g: 1_000000000000,
+            c: 1_000000000000,
+            taylor_iterations: 1000,
             initialized: true,
         };
-        // log_curve(1.0, 0.01, 225048.399385, 225049.399385);
-        // assert_eq!(curve.price(0.0, 0.0, 10.0), 0.47320254147052765);
-        // assert_eq!(curve.price(0.0, 225048.399385, 2.0), 15.438698544166982);
-        assert_eq!(curve.price(0.0, 17.735459326, 8.085891811), 15.438698544166982);
+        let precision = InnerUint::from(5_000_000); // correct to at least 3 decimal places
+        let actual = curve.price(
+            &PreciseNumber::new(0_u128).unwrap(), 
+            &PreciseNumber::new(0_u128).unwrap(), 
+            &PreciseNumber::new(10_u128).unwrap()
+        ).unwrap();
+        let expected = PreciseNumber { value: InnerUint::from(16_376848000782_u128) };
+        assert!(actual.almost_eq(&expected, precision));
+    }
 
+    #[test]
+    fn test_invariant_price() {
+        let curve = LogCurveV0 {
+            key: Key::LogCurveV0,
+            g: 1_000000000000,
+            c: 1_000000000000,
+            taylor_iterations: 100,
+            initialized: true,
+        };
+        // Buy 10
+        let first_price = curve.price(
+            &PreciseNumber::new(0_u128).unwrap(), 
+            &PreciseNumber::new(0_u128).unwrap(), 
+            &PreciseNumber::new(10_u128).unwrap()
+        ).unwrap();
+        // Sell five
+        let second_price = curve.price(
+            &PreciseNumber::new(0_u128).unwrap(), 
+            &PreciseNumber::new(5_u128).unwrap(), 
+            &PreciseNumber::new(5_u128).unwrap()
+        ).unwrap();
+        // Sell another 5
+        let third_price = curve.price(
+            &PreciseNumber::new(0_u128).unwrap(), 
+            &PreciseNumber::new(0_u128).unwrap(), 
+            &PreciseNumber::new(5_u128).unwrap()
+        ).unwrap();
+        let sell_total = third_price.checked_add(&second_price).unwrap();
+        
+        assert!(sell_total.almost_eq(&first_price, InnerUint::from(5_000)));
     }
 
     #[test]

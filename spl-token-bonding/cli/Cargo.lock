@@ -3187,6 +3187,7 @@ dependencies = [
  "num-derive",
  "num-traits",
  "solana-program",
+ "spl-math",
  "spl-token",
  "thiserror",
 ]

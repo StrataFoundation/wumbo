@@ -7,13 +7,13 @@ import {
 // export const SOLANA_API_URL = "https://api.mainnet-beta.solana.com"
 export const WUM_REWARDS_PERCENTAGE = 1000;
 export const WUM_BONDING = new PublicKey(
-  "D7k9khqLQqbu5NaoyCHSkvRj5PnhfHksZuP2siphTnrQ"
+  "21qbygjajGwiu649VYXg5HQ96T8c3usGBgDMCz5APgZB"
 );
 export const WUM_TOKEN = new PublicKey(
-  "7i9R5R9Fr98DrPz29rJDXwRVRnzFzy77amixbyFy5cJ7"
+  "B9tXMDG52cNKAWkueseqDGovzwEvGiUoSqNFyhK2RaKd"
 );
 export const WUMBO_INSTANCE_KEY: PublicKey = new PublicKey(
-  "7dwwCuQUdAp3hJZNRsgeUn5q2kEGjmw4ZrKcryyY7Bz4"
+  "6AxSSe5xVRoBvYRMUsnnR3gyLiWCUAZfqHcNddsK86Cy"
 );
 export const WUMBO_PROGRAM_ID: PublicKey = new PublicKey(
   "AVYYDfjDiQU6rixuNe9LmKAZY1f7cbYexEMVAMpCAaoP"
