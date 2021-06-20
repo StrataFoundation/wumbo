@@ -64,8 +64,8 @@ pub trait Curve {
     fn price(&self, base_supply: &PreciseNumber, target_supply: &PreciseNumber, amount: &PreciseNumber) -> Option<PreciseNumber>;
 }
 
-/// If normal log curve, base + c * log(1 + (g * x))
-/// If base relative, base + c * log(1 + (g * x) / (1 + base_supply))
+/// If normal log curve, c * log(1 + (g * x))
+/// If base relative, c * log(1 + (g * x) / (1 + base_supply))
 #[repr(C)]
 #[derive(BorshSerialize, BorshDeserialize, PartialEq, Debug, Clone)]
 pub struct LogCurveV0 {
@@ -94,13 +94,14 @@ pub fn log_curve(c: &PreciseNumber, g: &PreciseNumber, a: &PreciseNumber, b: &Pr
     general(b)?.checked_sub(&general(a)?)
 }
 
+static one_prec: PreciseNumber =  PreciseNumber { value: one() };
+
 impl Curve for LogCurveV0 {
     fn initialized(&self) -> bool {
         self.initialized
     }
 
     fn price(&self, base_supply: &PreciseNumber, target_supply: &PreciseNumber, amount: &PreciseNumber) -> Option<PreciseNumber> {
-        let one_prec = PreciseNumber { value: one() };
         let g_prec = PreciseNumber { value: InnerUint::from(self.g) };
         let g = if self.key == Key::BaseRelativeLogCurveV0 {
             g_prec.checked_div(&one_prec.checked_add(base_supply)?)?

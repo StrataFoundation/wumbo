@@ -4,6 +4,9 @@ import {
   TOKEN_PROGRAM_ID as SPL_TOKEN_PROGRAM_ID,
 } from "@solana/spl-token";
 
+export const TWITTER_REGISTRAR_SERVER_URL =
+"http://localhost:3000/registrar/twitter-oauth";
+
 // export const SOLANA_API_URL = "https://api.mainnet-beta.solana.com"
 export const WUM_REWARDS_PERCENTAGE = 1000;
 export const WUM_BONDING = new PublicKey(

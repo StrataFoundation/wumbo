@@ -1,7 +1,9 @@
 // import {WALLET_PROVIDERS} from "./utils/wallet";
 import { WalletAdapter } from "@solana/wallet-base";
 import { WALLET_PROVIDERS } from "./constants/walletProviders";
-import { Transaction } from "@solana/web3.js";
+import { Connection, Transaction } from "@solana/web3.js";
+import auth0, {auth0Options} from "./constants/auth0"
+import { claim } from "./utils/twitter"
 
 let publicKey: Buffer | null = null;
 let walletAdapter: WalletAdapter | null = null;
@@ -20,6 +22,31 @@ function sendWallet() {
 chrome.runtime.onMessage.addListener((msg, _, sendResponse) => {
   // @ts-ignore
   (async () => {
+    const redirectUri = 'https://hello.com/en/index.html'
+    if (msg.type == 'TRY_CLAIM') {
+      chrome.tabs.create({
+        url: auth0.client.buildAuthorizeUrl({
+          ...auth0Options,
+          scope: 'openid profile',
+          redirectUri,
+          responseType: 'code',
+          state: 'foo',
+        })
+      })
+    }
+    if (msg.type == 'CLAIM') {
+      const code: string = msg.data.code
+      if (walletAdapter) {
+        const connection = new Connection("https://api.devnet.solana.com")
+        claim(connection, {
+          wallet: walletAdapter,
+          code,
+          twitterHandle: "ChewyGlass",
+          redirectUri
+        })
+      }
+    }
+
     if (msg.type == "WALLET_CONNECT") {
       const adapter = WALLET_PROVIDERS.find(
         (p) => p.url == msg.data.providerUrl

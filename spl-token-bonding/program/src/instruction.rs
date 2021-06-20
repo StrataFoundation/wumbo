@@ -16,7 +16,7 @@ pub enum TokenBondingInstruction {
     ///
     ///   0. `[signer]` Payer
     ///   1. `[signer writeable]` Curve to create
-    ///   2. `[]` Program id
+    ///   2. `[]` System program id
     ///   3. `[]` Rent sysvar
     CreateLogCurveV0 {
         g: u128,

@@ -17,7 +17,8 @@
     "url": "https://github.com/ChewingGlassFund/wumbo"
   },
   "dependencies": {
-    "@bonfida/spl-name-service": "^0.1.4",
+    "@bonfida/borsh-js": "^0.3.1",
+    "@bonfida/spl-name-service": "file:../../solana-program-library/name-service/js",
     "@oyster/common": "file:../../oyster/packages/common/dist",
     "@project-serum/serum": "^0.13.34",
     "@project-serum/sol-wallet-adapter": "^0.1.4",
@@ -30,7 +31,9 @@
     "@toruslabs/openlogin-ed25519": "^0.8.5",
     "@toruslabs/openlogin-utils": "^0.8.5",
     "@toruslabs/torus-direct-web-sdk": "^4.13.2",
+    "@types/auth0-js": "^9.14.4",
     "antd": "^4.15.5",
+    "auth0-js": "^9.16.2",
     "bip39": "^3.0.4",
     "lambert-w-function": "^2.0.0",
     "react": "16.13.1",

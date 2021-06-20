@@ -19,6 +19,10 @@
       {
           "matches": ["https://twitter.com/*"],
           "js": ["js/vendor.js", "js/content_script.js"]
+      },
+      {
+        "matches": ["https://hello.com/*"],
+        "js": ["js/vendor.js", "js/oauth.js"]
       }
   ],
 
