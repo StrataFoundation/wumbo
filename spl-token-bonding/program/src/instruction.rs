@@ -31,20 +31,22 @@ pub enum TokenBondingInstruction {
     ///
     ///   0. `[writeable signer]` Payer
     ///   1. `[writeable signer]` Token bonding account to create
-    ///   2. `[]` Bonding Curve Authority
-    ///   3. `[]` Bonding Curve, see Create<Type>Curve instructions
-    ///   4. `[]` Base coin mint
-    ///   5. `[]` Target coin mint. Must have mint and freeze authority as `create_program_address(['target-authority', target.pubKey])`
-    ///   6. `[]` Founder rewards account. Founder rewards will be distributed to this account
-    ///   7. `[]` Base coin storage account. Must be an empty account, bonding will initialize this for you
-    ///   8. `[]` Base coin storage authority. Must be an empty account with key ['base-storage-authority', base storage.pubkey]
-    ///   9. `[]` Token program id
-    ///   10. `[]` System program id
-    ///   11. `[]` Rent sysvar
+    ///   2. `[]` Bonding Curve, see Create<Type>Curve instructions
+    ///   3. `[]` Base coin mint
+    ///   4. `[]` Target coin mint. Must have mint and freeze authority as `create_program_address(['target-authority', target.pubKey])`
+    ///   5. `[]` Founder rewards account. Founder rewards will be distributed to this account
+    ///   6. `[]` Base coin storage account. Must be an empty account, bonding will initialize this for you
+    ///   7. `[]` Base coin storage authority. Must be an empty account with key ['base-storage-authority', base storage.pubkey]
+    ///   8. `[]` Token program id
+    ///   9. `[]` System program id
+    ///   10. `[]` Rent sysvar
     InitializeTokenBondingV0 {
         /// Percentage of purchases that go to the founder
         /// Percentage Value is (founder_reward_percentage / 10,000) * 100
-        founder_reward_percentage: u16
+        founder_reward_percentage: u16,
+        // The maximum number of target tokens that can be minted.
+        mint_cap: Option<u64>,
+        token_bonding_authority: Option<Pubkey>
     },
 
     /// Buy creator coins
@@ -65,6 +67,8 @@ pub enum TokenBondingInstruction {
     BuyV0 {
         /// Number to purchase. This is including the decimal value. So 1 is the lowest possible fraction of a coin
         amount: u64,
+        // Maximum price to pay for this amount. ALlows users to account and fail-fast for slippage.
+        max_price: u64,
     },
 
     /// Sell creator coins
@@ -84,6 +88,8 @@ pub enum TokenBondingInstruction {
     SellV0 {
         /// Number to sell. This is including the decimal value. So 1 is the lowest possible fraction of a coin
         amount: u64,
+        // Minimum amount of base to receive for this amount. Allows users to account and fail-fast for slippage.
+        min_price: u64,
     },
 }
 
@@ -93,19 +99,19 @@ pub fn initialize_token_bonding_v0(
     token_program_id: &Pubkey,
     payer: &Pubkey,
     token_bonding: &Pubkey,
-    token_bonding_authority: &Pubkey,
+    token_bonding_authority: Option<Pubkey>,
     curve: &Pubkey,
     base_mint: &Pubkey,
     target_mint: &Pubkey,
     founder_rewards: &Pubkey,
     base_storage: &Pubkey,
     base_storage_authority: &Pubkey,
-    founder_reward_percentage: u16
+    founder_reward_percentage: u16,
+    mint_cap: Option<u64>,
 ) -> Instruction {
     let accounts = vec![
         AccountMeta::new(*payer, true),
         AccountMeta::new(*token_bonding, true),
-        AccountMeta::new_readonly(*token_bonding_authority, false),
         AccountMeta::new_readonly(*curve, false),
         AccountMeta::new_readonly(*base_mint, false),
         AccountMeta::new_readonly(*target_mint, false),
@@ -121,6 +127,8 @@ pub fn initialize_token_bonding_v0(
         accounts,
         data: TokenBondingInstruction::InitializeTokenBondingV0 {
             founder_reward_percentage,
+            mint_cap,
+            token_bonding_authority
         }
         .try_to_vec()
         .unwrap(),
@@ -141,6 +149,7 @@ pub fn buy_v0_instruction(
     destination: &Pubkey,
     token_program_id: &Pubkey,
     amount: u64,
+    max_price: u64,
 ) -> Instruction {
     Instruction {
         program_id: *program_id,
@@ -158,7 +167,7 @@ pub fn buy_v0_instruction(
             AccountMeta::new_readonly(*token_program_id, false),
             AccountMeta::new_readonly(solana_program::system_program::id(), false),
         ],
-        data: TokenBondingInstruction::BuyV0 { amount }
+        data: TokenBondingInstruction::BuyV0 { amount, max_price }
             .try_to_vec()
             .unwrap(),
     }
@@ -177,6 +186,7 @@ pub fn sell_v0_instruction(
     destination: &Pubkey,
     token_program_id: &Pubkey,
     amount: u64,
+    min_price: u64,
 ) -> Instruction {
     Instruction {
         program_id: *program_id,
@@ -193,7 +203,7 @@ pub fn sell_v0_instruction(
             AccountMeta::new_readonly(*token_program_id, false),
             AccountMeta::new_readonly(solana_program::system_program::id(), false),
         ],
-        data: TokenBondingInstruction::BuyV0 { amount }
+        data: TokenBondingInstruction::SellV0 { amount, min_price }
             .try_to_vec()
             .unwrap(),
     }
@@ -213,7 +223,6 @@ pub fn create_log_curve_v0(
         accounts: vec![
             AccountMeta::new(*payer, true),
             AccountMeta::new(*curve, true),
-            AccountMeta::new_readonly(solana_program::system_program::id(), false),
             AccountMeta::new_readonly(sysvar::rent::id(), false),
         ],
         data: TokenBondingInstruction::CreateLogCurveV0 {

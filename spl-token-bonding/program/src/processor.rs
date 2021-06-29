@@ -10,7 +10,7 @@ use {
         ln::{InnerUint},
         error::TokenBondingError,
         instruction::TokenBondingInstruction,
-        state::{Curve, Key, LogCurveV0, TokenBondingV0, TARGET_AUTHORITY, log_curve},
+        state::{Curve, Key, LogCurveV0, TokenBondingV0, TARGET_AUTHORITY},
     },
     borsh::{BorshDeserialize, BorshSerialize},
     solana_program::{
@@ -48,17 +48,19 @@ pub fn process_instruction(
         }
         TokenBondingInstruction::InitializeTokenBondingV0 {
             founder_reward_percentage,
+            mint_cap,
+            token_bonding_authority,
         } => {
             msg!("Instruction: Initialize Token Bonding V0");
-            process_initialize_token_bonding_v0(program_id, accounts, founder_reward_percentage)
+            process_initialize_token_bonding_v0(program_id, accounts, founder_reward_percentage, mint_cap, token_bonding_authority)
         }
-        TokenBondingInstruction::BuyV0 { amount } => {
+        TokenBondingInstruction::BuyV0 { amount , max_price } => {
             msg!("Instruction: Buy V0");
-            process_buy_v0(program_id, accounts, amount)
+            process_buy_v0(program_id, accounts, amount, max_price)
         }
-        TokenBondingInstruction::SellV0 { amount } => {
+        TokenBondingInstruction::SellV0 { amount, min_price } => {
             msg!("Instruction: Sell V0");
-            process_sell_v0(program_id, accounts, amount)
+            process_sell_v0(program_id, accounts, amount, min_price)
         }
     }
 }
@@ -156,7 +158,6 @@ fn process_create_log_curve_v0(
     let accounts_iter = &mut accounts.into_iter();
     let payer = next_account_info(accounts_iter)?;
     let curve = next_account_info(accounts_iter)?;
-    let system_account_info = next_account_info(accounts_iter)?;
     let rent = next_account_info(accounts_iter)?;
 
     if !payer.is_signer {
@@ -197,11 +198,12 @@ fn process_initialize_token_bonding_v0(
     program_id: &Pubkey,
     accounts: &[AccountInfo],
     founder_reward_percentage: u16,
+    mint_cap: Option<u64>,
+    token_bonding_authority_opt: Option<Pubkey>,
 ) -> ProgramResult {
     let accounts_iter = &mut accounts.into_iter();
     let payer = next_account_info(accounts_iter)?;
     let token_bonding_account = next_account_info(accounts_iter)?;
-    let token_bonding_authority = next_account_info(accounts_iter)?;
     let curve = next_account_info(accounts_iter)?;
     unpack_curve(program_id, curve)?;
     let base_mint = next_account_info(accounts_iter)?;
@@ -313,12 +315,15 @@ fn process_initialize_token_bonding_v0(
     let new_account_data = TokenBondingV0 {
         key: Key::TokenBondingV0,
         target_mint: *target_mint.key,
-        authority: *token_bonding_authority.key,
+        authority: token_bonding_authority_opt,
         base_mint: *base_mint.key,
         base_storage: *base_storage.key,
         founder_rewards: *founder_rewards.key,
         founder_reward_percentage,
         curve: *curve.key,
+        buy_frozen: false,
+        sell_frozen: false,
+        mint_cap,
         initialized: true,
     };
     new_account_data.serialize(&mut *token_bonding_account.try_borrow_mut_data()?)?;
@@ -342,7 +347,7 @@ fn to_lamports(amt: &PreciseNumber, mint: Mint) -> u64 {
     ).unwrap().to_imprecise().unwrap() as u64
 }
 
-fn process_buy_v0(program_id: &Pubkey, accounts: &[AccountInfo], amount: u64) -> ProgramResult {
+fn process_buy_v0(program_id: &Pubkey, accounts: &[AccountInfo], amount: u64, max_price: u64) -> ProgramResult {
     let accounts_iter = &mut accounts.into_iter();
     let token_bonding = next_account_info(accounts_iter)?;
     let curve = next_account_info(accounts_iter)?;
@@ -421,12 +426,19 @@ fn process_buy_v0(program_id: &Pubkey, accounts: &[AccountInfo], amount: u64) ->
         base_mint_data,
     );
     msg!("Price is {}", price);
+    if price > max_price {
+        return Err(TokenBondingError::MaxPriceExceeded.into());
+    }
 
     let founder_cut = to_lamports(
         &amount_with_rewards.checked_sub(&amount_prec).unwrap(),
         target_mint_data
     );
     let purchaser_cut = amount;
+
+    if amount + founder_cut > token_bonding_data.mint_cap.unwrap() {
+        return Err(TokenBondingError::MaxTokensMinted.into());
+    }
 
     msg!(
         "Attempting to buy {} target lamports for {} base lamports",
@@ -520,7 +532,7 @@ fn process_buy_v0(program_id: &Pubkey, accounts: &[AccountInfo], amount: u64) ->
     Ok(())
 }
 
-fn process_sell_v0(program_id: &Pubkey, accounts: &[AccountInfo], amount: u64) -> ProgramResult {
+fn process_sell_v0(program_id: &Pubkey, accounts: &[AccountInfo], amount: u64, min_price: u64) -> ProgramResult {
     let accounts_iter = &mut accounts.into_iter();
     let token_bonding = next_account_info(accounts_iter)?;
     let curve = next_account_info(accounts_iter)?;
@@ -572,6 +584,10 @@ fn process_sell_v0(program_id: &Pubkey, accounts: &[AccountInfo], amount: u64) -
         ).unwrap(),
         base_mint_data,
     );
+
+    if reclaimed_amount < min_price {
+        return Err(TokenBondingError::MinPriceExceeded.into());
+    }
 
     msg!(
         "Attempting to burn {} target lamports for {} base lamports",
@@ -842,7 +858,7 @@ mod tests {
                 &fixture.token_program_id,
                 &fixture.payer_key,
                 &fixture.token_bonding_key,
-                &fixture.token_bonding_authority_key,
+                Some(fixture.token_bonding_authority_key),
                 &fixture.curve_key,
                 &fixture.base_mint_key,
                 &fixture.target_mint_key,
@@ -850,11 +866,11 @@ mod tests {
                 &fixture.base_storage_key,
                 &fixture.base_storage_authority_key,
                 1000,
+                Some(100000000000000_u64),
             ),
             vec![
                 &mut fixture.payer,
                 &mut fixture.token_bonding,
-                &mut fixture.token_bonding_authority,
                 &mut fixture.curve,
                 &mut fixture.base_mint,
                 &mut fixture.target_mint,
@@ -1000,6 +1016,7 @@ mod tests {
                     &destination_key,
                     &fixture.token_program_id,
                     100000000000,
+                    10000000000000
                 ),
                 vec![
                     &mut fixture.token_bonding,

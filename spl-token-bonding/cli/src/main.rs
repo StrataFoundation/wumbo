@@ -283,6 +283,7 @@ fn main() {
                     &base_storage_key,
                     &storage_authority_key,
                     1000,
+                    None
                 )
             ];
             let instructions: Vec<Instruction> = create_token_instructions

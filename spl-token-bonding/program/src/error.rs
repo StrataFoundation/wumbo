@@ -97,6 +97,14 @@ pub enum TokenBondingError {
     #[error("Invalid token bonding owner , must be owned by token bonding program")]
     InvalidTokenBondingOwner,
 
+    #[error("The maximum amount of tokens set to be minted by the bonding curve has been reached")]
+    MaxTokensMinted,
+
+    #[error("The maximum price set in the transaction was exceeded")]
+    MaxPriceExceeded,
+
+    #[error("The minimum price set in the transaction was exceeded")]
+    MinPriceExceeded,
 }
 
 impl PrintProgramError for TokenBondingError {

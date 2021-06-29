@@ -1,4 +1,3 @@
-use num_traits::ops::inv;
 use spl_math::precise_number::PreciseNumber;
 use crate::ln::{InnerUint, NaturalLog, one};
 
@@ -8,7 +7,6 @@ use {
     solana_program::program_error::ProgramError,
     solana_program::program_pack::{Pack, Sealed},
     solana_program::pubkey::Pubkey,
-    fastapprox::bits::{from_bits, to_bits}
 };
 
 
@@ -30,7 +28,7 @@ pub struct TokenBondingV0 {
     pub key: Key,
     pub base_mint: Pubkey,
     pub target_mint: Pubkey,
-    pub authority: Pubkey,
+    pub authority: Option<Pubkey>,
     pub base_storage: Pubkey,
     pub founder_rewards: Pubkey,
     /// Percentage of purchases that go to the founder
@@ -38,12 +36,15 @@ pub struct TokenBondingV0 {
     pub founder_reward_percentage: u16,
     /// The bonding curve to use 
     pub curve: Pubkey,
+    pub mint_cap: Option<u64>,
+    pub buy_frozen: bool,
+    pub sell_frozen: bool,
     pub initialized: bool,
 }
 impl Sealed for TokenBondingV0 {}
 
 impl Pack for TokenBondingV0 {
-    const LEN: usize = 1 + 32 * 6 + 2 + 1;
+    const LEN: usize = 1 + 32 * 6 + 2 + 1 + 1 + 1 + 8 + 1 + 1;
 
     fn pack_into_slice(&self, dst: &mut [u8]) {
         let mut slice = dst;
@@ -81,11 +82,9 @@ impl Sealed for LogCurveV0 {}
 
 /// https://www.wolframalpha.com/input/?i=c+*+log%281+%2B+g+*+x%29+dx
 pub fn log_curve(c: &PreciseNumber, g: &PreciseNumber, a: &PreciseNumber, b: &PreciseNumber, log_num_iterations: u16) -> Option<PreciseNumber> {
-    let one_prec = PreciseNumber { value: one() };
-
     let general = |x: &PreciseNumber| {
-      let inv_g = one_prec.checked_div(g)?;
-      let inside = one_prec.checked_add(&g.checked_mul(&x)?)?;
+      let inv_g = ONE_PREC.checked_div(g)?;
+      let inside = ONE_PREC.checked_add(&g.checked_mul(&x)?)?;
       let log = inside.ln(log_num_iterations)?;
       let log_mult = log.checked_mul(&inv_g.checked_add(&x)?)?;
       Some(c.checked_mul(&log_mult.checked_sub(&x)?)?)
@@ -94,7 +93,7 @@ pub fn log_curve(c: &PreciseNumber, g: &PreciseNumber, a: &PreciseNumber, b: &Pr
     general(b)?.checked_sub(&general(a)?)
 }
 
-static one_prec: PreciseNumber =  PreciseNumber { value: one() };
+static ONE_PREC: PreciseNumber =  PreciseNumber { value: one() };
 
 impl Curve for LogCurveV0 {
     fn initialized(&self) -> bool {
@@ -104,7 +103,7 @@ impl Curve for LogCurveV0 {
     fn price(&self, base_supply: &PreciseNumber, target_supply: &PreciseNumber, amount: &PreciseNumber) -> Option<PreciseNumber> {
         let g_prec = PreciseNumber { value: InnerUint::from(self.g) };
         let g = if self.key == Key::BaseRelativeLogCurveV0 {
-            g_prec.checked_div(&one_prec.checked_add(base_supply)?)?
+            g_prec.checked_div(&ONE_PREC.checked_add(base_supply)?)?
         } else {
             g_prec
         };
