@@ -62,6 +62,40 @@ pub fn process_instruction(
             msg!("Instruction: Sell V0");
             process_sell_v0(program_id, accounts, amount, min_price)
         }
+        TokenBondingInstruction::FreezeBuyV0 {} => {
+            msg!("Instruction: Freeze Buy V0");
+            process_freeze_v0(program_id, accounts, FreezeInfo {
+                buy_frozen: Some(true),
+                sell_frozen: None
+            })
+        }
+        TokenBondingInstruction::ThawBuyV0 {} => {
+            msg!("Instruction: Thaw Buy V0");
+            process_freeze_v0(program_id, accounts, FreezeInfo {
+                buy_frozen: Some(false),
+                sell_frozen: None
+            })
+        }
+        TokenBondingInstruction::FreezeSellV0 {} => {
+            msg!("Instruction: Freeze Sell V0");
+            process_freeze_v0(program_id, accounts, FreezeInfo {
+                buy_frozen: None,
+                sell_frozen: Some(true)
+            })
+        }
+        TokenBondingInstruction::ThawSellV0 {} => {
+            msg!("Instruction: Thaw Sell V0");
+            process_freeze_v0(program_id, accounts, FreezeInfo {
+                buy_frozen: None,
+                sell_frozen: Some(false)
+            })
+        }
+        TokenBondingInstruction::ChangeAuthorityV0 {
+            new_authority
+        } => {
+            msg!("Instruction: Change Authority V0");
+            process_change_authority_v0(program_id, accounts, new_authority)
+        }
     }
 }
 
@@ -371,6 +405,10 @@ fn process_buy_v0(program_id: &Pubkey, accounts: &[AccountInfo], amount: u64, ma
     let target_mint_key = token_bonding_data.target_mint;
     let (target_mint_authority_key, bump) = target_authority(program_id, target_mint.key);
 
+    if token_bonding_data.key != Key::TokenBondingV0 {
+        return Err(ProgramError::InvalidAccountData);
+    }
+
     if target_mint_key != *target_mint.key {
         return Err(TokenBondingError::InvalidTargetMint.into());
     }
@@ -556,6 +594,10 @@ fn process_sell_v0(program_id: &Pubkey, accounts: &[AccountInfo], amount: u64, m
     let target_mint_key = token_bonding_data.target_mint;
     let base_mint_key = token_bonding_data.base_mint;
 
+    if token_bonding_data.key != Key::TokenBondingV0 {
+        return Err(ProgramError::InvalidAccountData);
+    }
+
     if target_mint_key != *target_mint.key {
         return Err(TokenBondingError::InvalidTargetMint.into());
     }
@@ -661,6 +703,97 @@ fn process_sell_v0(program_id: &Pubkey, accounts: &[AccountInfo], amount: u64, m
         ],
         &[],
     )?;
+    Ok(())
+}
+
+pub struct FreezeInfo {
+    buy_frozen: Option<bool>,
+    sell_frozen: Option<bool>,
+}
+
+fn process_freeze_v0(program_id: &Pubkey, accounts: &[AccountInfo], freeze_info: FreezeInfo) -> ProgramResult {
+    let accounts_iter = &mut accounts.into_iter();
+    let token_bonding = next_account_info(accounts_iter)?;
+    let token_bonding_authority = next_account_info(accounts_iter)?;
+    let token_bonding_data: TokenBondingV0 =
+        try_from_slice_unchecked(*token_bonding.data.borrow())?;
+
+    if token_bonding_data.key != Key::TokenBondingV0 {
+        return Err(ProgramError::InvalidAccountData);
+    }
+
+    if !token_bonding_authority.is_signer {
+        return Err(TokenBondingError::MissingSigner.into());
+    }
+
+    if token_bonding_data.authority.unwrap() != *token_bonding_authority.key {
+        return Err(TokenBondingError::InvalidAuthority.into());
+    }
+
+    if *token_bonding.owner != *program_id {
+        return Err(TokenBondingError::InvalidOwner.into());
+    }
+
+    let prev_buy_frozen = token_bonding_data.buy_frozen;
+    let prev_sell_frozen = token_bonding_data.sell_frozen;
+    let new_account_data = TokenBondingV0 {
+        key: token_bonding_data.key,
+        target_mint: token_bonding_data.target_mint,
+        authority: token_bonding_data.authority,
+        base_mint: token_bonding_data.base_mint,
+        base_storage: token_bonding_data.base_storage,
+        founder_rewards: token_bonding_data.founder_rewards,
+        founder_reward_percentage: token_bonding_data.founder_reward_percentage,
+        curve: token_bonding_data.curve,
+        buy_frozen: freeze_info.buy_frozen.or_else(|| Some(prev_buy_frozen)).unwrap(),
+        sell_frozen: freeze_info.sell_frozen.or_else(|| Some(prev_sell_frozen)).unwrap(),
+        mint_cap: token_bonding_data.mint_cap,
+        initialized: token_bonding_data.initialized,
+    };
+    new_account_data.serialize(&mut *token_bonding.try_borrow_mut_data()?)?;
+
+    Ok(())
+}
+
+fn process_change_authority_v0(program_id: &Pubkey, accounts: &[AccountInfo], new_authority: Option<Pubkey>) -> ProgramResult {
+    let accounts_iter = &mut accounts.into_iter();
+    let token_bonding = next_account_info(accounts_iter)?;
+    let token_bonding_authority = next_account_info(accounts_iter)?;
+    let token_bonding_data: TokenBondingV0 =
+        try_from_slice_unchecked(*token_bonding.data.borrow())?;
+
+    if token_bonding_data.key != Key::TokenBondingV0 {
+        return Err(ProgramError::InvalidAccountData);
+    }
+
+    if !token_bonding_authority.is_signer {
+        return Err(TokenBondingError::MissingSigner.into());
+    }
+
+    if token_bonding_data.authority.unwrap() != *token_bonding_authority.key {
+        return Err(TokenBondingError::InvalidAuthority.into());
+    }
+
+    if *token_bonding.owner != *program_id {
+        return Err(TokenBondingError::InvalidOwner.into());
+    }
+
+    let new_account_data = TokenBondingV0 {
+        key: token_bonding_data.key,
+        target_mint: token_bonding_data.target_mint,
+        authority: new_authority,
+        base_mint: token_bonding_data.base_mint,
+        base_storage: token_bonding_data.base_storage,
+        founder_rewards: token_bonding_data.founder_rewards,
+        founder_reward_percentage: token_bonding_data.founder_reward_percentage,
+        curve: token_bonding_data.curve,
+        buy_frozen: token_bonding_data.buy_frozen,
+        sell_frozen: token_bonding_data.sell_frozen,
+        mint_cap: token_bonding_data.mint_cap,
+        initialized: token_bonding_data.initialized,
+    };
+    new_account_data.serialize(&mut *token_bonding.try_borrow_mut_data()?)?;
+
     Ok(())
 }
 

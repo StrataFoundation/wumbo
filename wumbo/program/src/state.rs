@@ -41,7 +41,7 @@ pub struct WumboCreatorV0 {
 impl Sealed for WumboCreatorV0 {}
 
 impl Pack for WumboCreatorV0 {
-    const LEN: usize = 1 + 32 * 3 + 1;
+    const LEN: usize = 1 + 32 * 3 + 1 + 1;
 
     fn pack_into_slice(&self, dst: &mut [u8]) {
         let mut slice = dst;

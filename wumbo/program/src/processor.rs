@@ -4,6 +4,7 @@ use solana_program::program::{invoke, invoke_signed};
 use solana_program::system_instruction;
 use spl_token::solana_program::program_pack::Pack;
 use spl_token_bonding::state::{LogCurveV0, TokenBondingV0};
+use spl_token_bonding::instruction::{freeze_buy_v0_instruction, thaw_buy_v0_instruction};
 
 use {
     crate::{
@@ -39,12 +40,20 @@ pub fn process_instruction(
     let instruction = WumboInstruction::try_from_slice(input)?;
     match instruction {
         WumboInstruction::InitializeWumboV0 { name_program_id } => {
-            msg!("Instruction: Initialize Wumbo");
+            msg!("Instruction: Initialize Wumbo V0");
             process_initialize_wumbo(program_id, accounts, name_program_id)
         }
         WumboInstruction::InitializeCreatorV0 => {
-            msg!("Instruction: Initialize Creator");
+            msg!("Instruction: Initialize Creator V0");
             process_initialize_creator(program_id, accounts)
+        }
+        WumboInstruction::OptOutV0 => {
+            msg!("Instruction: Opt Out V0")
+            process_opt(program_id, true)
+        }
+        WumboInstruction::OptInV0 => {
+            msg!("Instruction: Opt Out V0")
+            process_opt(program_id, false)
         }
     }
 }
@@ -265,6 +274,10 @@ fn process_initialize_creator(program_id: &Pubkey, accounts: &[AccountInfo]) -> 
         ],
     )?;
 
+    if wumbo_instance_data.key != Key::WumboInstanceV0 {
+        return Err(ProgramError::InvalidAccountData);
+    }
+
     if *wumbo_instance.owner != *program_id {
         return Err(WumboError::InvalidWumboInstanceOwner.into());
     }
@@ -291,6 +304,95 @@ fn process_initialize_creator(program_id: &Pubkey, accounts: &[AccountInfo]) -> 
         initialized: true,
     };
     new_account_data.serialize(&mut *creator.try_borrow_mut_data()?)?;
+
+    Ok(())
+}
+
+/// Verify all of the big requirements:
+///   1. Token bonding belongs to creator
+///   2. Signer (name owner) is the owner of name
+///   3. Creator is associated with this name
+///   4. Creator is part of this program id
+///   5. Token bonding authority is the correct pda of ['bonding-authority', Creator Pubkey]
+fn verify_creator(accounts &[AccountInfo]): Result<WumboCreatorV0, ProgramError> {
+    let accounts_iter = &mut accounts.into_iter();
+    let creator = next_account_info(accounts_iter)?;
+    let token_bonding = next_account_info(accounts_iter)?;
+    let token_bonding_authority = next_account_info(accounts_iter)?;
+    let name = next_account_info(accounts_iter)?;
+    let name_owner = next_account_info(accounts_iter)?;
+    let creator_data = WumboCreatorV0::unpack_from_slice(&creator.data.borrow())?;
+    let name_record_header = NameRecordHeader::unpack_from_slice(&name.data.borrow())?;
+    let name_specified_owner = name_record_header.owner
+    if !name_owner.is_signer {
+        return Err(WumboError::MissingSigner.into());
+    }
+
+    if creator_data.key != Key::WumboCreatorV0 {
+        return Err(ProgramError::InvalidAccountData);
+    }
+
+    if *name_owner.key != name_specified_owner {
+        return Err(WumboError::NameOwnerMismatch.into());
+    }
+
+    if *token_bonding.key != creator.token_bonding {
+        return Err(WumboError::InavlidTokenBonding.into());
+    }
+
+    if creator.name != *name.key {
+        return Err(WumboError::InvalidName.into());
+    }
+
+    let (token_bonding_authority_key, _) = bonding_authority(program_id, &creator.key);
+    if token_bonding_authority_key != token_bonding_data.authority {
+        msg!("Invalid token bonding authority");
+        return Err(WumboError::InvalidAuthority.into());
+    }
+
+    Ok(creator_data)
+}
+
+fn process_opt(program_id: &Pubkey, accounts: &[AccountInfo], opted_out: bool) -> ProgramResult {
+    let accounts_iter = &mut accounts.into_iter();
+    let creator = next_account_info(accounts_iter)?;
+    let creator_data = verify_creator(accounts);
+    let token_bonding = next_account_info(accounts_iter)?;
+    let token_bonding_authority = next_account_info(accounts_iter)?;
+    
+    let (_, nonce) = bonding_authority(program_id, &creator.key);
+    let signer_seeds = &[
+        &BONDING_AUTHORITY_PREFIX.as_bytes(),
+        &creator.key.to_bytes(),
+        &[nonce]
+    ];
+    if opted_out {
+        invoke_signed(
+            &freeze_buy_v0_instruction(
+                spl_token_bonding::id(),
+                &token_bonding.key,
+                &token_bonding_authority.key
+            ),
+            &[
+                token_bonding.clone(),
+                &token_bonding_authority.clone()
+            ]
+            &[&signer_seeds],
+        )?;
+    } else {
+        invoke_signed(
+            &thaw_buy_v0_instruction(
+                spl_token_bonding::id(),
+                &token_bonding.key,
+                &token_bonding_authority.key
+            ),
+            &[
+                token_bonding.clone(),
+                &token_bonding_authority.clone()
+            ]
+            &[&signer_seeds],
+        )?;
+    }
 
     Ok(())
 }

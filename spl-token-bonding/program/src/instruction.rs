@@ -91,6 +91,33 @@ pub enum TokenBondingInstruction {
         // Minimum amount of base to receive for this amount. Allows users to account and fail-fast for slippage.
         min_price: u64,
     },
+
+    /// Freeze BUY on the bonding curve. Tokens can no longer be bought/minted
+    ///   0. `[writeable]` Token bonding account
+    ///   1. `[signer]` Token bonding authority
+    FreezeBuyV0,
+
+    /// Thaw BUY on the bonding curve. Tokens can no longer be bought/minted
+    ///   0. `[writeable]` Token bonding account
+    ///   1. `[signer]` Token bonding authority
+    ThawBuyV0,
+
+    /// Freeze SELL on the bonding curve. Tokens can no longer be sold, refunding money from the base account.
+    ///   0. `[writeable]` Token bonding account
+    ///   1. `[signer]` Token bonding authority
+    FreezeSellV0,
+
+    /// Thaw SELL on the bonding curve. Tokens can no longer be sold, refunding money from the base account.
+    ///   0. `[writeable]` Token bonding account
+    ///   1. `[signer]` Token bonding authority
+    ThawSellV0,
+
+    /// Change the authority on the bonding curve.
+    ///   0. `[writeable]` Token bonding account
+    ///   1. `[signer]` Token bonding authority
+    ChangeAuthorityV0 {
+        new_authority: Option<Pubkey>
+    }
 }
 
 /// Creates an InitializeTokenBondingV0 instruction
@@ -231,6 +258,94 @@ pub fn create_log_curve_v0(
                 taylor_iterations,
                 is_base_relative
             }
+            .try_to_vec()
+            .unwrap(),
+    }
+}
+
+pub fn freeze_buy_v0_instruction(
+    program_id: &Pubkey,
+    token_bonding: &Pubkey,
+    token_bonding_authority: &Pubkey,
+) -> Instruction {
+    Instruction {
+        program_id: *program_id,
+        accounts: vec![
+            AccountMeta::new(*token_bonding, false),
+            AccountMeta::new_readonly(*token_bonding_authority, true),
+        ],
+        data: TokenBondingInstruction::FreezeBuyV0 {}
+            .try_to_vec()
+            .unwrap(),
+    }
+}
+
+pub fn thaw_buy_v0_instruction(
+    program_id: &Pubkey,
+    token_bonding: &Pubkey,
+    token_bonding_authority: &Pubkey,
+) -> Instruction {
+    Instruction {
+        program_id: *program_id,
+        accounts: vec![
+            AccountMeta::new(*token_bonding, false),
+            AccountMeta::new_readonly(*token_bonding_authority, true),
+        ],
+        data: TokenBondingInstruction::ThawBuyV0 {}
+            .try_to_vec()
+            .unwrap(),
+    }
+}
+
+pub fn freeze_sell_v0_instruction(
+    program_id: &Pubkey,
+    token_bonding: &Pubkey,
+    token_bonding_authority: &Pubkey,
+) -> Instruction {
+    Instruction {
+        program_id: *program_id,
+        accounts: vec![
+            AccountMeta::new(*token_bonding, false),
+            AccountMeta::new_readonly(*token_bonding_authority, true),
+        ],
+        data: TokenBondingInstruction::FreezeSellV0 {}
+            .try_to_vec()
+            .unwrap(),
+    }
+}
+
+pub fn thaw_sell_v0_instruction(
+    program_id: &Pubkey,
+    token_bonding: &Pubkey,
+    token_bonding_authority: &Pubkey,
+) -> Instruction {
+    Instruction {
+        program_id: *program_id,
+        accounts: vec![
+            AccountMeta::new(*token_bonding, false),
+            AccountMeta::new_readonly(*token_bonding_authority, true),
+        ],
+        data: TokenBondingInstruction::ThawSellV0 {}
+            .try_to_vec()
+            .unwrap(),
+    }
+}
+
+pub fn change_authority_v0_instruction(
+    program_id: &Pubkey,
+    token_bonding: &Pubkey,
+    token_bonding_authority: &Pubkey,
+    new_authority: Option<Pubkey>
+) -> Instruction {
+    Instruction {
+        program_id: *program_id,
+        accounts: vec![
+            AccountMeta::new(*token_bonding, false),
+            AccountMeta::new_readonly(*token_bonding_authority, true),
+        ],
+        data: TokenBondingInstruction::ChangeAuthorityV0 {
+            new_authority
+        }
             .try_to_vec()
             .unwrap(),
     }

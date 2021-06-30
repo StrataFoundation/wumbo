@@ -30,6 +30,9 @@ pub enum WumboError {
     #[error("Token program id did not match expected for this wumbo instance")]
     InvalidTokenProgramId,
 
+    #[error("Token bonding did not match the token bonding on the creator")]
+    InavlidTokenBonding,
+
     #[error("Was not able to unpack an Account from the specified token account")]
     ExpectedAccount,
 
@@ -101,7 +104,10 @@ pub enum WumboError {
     InvalidWumboInstanceOwner,
 
     #[error("Founder rewards account must be owned by either this program or the name account owner")]
-    InvalidFounderRewardsOwner
+    InvalidFounderRewardsOwner,
+
+    #[error("Name did not match the name found on the creator")]
+    InvalidName,
 }
 
 impl PrintProgramError for WumboError {

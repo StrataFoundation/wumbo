@@ -35,6 +35,22 @@ pub enum WumboInstruction {
     ///   8. `[]` Rent sysvar
     ///   9. (optional) `[signer]` Name service owner. If this is set, will not verify the owner of the founder rewards account
     InitializeCreatorV0,
+
+    /// Opt out of Wum.bo
+    ///   0. `[]` Creator to opt out
+    ///   1. `[writeable]` Token bonding for the creator
+    ///   2. `[] Token bonding authority. Should be a pda of ['bonding-authority', Creator Pubkey]
+    ///   3. `[]` Name service name
+    ///   4. `[signer]` Name service owner. If this is set, will not verify the owner of the founder rewards account
+    OptOutV0,
+
+    /// Opt out of Wum.bo
+    ///   0. `[]` Creator to opt out
+    ///   1. `[writeable]` Token bonding for the creator
+    ///   2. `[] Token bonding authority. Should be a pda of ['bonding-authority', Creator Pubkey]
+    ///   3. `[]` Name service name
+    ///   4. `[signer]` Name service owner. If this is set, will not verify the owner of the founder rewards account
+    OptInV0,
 }
 
 /// Creates an InitializeWumboV0 instruction
@@ -94,5 +110,51 @@ pub fn initialize_creator(
         data: WumboInstruction::InitializeCreatorV0
         .try_to_vec()
         .unwrap(),
+    }
+}
+
+pub fn opt_out_v0_instruction(
+    program_id: &Pubkey,
+    creator: &Pubkey,
+    token_bonding: &Pubkey,
+    token_bonding_authority: &Pubkey,
+    name: &Pubkey,
+    name_owner: &Pubkey,
+) -> Instruction {
+    Instruction {
+        program_id: *program_id,
+        accounts: vec![
+            AccountMeta::new_readonly(*creator, false),
+            AccountMeta::new(*token_bonding, false),
+            AccountMeta::new_readonly(*token_bonding_authority, false),
+            AccountMeta::new_readonly(*name, false),
+            AccountMeta::new_readonly(*name_owner, true),
+        ],
+        data: WumboInstruction::OptOutV0 {}
+            .try_to_vec()
+            .unwrap(),
+    }
+}
+
+pub fn opt_in_v0_instruction(
+    program_id: &Pubkey,
+    creator: &Pubkey,
+    token_bonding: &Pubkey,
+    token_bonding_authority: &Pubkey,
+    name: &Pubkey,
+    name_owner: &Pubkey,
+) -> Instruction {
+    Instruction {
+        program_id: *program_id,
+        accounts: vec![
+            AccountMeta::new_readonly(*creator, false),
+            AccountMeta::new(*token_bonding, false),
+            AccountMeta::new_readonly(*token_bonding_authority, false),
+            AccountMeta::new_readonly(*name, false),
+            AccountMeta::new_readonly(*name_owner, true),
+        ],
+        data: WumboInstruction::OptOutV0 {}
+            .try_to_vec()
+            .unwrap(),
     }
 }

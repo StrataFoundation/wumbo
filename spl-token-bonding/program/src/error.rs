@@ -105,6 +105,12 @@ pub enum TokenBondingError {
 
     #[error("The minimum price set in the transaction was exceeded")]
     MinPriceExceeded,
+
+    #[error("Cannot buy, the curve is frozen")]
+    BuyFrozen,
+
+    #[error("Cannot sell, the curve is frozen")]
+    SellFrozen
 }
 
 impl PrintProgramError for TokenBondingError {
