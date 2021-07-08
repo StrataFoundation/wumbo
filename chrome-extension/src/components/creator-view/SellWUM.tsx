@@ -11,6 +11,7 @@ import { useMint } from "../../utils/mintState"
 import { CreatorInfo, CreatorInfoState } from "../../utils/creatorState"
 import { usePricing } from "../../utils/pricing"
 import {
+  BASE_SLIPPAGE,
   SOL_TOKEN,
   WUM_BONDING,
   WUM_REWARDS_PERCENTAGE,
@@ -29,7 +30,12 @@ export default (props: Props) => {
   const { curve, inverseCurve, loading } = usePricing(WUM_BONDING)
   const { wallet, awaitingApproval } = useWallet()
   const doSell = async (baseAmount: number, targetAmount: number) => {
-    await sell(wallet)(connection, WUM_BONDING, targetAmount)
+    await sell(wallet)(
+      connection,
+      WUM_BONDING,
+      targetAmount,
+      baseAmount - BASE_SLIPPAGE * baseAmount
+    )
   }
   const { execute, error } = useAsyncCallback(doSell)
 

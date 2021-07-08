@@ -47,7 +47,7 @@ export default ({ creatorName, creatorImg }: CreatorInfoProps) => {
     WumboInstance.fromAccount
   )
 
-  if (!loading && !creatorInfo && wumboInstance && wallet) {
+  if (!loading && !creatorInfo && wumboInstance) {
     return (
       <Popover
         placement="bottom"

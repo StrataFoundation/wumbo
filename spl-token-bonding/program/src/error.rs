@@ -110,7 +110,10 @@ pub enum TokenBondingError {
     BuyFrozen,
 
     #[error("Cannot sell, the curve is frozen")]
-    SellFrozen
+    SellFrozen,
+
+    #[error("Insufficient funds to complete this action")]
+    InsufficientFunds
 }
 
 impl PrintProgramError for TokenBondingError {

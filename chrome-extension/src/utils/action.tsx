@@ -16,7 +16,8 @@ import { PublicKey } from "@solana/web3.js";
 export const buy = (wallet: WalletAdapter | undefined) => (
   connection: Connection,
   tokenBonding: PublicKey,
-  amount: number
+  amount: number,
+  maxPrice: number
 ): Promise<void> => {
   if (wallet) {
     return buyBondingWithWallet(connection, {
@@ -26,6 +27,7 @@ export const buy = (wallet: WalletAdapter | undefined) => (
       tokenBonding,
       purchaserWallet: wallet,
       amount: Math.floor(amount * Math.pow(10, 9)),
+      maxPrice: Math.floor(maxPrice * Math.pow(10, 9))
     });
   }
 
@@ -35,7 +37,8 @@ export const buy = (wallet: WalletAdapter | undefined) => (
 export const sell = (wallet: WalletAdapter | undefined) => (
   connection: Connection,
   tokenBonding: PublicKey,
-  amount: number
+  amount: number,
+  minPrice: number
 ): Promise<void> => {
   if (wallet) {
     return sellBondingWithWallet(connection, {
@@ -45,6 +48,7 @@ export const sell = (wallet: WalletAdapter | undefined) => (
       tokenBonding,
       sellerWallet: wallet,
       amount: Math.floor(amount * Math.pow(10, 9)),
+      minPrice: Math.floor(minPrice * Math.pow(10, 9))
     });
   }
 

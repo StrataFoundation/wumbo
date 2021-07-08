@@ -1,4 +1,4 @@
-use spl_math::precise_number::PreciseNumber;
+use crate::precise_number::PreciseNumber;
 use crate::ln::{InnerUint, NaturalLog, one};
 
 use {
@@ -44,7 +44,12 @@ pub struct TokenBondingV0 {
 impl Sealed for TokenBondingV0 {}
 
 impl Pack for TokenBondingV0 {
-    const LEN: usize = 1 + 32 * 6 + 2 + 1 + 1 + 1 + 8 + 1 + 1;
+    const LEN: usize = 1 + // key
+        (32 * 6) + // Public keys
+        2 + // Options
+        2 + // Founder rewards %
+        8 + // Mint cap
+        3; // buy frozen, sell frozen, initialized
 
     fn pack_into_slice(&self, dst: &mut [u8]) {
         let mut slice = dst;
@@ -53,8 +58,8 @@ impl Pack for TokenBondingV0 {
 
     fn unpack_from_slice(src: &[u8]) -> Result<Self, ProgramError> {
         let mut p = src;
-        TokenBondingV0::deserialize(&mut p).map_err(|_| {
-            msg!("Failed to deserialize name record");
+        TokenBondingV0::deserialize(&mut p).map_err(|e| {
+            msg!("Failed to deserialize token bonding record {}", e);
             ProgramError::InvalidAccountData
         })
     }

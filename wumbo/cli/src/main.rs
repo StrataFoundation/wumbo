@@ -14,7 +14,7 @@ use solana_program::pubkey::Pubkey;
 use spl_wumbo::instruction::initialize_wumbo;
 
 const NAME_PROGRAM_ID_STR: &str = "FV42ih6c4jfUTHRbqT8tCVo67UYFMssjavmT3XeNBsdX";
-const WUMBO_PORGRAM_ID_STR: &str = "AVYYDfjDiQU6rixuNe9LmKAZY1f7cbYexEMVAMpCAaoP";
+const WUMBO_PORGRAM_ID_STR: &str = "AyvifSXGFuXadeve8y66cLQaPgRLfWwDBb8H7TJvTSse";
 // BRbG1myx3zXz8JMBTuvyJPbTwgpSPZdxypVcvbGGnPcE
 fn main() {
     // let TOKEN_SWAP_PROGRAM_ID: Pubkey = Pubkey::from_str(TOKEN_SWAP_PROGRAM_ID_STR).unwrap();

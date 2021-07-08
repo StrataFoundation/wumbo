@@ -1,7 +1,8 @@
 import { Numberu16 } from "./utils";
 import { AccountInfo, Connection, PublicKey } from "@solana/web3.js";
-import { deserializeUnchecked,deserialize, Schema } from "@bonfida/borsh-js";
+import { deserializeUnchecked,deserialize, Schema } from "borsh";
 import { Numberu64 } from "@bonfida/spl-name-service";
+import { u64 } from "@solana/spl-token";
 
 function decodeu128asf64(arg: Uint8Array): number {
   const x = new ArrayBuffer(16);
@@ -21,14 +22,22 @@ export class TokenBondingV0 {
   publicKey: PublicKey; // Gets set on retrieve
   baseMint: PublicKey;
   targetMint: PublicKey;
-  authority: PublicKey;
+  authority: PublicKey | undefined;
   baseStorage: PublicKey;
   founderRewards: PublicKey;
   founderRewardPercentage: number;
   curve: PublicKey;
+  mintCap: u64 | undefined;
+  buyFrozen: boolean;
+  sellFrozen: boolean;
   initialized: boolean;
 
-  static LEN = 1 + 32 * 6 + 2 + 1;
+  static LEN = 1 + // key
+    (32 * 6) + // Public keys
+    2 + // Options
+    2 + // Founder rewards %
+    8 + // Mint cap
+    3; // buy frozen, sell frozen, initialized
 
   static schema: Schema = new Map([
     [
@@ -39,12 +48,21 @@ export class TokenBondingV0 {
           ["key", [1]],
           ["baseMint", [32]],
           ["targetMint", [32]],
-          ["authority", [32]],
+          ["authority", {
+            kind: 'option',
+            type: [32]
+          }],
           ["baseStorage", [32]],
           ["founderRewards", [32]],
           ["founderRewardPercentage", [2]],
           ["curve", [32]],
-          ["initialized", [1]],
+          ["mintCap", {
+            kind: 'option',
+            type: [8]
+          }],
+          ["buyFrozen", 'u8'],
+          ["sellFrozen", 'u8'],
+          ["initialized", 'u8'],
         ],
       },
     ],
@@ -54,23 +72,29 @@ export class TokenBondingV0 {
     key: Uint8Array;
     baseMint: Uint8Array;
     targetMint: Uint8Array;
-    authority: Uint8Array;
+    authority: Uint8Array | undefined;
     baseStorage: Uint8Array;
     founderRewards: Uint8Array;
     founderRewardPercentage: Uint8Array;
     curve: Uint8Array;
-    initialized: Uint8Array;
+    mintCap: Uint8Array | undefined;
+    buyFrozen: boolean,
+    sellFrozen: boolean,
+    initialized: boolean;
   }) {
     this.baseMint = new PublicKey(obj.baseMint);
     this.targetMint = new PublicKey(obj.targetMint);
-    this.authority = new PublicKey(obj.authority);
+    this.authority = obj.authority && new PublicKey(obj.authority);
     this.baseStorage = new PublicKey(obj.baseStorage);
     this.founderRewards = new PublicKey(obj.founderRewards);
     this.founderRewardPercentage = new Numberu16(
       obj.founderRewardPercentage.reverse()
     ).toNumber();
     this.curve = new PublicKey(obj.curve);
-    this.initialized = obj.initialized[0] === 1;
+    this.mintCap = obj.mintCap && u64.fromBuffer(Buffer.from(obj.mintCap));
+    this.buyFrozen = obj.buyFrozen;
+    this.sellFrozen = obj.sellFrozen
+    this.initialized = obj.initialized;
   }
 
   static fromAccount(

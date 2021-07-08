@@ -17,7 +17,6 @@
     "url": "https://github.com/ChewingGlassFund/wumbo"
   },
   "dependencies": {
-    "@bonfida/borsh-js": "^0.3.1",
     "@bonfida/spl-name-service": "file:../../solana-program-library/name-service/js",
     "@oyster/common": "file:../../oyster/packages/common/dist",
     "@project-serum/serum": "^0.13.34",
@@ -35,6 +34,7 @@
     "antd": "^4.15.5",
     "auth0-js": "^9.16.2",
     "bip39": "^3.0.4",
+    "borsh": "^0.4.0",
     "lambert-w-function": "^2.0.0",
     "react": "16.13.1",
     "react-async-hook": "^3.6.2",

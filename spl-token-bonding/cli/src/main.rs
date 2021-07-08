@@ -29,7 +29,7 @@ use spl_token_bonding::{
 const TOKEN_SWAP_PROGRAM_ID_STR: &str = "F2LtPFtixA8vKbg8ark5zswM4QuJKBn85KZcqrzWNe4K";
 const TOKEN_PROGRAM_ID_STR: &str = "CiBbJADtSJnVQEsgXZpRfLyLNqDjwfvua8EMe9tPhKvo";
 const NAME_PROGRAM_ID_STR: &str = "CiBbJADtSJnVQEsgXZpRfLyLNqDjwfvua8EMe9tPhKvo";
-const TOKEN_BONDING_PROGRAM_ID_STR: &str = "JA285FMDWsNVCnbUbzKFJgyC6xUHXBq6mrQkrKH6Ru5s";
+const TOKEN_BONDING_PROGRAM_ID_STR: &str = "GNaAvtLUeVLMWJw2hafeVxFbK254UR3Y4mrxaqZHR4sY";
 // const TOKEN_BONDING_PROGRAM_ID_STR: &str = "CBvX6GXQ7CfoqWNG99wW22zzufz1owyH2tPSfEyus7JV";
 
 fn main() {
@@ -275,7 +275,7 @@ fn main() {
                     &TOKEN_PROGRAM_ID,
                     &fee_payer.pubkey(),
                     &token_bonding_key,
-                    &fee_payer.pubkey(),
+                    Some(fee_payer.pubkey()),
                     &curve_key,
                     &base_key,
                     &target_key,

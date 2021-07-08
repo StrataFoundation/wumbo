@@ -48,7 +48,6 @@ interface CreatorState {
 
 export const useCreator = (name: string): UseAccountState<WumboCreator> => {
   const key = useCreatorKey(name);
-  const connection = useConnection();
 
   return useAccount(key, WumboCreator.fromAccount);
 };

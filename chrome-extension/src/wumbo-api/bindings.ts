@@ -50,6 +50,7 @@ export type BuyBondingWithWalletParams = {
   tokenBonding: PublicKey;
   purchaserWallet: WalletAdapter;
   amount: number;
+  maxPrice: number;
 };
 
 export type SellBondingWithWalletParams = {
@@ -59,6 +60,7 @@ export type SellBondingWithWalletParams = {
   tokenBonding: PublicKey;
   sellerWallet: WalletAdapter;
   amount: number;
+  minPrice: number;
 };
 
 async function sendTransaction(
@@ -375,7 +377,8 @@ export async function buyBondingWithWallet(
       purchaseAccount,
       params.purchaserWallet.publicKey,
       destinationAccount,
-      params.amount
+      params.amount,
+      params.maxPrice
     )
   );
 
@@ -468,7 +471,8 @@ export async function sellBondingWithWallet(
       sellAccount,
       params.sellerWallet.publicKey,
       destinationAccount,
-      params.amount
+      params.amount,
+      params.minPrice
     )
   );
 

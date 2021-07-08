@@ -9,7 +9,7 @@ import {
 
 export default () => {
   const connectionConfig = useConnectionConfig()
-  connectionConfig.setEndpoint("https://api.devnet.solana.com")
+  connectionConfig.setEndpoint("https://wumbo.devnet.rpcpool.com/")
 
   const tweets = useTweets()
   if (tweets) {

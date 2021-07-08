@@ -10,6 +10,7 @@ import Swap from "./Swap"
 import { CreatorInfo, CreatorInfoState } from "../../utils/creatorState"
 import { useMint } from "@oyster/common/lib/contexts/accounts"
 import { inverseLogCurve, logCurve, usePricing } from "../../utils/pricing"
+import { BASE_SLIPPAGE } from "../../constants/globals"
 
 interface SellProps {
   creatorInfo: CreatorInfo
@@ -31,7 +32,8 @@ export default ({
     await sell(wallet)(
       connection,
       creatorInfo.tokenBonding.publicKey,
-      targetAmount
+      targetAmount,
+      baseAmount - BASE_SLIPPAGE * baseAmount
     )
   }
   const { execute } = useAsyncCallback(doSell)

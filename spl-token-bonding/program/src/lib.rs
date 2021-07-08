@@ -10,5 +10,7 @@ pub mod processor;
 pub mod state;
 pub mod utils;
 pub mod ln;
+pub mod precise_number;
+pub mod uint;
 
 solana_program::declare_id!("metoTA73sFPqA8whreUbBsbn3SLJH2vhrW9fP5dmfdC");

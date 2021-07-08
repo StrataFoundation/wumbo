@@ -2,7 +2,7 @@ use std::convert::TryInto;
 
 use solana_program::program::{invoke, invoke_signed};
 use solana_program::{program_error::ProgramError, system_instruction};
-use spl_math::precise_number::PreciseNumber;
+use crate::precise_number::PreciseNumber;
 use spl_token::{native_mint, solana_program::program_pack::Pack};
 
 use {
@@ -316,7 +316,7 @@ fn process_initialize_token_bonding_v0(
     }
 
     if token_bonding_account.data.borrow().len() > 0
-        && TokenBondingV0::unpack_unchecked(&token_bonding_account.data.borrow())?.initialized
+        && TokenBondingV0::unpack_from_slice(&token_bonding_account.data.borrow())?.initialized
     {
         return Err(TokenBondingError::AlreadyInitialized.into());
     }
@@ -474,7 +474,7 @@ fn process_buy_v0(program_id: &Pubkey, accounts: &[AccountInfo], amount: u64, ma
     );
     let purchaser_cut = amount;
 
-    if amount + founder_cut > token_bonding_data.mint_cap.unwrap() {
+    if token_bonding_data.mint_cap.is_some() && amount + founder_cut > token_bonding_data.mint_cap.unwrap() {
         return Err(TokenBondingError::MaxTokensMinted.into());
     }
 
@@ -620,7 +620,8 @@ fn process_sell_v0(program_id: &Pubkey, accounts: &[AccountInfo], amount: u64, m
 
     let reclaimed_amount = to_lamports(
         &curve_data.price(
-            &precise_supply(target_mint_data).checked_sub(&precise_supply_amt(amount, target_mint_data)).unwrap(),
+            &precise_supply(target_mint_data).checked_sub(&precise_supply_amt(amount, target_mint_data))
+                .ok_or::<ProgramError>(TokenBondingError::InsufficientFunds.into())?,
             &precise_supply(base_mint_data),
             &precise_supply_amt(amount, target_mint_data),
         ).unwrap(),
@@ -804,7 +805,7 @@ mod tests {
         create_account_for_test, create_is_signer_account_infos, Account as SolanaAccount,
     };
     use solana_sdk::program_option::COption;
-    use spl_math::precise_number::PreciseNumber;
+    use crate::precise_number::PreciseNumber;
     use spl_token::solana_program::program_pack::Pack;
     use spl_token::state::AccountState;
 
@@ -886,7 +887,7 @@ mod tests {
     }
 
     fn get_fixture() -> Fixture {
-        let token_program_id = Pubkey::new_unique();
+        let token_program_id = spl_token::id();
         let program_id = Pubkey::new_unique();
         let payer_key = Pubkey::new_unique();
         let payer = SolanaAccount::new(100000, 0, &program_id);

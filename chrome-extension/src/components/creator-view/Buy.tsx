@@ -10,6 +10,7 @@ import Swap from "./Swap"
 import { CreatorInfo, CreatorInfoState } from "../../utils/creatorState"
 import { inverseLogCurve, logCurve, usePricing } from "../../utils/pricing"
 import { useMint } from "@oyster/common/lib/contexts/accounts"
+import { BASE_SLIPPAGE } from "../../constants/globals"
 
 interface BuyProps {
   creatorInfo: CreatorInfo
@@ -31,7 +32,8 @@ export default ({
     await buy(wallet)(
       connection,
       creatorInfo.tokenBonding.publicKey,
-      targetAmount
+      targetAmount,
+      baseAmount + BASE_SLIPPAGE * baseAmount
     )
   }
   const { execute } = useAsyncCallback(doBuy)

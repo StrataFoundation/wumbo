@@ -1,5 +1,5 @@
 import { AccountInfo, Connection, PublicKey } from "@solana/web3.js";
-import { deserializeUnchecked, Schema } from "@bonfida/borsh-js";
+import { deserializeUnchecked, Schema } from "borsh";
 import { Numberu16, Numberu8 } from "./utils";
 import { MintInfo, MintLayout, u64 } from "@solana/spl-token";
 

@@ -13,14 +13,15 @@ export function initializeTokenBondingV0Instruction(
   tokenProgramId: PublicKey,
   payer: PublicKey,
   tokenBondingAccount: PublicKey,
-  tokenBondingAuthority: PublicKey,
+  tokenBondingAuthority: PublicKey | null,
   curve: PublicKey,
   baseMint: PublicKey,
   targetMint: PublicKey,
   founderRewards: PublicKey,
   baseStorage: PublicKey,
   baseStorageAuthority: PublicKey,
-  founderRewardsPercentage: number
+  founderRewardsPercentage: number,
+  mintCap?: number
 ): TransactionInstruction {
   return new TransactionInstruction({
     programId,
@@ -34,11 +35,6 @@ export function initializeTokenBondingV0Instruction(
         pubkey: tokenBondingAccount,
         isSigner: true,
         isWritable: true,
-      },
-      {
-        pubkey: tokenBondingAuthority,
-        isSigner: false,
-        isWritable: false,
       },
       {
         pubkey: curve,
@@ -89,6 +85,8 @@ export function initializeTokenBondingV0Instruction(
     data: Buffer.concat([
       Buffer.from(Int8Array.from([1])),
       new Numberu16(founderRewardsPercentage).toBuffer(),
+      mintCap ? Buffer.concat([Buffer.from(Int8Array.from([1])), new Numberu16(mintCap).toBuffer()]) : Buffer.from(Int8Array.from([0])),
+      tokenBondingAuthority ? Buffer.concat([Buffer.from(Int8Array.from([1])), tokenBondingAuthority.toBuffer()]) : Buffer.from(Int8Array.from([0]))
     ]),
   });
 }
@@ -106,7 +104,8 @@ export function buyV0Instruction(
   purchaseAccount: PublicKey,
   purchaseAuthority: PublicKey,
   destination: PublicKey,
-  amount: number
+  amount: number,
+  maxPrice: number
 ): TransactionInstruction {
   return new TransactionInstruction({
     programId,
@@ -175,6 +174,7 @@ export function buyV0Instruction(
     data: Buffer.concat([
       Buffer.from(Int8Array.from([2])),
       new Numberu64(amount).toBuffer(),
+      new Numberu64(maxPrice).toBuffer(),
     ]),
   });
 }
@@ -191,7 +191,8 @@ export function sellV0Instruction(
   sellAccount: PublicKey,
   sellAuthority: PublicKey,
   destination: PublicKey,
-  amount: number
+  amount: number,
+  minPrice: number
 ): TransactionInstruction {
   return new TransactionInstruction({
     programId,
@@ -255,6 +256,7 @@ export function sellV0Instruction(
     data: Buffer.concat([
       Buffer.from(Int8Array.from([3])),
       new Numberu64(amount).toBuffer(),
+      new Numberu64(minPrice).toBuffer(),
     ]),
   });
 }
