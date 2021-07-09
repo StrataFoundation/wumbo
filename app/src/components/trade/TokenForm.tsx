@@ -27,13 +27,36 @@ export const TokenForm = ({
   submitting = false,
 }: TokenFormProps) => {
   const { wallet, awaitingApproval } = useWallet();
-  const { register, handleSubmit } = useForm<FormValues>();
+  const { register, handleSubmit, setValue, reset } = useForm<FormValues>();
 
   const inputClasses =
     "p-0 bg-transparent border-transparent focus:shadow-none focus:border-transparent";
 
+  const handleOnFiatChange = ({
+    target: { value },
+  }: {
+    target: { value: string };
+  }) => {
+    // TODO on change of fiatAmount determine tokenAmount
+    setValue("tokenAmount", +value);
+  };
+
+  const handleOnTokenChange = ({
+    target: { value },
+  }: {
+    target: { value: string };
+  }) => {
+    // TODO on change of tokenAmount determine fiatAmount
+    setValue("fiatAmount", +value);
+  };
+
+  const handleOnSubmit = (values: FormValues) => {
+    onSubmit(values);
+    reset();
+  };
+
   return (
-    <form onSubmit={handleSubmit(onSubmit)}>
+    <form onSubmit={handleSubmit(handleOnSubmit)}>
       <div className="flex justify-between px-2 py-1 mt-4 border-1 border-gray-300 rounded-lg hover:bg-gray-100">
         <div className="flex items-center justify-center">
           {isWUM ? (
@@ -55,6 +78,7 @@ export const TokenForm = ({
               step={0.01}
               placeholder="0.00"
               {...register("fiatAmount")}
+              onChange={handleOnFiatChange}
             />
             <span>$</span>
           </div>
@@ -66,9 +90,8 @@ export const TokenForm = ({
               min={0}
               step={0.01}
               placeholder="0"
-              {...register("tokenAmount", {
-                pattern: /^(\d+(\.\d{0,2})?|\.?\d{1,9})$/i,
-              })}
+              {...register("tokenAmount")}
+              onChange={handleOnTokenChange}
             />
             <span>{isWUM ? "WUM" : "NXX2"}</span>
           </div>
@@ -83,7 +106,7 @@ export const TokenForm = ({
               </div>
             )}
             {awaitingApproval && "Awaiting Approval"}
-            {!awaitingApproval && type === "sell" ? "Sell" : "Buy"}
+            {!awaitingApproval && (type === "sell" ? "Sell" : "Buy")}
           </Button>
         ) : (
           <Link to={routes.wallet.path} className="w-full">

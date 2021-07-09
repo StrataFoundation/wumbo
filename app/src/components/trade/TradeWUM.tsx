@@ -1,4 +1,4 @@
-import React, { Fragment, useState, useEffect } from "react";
+import React, { Fragment, useState, ReactNode } from "react";
 import { Link } from "react-router-dom";
 import { useConnection } from "@oyster/common/lib/contexts/connection";
 import { ChevronUpIcon, ChevronDownIcon } from "@heroicons/react/solid";
@@ -21,10 +21,19 @@ import { routes } from "@/constants/routes";
 import { TokenForm, FormValues } from "./TokenForm";
 import { usePricing } from "@/utils/pricing";
 import { useAsyncCallback } from "react-async-hook";
+import { SuccessfulTransaction } from "./SuccessfulTransaction";
 
 export const TradeWUM = React.memo(() => {
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   const [detailsVisible, setDetailsVisible] = useState<boolean>(false);
+  // TODO: should move this to a context vvv
+  const [transactionSuccesful, setTransactionSuccesful] = useState<{
+    showing: boolean;
+    amount: number;
+    tokenSvg?: ReactNode;
+    tokenSrc?: string;
+    tokenName: string;
+  } | null>(null);
   const { state } = useDrawer();
   const { creator } = state;
   const connection = useConnection();
@@ -42,25 +51,48 @@ export const TradeWUM = React.memo(() => {
   const { execute: onHandleBuy, error: buyError } = useAsyncCallback(
     async (values: FormValues) => {
       setIsSubmitting(true);
-      await buy(wallet)(
-        connection,
-        WUM_BONDING,
-        values.tokenAmount,
-        curve(values.tokenAmount) + BASE_SLIPPAGE * curve(values.tokenAmount)
-      );
+      try {
+        await buy(wallet)(
+          connection,
+          WUM_BONDING,
+          values.tokenAmount,
+          curve(values.tokenAmount) + BASE_SLIPPAGE * curve(values.tokenAmount)
+        );
+        setTransactionSuccesful({
+          showing: true,
+          amount: values.tokenAmount,
+          tokenName: "WUM",
+          tokenSvg: <Logo width="45" height="45" />,
+        });
+      } catch (e) {
+        console.log(e);
+      }
       setIsSubmitting(false);
     }
   );
 
+  // TODO: sell not executing something off with the inverse/slippage
   const { execute: onHandleSell, error: sellError } = useAsyncCallback(
     async (values: FormValues) => {
       setIsSubmitting(true);
-      await sell(wallet)(
-        connection,
-        WUM_BONDING,
-        curve(values.tokenAmount),
-        values.tokenAmount - BASE_SLIPPAGE * values.tokenAmount
-      );
+      try {
+        await sell(wallet)(
+          connection,
+          WUM_BONDING,
+          inverseCurve(values.tokenAmount),
+          values.tokenAmount - BASE_SLIPPAGE * values.tokenAmount
+        );
+        setTransactionSuccesful({
+          showing: true,
+          amount: +(inverseCurve(values.tokenAmount) / Math.pow(10, 9)).toFixed(
+            2
+          ),
+          tokenName: "SOL",
+          tokenSvg: <SolLogo width="45" height="45" />,
+        });
+      } catch (e) {
+        console.log(e);
+      }
       setIsSubmitting(false);
     }
   );
@@ -70,8 +102,10 @@ export const TradeWUM = React.memo(() => {
       <WumboDrawer.Header>
         <div className="flex justify-between w-full">
           <p className="text-lg font-medium text-indigo-600">Trade WUM</p>
+          {/* TODO: link to ftx pay */}
           <Link to={routes.tradeWUM.path}>
             <Badge rounded hoverable color="neutral">
+              {/* TODO: Get owned sol amount and displaay here || Buy SOL */}
               <SolLogo width="20" height="20" className="mr-2" /> Buy SOL
             </Badge>
           </Link>
@@ -80,6 +114,7 @@ export const TradeWUM = React.memo(() => {
       <WumboDrawer.Content>
         <div className="flex bg-gray-100 p-4 rounded-lg space-x-4">
           <Logo width="45" height="45" />
+          {/* TODO: Tie to actual wum token not creatorInfo */}
           <div className="flex flex-col flex-grow justify-center text-gray-700">
             <div className="flex justify-between font-medium">
               <span>Wum.bo</span>
@@ -101,12 +136,14 @@ export const TradeWUM = React.memo(() => {
             </div>
           </div>
         </div>
+        {/* TODO: Tie to actual wum token not creatorInfo */}
         {detailsVisible && (
           <div className="px-2 py-2 mt-4 border-1 border-gray-300 rounded-lg">
             <CoinDetails creatorInfo={creatorInfo} textSize="text-xxs" />
           </div>
         )}
         <div className="flex justify-center mt-4">
+          {/* TODO: show owned amount in both tabs */}
           <Tabs>
             <Tab title="Buy">
               <div className="mt-2">
@@ -125,6 +162,7 @@ export const TradeWUM = React.memo(() => {
                     You can buy up to 3.34807 WUM coins!
                   </span>
                   <div className="flex justify-center mt-4">
+                    {/* TODO: link to ftx pay */}
                     <Link to={routes.tradeWUM.path}>
                       <Badge rounded hoverable color="neutral">
                         <SolLogo width="20" height="20" className="mr-2" /> Buy
@@ -151,6 +189,13 @@ export const TradeWUM = React.memo(() => {
             </Tab>
           </Tabs>
         </div>
+        <SuccessfulTransaction
+          isShowing={transactionSuccesful?.showing || false}
+          tokenName={transactionSuccesful?.tokenName}
+          tokenSvg={transactionSuccesful?.tokenSvg}
+          amount={transactionSuccesful?.amount}
+          toggleShowing={() => setTransactionSuccesful(null)}
+        />
       </WumboDrawer.Content>
       <WumboDrawer.Nav />
     </Fragment>

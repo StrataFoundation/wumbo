@@ -1,4 +1,4 @@
-import React, { Fragment, useState, useEffect } from "react";
+import React, { Fragment, useState, useEffect, ReactNode } from "react";
 import { Link } from "react-router-dom";
 import { useConnection } from "@oyster/common/lib/contexts/connection";
 import { ChevronUpIcon, ChevronDownIcon } from "@heroicons/react/solid";
@@ -7,18 +7,34 @@ import { useDrawer } from "@/contexts/drawerContext";
 import { useWallet } from "@/utils/wallet";
 import { useAccount } from "@/utils/account";
 import { useCreatorInfo } from "@/utils/creatorState";
+import { buy, sell } from "@/utils/action";
 import { useAssociatedAccount } from "@/utils/walletState";
-import { WUM_TOKEN, WUMBO_INSTANCE_KEY } from "@/constants/globals";
+import {
+  BASE_SLIPPAGE,
+  WUM_TOKEN,
+  WUMBO_INSTANCE_KEY,
+} from "@/constants/globals";
 import { WumboInstance } from "@/wumbo-api/state";
 import { Avatar, CoinDetails, Tabs, Tab, Badge } from "@/components/common";
 import { routes } from "@/constants/routes";
-import { TokenForm } from "./TokenForm";
+import { TokenForm, FormValues } from "./TokenForm";
 import Logo from "../../../public/assets/img/logo.svg";
 import { usePricing } from "@/utils/pricing";
+import { useAsyncCallback } from "react-async-hook";
+import { SuccessfulTransaction } from "./SuccessfulTransaction";
 
 export const Trade = React.memo(() => {
+  const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   const [ownedWUM, setOwnedWUM] = useState<string | null>(null);
   const [detailsVisible, setDetailsVisible] = useState<boolean>(false);
+  // TODO: should move this to a context vvv
+  const [transactionSuccesful, setTransactionSuccesful] = useState<{
+    showing: boolean;
+    amount: number;
+    tokenSvg?: ReactNode;
+    tokenSrc?: string;
+    tokenName: string;
+  } | null>(null);
   const { state } = useDrawer();
   const { creator } = state;
   const { wallet } = useWallet();
@@ -46,6 +62,54 @@ export const Trade = React.memo(() => {
 
   const toggleDetails = () => setDetailsVisible(!detailsVisible);
 
+  const { execute: onHandleBuy, error: buyError } = useAsyncCallback(
+    async (values: FormValues) => {
+      setIsSubmitting(true);
+      try {
+        await buy(wallet)(
+          connection,
+          creatorInfo!.tokenBonding.publicKey,
+          values.tokenAmount,
+          curve(values.tokenAmount) + BASE_SLIPPAGE * curve(values.tokenAmount)
+        );
+        setTransactionSuccesful({
+          showing: true,
+          amount: values.tokenAmount,
+          tokenName: "NXX2",
+        });
+      } catch (e) {
+        console.log(e);
+      }
+      setIsSubmitting(false);
+    }
+  );
+
+  // TODO: sell not executing something off with the inverse/slippage
+  const { execute: onHandleSell, error: sellError } = useAsyncCallback(
+    async (values: FormValues) => {
+      setIsSubmitting(true);
+      try {
+        await sell(wallet)(
+          connection,
+          creatorInfo!.tokenBonding.publicKey,
+          inverseCurve(values.tokenAmount),
+          values.tokenAmount - BASE_SLIPPAGE * values.tokenAmount
+        );
+        setTransactionSuccesful({
+          showing: true,
+          amount: +(inverseCurve(values.tokenAmount) / Math.pow(10, 9)).toFixed(
+            2
+          ),
+          tokenName: "WUM",
+          tokenSvg: <Logo width="45" height="45" />,
+        });
+      } catch (e) {
+        console.log(e);
+      }
+      setIsSubmitting(false);
+    }
+  );
+
   return (
     <Fragment>
       <WumboDrawer.Header>
@@ -55,6 +119,7 @@ export const Trade = React.memo(() => {
           <Link to={routes.tradeWUM.path}>
             <Badge rounded hoverable color="primary">
               <Logo width="20" height="20" className="mr-2" />{" "}
+              {/* TODO: show in fiat terms not token */}
               {ownedWUM || "Buy WUM"}
             </Badge>
           </Link>
@@ -90,6 +155,7 @@ export const Trade = React.memo(() => {
           </div>
         )}
         <div className="flex justify-center mt-4">
+          {/* TODO: show owned amount in both tabs */}
           <Tabs>
             <Tab title="Buy">
               <div className="mt-2">
@@ -99,9 +165,8 @@ export const Trade = React.memo(() => {
                 <TokenForm
                   creatorInfoState={creatorInfoState}
                   type="buy"
-                  onSubmit={(values) => {
-                    console.log(values);
-                  }}
+                  onSubmit={onHandleBuy}
+                  submitting={isSubmitting}
                 />
                 <div className="flex flex-col justify-center mt-4">
                   <span className="flex justify-center text-xxs">
@@ -127,14 +192,20 @@ export const Trade = React.memo(() => {
                 <TokenForm
                   creatorInfoState={creatorInfoState}
                   type="sell"
-                  onSubmit={(values) => {
-                    console.log(values);
-                  }}
+                  onSubmit={onHandleSell}
+                  submitting={isSubmitting}
                 />
               </div>
             </Tab>
           </Tabs>
         </div>
+        <SuccessfulTransaction
+          isShowing={transactionSuccesful?.showing || false}
+          tokenName={transactionSuccesful?.tokenName}
+          tokenSvg={transactionSuccesful?.tokenSvg}
+          amount={transactionSuccesful?.amount}
+          toggleShowing={() => setTransactionSuccesful(null)}
+        />
       </WumboDrawer.Content>
       <WumboDrawer.Nav />
     </Fragment>
