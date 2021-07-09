@@ -1,5 +1,5 @@
 import React, { ReactNode } from "react";
-import { classNames } from "@/utils/classNames";
+import { classNames } from "@/utils/utils";
 
 /*
  ** Basic Badge

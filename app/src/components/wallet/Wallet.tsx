@@ -7,7 +7,7 @@ import { WALLET_PROVIDERS } from "@/constants/walletProviders";
 import { Button, Alert } from "@/components/common";
 import { WumboDrawer } from "../WumboDrawer";
 import { routes } from "@/constants/routes";
-import { usePrevious } from "@/hooks/usePrevious";
+import { usePrevious } from "@/utils/utils";
 
 export const Wallet = () => {
   const history = useHistory();

@@ -4,7 +4,7 @@ import React, {
   forwardRef,
   ReactNode,
 } from "react";
-import { classNames } from "@/utils/classNames";
+import { classNames } from "@/utils/utils";
 
 interface ButtonPropsWithChildren {}
 

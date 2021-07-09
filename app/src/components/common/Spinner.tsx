@@ -1,5 +1,5 @@
 import React from "react";
-import { classNames } from "@/utils/classNames";
+import { classNames } from "@/utils/utils";
 
 interface SpinnerProps {
   color?: "primary" | "secondary" | "white";

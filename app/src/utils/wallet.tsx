@@ -1,5 +1,6 @@
 import { useConnectionConfig } from "@oyster/common/lib/contexts/connection";
 import React, { useContext, useEffect, useMemo, useState } from "react";
+import { useAccount } from "./account";
 import { useLocalStorageState } from "@oyster/common/lib/utils/utils";
 import { WalletAdapter } from "@solana/wallet-base";
 import { WALLET_PROVIDERS } from "../constants/walletProviders";

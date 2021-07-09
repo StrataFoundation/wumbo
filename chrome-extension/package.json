@@ -17,7 +17,7 @@
     "url": "https://github.com/ChewingGlassFund/wumbo"
   },
   "dependencies": {
-    "@bonfida/spl-name-service": "file:../../solana-program-library/name-service/js",
+    "@bonfida/spl-name-service": "0.1.12",
     "@oyster/common": "file:../../oyster/packages/common/dist",
     "@project-serum/serum": "^0.13.34",
     "@project-serum/sol-wallet-adapter": "^0.1.4",

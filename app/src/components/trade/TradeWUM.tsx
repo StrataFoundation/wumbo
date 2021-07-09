@@ -10,7 +10,11 @@ import { useWallet } from "@/utils/wallet";
 import { useAccount } from "@/utils/account";
 import { useCreatorInfo } from "@/utils/creatorState";
 import { buy, sell } from "@/utils/action";
-import { WUMBO_INSTANCE_KEY, WUM_BONDING } from "@/constants/globals";
+import {
+  SOL_TOKEN,
+  WUMBO_INSTANCE_KEY,
+  WUM_BONDING,
+} from "@/constants/globals";
 import { WumboInstance } from "@/wumbo-api/state";
 import { CoinDetails, Tabs, Tab, Badge } from "@/components/common";
 import { routes } from "@/constants/routes";
@@ -32,6 +36,15 @@ export const TradeWUM = React.memo(() => {
     WUMBO_INSTANCE_KEY,
     WumboInstance.fromAccount
   );
+
+  connection
+    .getAccountInfo(wallet!.publicKey!)
+    .then((account) => {
+      console.log(account);
+    })
+    .catch((e) => {
+      console.log(e);
+    });
 
   const toggleDetails = () => setDetailsVisible(!detailsVisible);
 

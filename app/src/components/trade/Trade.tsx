@@ -14,6 +14,7 @@ import { Avatar, CoinDetails, Tabs, Tab, Badge } from "@/components/common";
 import { routes } from "@/constants/routes";
 import { TokenForm } from "./TokenForm";
 import Logo from "../../../public/assets/img/logo.svg";
+import { usePricing } from "@/utils/pricing";
 
 export const Trade = React.memo(() => {
   const [ownedWUM, setOwnedWUM] = useState<string | null>(null);
@@ -24,6 +25,9 @@ export const Trade = React.memo(() => {
   const connection = useConnection();
   const creatorInfoState = useCreatorInfo(creator.name!);
   const { creatorInfo, loading } = creatorInfoState;
+  const { curve, inverseCurve, loading: loadingCurve } = usePricing(
+    creatorInfo?.tokenBonding.publicKey
+  );
   const { info: wumboInstance } = useAccount(
     WUMBO_INSTANCE_KEY,
     WumboInstance.fromAccount
@@ -101,7 +105,9 @@ export const Trade = React.memo(() => {
                 />
                 <div className="flex flex-col justify-center mt-4">
                   <span className="flex justify-center text-xxs">
-                    You can buy up to 3.34807 NXX2 coins!
+                    You can buy up to{" "}
+                    {inverseCurve(ownedWUM ? +ownedWUM : 0).toFixed(4)} NXX2
+                    coins!
                   </span>
                   <div className="flex justify-center mt-4">
                     <Link to={routes.tradeWUM.path}>
