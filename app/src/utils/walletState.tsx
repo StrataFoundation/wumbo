@@ -53,12 +53,15 @@ export function useAssociatedAccount(
     result: associatedTokenAddress,
     loading: associatedTokenLoading,
   } = useAssociatedTokenAddress(wallet, mint);
-  const { info: associatedAccount, loading } = useAccount(associatedTokenAddress, (pubkey: PublicKey, acct: AccountInfo<Buffer>) => {
-    return TokenAccountParser(pubkey, acct).info
-  });
+  const { info: associatedAccount, loading } = useAccount(
+    associatedTokenAddress,
+    (pubkey: PublicKey, acct: AccountInfo<Buffer>) => {
+      return TokenAccountParser(pubkey, acct).info;
+    }
+  );
 
   return {
     associatedAccount,
-    loading
-  }
+    loading,
+  };
 }

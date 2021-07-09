@@ -11,7 +11,7 @@ import { useAccount } from "@/utils/account";
 import { useCreatorInfo } from "@/utils/creatorState";
 import { buy, sell } from "@/utils/action";
 import {
-  SOL_TOKEN,
+  BASE_SLIPPAGE,
   WUMBO_INSTANCE_KEY,
   WUM_BONDING,
 } from "@/constants/globals";
@@ -29,7 +29,7 @@ export const TradeWUM = React.memo(() => {
   const { creator } = state;
   const connection = useConnection();
   const { curve, inverseCurve, loading } = usePricing(WUM_BONDING);
-  const { wallet, awaitingApproval } = useWallet();
+  const { wallet } = useWallet();
   const creatorInfoState = useCreatorInfo(creator.name!);
   const { creatorInfo, loading: loadingCreatorState } = creatorInfoState;
   const { info: wumboInstance } = useAccount(
@@ -37,22 +37,17 @@ export const TradeWUM = React.memo(() => {
     WumboInstance.fromAccount
   );
 
-  connection
-    .getAccountInfo(wallet!.publicKey!)
-    .then((account) => {
-      console.log(account);
-    })
-    .catch((e) => {
-      console.log(e);
-    });
-
   const toggleDetails = () => setDetailsVisible(!detailsVisible);
 
   const { execute: onHandleBuy, error: buyError } = useAsyncCallback(
     async (values: FormValues) => {
       setIsSubmitting(true);
-      console.log("TODO: Buy");
-      console.log(curve(20));
+      await buy(wallet)(
+        connection,
+        WUM_BONDING,
+        values.tokenAmount,
+        curve(values.tokenAmount) + BASE_SLIPPAGE * curve(values.tokenAmount)
+      );
       setIsSubmitting(false);
     }
   );
@@ -60,8 +55,12 @@ export const TradeWUM = React.memo(() => {
   const { execute: onHandleSell, error: sellError } = useAsyncCallback(
     async (values: FormValues) => {
       setIsSubmitting(true);
-      console.log("TODO: Sell");
-      console.log(inverseCurve(20));
+      await sell(wallet)(
+        connection,
+        WUM_BONDING,
+        curve(values.tokenAmount),
+        values.tokenAmount - BASE_SLIPPAGE * values.tokenAmount
+      );
       setIsSubmitting(false);
     }
   );

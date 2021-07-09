@@ -56,20 +56,20 @@ export function useAccount<T>(
         })
       )
       .catch((err) => {
-        console.log(err)
+        console.log(err);
         // Oyster's cache, while great, explodes and doesn't watch accounts that don't exist. Shim it in
         if (key) {
           let subId: number;
           function addToCache(acc: AccountInfo<Buffer>) {
             if (key) {
-              cache.add(key, acc, parsedAccountBaseParser)
+              cache.add(key, acc, parsedAccountBaseParser);
             }
             connection.removeAccountChangeListener(subId);
           }
           subId = connection.onAccountChange(key, addToCache);
         }
 
-        setState({ loading: false })
+        setState({ loading: false });
       });
 
     const dispose = cache.emitter.onCache((e) => {

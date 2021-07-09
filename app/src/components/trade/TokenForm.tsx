@@ -26,7 +26,7 @@ export const TokenForm = ({
   onSubmit,
   submitting = false,
 }: TokenFormProps) => {
-  const { wallet } = useWallet();
+  const { wallet, awaitingApproval } = useWallet();
   const { register, handleSubmit } = useForm<FormValues>();
 
   const inputClasses =
@@ -82,7 +82,8 @@ export const TokenForm = ({
                 <Spinner size="sm" />
               </div>
             )}
-            {type === "sell" ? "Sell" : "Buy"}
+            {awaitingApproval && "Awaiting Approval"}
+            {!awaitingApproval && type === "sell" ? "Sell" : "Buy"}
           </Button>
         ) : (
           <Link to={routes.wallet.path} className="w-full">
