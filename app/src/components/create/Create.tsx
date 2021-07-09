@@ -1,5 +1,5 @@
 import React, { Fragment, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useHistory } from "react-router-dom";
 import { useConnection } from "@oyster/common/lib/contexts/connection";
 import { WumboDrawer } from "../WumboDrawer";
 import { useDrawer } from "@/contexts/drawerContext";
@@ -20,16 +20,16 @@ import { Avatar, Button, Spinner } from "@/components/common";
 import { routes } from "@/constants/routes";
 
 export const Create = () => {
+  const history = useHistory();
   const { state } = useDrawer();
   const { creator } = state;
   const { wallet } = useWallet();
   const connection = useConnection();
+  const [creationLoading, setCreationLoading] = useState<boolean>(false);
   const { info: wumboInstance } = useAccount(
     WUMBO_INSTANCE_KEY,
     WumboInstance.fromAccount
   );
-
-  const [creationLoading, setCreationLoading] = useState<boolean>(false);
 
   const createCreator = () => {
     setCreationLoading(true);
@@ -46,8 +46,9 @@ export const Create = () => {
       founderRewardsPercentage: 5.5,
       nameParent: TWITTER_ROOT_PARENT_REGISTRY_KEY,
     })
-      .then(async () => {
+      .then(async (x) => {
         setCreationLoading(false);
+        history.push(routes.trade.path);
       })
       .catch((err) => {
         console.error(err);

@@ -1,4 +1,4 @@
-import React, { Fragment, useState } from "react";
+import React, { Fragment, useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { useConnection } from "@oyster/common/lib/contexts/connection";
 import { ChevronUpIcon, ChevronDownIcon } from "@heroicons/react/solid";
@@ -9,26 +9,49 @@ import { useDrawer } from "@/contexts/drawerContext";
 import { useWallet } from "@/utils/wallet";
 import { useAccount } from "@/utils/account";
 import { useCreatorInfo } from "@/utils/creatorState";
-import { WUMBO_INSTANCE_KEY } from "@/constants/globals";
+import { buy, sell } from "@/utils/action";
+import { WUMBO_INSTANCE_KEY, WUM_BONDING } from "@/constants/globals";
 import { WumboInstance } from "@/wumbo-api/state";
 import { CoinDetails, Tabs, Tab, Badge } from "@/components/common";
 import { routes } from "@/constants/routes";
-import { TokenForm } from "./TokenForm";
+import { TokenForm, FormValues } from "./TokenForm";
+import { usePricing } from "@/utils/pricing";
+import { useAsyncCallback } from "react-async-hook";
 
 export const TradeWUM = React.memo(() => {
+  const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
+  const [detailsVisible, setDetailsVisible] = useState<boolean>(false);
   const { state } = useDrawer();
   const { creator } = state;
-  const { wallet } = useWallet();
   const connection = useConnection();
+  const { curve, inverseCurve, loading } = usePricing(WUM_BONDING);
+  const { wallet, awaitingApproval } = useWallet();
   const creatorInfoState = useCreatorInfo(creator.name!);
-  const { creatorInfo, loading } = creatorInfoState;
+  const { creatorInfo, loading: loadingCreatorState } = creatorInfoState;
   const { info: wumboInstance } = useAccount(
     WUMBO_INSTANCE_KEY,
     WumboInstance.fromAccount
   );
 
-  const [detailsVisible, setDetailsVisible] = useState<boolean>(false);
   const toggleDetails = () => setDetailsVisible(!detailsVisible);
+
+  const { execute: onHandleBuy, error: buyError } = useAsyncCallback(
+    async (values: FormValues) => {
+      setIsSubmitting(true);
+      console.log("TODO: Buy");
+      console.log(curve(20));
+      setIsSubmitting(false);
+    }
+  );
+
+  const { execute: onHandleSell, error: sellError } = useAsyncCallback(
+    async (values: FormValues) => {
+      setIsSubmitting(true);
+      console.log("TODO: Sell");
+      console.log(inverseCurve(20));
+      setIsSubmitting(false);
+    }
+  );
 
   return (
     <Fragment>
@@ -37,7 +60,7 @@ export const TradeWUM = React.memo(() => {
           <p className="text-lg font-medium text-indigo-600">Trade WUM</p>
           <Link to={routes.tradeWUM.path}>
             <Badge rounded hoverable color="neutral">
-              <SolLogo width="20" height="20" className="mr-2" /> $1,340.00
+              <SolLogo width="20" height="20" className="mr-2" /> Buy SOL
             </Badge>
           </Link>
         </div>
@@ -82,9 +105,8 @@ export const TradeWUM = React.memo(() => {
                   isWUM
                   creatorInfoState={creatorInfoState}
                   type="buy"
-                  onSubmit={(values) => {
-                    console.log(values);
-                  }}
+                  onSubmit={onHandleBuy}
+                  submitting={isSubmitting}
                 />
                 <div className="flex flex-col justify-center mt-4">
                   <span className="flex justify-center text-xxs">
@@ -110,9 +132,8 @@ export const TradeWUM = React.memo(() => {
                   isWUM
                   creatorInfoState={creatorInfoState}
                   type="sell"
-                  onSubmit={(values) => {
-                    console.log(values);
-                  }}
+                  onSubmit={onHandleSell}
+                  submitting={isSubmitting}
                 />
               </div>
             </Tab>

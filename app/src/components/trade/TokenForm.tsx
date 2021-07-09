@@ -1,13 +1,13 @@
 import React from "react";
 import { Link } from "react-router-dom";
 import { SubmitHandler, useForm } from "react-hook-form";
-import { Avatar, Button } from "@/components/common";
+import { Avatar, Button, Spinner } from "@/components/common";
 import { CreatorInfoState } from "@/utils/creatorState";
 import { useWallet } from "@/utils/wallet";
 import { routes } from "@/constants/routes";
 import Logo from "../../../public/assets/img/logo.svg";
 
-type FormValues = {
+export type FormValues = {
   fiatAmount: number;
   tokenAmount: number;
 };
@@ -17,12 +17,14 @@ interface TokenFormProps {
   isWUM?: boolean;
   creatorInfoState?: CreatorInfoState;
   onSubmit: SubmitHandler<FormValues>;
+  submitting?: boolean;
 }
 
 export const TokenForm = ({
   type,
-  onSubmit,
   isWUM = false,
+  onSubmit,
+  submitting = false,
 }: TokenFormProps) => {
   const { wallet } = useWallet();
   const { register, handleSubmit } = useForm<FormValues>();
@@ -64,15 +66,22 @@ export const TokenForm = ({
               min={0}
               step={0.01}
               placeholder="0"
-              {...register("tokenAmount")}
+              {...register("tokenAmount", {
+                pattern: /^(\d+(\.\d{0,2})?|\.?\d{1,9})$/i,
+              })}
             />
-            <span>NXX2</span>
+            <span>{isWUM ? "WUM" : "NXX2"}</span>
           </div>
         </div>
       </div>
       <div className="flex mt-4">
         {wallet && wallet.publicKey ? (
-          <Button block submit color="primary" size="lg">
+          <Button block submit color="primary" size="lg" disabled={submitting}>
+            {submitting && (
+              <div className="mr-4">
+                <Spinner size="sm" />
+              </div>
+            )}
             {type === "sell" ? "Sell" : "Buy"}
           </Button>
         ) : (

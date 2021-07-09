@@ -158,9 +158,6 @@ export async function createWumboCreator(
 
   console.log(`Set founder rewards account owner to ${founderRewardsOwner}`);
 
-  console.log(`Owner`, founderRewardsOwner);
-  console.log("nameExists", nameExists);
-
   const associatedFounderRewardsAddress = await Token.getAssociatedTokenAddress(
     params.splAssociatedTokenAccountProgramId,
     params.splTokenProgramId,

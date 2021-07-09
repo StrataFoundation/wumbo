@@ -57,7 +57,8 @@ export const Wallet = () => {
         ) : (
           <div className="flex flex-col space-y-4 px-4">
             <span className="test-sm">
-              New to Crypto & dont have an existing wallet? x1 <br />
+              New to Crypto & dont have an existing wallet?
+              <br />
               <a href="https://www.sollet.io" className="text-purple-600">
                 Get one here.
               </a>

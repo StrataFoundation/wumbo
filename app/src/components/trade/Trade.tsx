@@ -1,4 +1,4 @@
-import React, { Fragment, useState } from "react";
+import React, { Fragment, useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { useConnection } from "@oyster/common/lib/contexts/connection";
 import { ChevronUpIcon, ChevronDownIcon } from "@heroicons/react/solid";
@@ -7,7 +7,8 @@ import { useDrawer } from "@/contexts/drawerContext";
 import { useWallet } from "@/utils/wallet";
 import { useAccount } from "@/utils/account";
 import { useCreatorInfo } from "@/utils/creatorState";
-import { WUMBO_INSTANCE_KEY } from "@/constants/globals";
+import { useAssociatedAccount } from "@/utils/walletState";
+import { WUM_TOKEN, WUMBO_INSTANCE_KEY } from "@/constants/globals";
 import { WumboInstance } from "@/wumbo-api/state";
 import { Avatar, CoinDetails, Tabs, Tab, Badge } from "@/components/common";
 import { routes } from "@/constants/routes";
@@ -15,6 +16,8 @@ import { TokenForm } from "./TokenForm";
 import Logo from "../../../public/assets/img/logo.svg";
 
 export const Trade = React.memo(() => {
+  const [ownedWUM, setOwnedWUM] = useState<string | null>(null);
+  const [detailsVisible, setDetailsVisible] = useState<boolean>(false);
   const { state } = useDrawer();
   const { creator } = state;
   const { wallet } = useWallet();
@@ -26,7 +29,17 @@ export const Trade = React.memo(() => {
     WumboInstance.fromAccount
   );
 
-  const [detailsVisible, setDetailsVisible] = useState<boolean>(false);
+  const {
+    associatedAccount: WUMAccount,
+    loading: wumLoading,
+  } = useAssociatedAccount(wallet?.publicKey || undefined, WUM_TOKEN);
+
+  useEffect(() => {
+    if (WUMAccount) {
+      setOwnedWUM((WUMAccount.amount.toNumber() / Math.pow(10, 9)).toFixed(2));
+    }
+  }, [WUMAccount, setOwnedWUM]);
+
   const toggleDetails = () => setDetailsVisible(!detailsVisible);
 
   return (
@@ -37,7 +50,8 @@ export const Trade = React.memo(() => {
 
           <Link to={routes.tradeWUM.path}>
             <Badge rounded hoverable color="primary">
-              <Logo width="20" height="20" className="mr-2" /> $1,340.00
+              <Logo width="20" height="20" className="mr-2" />{" "}
+              {ownedWUM || "Buy WUM"}
             </Badge>
           </Link>
         </div>
