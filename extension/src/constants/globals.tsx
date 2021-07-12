@@ -10,13 +10,13 @@ export const TWITTER_REGISTRAR_SERVER_URL =
 // export const SOLANA_API_URL = "https://api.mainnet-beta.solana.com"
 export const WUM_REWARDS_PERCENTAGE = 1000;
 export const WUM_BONDING = new PublicKey(
-  "64Besb5YEe4dH4HU2KhuWYXnEhbeNQhi6cvagMu3TfWB"
+  "HFun9v5tbApxdgnNL3z6PmWU5usTpjkjSDR4ay6Akcvt"
 );
 export const WUM_TOKEN = new PublicKey(
-  "5SFJNy2zTeAnK2pTcoHyibCf87SwrmZ9ijiVH3DpyDcy"
+  "FJurGptusVwD74rZsJBMgy2svpzPhaBZDosMy51BhEEW"
 );
 export const WUMBO_INSTANCE_KEY: PublicKey = new PublicKey(
-  "9mwZjMt3dP1XEyiZSSC9jYp2PKCcESg2WixcxUmFZrU5"
+  "B1rbgQNu129VPvazrbbw6hxgDuHcKccS26v3wDJqmcSN"
 );
 export const WUMBO_PROGRAM_ID: PublicKey = new PublicKey(
   "AyvifSXGFuXadeve8y66cLQaPgRLfWwDBb8H7TJvTSse"

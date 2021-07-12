@@ -52,10 +52,10 @@ impl NaturalLog for PreciseNumber {
             if over_two.less_than(&ONE_PREC) {
                 // ln(1/x) = - ln(x)
                 let flipped = ONE_PREC.checked_div(&over_two)?;
-                let log = &flipped.ln(max_iterations - 1)?;
+                let log = &flipped.ln(max_iterations)?;
                 LN_2.checked_sub(log)
             } else {
-                LN_2.checked_add(&over_two.ln(max_iterations - 1)?)
+                LN_2.checked_add(&over_two.ln(max_iterations)?)
             }
         } else {
             self.ln_helper(max_iterations)

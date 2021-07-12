@@ -636,26 +636,34 @@ fn process_sell_v0(program_id: &Pubkey, accounts: &[AccountInfo], amount: u64, m
     if reclaimed_amount < min_price {
         return Err(TokenBondingError::MinPriceExceeded.into());
     }
+
+    // Burn the required lamports
+    msg!("Burning  {} target coins (including decimal)", amount);
+    let burn = spl_token::instruction::burn(
+        &token_program_id.key,
+        &sell_account.key,
+        &target_mint.key,
+        &sell_authority.key,
+        &[],
+        amount,
+    )?;
+    invoke_signed(
+        &burn,
+        &[
+            token_program_id.clone(),
+            sell_account.clone(),
+            target_mint.clone(),
+            sell_authority.clone(),
+        ],
+        &[],
+    )?;
+    msg!("Done");
+
     msg!("Paying from base storage");
     if *base_mint.key == native_mint::id() {
         msg!("Base is the native mint, issueing a native transfer");
-        let (_, acct_nonce) = storage_key(&program_id, token_bonding.key);
-        let acct_seed = &[
-            BASE_STORAGE_KEY.as_bytes(),
-            &token_bonding.key.to_bytes(),
-            &[acct_nonce],
-        ];
-        let pay_money =
-            system_instruction::transfer(base_storage.key, destination.key, reclaimed_amount);
-        invoke_signed(
-            &pay_money,
-            &[
-                base_storage.clone(),
-                destination.clone(),
-                system_account_info.clone(),
-            ],
-            &[acct_seed],
-        )?;
+        **base_storage.try_borrow_mut_lamports()? -= reclaimed_amount;
+        **destination.try_borrow_mut_lamports()? += reclaimed_amount;
     } else {
         let authority_seed = &[
             BASE_STORAGE_AUTHORITY.as_bytes(),
@@ -682,27 +690,6 @@ fn process_sell_v0(program_id: &Pubkey, accounts: &[AccountInfo], amount: u64, m
         )?;
     };
 
-    msg!("Done");
-    // Burn the required lamports
-    msg!("Burning  {} target coins (including decimal)", amount);
-    let burn = spl_token::instruction::burn(
-        &token_program_id.key,
-        &sell_account.key,
-        &target_mint.key,
-        &sell_authority.key,
-        &[],
-        amount,
-    )?;
-    invoke_signed(
-        &burn,
-        &[
-            token_program_id.clone(),
-            sell_account.clone(),
-            target_mint.clone(),
-            sell_authority.clone(),
-        ],
-        &[],
-    )?;
     Ok(())
 }
 

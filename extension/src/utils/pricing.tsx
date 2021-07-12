@@ -34,11 +34,15 @@ function logCurveRange(c: number, g: number, a: number, b: number): number {
 }
 
 export function supplyAsNum(mint: MintInfo): number {
-  return mint.supply.toNumber() / Math.pow(10, mint.decimals);
+  return amountAsNum(mint.supply, mint);
 }
 
 export function amountAsNum(amount: u64, mint: MintInfo): number {
-  return amount.toNumber() / Math.pow(10, mint.decimals);
+  const decimals = new u64(Math.pow(10, mint.decimals).toString());
+  const decimal = amount.mod(decimals).toNumber() / decimals.toNumber();
+  return amount
+  .div(decimals)
+  .toNumber() + decimal;
 }
 
 export function useOwnedAmount(
@@ -83,7 +87,6 @@ export const inverseLogCurve =
     const rewardsDecimal = founderRewardsPercentage / 10000;
     const k = baseAmount + generalLogCurve(c, g, s);
     const exp = gsl_sf_lambert_W0((g * k - c) / (c * Math.E)) + 1;
-    const orig = logCurve(curve, base, target, founderRewardsPercentage);
 
     return Math.abs(
       (Math.pow(Math.E, exp) - g * s - 1) / ((1 + rewardsDecimal) * g)
@@ -121,10 +124,10 @@ export interface PricingState {
   // How much to buy this much of the target coin in terms of base
   targetToBasePrice(targetAmount: number): number;
   // What is the target price in terms of base if there are no founder rewards collected (sell)
-  targetToBasePriceNoRewards(targetAmount: number): number;
+  sellTargetToBasePrice(targetAmount: number): number;
   // How many target coins we'll get for this base amount
   baseToTargetPrice(baseAmount: number): number;
-  baseToTargetPriceNoRewards(baseAmount: number): number;
+  sellBaseToTargetPrice(baseAmount: number): number;
   // General from some start supply to finish supply
   targetRangeToBasePrice(start: number, finish: number): number;
   // The current price of target in terms of base
@@ -136,9 +139,9 @@ export function useBondingPricing(
   const [state, setState] = useState<PricingState>({
     loading: true,
     targetToBasePrice: () => 0,
-    targetToBasePriceNoRewards: () => 0,
+    sellTargetToBasePrice: () => 0,
     baseToTargetPrice: () => 0,
-    baseToTargetPriceNoRewards: () => 0,
+    sellBaseToTargetPrice: () => 0,
     targetRangeToBasePrice: () => 0,
     current: 0,
   });
@@ -152,6 +155,7 @@ export function useBondingPricing(
   const target = useMint(bonding?.targetMint);
   useEffect(() => {
     if (curve && base && target && bonding) {
+      const targetRangeToBasePrice = startFinishLogCurve(curve, base);
       setState({
         loading: false,
         targetToBasePrice: logCurve(
@@ -160,15 +164,15 @@ export function useBondingPricing(
           target,
           bonding.founderRewardPercentage
         ),
-        targetToBasePriceNoRewards: logCurve(curve, base, target, 0),
+        sellTargetToBasePrice: (amount: number) => targetRangeToBasePrice(supplyAsNum(target) - amount, supplyAsNum(target)),
         baseToTargetPrice: inverseLogCurve(
           curve,
           base,
           target,
           bonding.founderRewardPercentage
         ),
-        baseToTargetPriceNoRewards: inverseLogCurve(curve, base, target, 0),
-        targetRangeToBasePrice: startFinishLogCurve(curve, base),
+        sellBaseToTargetPrice: (amount: number) => inverseLogCurve(curve, base, target, 0)(-amount),
+        targetRangeToBasePrice,
         current:
           curve.c *
           Math.log(
@@ -185,10 +189,10 @@ export function useBondingPricing(
 
 export const UsdWumboPriceProvider = ({ children = undefined as any }) => {
   const price = useMarketPrice(SOL_TO_USD_MARKET);
-  const { targetToBasePrice: curve } = useBondingPricing(WUM_BONDING);
+  const { current } = useBondingPricing(WUM_BONDING);
 
   return (
-    <UsdWumboPriceContext.Provider value={(price || 0) * curve(1)}>
+    <UsdWumboPriceContext.Provider value={(price || 0) * current}>
       {children}
     </UsdWumboPriceContext.Provider>
   );

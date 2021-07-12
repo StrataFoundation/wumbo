@@ -25,9 +25,9 @@ uint = "0.9"
 
 [dev-dependencies]
 proptest = "1.0.0"
-solana-program-test = "1.7.3"
+solana-program-test = "1.7.4"
 assert_matches = "1.5.0"
-solana-sdk = "1.7.0"
+solana-sdk = "1.7.4"
 log = "0.4.14"
 
 [lib]
