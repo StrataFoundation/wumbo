@@ -620,23 +620,22 @@ fn process_sell_v0(program_id: &Pubkey, accounts: &[AccountInfo], amount: u64, m
 
     let reclaimed_amount = to_lamports(
         &curve_data.price(
+            &precise_supply(base_mint_data),
             &precise_supply(target_mint_data).checked_sub(&precise_supply_amt(amount, target_mint_data))
                 .ok_or::<ProgramError>(TokenBondingError::InsufficientFunds.into())?,
-            &precise_supply(base_mint_data),
             &precise_supply_amt(amount, target_mint_data),
         ).unwrap(),
         base_mint_data,
     );
-
-    if reclaimed_amount < min_price {
-        return Err(TokenBondingError::MinPriceExceeded.into());
-    }
 
     msg!(
         "Attempting to burn {} target lamports for {} base lamports",
         amount,
         reclaimed_amount
     );
+    if reclaimed_amount < min_price {
+        return Err(TokenBondingError::MinPriceExceeded.into());
+    }
     msg!("Paying from base storage");
     if *base_mint.key == native_mint::id() {
         msg!("Base is the native mint, issueing a native transfer");

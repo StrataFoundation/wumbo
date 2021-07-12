@@ -1,199 +1,296 @@
-import React, { Fragment, useState, useEffect, ReactNode } from "react";
-import { Link } from "react-router-dom";
-import { useConnection } from "@oyster/common/lib/contexts/connection";
-import { ChevronUpIcon, ChevronDownIcon } from "@heroicons/react/solid";
-import { WumboDrawer } from "../WumboDrawer";
-import { useDrawer } from "@/contexts/drawerContext";
+import React, { Fragment, useState, ReactNode, useEffect } from "react";
+import { Link, useParams, useLocation } from "react-router-dom";
+import { useConnection, Wallet } from "@oyster/common";
 import { useWallet } from "@/utils/wallet";
 import { useAccount } from "@/utils/account";
 import { useCreatorInfo } from "@/utils/creatorState";
 import { buy, sell } from "@/utils/action";
 import { useAssociatedAccount } from "@/utils/walletState";
-import {
-  BASE_SLIPPAGE,
-  WUM_TOKEN,
-  WUMBO_INSTANCE_KEY,
-} from "@/constants/globals";
-import { WumboInstance } from "@/wumbo-api/state";
-import { Avatar, CoinDetails, Tabs, Tab, Badge } from "@/components/common";
+import { BASE_SLIPPAGE, WUM_BONDING, WUM_TOKEN } from "@/constants/globals";
+import { Tabs, Tab, Badge, Spinner, Avatar } from "@/components/common";
 import { routes } from "@/constants/routes";
 import { TokenForm, FormValues } from "./TokenForm";
 import Logo from "../../../public/assets/img/logo.svg";
-import { usePricing } from "@/utils/pricing";
+import {
+  useFiatPrice,
+  useBondingPricing,
+  useOwnedAmount,
+} from "@/utils/pricing";
 import { useAsyncCallback } from "react-async-hook";
 import { SuccessfulTransaction } from "./SuccessfulTransaction";
+import { PublicKey } from "@solana/web3.js";
+import { TokenBondingV0 } from "@/spl-token-bonding-api/state";
+import TokenPill from "./TokenPill";
+import SolLogo from "../../../public/assets/img/sol.svg";
+import { WumboDrawer } from "../WumboDrawer";
+import { useMint } from "@/utils/mintState";
 
-export const Trade = React.memo(() => {
-  const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
-  const [ownedWUM, setOwnedWUM] = useState<string | null>(null);
-  const [detailsVisible, setDetailsVisible] = useState<boolean>(false);
-  // TODO: should move this to a context vvv
-  const [transactionSuccesful, setTransactionSuccesful] = useState<{
-    showing: boolean;
-    amount: number;
-    tokenSvg?: ReactNode;
-    tokenSrc?: string;
-    tokenName: string;
-  } | null>(null);
-  const { state } = useDrawer();
-  const { creator } = state;
-  const { wallet } = useWallet();
-  const connection = useConnection();
-  const creatorInfoState = useCreatorInfo(creator.name!);
-  const { creatorInfo, loading } = creatorInfoState;
-  const { curve, inverseCurve, loading: loadingCurve } = usePricing(
-    creatorInfo?.tokenBonding.publicKey
-  );
-  const { info: wumboInstance } = useAccount(
-    WUMBO_INSTANCE_KEY,
-    WumboInstance.fromAccount
-  );
+function useQuery(): URLSearchParams {
+  return new URLSearchParams(useLocation().search);
+}
 
-  const {
-    associatedAccount: WUMAccount,
-    loading: wumLoading,
-  } = useAssociatedAccount(wallet?.publicKey || undefined, WUM_TOKEN);
+function useName(tokenBonding: TokenBondingV0 | undefined): string | undefined {
+  const query = useQuery();
+  const [name, setName] = useState<string>();
 
   useEffect(() => {
-    if (WUMAccount) {
-      setOwnedWUM((WUMAccount.amount.toNumber() / Math.pow(10, 9)).toFixed(2));
-    }
-  }, [WUMAccount, setOwnedWUM]);
-
-  const toggleDetails = () => setDetailsVisible(!detailsVisible);
-
-  const { execute: onHandleBuy, error: buyError } = useAsyncCallback(
-    async (values: FormValues) => {
-      setIsSubmitting(true);
-      try {
-        await buy(wallet)(
-          connection,
-          creatorInfo!.tokenBonding.publicKey,
-          values.tokenAmount,
-          curve(values.tokenAmount) + BASE_SLIPPAGE * curve(values.tokenAmount)
-        );
-        setTransactionSuccesful({
-          showing: true,
-          amount: values.tokenAmount,
-          tokenName: "NXX2",
-        });
-      } catch (e) {
-        console.log(e);
+    if (tokenBonding) {
+      if (tokenBonding.targetMint.toBase58() == WUM_TOKEN.toBase58()) {
+        setName("WUM");
+      } else {
+        setName(query.get("name") || undefined);
       }
-      setIsSubmitting(false);
     }
+  }, [query.get("name"), tokenBonding]);
+
+  return name;
+}
+
+function useImage(
+  tokenBonding: TokenBondingV0 | undefined
+): React.ReactElement {
+  const query = useQuery();
+  const [icon, setIcon] = useState<React.ReactElement>(<div />);
+
+  useEffect(() => {
+    if (tokenBonding) {
+      if (tokenBonding.targetMint.toBase58() == WUM_TOKEN.toBase58()) {
+        setIcon(<Logo width="45" height="45" />);
+      } else {
+        setIcon(<Avatar name="UNCLAIMED" />);
+      }
+    }
+  }, [tokenBonding]);
+
+  return icon;
+}
+
+interface TradeParams {
+  tokenBonding: TokenBondingV0;
+  name: string;
+  ticker: string;
+  icon: React.ReactElement;
+  baseTicker: string;
+  baseIcon: React.ReactElement;
+  buyBaseLink: React.ReactElement;
+}
+
+export const TradeRoute = React.memo(() => {
+  const params = useParams<{ tokenBondingKey: string }>();
+  const tokenBondingKey = new PublicKey(params.tokenBondingKey);
+  const { info: tokenBonding } = useAccount(
+    tokenBondingKey,
+    TokenBondingV0.fromAccount
   );
+  const name = useName(tokenBonding);
+  const icon = useImage(tokenBonding);
+  const ownedWUM = useOwnedAmount(WUM_TOKEN);
+  const fiatPrice = useFiatPrice(tokenBonding?.baseMint);
+  const toFiat = (a: number) => (fiatPrice || 0) * a;
 
-  // TODO: sell not executing something off with the inverse/slippage
-  const { execute: onHandleSell, error: sellError } = useAsyncCallback(
-    async (values: FormValues) => {
-      setIsSubmitting(true);
-      try {
-        await sell(wallet)(
-          connection,
-          creatorInfo!.tokenBonding.publicKey,
-          inverseCurve(values.tokenAmount),
-          values.tokenAmount - BASE_SLIPPAGE * values.tokenAmount
-        );
-        setTransactionSuccesful({
-          showing: true,
-          amount: +(inverseCurve(values.tokenAmount) / Math.pow(10, 9)).toFixed(
-            2
-          ),
-          tokenName: "WUM",
-          tokenSvg: <Logo width="45" height="45" />,
-        });
-      } catch (e) {
-        console.log(e);
-      }
-      setIsSubmitting(false);
-    }
+  if (!tokenBonding || !name || !icon) {
+    // TODO: Bry wtf is happening, and why does this error out if there's no input to focus on
+    return (
+      <div>
+        <input></input>
+      </div>
+    );
+    // return <Spinner />
+  }
+  const isTargetWUM =
+    tokenBonding.targetMint.toBase58() == WUM_TOKEN.toBase58();
+  const buyBaseLink = isTargetWUM ? (
+    <Link to={"/undefined"}>
+      <Badge rounded hoverable color="neutral">
+        <SolLogo width="20" height="20" className="mr-2" /> Buy SOL
+      </Badge>
+    </Link>
+  ) : (
+    <Link
+      to={routes.trade.path.replace(":tokenBondingKey", WUM_BONDING.toBase58())}
+    >
+      <Badge rounded hoverable color="primary">
+        <Logo width="20" height="20" className="mr-2" />$
+        {toFiat(ownedWUM || 0).toFixed(2) || "Buy WUM"}
+      </Badge>
+    </Link>
   );
 
   return (
     <Fragment>
       <WumboDrawer.Header>
         <div className="flex justify-between w-full">
-          <p className="text-lg font-medium text-indigo-600">Trade</p>
-
-          <Link to={routes.tradeWUM.path}>
-            <Badge rounded hoverable color="primary">
-              <Logo width="20" height="20" className="mr-2" />{" "}
-              {/* TODO: show in fiat terms not token */}
-              {ownedWUM || "Buy WUM"}
-            </Badge>
-          </Link>
+          <p className="text-lg font-medium text-indigo-600">Trade WUM</p>
+          {/* TODO: link to ftx pay */}
+          {buyBaseLink}
         </div>
       </WumboDrawer.Header>
       <WumboDrawer.Content>
-        <div className="flex bg-gray-100 p-4 rounded-lg space-x-4">
-          <Avatar name="NXX2" token />
-          <div className="flex flex-col flex-grow justify-center text-gray-700">
-            <div className="flex justify-between font-medium">
-              <span>@{creator.name}</span>
-              <span>${creatorInfo?.coinPriceUsd.toFixed(2) || 0.0}</span>
-            </div>
-            <div className="flex justify-between text-xs">
-              <span>NXX2</span>
-              <span
-                className="flex align-center cursor-pointer"
-                onClick={toggleDetails}
-              >
-                Details{" "}
-                {!detailsVisible ? (
-                  <ChevronDownIcon className="h-4 w-4" />
-                ) : (
-                  <ChevronUpIcon className="h-4 w-4" />
-                )}
-              </span>
-            </div>
-          </div>
+        <Trade
+          baseTicker={isTargetWUM ? "SOL" : "WUM"}
+          baseIcon={
+            isTargetWUM ? (
+              <SolLogo width="45" height="45" />
+            ) : (
+              <Logo width="45" height="45" />
+            )
+          }
+          ticker={isTargetWUM ? "WUM" : "UNCLAIMED"}
+          name={name}
+          tokenBonding={tokenBonding}
+          icon={icon}
+          buyBaseLink={buyBaseLink}
+        />
+      </WumboDrawer.Content>
+      <WumboDrawer.Nav />
+    </Fragment>
+  );
+});
+
+export const Trade = React.memo(
+  ({
+    baseTicker,
+    baseIcon,
+    name,
+    icon,
+    ticker,
+    buyBaseLink,
+    tokenBonding,
+  }: TradeParams) => {
+    // TODO: should move this to a context vvv
+    const [transactionSuccesful, setTransactionSuccesful] = useState<{
+      showing: boolean;
+      amount: number;
+      tokenSvg?: ReactNode;
+      tokenSrc?: string;
+      tokenName: string;
+    } | null>(null);
+    const { wallet } = useWallet();
+    const connection = useConnection();
+    const fiatPrice = useFiatPrice(tokenBonding.baseMint);
+    const {
+      targetToBasePrice,
+      baseToTargetPrice,
+      targetToBasePriceNoRewards,
+      baseToTargetPriceNoRewards,
+    } = useBondingPricing(tokenBonding.publicKey);
+    const toFiat = (a: number) => (fiatPrice || 0) * a;
+    const fromFiat = (a: number) => a / (fiatPrice || 0);
+
+    const ownedBase = useOwnedAmount(tokenBonding.targetMint);
+    const ownedTarget = useOwnedAmount(tokenBonding.targetMint);
+
+    const {
+      execute: onHandleBuy,
+      error: buyError,
+      loading: buyIsSubmitting,
+    } = useAsyncCallback(async (values: FormValues) => {
+      try {
+        await buy(wallet)(
+          connection,
+          tokenBonding.publicKey,
+          values.tokenAmount,
+          baseToTargetPrice(values.tokenAmount) +
+            BASE_SLIPPAGE * baseToTargetPrice(values.tokenAmount)
+        );
+        setTransactionSuccesful({
+          showing: true,
+          amount: values.tokenAmount,
+          tokenName: ticker,
+        });
+      } catch (e) {
+        console.error(e);
+      }
+    });
+
+    const {
+      execute: onHandleSell,
+      error: sellError,
+      loading: sellIsSubmitting,
+    } = useAsyncCallback(async (values: FormValues) => {
+      try {
+        await sell(wallet)(
+          connection,
+          tokenBonding.publicKey,
+          values.tokenAmount,
+          targetToBasePriceNoRewards(values.tokenAmount) -
+            BASE_SLIPPAGE * targetToBasePriceNoRewards(values.tokenAmount)
+        );
+        setTransactionSuccesful({
+          showing: true,
+          amount: targetToBasePriceNoRewards(values.tokenAmount),
+          tokenName: baseTicker,
+          tokenSvg: baseIcon,
+        });
+      } catch (e) {
+        console.log(e);
+      }
+    });
+
+    const Info = (
+      <Fragment>
+        <span className="text-xxs">
+          Amounts shown in <span className="text-indigo-600">USD</span>
+        </span>
+        <div className="text-xxs w-full text-right">
+          Own: {(ownedTarget || 0).toFixed(4)}
         </div>
-        {detailsVisible && (
-          <div className="px-2 py-2 mt-4 border-1 border-gray-300 rounded-lg">
-            <CoinDetails creatorInfo={creatorInfo} textSize="text-xxs" />
-          </div>
-        )}
+      </Fragment>
+    );
+
+    return (
+      <Fragment>
+        <TokenPill
+          tokenBonding={tokenBonding}
+          name={name}
+          icon={icon}
+          toFiat={toFiat}
+          ticker={ticker}
+        />
         <div className="flex justify-center mt-4">
           {/* TODO: show owned amount in both tabs */}
           <Tabs>
             <Tab title="Buy">
               <div className="mt-2">
-                <span className="text-xxs">
-                  Amounts shown in <span className="text-indigo-600">USD</span>
-                </span>
+                {Info}
                 <TokenForm
-                  creatorInfoState={creatorInfoState}
+                  fiatAmountFromTokenAmount={(tokenAmount: number) =>
+                    toFiat(targetToBasePrice(tokenAmount))
+                  }
+                  tokenAmountFromFiatAmount={(fiatAmount: number) =>
+                    baseToTargetPrice(fromFiat(fiatAmount))
+                  }
+                  icon={icon}
+                  ticker={ticker}
                   type="buy"
                   onSubmit={onHandleBuy}
-                  submitting={isSubmitting}
+                  submitting={buyIsSubmitting}
                 />
                 <div className="flex flex-col justify-center mt-4">
                   <span className="flex justify-center text-xxs">
                     You can buy up to{" "}
-                    {inverseCurve(ownedWUM ? +ownedWUM : 0).toFixed(4)} NXX2
+                    {baseToTargetPrice(ownedBase || 0).toFixed(4)} {ticker}{" "}
                     coins!
                   </span>
-                  <div className="flex justify-center mt-4">
-                    <Link to={routes.tradeWUM.path}>
-                      <Badge rounded hoverable color="primary">
-                        <Logo width="20" height="20" className="mr-2" /> Buy WUM
-                      </Badge>
-                    </Link>
-                  </div>
+                  <div className="flex justify-center mt-4">{buyBaseLink}</div>
                 </div>
               </div>
             </Tab>
             <Tab title="Sell">
               <div className="mt-2">
-                <span className="text-xxs">
-                  Amounts shown in <span className="text-indigo-600">USD</span>
-                </span>
+                {Info}
                 <TokenForm
-                  creatorInfoState={creatorInfoState}
+                  fiatAmountFromTokenAmount={(fiatAmount: number) =>
+                    toFiat(targetToBasePriceNoRewards(fiatAmount))
+                  }
+                  tokenAmountFromFiatAmount={(tokenAmount: number) =>
+                    baseToTargetPriceNoRewards(fromFiat(tokenAmount))
+                  }
+                  icon={icon}
+                  ticker={ticker}
                   type="sell"
                   onSubmit={onHandleSell}
-                  submitting={isSubmitting}
+                  submitting={sellIsSubmitting}
                 />
               </div>
             </Tab>
@@ -206,8 +303,7 @@ export const Trade = React.memo(() => {
           amount={transactionSuccesful?.amount}
           toggleShowing={() => setTransactionSuccesful(null)}
         />
-      </WumboDrawer.Content>
-      <WumboDrawer.Nav />
-    </Fragment>
-  );
-});
+      </Fragment>
+    );
+  }
+);

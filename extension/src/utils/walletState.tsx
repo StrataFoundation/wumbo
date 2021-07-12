@@ -5,7 +5,7 @@ import {
   SPL_ASSOCIATED_TOKEN_ACCOUNT_PROGRAM_ID,
   TOKEN_PROGRAM_ID,
 } from "../constants/globals";
-import { TokenAccountParser } from "@oyster/common/lib/contexts/accounts";
+import { TokenAccountParser } from "@oyster/common";
 import { useAccount } from "./account";
 import { AccountInfo } from "@solana/web3.js";
 
@@ -49,10 +49,8 @@ export function useAssociatedAccount(
   wallet: PublicKey | undefined | null,
   mint: PublicKey | undefined
 ): AssociatedAccountState {
-  const {
-    result: associatedTokenAddress,
-    loading: associatedTokenLoading,
-  } = useAssociatedTokenAddress(wallet, mint);
+  const { result: associatedTokenAddress, loading: associatedTokenLoading } =
+    useAssociatedTokenAddress(wallet, mint);
   const { info: associatedAccount, loading } = useAccount(
     associatedTokenAddress,
     (pubkey: PublicKey, acct: AccountInfo<Buffer>) => {

@@ -1,6 +1,6 @@
 import React from "react";
 import ReactDOM from "react-dom";
-import { ConnectionProvider } from "@oyster/common/lib/contexts/connection";
+import { ConnectionProvider } from "@oyster/common";
 import Popup from "./Popup";
 import { Alert } from "@/components/common";
 import "windi.css";

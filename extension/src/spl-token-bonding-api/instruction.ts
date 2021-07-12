@@ -85,8 +85,18 @@ export function initializeTokenBondingV0Instruction(
     data: Buffer.concat([
       Buffer.from(Int8Array.from([1])),
       new Numberu16(founderRewardsPercentage).toBuffer(),
-      mintCap ? Buffer.concat([Buffer.from(Int8Array.from([1])), new Numberu16(mintCap).toBuffer()]) : Buffer.from(Int8Array.from([0])),
-      tokenBondingAuthority ? Buffer.concat([Buffer.from(Int8Array.from([1])), tokenBondingAuthority.toBuffer()]) : Buffer.from(Int8Array.from([0]))
+      mintCap
+        ? Buffer.concat([
+            Buffer.from(Int8Array.from([1])),
+            new Numberu16(mintCap).toBuffer(),
+          ])
+        : Buffer.from(Int8Array.from([0])),
+      tokenBondingAuthority
+        ? Buffer.concat([
+            Buffer.from(Int8Array.from([1])),
+            tokenBondingAuthority.toBuffer(),
+          ])
+        : Buffer.from(Int8Array.from([0])),
     ]),
   });
 }

@@ -20,7 +20,7 @@ module.exports = defineConfig({
       },
       fontSize: {
         xxs: ".675rem",
-      },
+      }
     },
   },
 });

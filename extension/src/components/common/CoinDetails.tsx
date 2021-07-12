@@ -1,22 +1,27 @@
 import React from "react";
 import { CreatorInfo } from "@/utils/creatorState";
 import { useMint } from "@/utils/mintState";
-import { supplyAsNum, usePricing } from "@/utils/pricing";
+import { PricingState, supplyAsNum, useBondingPricing } from "@/utils/pricing";
+import { PublicKey } from "@solana/web3.js";
+import { TokenBondingV0 } from "@/spl-token-bonding-api/state";
 
 interface CoinDetailsProps {
-  creatorInfo: CreatorInfo | undefined;
+  tokenBonding: TokenBondingV0;
   textSize?: string;
+  toFiat(baseAmount: number): number;
 }
 
 export const CoinDetails = ({
-  creatorInfo,
+  tokenBonding,
+  toFiat,
   textSize = "text-xxs",
 }: CoinDetailsProps) => {
-  const mint = useMint(creatorInfo?.tokenBonding.targetMint);
+  const mint = useMint(tokenBonding.targetMint);
   const supply = mint ? supplyAsNum(mint) : 0;
-  const { general } = usePricing(creatorInfo?.tokenBonding.publicKey);
-  const coinPriceUsd = creatorInfo?.coinPriceUsd || 0;
-
+  const { targetRangeToBasePrice: general, current } = useBondingPricing(
+    tokenBonding.publicKey
+  );
+  const coinPriceUsd = toFiat(current);
   const colClasses = `flex flex-col ${textSize}`;
 
   return (

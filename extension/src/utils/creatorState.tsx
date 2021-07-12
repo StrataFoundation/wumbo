@@ -7,9 +7,9 @@ import {
 } from "../constants/globals";
 import { AccountInfo, PublicKey } from "@solana/web3.js";
 import { WumboCreator } from "../wumbo-api/state";
-import { useConnection } from "@oyster/common/lib/contexts/connection";
+import { useConnection } from "@oyster/common";
 import { useMint } from "./mintState";
-import { usePricing, useWumboUsdPrice } from "./pricing";
+import { useBondingPricing, useWumboUsdPrice } from "./pricing";
 import { MintInfo } from "@solana/spl-token";
 import { useAccount, UseAccountState } from "./account";
 import { LogCurveV0, TokenBondingV0 } from "../spl-token-bonding-api/state";
@@ -80,7 +80,7 @@ export const useCreatorInfo = (name: string): CreatorInfoState => {
   const [creatorInfo, setCreatorInfo] = useState<CreatorInfoState>({
     loading: true,
   });
-  const { current } = usePricing(creator?.tokenBonding)
+  const { current } = useBondingPricing(creator?.tokenBonding);
 
   useEffect(() => {
     if (curve && tokenBonding && mint && creator) {

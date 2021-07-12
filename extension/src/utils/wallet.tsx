@@ -1,6 +1,6 @@
-import { useConnectionConfig } from "@oyster/common/lib/contexts/connection";
+import { useConnectionConfig } from "@oyster/common";
 import React, { useContext, useEffect, useMemo, useState } from "react";
-import { useLocalStorageState } from "@oyster/common/lib/utils/utils";
+import { useLocalStorageState } from "@oyster/common";
 import { WalletAdapter } from "@solana/wallet-base";
 import { WALLET_PROVIDERS } from "../constants/walletProviders";
 import { PublicKey, Transaction } from "@solana/web3.js";
@@ -155,19 +155,22 @@ class BackgroundWalletAdapter extends EventEmitter implements WalletAdapter {
   }
 }
 
+const LOCAL_WALLETS = new Set(["Ledger", "Phantom"]);
+
 export function WalletProvider({ children = null as any }) {
   const { endpoint } = useConnectionConfig();
-  const {
-    error,
-    providerUrl,
-    publicKey,
-    setProviderUrl,
-  } = useBackgroundState();
+  const { error, providerUrl, publicKey, setProviderUrl } =
+    useBackgroundState();
   const [autoConnect, setAutoConnect] = useState(false);
   const [awaitingApproval, setAwaitingApproval] = useState<boolean>();
   const wallet = useMemo(
     function () {
       if (providerUrl && !error && endpoint) {
+        const adapter = WALLET_PROVIDERS.find((p) => p.url == providerUrl);
+        if (adapter && LOCAL_WALLETS.has(adapter.name)) {
+          // @ts-ignore
+          return new adapter.adapter(providerUrl, endpoint);
+        }
         return new BackgroundWalletAdapter(
           publicKey || null,
           providerUrl,

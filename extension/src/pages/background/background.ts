@@ -1,14 +1,14 @@
 // import {WALLET_PROVIDERS} from "./utils/wallet";
-import { WalletAdapter } from '@solana/wallet-base';
-import { WALLET_PROVIDERS } from '@/constants/walletProviders';
-import { Transaction } from '@solana/web3.js';
+import { WalletAdapter } from "@solana/wallet-base";
+import { WALLET_PROVIDERS } from "@/constants/walletProviders";
+import { Transaction } from "@solana/web3.js";
 
 let publicKey: Buffer | null = null;
 let walletAdapter: WalletAdapter | null = null;
 let providerUrl: string | null = null;
 
 function sendWallet() {
-  const msg = { data: { publicKey: publicKey, providerUrl }, type: 'WALLET' };
+  const msg = { data: { publicKey: publicKey, providerUrl }, type: "WALLET" };
   chrome.runtime.sendMessage(msg, () => {});
   chrome.tabs.query({}, function (tabs) {
     tabs.forEach(
@@ -20,7 +20,7 @@ function sendWallet() {
 chrome.runtime.onMessage.addListener((msg, _, sendResponse) => {
   // @ts-ignore
   (async () => {
-    if (msg.type == 'WALLET_CONNECT') {
+    if (msg.type == "WALLET_CONNECT") {
       const adapter = WALLET_PROVIDERS.find(
         (p) => p.url == msg.data.providerUrl
       );
@@ -41,7 +41,7 @@ chrome.runtime.onMessage.addListener((msg, _, sendResponse) => {
 
       walletAdapter.connect().catch((error: Error) => sendResponse({ error }));
 
-      walletAdapter.on('connect', () => {
+      walletAdapter.on("connect", () => {
         if (walletAdapter && walletAdapter.publicKey) {
           publicKey = walletAdapter.publicKey.toBuffer();
         }
@@ -49,20 +49,20 @@ chrome.runtime.onMessage.addListener((msg, _, sendResponse) => {
         sendResponse({ data: { publicKey: publicKey } });
       });
 
-      walletAdapter.on('disconnect', () => {
+      walletAdapter.on("disconnect", () => {
         publicKey = null;
         walletAdapter = null;
         sendWallet();
       });
     }
-    if (msg.type == 'WALLET_DISCONNECT') {
+    if (msg.type == "WALLET_DISCONNECT") {
       walletAdapter = null;
       publicKey = null;
-      chrome.runtime.sendMessage({ type: 'WALLET', data: {} });
-      sendResponse({ type: 'WALLET', data: {} });
+      chrome.runtime.sendMessage({ type: "WALLET", data: {} });
+      sendResponse({ type: "WALLET", data: {} });
     }
 
-    if (msg.type == 'SIGN_TRANSACTION') {
+    if (msg.type == "SIGN_TRANSACTION") {
       if (!walletAdapter) {
         sendResponse({ error: new Error(`No wallet connected`) });
         return;
@@ -78,7 +78,7 @@ chrome.runtime.onMessage.addListener((msg, _, sendResponse) => {
       );
     }
 
-    if (msg.type == 'SIGN_TRANSACTIONS') {
+    if (msg.type == "SIGN_TRANSACTIONS") {
       if (!walletAdapter) {
         sendResponse({ error: new Error(`No wallet connected`) });
         return;
@@ -103,9 +103,9 @@ chrome.runtime.onMessage.addListener((msg, _, sendResponse) => {
 
 // Route WALLET messages to popup
 chrome.runtime.onConnect.addListener(function (port) {
-  console.assert(port.name == 'popup');
+  console.assert(port.name == "popup");
   const listener = function (msg: any) {
-    if (msg.type == 'WALLET') {
+    if (msg.type == "WALLET") {
       port.postMessage(msg);
     }
     return true;
@@ -118,8 +118,8 @@ chrome.runtime.onConnect.addListener(function (port) {
 });
 
 chrome.runtime.onMessage.addListener(function (msg, sender, sendResponse) {
-  if (msg.type == 'LOAD_WALLET') {
-    sendResponse({ type: 'WALLET', data: { publicKey, providerUrl } });
+  if (msg.type == "LOAD_WALLET") {
+    sendResponse({ type: "WALLET", data: { publicKey, providerUrl } });
   }
   return true;
 });

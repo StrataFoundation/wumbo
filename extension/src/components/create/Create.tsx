@@ -1,6 +1,6 @@
 import React, { Fragment, useState } from "react";
 import { Link, useHistory } from "react-router-dom";
-import { useConnection } from "@oyster/common/lib/contexts/connection";
+import { useConnection } from "@oyster/common";
 import { WumboDrawer } from "../WumboDrawer";
 import { useDrawer } from "@/contexts/drawerContext";
 import {
@@ -35,7 +35,8 @@ export const Create = () => {
     setCreationLoading(true);
     createWumboCreator(connection, {
       splTokenBondingProgramId: TOKEN_BONDING_PROGRAM_ID,
-      splAssociatedTokenAccountProgramId: SPL_ASSOCIATED_TOKEN_ACCOUNT_PROGRAM_ID,
+      splAssociatedTokenAccountProgramId:
+        SPL_ASSOCIATED_TOKEN_ACCOUNT_PROGRAM_ID,
       splTokenProgramId: TOKEN_PROGRAM_ID,
       splWumboProgramId: WUMBO_PROGRAM_ID,
       splNameServicePogramId: SPL_NAME_SERVICE_PROGRAM_ID,
@@ -46,9 +47,14 @@ export const Create = () => {
       founderRewardsPercentage: 5.5,
       nameParent: TWITTER_ROOT_PARENT_REGISTRY_KEY,
     })
-      .then(async (x) => {
+      .then(async ({ tokenBondingKey }) => {
         setCreationLoading(false);
-        history.push(routes.trade.path);
+        history.push(
+          routes.trade.path.replace(
+            ":tokenBondingKey",
+            tokenBondingKey.toBase58()
+          )
+        );
       })
       .catch((err) => {
         console.error(err);

@@ -2,7 +2,6 @@ import React from "react";
 import { Link } from "react-router-dom";
 import { SubmitHandler, useForm } from "react-hook-form";
 import { Avatar, Button, Spinner } from "@/components/common";
-import { CreatorInfoState } from "@/utils/creatorState";
 import { useWallet } from "@/utils/wallet";
 import { routes } from "@/constants/routes";
 import Logo from "../../../public/assets/img/logo.svg";
@@ -14,17 +13,22 @@ export type FormValues = {
 
 interface TokenFormProps {
   type: "buy" | "sell";
-  isWUM?: boolean;
-  creatorInfoState?: CreatorInfoState;
   onSubmit: SubmitHandler<FormValues>;
   submitting?: boolean;
+  icon: React.ReactElement;
+  ticker: string;
+  fiatAmountFromTokenAmount: (amount: number) => number;
+  tokenAmountFromFiatAmount: (amount: number) => number;
 }
 
 export const TokenForm = ({
   type,
-  isWUM = false,
   onSubmit,
   submitting = false,
+  icon,
+  ticker,
+  fiatAmountFromTokenAmount,
+  tokenAmountFromFiatAmount,
 }: TokenFormProps) => {
   const { wallet, awaitingApproval } = useWallet();
   const { register, handleSubmit, setValue, reset } = useForm<FormValues>();
@@ -37,8 +41,7 @@ export const TokenForm = ({
   }: {
     target: { value: string };
   }) => {
-    // TODO on change of fiatAmount determine tokenAmount
-    setValue("tokenAmount", +value);
+    setValue("tokenAmount", +tokenAmountFromFiatAmount(+value).toFixed(2));
   };
 
   const handleOnTokenChange = ({
@@ -47,7 +50,7 @@ export const TokenForm = ({
     target: { value: string };
   }) => {
     // TODO on change of tokenAmount determine fiatAmount
-    setValue("fiatAmount", +value);
+    setValue("fiatAmount", +fiatAmountFromTokenAmount(+value).toFixed(2));
   };
 
   const handleOnSubmit = (values: FormValues) => {
@@ -57,22 +60,16 @@ export const TokenForm = ({
 
   return (
     <form onSubmit={handleSubmit(handleOnSubmit)}>
-      <div className="flex justify-between px-2 py-1 mt-4 border-1 border-gray-300 rounded-lg hover:bg-gray-100">
+      <div className="flex justify-between px-2 py-1 mt-2 border-1 border-gray-300 rounded-lg hover:bg-gray-100">
         <div className="flex items-center justify-center">
-          {isWUM ? (
-            <Logo width="30" height="30" />
-          ) : (
-            <Avatar name="NXX2" token size="xs" />
-          )}
-          <span className="flex items-center text-sm pl-2">
-            {isWUM ? "WUM" : "NXX2"}
-          </span>
+          {icon}
+          <span className="flex items-center text-sm pl-2">{ticker}</span>
         </div>
         <div className="flex flex-col items-end">
           <div className="flex text-xl">
             <input
               required
-              className={`${inputClasses} text-xl text-right leading-none`}
+              className={`${inputClasses} text-xl w-full text-right leading-none`}
               type="number"
               min={0}
               step={0.01}
@@ -85,7 +82,7 @@ export const TokenForm = ({
           <div className="flex text-xs">
             <input
               required
-              className={`${inputClasses} text-xs text-right leading-none`}
+              className={`${inputClasses} text-xs w-full text-right leading-none`}
               type="number"
               min={0}
               step={0.01}
@@ -93,7 +90,7 @@ export const TokenForm = ({
               {...register("tokenAmount")}
               onChange={handleOnTokenChange}
             />
-            <span>{isWUM ? "WUM" : "NXX2"}</span>
+            <span>{ticker}</span>
           </div>
         </div>
       </div>

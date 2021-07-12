@@ -1,4 +1,4 @@
-import React, { ReactNode } from 'react';
+import React, { ReactNode } from "react";
 
 /*
  ** Basic Alert
@@ -7,32 +7,32 @@ import React, { ReactNode } from 'react';
  */
 
 interface AlertProps {
-  type: 'warning' | 'info' | 'success' | 'error' | 'primary';
+  type: "warning" | "info" | "success" | "error" | "primary";
   icon?: boolean;
   message: string;
 }
 
 const style = {
-  default: 'rounded-md p-3',
+  default: "rounded-md p-3",
   primary: {
-    bg: 'bg-purple-50',
-    text: 'bg-purple-700',
+    bg: "bg-purple-50",
+    text: "bg-purple-700",
   },
   warning: {
-    bg: 'bg-yellow-50',
-    text: 'text-yellow-400',
+    bg: "bg-yellow-50",
+    text: "text-yellow-400",
   },
   info: {
-    bg: 'bg-blue-50',
-    text: 'text-blue-700',
+    bg: "bg-blue-50",
+    text: "text-blue-700",
   },
   success: {
-    bg: 'bg-green-50',
-    text: 'text-green-700',
+    bg: "bg-green-50",
+    text: "text-green-700",
   },
   error: {
-    bg: 'bg-red-200',
-    text: 'text-red-600',
+    bg: "bg-red-200",
+    text: "text-red-600",
   },
 };
 

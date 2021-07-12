@@ -12,14 +12,8 @@ import { usePrevious } from "@/utils/utils";
 export const Wallet = () => {
   const history = useHistory();
   const lastLocation = useLastLocation();
-  const {
-    connect,
-    disconnect,
-    wallet,
-    setProviderUrl,
-    setAutoConnect,
-    error,
-  } = useWallet();
+  const { connect, disconnect, wallet, setProviderUrl, setAutoConnect, error } =
+    useWallet();
   const prevWallet = usePrevious(wallet);
 
   useEffect(() => {

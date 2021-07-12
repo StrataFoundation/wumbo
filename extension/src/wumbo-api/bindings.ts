@@ -82,10 +82,14 @@ async function sendTransaction(
   await sendAndConfirmRawTransaction(connection, signed.serialize());
 }
 
+interface CreateCreatorResult {
+  creatorKey: PublicKey;
+  tokenBondingKey: PublicKey;
+}
 export async function createWumboCreator(
   connection: Connection,
   params: CreateWumboCreatorParams
-): Promise<void> {
+): Promise<CreateCreatorResult> {
   if (!params.payer.publicKey) {
     throw new Error("Invalid payer");
   }
@@ -252,6 +256,11 @@ export async function createWumboCreator(
   console.log(
     `Created creator with key ${creator}, founder rewards account ${associatedFounderRewardsAddress}, token bonding ${tokenBonding.publicKey} and mint ${targetMint.publicKey}`
   );
+
+  return {
+    creatorKey: creator,
+    tokenBondingKey: tokenBonding.publicKey,
+  };
 }
 
 async function findAssociatedTokenAddress(

@@ -42,8 +42,8 @@ export const SuccessfulTransaction = ({
             (tokenName && <Avatar token name={tokenName} imgSrc={tokenSrc} />)}
         <div className="flex flex-col jusfity-center text-center px-8 mt-4">
           <span>
-            You're transaction is complete. You now own {amount} of {tokenName}{" "}
-            coin! View your wallet to view further details.
+            You're transaction is complete. You now own {amount?.toFixed(4)} of{" "}
+            {tokenName} coin! View your wallet to view further details.
           </span>
           <span
             className="cursor-pointer text-indigo-600 hover:text-indigo-800 mt-4 text-sm"

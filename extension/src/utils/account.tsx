@@ -1,10 +1,5 @@
-import { useConnection } from "@oyster/common/lib/contexts/connection";
 import { AccountInfo, PublicKey } from "@solana/web3.js";
-import {
-  ParsedAccount,
-  cache,
-  ParsedAccountBase,
-} from "@oyster/common/lib/contexts/accounts";
+import { useConnection, cache, ParsedAccountBase } from "@oyster/common";
 import { useState, useEffect } from "react";
 
 export interface UseAccountState<T> {

@@ -1,6 +1,6 @@
 import { Numberu16 } from "./utils";
 import { AccountInfo, Connection, PublicKey } from "@solana/web3.js";
-import { deserializeUnchecked,deserialize, Schema } from "borsh";
+import { deserializeUnchecked, deserialize, Schema } from "borsh";
 import { Numberu64 } from "@bonfida/spl-name-service";
 import { u64 } from "@solana/spl-token";
 
@@ -10,9 +10,15 @@ function decodeu128asf64(arg: Uint8Array): number {
   arg.forEach((i: any, idx: number) => y.setUint8(idx, i));
 
   // 40 bits to represent the decimal
-  const decimalWithPotentialExtra = ((y.getUint32(0, true) + (y.getUint8(4) *  Math.pow(2, 32))) / Math.pow(10, 12))
-  const decimal = decimalWithPotentialExtra % 1
-  const afterDecimal = (decimalWithPotentialExtra - decimal) + (Number(y.getBigUint64(5)) *  Math.pow(2, 40)) + (y.getUint16(8) * Math.pow(2, 104)) + (y.getUint8(10) * Math.pow(2, 120));
+  const decimalWithPotentialExtra =
+    (y.getUint32(0, true) + y.getUint8(4) * Math.pow(2, 32)) / Math.pow(10, 12);
+  const decimal = decimalWithPotentialExtra % 1;
+  const afterDecimal =
+    decimalWithPotentialExtra -
+    decimal +
+    Number(y.getBigUint64(5)) * Math.pow(2, 40) +
+    y.getUint16(8) * Math.pow(2, 104) +
+    y.getUint8(10) * Math.pow(2, 120);
 
   return afterDecimal + decimal;
 }
@@ -32,8 +38,9 @@ export class TokenBondingV0 {
   sellFrozen: boolean;
   initialized: boolean;
 
-  static LEN = 1 + // key
-    (32 * 6) + // Public keys
+  static LEN =
+    1 + // key
+    32 * 6 + // Public keys
     2 + // Options
     2 + // Founder rewards %
     8 + // Mint cap
@@ -48,21 +55,27 @@ export class TokenBondingV0 {
           ["key", [1]],
           ["baseMint", [32]],
           ["targetMint", [32]],
-          ["authority", {
-            kind: 'option',
-            type: [32]
-          }],
+          [
+            "authority",
+            {
+              kind: "option",
+              type: [32],
+            },
+          ],
           ["baseStorage", [32]],
           ["founderRewards", [32]],
           ["founderRewardPercentage", [2]],
           ["curve", [32]],
-          ["mintCap", {
-            kind: 'option',
-            type: [8]
-          }],
-          ["buyFrozen", 'u8'],
-          ["sellFrozen", 'u8'],
-          ["initialized", 'u8'],
+          [
+            "mintCap",
+            {
+              kind: "option",
+              type: [8],
+            },
+          ],
+          ["buyFrozen", "u8"],
+          ["sellFrozen", "u8"],
+          ["initialized", "u8"],
         ],
       },
     ],
@@ -78,8 +91,8 @@ export class TokenBondingV0 {
     founderRewardPercentage: Uint8Array;
     curve: Uint8Array;
     mintCap: Uint8Array | undefined;
-    buyFrozen: boolean,
-    sellFrozen: boolean,
+    buyFrozen: boolean;
+    sellFrozen: boolean;
     initialized: boolean;
   }) {
     this.baseMint = new PublicKey(obj.baseMint);
@@ -93,7 +106,7 @@ export class TokenBondingV0 {
     this.curve = new PublicKey(obj.curve);
     this.mintCap = obj.mintCap && u64.fromBuffer(Buffer.from(obj.mintCap));
     this.buyFrozen = obj.buyFrozen;
-    this.sellFrozen = obj.sellFrozen
+    this.sellFrozen = obj.sellFrozen;
     this.initialized = obj.initialized;
   }
 
@@ -141,11 +154,11 @@ export class LogCurveV0 {
       {
         kind: "struct",
         fields: [
-          ["key", 'u8'],
+          ["key", "u8"],
           ["g", [16]],
           ["c", [16]],
           ["taylor_iterations", [2]],
-          ["initialized", 'u8'],
+          ["initialized", "u8"],
         ],
       },
     ],
@@ -164,11 +177,7 @@ export class LogCurveV0 {
   }
 
   static fromAccount(key: PublicKey, account: AccountInfo<Buffer>): LogCurveV0 {
-    const value = deserialize(
-      LogCurveV0.schema,
-      LogCurveV0,
-      account.data
-    );
+    const value = deserialize(LogCurveV0.schema, LogCurveV0, account.data);
     value.publicKey = key;
 
     return value;

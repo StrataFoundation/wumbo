@@ -17,10 +17,6 @@ type Props = {
 
 const CreatorInfo: React.FC<Props> = ({ creatorName, creatorImg }: Props) => {
   const { state, dispatch } = useDrawer();
-  const toggleDrawer = () => {
-    !state.isOpen &&
-      dispatch({ type: "toggle", data: { creatorName, creatorImg } });
-  };
 
   const creatorInfoState = useCreatorInfo(creatorName);
   const { creatorInfo, loading } = creatorInfoState;
@@ -29,6 +25,18 @@ const CreatorInfo: React.FC<Props> = ({ creatorName, creatorImg }: Props) => {
     WUMBO_INSTANCE_KEY,
     WumboInstance.fromAccount
   );
+
+  const toggleDrawer = () => {
+    !state.isOpen &&
+      dispatch({
+        type: "toggle",
+        data: {
+          creatorName,
+          creatorImg,
+          tokenBondingKey: creatorInfo?.tokenBonding.publicKey,
+        },
+      });
+  };
 
   if (!loading && !creatorInfo && wumboInstance && wallet) {
     return (
@@ -44,8 +52,14 @@ const CreatorInfo: React.FC<Props> = ({ creatorName, creatorImg }: Props) => {
     return <Spinner />;
   }
 
+  const path =
+    routes.trade.path.replace(
+      ":tokenBondingKey",
+      creatorInfo.tokenBonding.publicKey.toBase58()
+    ) + `?name=@${creatorName}`;
+
   return (
-    <Link to={routes.trade.path}>
+    <Link to={path}>
       <Button size="xs" color="secondary" onClick={toggleDrawer}>
         <span className="!text-green-800">
           ${creatorInfo?.coinPriceUsd.toFixed(2)}

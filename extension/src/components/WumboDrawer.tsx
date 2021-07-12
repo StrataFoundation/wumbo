@@ -35,7 +35,11 @@ export const WumboDrawer = (props: { children: ReactNode }) => {
             <Dialog.Overlay className="absolute inset-0 bg-gray-800 bg-opacity-75 transition-opacity" />
           </Transition.Child>
 
-          <div className="fixed inset-y-32 right-0 pl-10 max-w-full flex">
+          {/* TODO: We can customize the 280px here based on where they drag the drawer */}
+          <div
+            style={{ top: "calc(50% - 280px)" }}
+            className="fixed right-0 pl-10 max-w-full flex"
+          >
             <Transition.Child
               as={Fragment}
               enter="transform transition ease-in-out duration-300 sm:duration-500"
@@ -110,10 +114,20 @@ WumboDrawer.Nav = () => {
       {Object.keys(routes).map((route) => {
         const { path, Icon, isDrawerNav } = routes[route as keyof IRoutes];
 
+        // Fill paths with params in
+        let filledPath = path;
+        if (path.endsWith(":tokenBondingKey") && creatorInfo) {
+          filledPath =
+            path.replace(
+              ":tokenBondingKey",
+              creatorInfo.tokenBonding.publicKey.toBase58()
+            ) + `?name=${creatorInfo.name}`;
+        }
+
         if (isDrawerNav && Icon) {
           return (
             <NavLink
-              to={path}
+              to={filledPath}
               key={path}
               className="flex flex-col justify-center items-center border-transparent text-gray-500 text-xs font-medium inline-flex items-center px-2 py-2 border-b-3 text-xs font-medium hover:border-gray-300 hover:text-gray-700"
               activeClassName="!border-indigo-500 !text-indigo-500"

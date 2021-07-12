@@ -6,7 +6,7 @@ import {
   SPL_ASSOCIATED_TOKEN_ACCOUNT_PROGRAM_ID,
   TOKEN_PROGRAM_ID,
 } from "../constants/globals";
-import { TokenAccountParser } from "@oyster/common/lib/contexts/accounts";
+import { TokenAccountParser } from "@oyster/common";
 
 const getAssociatedSolcloutAccount = async (
   connection: Connection,

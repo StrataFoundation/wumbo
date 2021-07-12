@@ -61,12 +61,15 @@ export const postTwitterRegistrarRequest = async (
 };
 
 export interface ClaimArgs {
-  wallet: WalletAdapter,
-  code: string,
-  redirectUri: string,
-  twitterHandle: string
+  wallet: WalletAdapter;
+  code: string;
+  redirectUri: string;
+  twitterHandle: string;
 }
-export async function claim(connection: Connection, { wallet, code, redirectUri, twitterHandle }: ClaimArgs) {
+export async function claim(
+  connection: Connection,
+  { wallet, code, redirectUri, twitterHandle }: ClaimArgs
+) {
   const alreadyExists = await twitterHandleExists(connection, twitterHandle);
   if (alreadyExists) {
     throw new Error("Twitter handle is already registered");
