@@ -9,7 +9,7 @@ import { useAssociatedAccount } from "@/utils/walletState";
 import {
   BASE_SLIPPAGE, WUM_BONDING, WUM_TOKEN,
 } from "@/constants/globals";
-import { Tabs, Tab, Badge, Spinner, Avatar } from "@/components/common";
+import { Tabs, Tab, Badge, Spinner, Avatar } from "wumbo-common";
 import { routes } from "@/constants/routes";
 import { TokenForm, FormValues } from "./TokenForm";
 import Logo from "../../../public/assets/img/logo.svg";

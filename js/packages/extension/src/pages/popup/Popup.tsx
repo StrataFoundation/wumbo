@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { WalletProvider } from "@/utils/wallet";
-import { Button, Alert } from "@/components/common";
+import { Button, Alert } from "wumbo-common";
 import { WalletSelect } from "@/components/WalletSelect";
 import { WebAuth } from "auth0-js";
 

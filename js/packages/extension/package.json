@@ -40,7 +40,8 @@
     "react-hook-form": "^7.9.0",
     "react-router-dom": "^5.2.0",
     "react-router-last-location": "^2.0.1",
-    "url-template": "^2.0.8"
+    "url-template": "^2.0.8",
+    "wumbo-common": "^1.0.0"
   },
   "devDependencies": {
     "@svgr/webpack": "^5.5.0",

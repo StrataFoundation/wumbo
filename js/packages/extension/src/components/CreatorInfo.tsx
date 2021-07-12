@@ -5,7 +5,7 @@ import { WumboInstance } from "@/wumbo-api/state";
 import { useCreatorInfo } from "@/utils/creatorState";
 import { useWallet } from "@/utils/wallet";
 import { useAccount } from "@/utils/account";
-import { Button, Spinner } from "@/components/common";
+import { Button, Spinner } from "wumbo-common";
 
 import { useDrawer } from "@/contexts/drawerContext";
 import { routes } from "@/constants/routes";

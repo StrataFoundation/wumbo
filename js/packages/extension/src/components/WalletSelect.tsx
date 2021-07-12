@@ -3,7 +3,7 @@ import { WalletProvider } from "@solana/wallet-base";
 import { ChevronLeftIcon } from "@heroicons/react/solid";
 import { useWallet } from "@/utils/wallet";
 import { WALLET_PROVIDERS } from "@/constants/walletProviders";
-import { Button, Alert } from "@/components/common";
+import { Button, Alert } from "wumbo-common";
 
 interface WalletSelectProps {
   setShowWalletConnect: (arg0: boolean) => void;

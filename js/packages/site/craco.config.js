@@ -1,7 +1,15 @@
+const windiCSSCracoPlugin = require("windicss-craco-plugin");
+
 module.exports = {
-  style: {
-    postcss: {
-      plugins: [require("tailwindcss"), require("autoprefixer")],
+  plugins: [
+    {
+      plugin: windiCSSCracoPlugin,
+      options: {
+        scan: {
+          dirs: ["./"],
+          exclude: ["node_modules", ".git", "public/index.html"],
+        },
+      },
     },
-  },
+  ]
 };

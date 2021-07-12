@@ -4,7 +4,7 @@ import { useLastLocation } from "react-router-last-location";
 import { WalletProvider } from "@solana/wallet-base";
 import { useWallet } from "@/utils/wallet";
 import { WALLET_PROVIDERS } from "@/constants/walletProviders";
-import { Button, Alert } from "@/components/common";
+import { Button, Alert } from "wumbo-common";
 import { WumboDrawer } from "../WumboDrawer";
 import { routes } from "@/constants/routes";
 import { usePrevious } from "@/utils/utils";

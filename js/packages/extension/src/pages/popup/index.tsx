@@ -2,7 +2,7 @@ import React from "react";
 import ReactDOM from "react-dom";
 import { ConnectionProvider } from "@oyster/common";
 import Popup from "./Popup";
-import { Alert } from "@/components/common";
+import { Alert } from "wumbo-common";
 import "windi.css";
 
 try {

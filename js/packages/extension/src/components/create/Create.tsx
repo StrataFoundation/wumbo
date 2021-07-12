@@ -16,7 +16,7 @@ import { WumboInstance } from "@/wumbo-api/state";
 import { createWumboCreator } from "@/wumbo-api/bindings";
 import { useAccount } from "@/utils/account";
 import { useWallet } from "@/utils/wallet";
-import { Avatar, Button, Spinner } from "@/components/common";
+import { Avatar, Button, Spinner } from "wumbo-common";
 import { routes } from "@/constants/routes";
 
 export const Create = () => {

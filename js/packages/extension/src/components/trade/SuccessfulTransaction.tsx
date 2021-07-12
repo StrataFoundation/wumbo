@@ -1,6 +1,6 @@
 import React, { ReactNode, useEffect } from "react";
 import { Transition } from "@headlessui/react";
-import { Avatar } from "@/components/common";
+import { Avatar } from "wumbo-common";
 
 interface SuccessfulTransactionProps {
   amount: number | undefined;

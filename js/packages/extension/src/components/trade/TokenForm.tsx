@@ -1,7 +1,7 @@
 import React from "react";
 import { Link } from "react-router-dom";
 import { SubmitHandler, useForm } from "react-hook-form";
-import { Avatar, Button, Spinner } from "@/components/common";
+import { Avatar, Button, Spinner } from "wumbo-common";
 import { useWallet } from "@/utils/wallet";
 import { routes } from "@/constants/routes";
 import Logo from "../../../public/assets/img/logo.svg";
@@ -60,7 +60,7 @@ export const TokenForm = ({
 
   return (
     <form onSubmit={handleSubmit(handleOnSubmit)}>
-      <div className="flex justify-between px-2 py-1 mt-2 border-1 border-gray-300 rounded-lg hover:bg-gray-100">
+      <div className="flex justify-between px-2 py-1 mt-1 border-1 border-gray-300 rounded-lg hover:bg-gray-100">
         <div className="flex items-center justify-center">
           {icon}
           <span className="flex items-center text-sm pl-2">{ticker}</span>
@@ -77,7 +77,7 @@ export const TokenForm = ({
               {...register("fiatAmount")}
               onChange={handleOnFiatChange}
             />
-            <span>$</span>
+            <span className="mt-px">$</span>
           </div>
           <div className="flex text-xs">
             <input
@@ -90,7 +90,7 @@ export const TokenForm = ({
               {...register("tokenAmount")}
               onChange={handleOnTokenChange}
             />
-            <span>{ticker}</span>
+            <span className="mt-px">{ticker}</span>
           </div>
         </div>
       </div>
