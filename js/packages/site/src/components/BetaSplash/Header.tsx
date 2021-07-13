@@ -1,5 +1,8 @@
 import React from "react";
 import { ReactComponent as Logo } from "../../assets/images/logo.svg";
+import { Button } from "wumbo-common";
+import TwitterClaimButton from "./TwitterClaimButton";
+import twitterLogo from "../../assets/images/social/twitter-white@3x.png";
 
 const Header: React.FC = () => (
   <div
@@ -12,7 +15,9 @@ const Header: React.FC = () => (
       <Logo className="mr-4" width="40" height="40" />
       <p className="text-xl">Wum.bo</p>
     </div>
-    <p className="text-xs md:text-sm">Beta sign up coming soon</p>
+
+    <TwitterClaimButton />
+    {/* <p className="text-xs md:text-sm">Beta sign up coming soon</p> */}
   </div>
 );
 
