@@ -21,7 +21,7 @@ module.exports = defineConfig({
         "340px": "340px",
       },
       width: {
-        "340px": "340px",
+        "card": "480px",
       },
       fontSize: {
         xxs: ".675rem",

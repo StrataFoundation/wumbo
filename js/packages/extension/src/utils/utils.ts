@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Keypair, Connection, PublicKey } from "@solana/web3.js";
+import { useLocation } from "react-router-dom";
 
 export function classNames(...classes: (false | null | undefined | string)[]) {
   return classes.filter(Boolean).join(" ");
@@ -7,6 +8,16 @@ export function classNames(...classes: (false | null | undefined | string)[]) {
 
 export async function sleep(ms: number) {
   return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+export function useQuery(): URLSearchParams {
+  const search = useLocation().search;
+  const [query, setQuery] = useState<URLSearchParams>(new URLSearchParams(search))
+
+  useEffect(() => {
+    setQuery(new URLSearchParams(search))
+  }, [search])
+  return query
 }
 
 export function useLocalStorageState<T>(

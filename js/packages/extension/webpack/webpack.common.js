@@ -6,6 +6,7 @@ const srcDir = path.join(__dirname, "..", "src");
 const { ESBuildMinifyPlugin } = require("esbuild-loader");
 const TsconfigPathsPlugin = require("tsconfig-paths-webpack-plugin");
 const WindiCSS = require("windicss-webpack-plugin").default;
+const nodeExternals = require('webpack-node-externals');
 
 module.exports = {
   entry: {

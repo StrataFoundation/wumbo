@@ -1,7 +1,8 @@
 import React from "react";
-import Header from "./Header";
+import Header from "../common/Header";
 import Content from "./Content";
-import Footer from "./Footer";
+import Footer from "../common/Footer";
+import TwitterClaimButton from "./TwitterClaimButton";
 
 const BetaSplash: React.FC = () => (
   <div
@@ -13,9 +14,17 @@ const BetaSplash: React.FC = () => (
       `,
     }}
   >
-    <Header />
+    <Header>
+      <TwitterClaimButton />
+    </Header>
     <Content />
-    <Footer />
+    <div
+      style={{
+        background: "rgba(35, 35, 35, 0.28)",
+      }}
+    >
+      <Footer />      
+    </div>
   </div>
 );
 

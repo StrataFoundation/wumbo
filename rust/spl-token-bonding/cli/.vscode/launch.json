@@ -1,0 +1,81 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Debug create wum curve",
+            "cargo": {
+                "args": [
+                    "build",
+                    "--bin=spl-token-bonding",
+                    "--package=spl-token-bonding-cli"
+                ],
+                "filter": {
+                    "name": "spl-token-bonding",
+                    "kind": "bin"
+                }
+            },
+            "args": ["create-log-curve", "1000000000", "1000000000000", "15", "--base-relative", "false"],
+            "cwd": "${workspaceFolder}"
+        },
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Debug create creator base curve",
+            "cargo": {
+                "args": [
+                    "build",
+                    "--bin=spl-token-bonding",
+                    "--package=spl-token-bonding-cli"
+                ],
+                "filter": {
+                    "name": "spl-token-bonding",
+                    "kind": "bin"
+                }
+            },
+            "args": ["create-log-curve", "10000000000", "1000000000000", "15", "--base-relative", "false"],
+            "cwd": "${workspaceFolder}"
+        },
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Debug create bonding",
+            "cargo": {
+                "args": [
+                    "build",
+                    "--bin=spl-token-bonding",
+                    "--package=spl-token-bonding-cli"
+                ],
+                "filter": {
+                    "name": "spl-token-bonding",
+                    "kind": "bin"
+                }
+            },
+            "args": ["create-bonding", "6vdKLY5dGYrkoN8MaEejFsjgzDwHqiQ64Z16pvJkvEQE", "So11111111111111111111111111111111111111112"],
+            "cwd": "${workspaceFolder}"
+        },
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Debug unit tests in executable 'spl-token-bonding'",
+            "cargo": {
+                "args": [
+                    "test",
+                    "--no-run",
+                    "--bin=spl-token-bonding",
+                    "--package=spl-token-bonding-cli"
+                ],
+                "filter": {
+                    "name": "spl-token-bonding",
+                    "kind": "bin"
+                }
+            },
+            "args": [],
+            "cwd": "${workspaceFolder}"
+        }
+    ]
+}

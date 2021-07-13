@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import { WUMBO_INSTANCE_KEY } from "@/constants/globals";
 import { WumboInstance } from "@/wumbo-api/state";
 import { useCreatorInfo } from "@/utils/creatorState";
-import { useWallet } from "@/utils/wallet";
+import { useWallet } from "wumbo-common";
 import { useAccount } from "@/utils/account";
 import { Button, Spinner } from "wumbo-common";
 

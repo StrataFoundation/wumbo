@@ -1,8 +1,8 @@
 import React from "react";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import { SubmitHandler, useForm } from "react-hook-form";
 import { Avatar, Button, Spinner } from "wumbo-common";
-import { useWallet } from "@/utils/wallet";
+import { useWallet } from "wumbo-common";
 import { routes } from "@/constants/routes";
 import Logo from "../../../public/assets/img/logo.svg";
 
@@ -30,6 +30,7 @@ export const TokenForm = ({
   fiatAmountFromTokenAmount,
   tokenAmountFromFiatAmount,
 }: TokenFormProps) => {
+  const location = useLocation();
   const { wallet, awaitingApproval } = useWallet();
   const { register, handleSubmit, setValue, reset } = useForm<FormValues>();
 
@@ -106,7 +107,7 @@ export const TokenForm = ({
             {!awaitingApproval && (type === "sell" ? "Sell" : "Buy")}
           </Button>
         ) : (
-          <Link to={routes.wallet.path} className="w-full">
+          <Link to={routes.wallet.path + `?redirect=${location.pathname}`} className="w-full">
             <Button block color="primary" size="lg">
               Connect Wallet
             </Button>

@@ -1,11 +1,10 @@
 import React, { Fragment, useState, ReactNode, useEffect } from "react";
 import { Link, useParams, useLocation } from "react-router-dom";
 import { useConnection, Wallet } from "@oyster/common";
-import { useWallet } from "@/utils/wallet";
 import { useAccount } from "@/utils/account";
 import { useCreatorInfo } from "@/utils/creatorState";
 import { buy, sell } from "@/utils/action";
-import { useAssociatedAccount } from "@/utils/walletState";
+import { useWallet, useAssociatedAccount } from "wumbo-common";
 import {
   BASE_SLIPPAGE, WUM_BONDING, WUM_TOKEN,
 } from "@/constants/globals";
@@ -22,10 +21,7 @@ import TokenPill from "./TokenPill";
 import SolLogo from "../../../public/assets/img/sol.svg";
 import { WumboDrawer } from "../WumboDrawer";
 import { useMint } from "@/utils/mintState";
-
-function useQuery(): URLSearchParams {
-  return new URLSearchParams(useLocation().search);
-}
+import { useQuery } from "@/utils/utils";
 
 function useName(tokenBonding: TokenBondingV0 | undefined): string | undefined {
   const query = useQuery();
@@ -260,3 +256,4 @@ export const Trade = React.memo(({ baseTicker, baseIcon, name, icon, ticker, buy
     </Fragment>
   );
 });
+

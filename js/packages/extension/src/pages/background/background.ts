@@ -1,6 +1,6 @@
 // import {WALLET_PROVIDERS} from "./utils/wallet";
 import { WalletAdapter } from "@solana/wallet-base";
-import { WALLET_PROVIDERS } from "@/constants/walletProviders";
+import { WALLET_PROVIDERS } from "wumbo-common";
 import { Transaction } from "@solana/web3.js";
 
 let publicKey: Buffer | null = null;

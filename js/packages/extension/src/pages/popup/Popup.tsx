@@ -1,7 +1,5 @@
 import React, { useState } from "react";
-import { WalletProvider } from "@/utils/wallet";
 import { Button, Alert } from "wumbo-common";
-import { WalletSelect } from "@/components/WalletSelect";
 import { WebAuth } from "auth0-js";
 
 const auth0 = new WebAuth({
@@ -36,11 +34,6 @@ const Popup: React.FC = () => {
             Connect Wallet
           </Button>
         </div>
-      )}
-      {showWalletConnect && (
-        <WalletProvider>
-          <WalletSelect setShowWalletConnect={setShowWalletConnect} />
-        </WalletProvider>
       )}
     </div>
   );

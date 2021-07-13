@@ -2,27 +2,10 @@ import { useConnectionConfig } from "@oyster/common";
 import React, { useContext, useEffect, useMemo, useState } from "react";
 import { useLocalStorageState } from "@oyster/common";
 import { WalletAdapter } from "@solana/wallet-base";
-import { WALLET_PROVIDERS } from "../constants/walletProviders";
+import { WalletContext, WALLET_PROVIDERS } from "wumbo-common"
 import { PublicKey, Transaction } from "@solana/web3.js";
 import EventEmitter from "eventemitter3";
 
-const WalletContext = React.createContext<{
-  wallet: WalletAdapter | undefined;
-  awaitingApproval: boolean;
-  error?: string;
-  connected: boolean;
-  setProviderUrl: (url: string) => void;
-  setAutoConnect: (val: boolean) => void;
-  provider: typeof WALLET_PROVIDERS[number] | undefined;
-}>({
-  wallet: undefined,
-  error: undefined,
-  connected: false,
-  awaitingApproval: false,
-  setProviderUrl() {},
-  setAutoConnect() {},
-  provider: undefined,
-});
 
 function sendMesssageAsync(message: any): Promise<any> {
   return new Promise<any>((resolve, reject) => {
@@ -205,30 +188,3 @@ export function WalletProvider({ children = null as any }) {
     </WalletContext.Provider>
   );
 }
-
-export const useWallet = () => {
-  const {
-    error,
-    setAutoConnect,
-    wallet,
-    connected,
-    provider,
-    setProviderUrl,
-    awaitingApproval,
-  } = useContext(WalletContext);
-  return {
-    error,
-    wallet,
-    connected,
-    provider,
-    setProviderUrl,
-    setAutoConnect,
-    awaitingApproval,
-    connect() {
-      wallet?.connect();
-    },
-    disconnect() {
-      wallet?.disconnect();
-    },
-  };
-};

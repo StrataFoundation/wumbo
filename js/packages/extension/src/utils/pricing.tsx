@@ -17,7 +17,7 @@ import { gsl_sf_lambert_W0 } from "./lambertw";
 import { useAccount } from "./account";
 import { useMint } from "./mintState";
 import { useAssociatedAccount } from "./walletState";
-import { useWallet } from "./wallet";
+import { useWallet } from "wumbo-common";
 
 // TODO: Use actual connection. But this can't happen in dev
 let connection = new Connection("https://api.mainnet-beta.solana.com");

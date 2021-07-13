@@ -1,0 +1,7 @@
+/* Oyster common sets some stuff on p, undo it */
+p {
+  color: inherit;
+  font-family: inherit;
+  font-style: inherit;
+  font-size: inherit;
+}

@@ -49,6 +49,7 @@ export const WALLET_PROVIDERS: WalletProvider[] = [
     name: "Torus",
     url: "https://tor.us",
     icon: `${ASSETS_URL}torus.svg`,
+    // @ts-ignore
     adapter: TorusWalletAdapter,
   },
 
