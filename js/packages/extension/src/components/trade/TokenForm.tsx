@@ -107,7 +107,7 @@ export const TokenForm = ({
             {!awaitingApproval && (type === "sell" ? "Sell" : "Buy")}
           </Button>
         ) : (
-          <Link to={routes.wallet.path + `?redirect=${location.pathname}`} className="w-full">
+          <Link to={routes.wallet.path + `?redirect=${location.pathname}${location.search}`} className="w-full">
             <Button block color="primary" size="lg">
               Connect Wallet
             </Button>

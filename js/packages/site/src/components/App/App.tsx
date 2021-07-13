@@ -9,9 +9,8 @@ import { ContextProviders } from "./ContextProviders";
 const App: React.FC = () => (
   <ContextProviders>
     <Switch>
-      {/* <Route path={Routes.betaSplash.path} component={BetaSplash} /> */}
-      <Claim />
-      {/* <Route path={Routes.claim.path} component={Claim} /> */}
+      <Route path={Routes.betaSplash.path} exact component={BetaSplash} />
+      <Route path={Routes.claim.path} component={Claim} />
     </Switch>
   </ContextProviders>
 );

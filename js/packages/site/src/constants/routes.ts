@@ -8,8 +8,8 @@ interface IRoutes {
 }
 
 const routes: IRoutes = {
-  betaSplash: { path: "/" },
-  claim: { path: "/claim" }
+  claim: { path: "/claim" },
+  betaSplash: { path: "/" }
 };
 
 export default routes;
