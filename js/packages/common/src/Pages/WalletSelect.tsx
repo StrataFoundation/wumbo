@@ -4,23 +4,20 @@ import { useWallet } from "../utils/wallet";
 import { WALLET_PROVIDERS } from "../constants/walletProviders";
 import { Button, Alert } from "../";
 
-//@ts-ignore
-window.react2 = React;
-
 export const WalletSelect = React.memo(() => {
-  const { connect, disconnect, wallet, setProviderUrl, setAutoConnect, error } =
+  const { connected, disconnect, wallet, setProviderUrl, setAutoConnect, error } =
     useWallet();
-
+    console.log(wallet?.publicKey);
   return (
     <Fragment>
-      {wallet && wallet.publicKey ? (
+      {connected ? (
         <div className="flex flex-col space-y-4 px-4">
           <span className="test-sm">Wallet Connected!</span>
           <Button
             block
             size="lg"
             color="primary"
-            onClick={() => console.log("TODO: disconnect")}
+            onClick={disconnect}
           >
             Disconnect
           </Button>

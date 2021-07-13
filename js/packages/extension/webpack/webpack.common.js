@@ -6,7 +6,6 @@ const srcDir = path.join(__dirname, "..", "src");
 const { ESBuildMinifyPlugin } = require("esbuild-loader");
 const TsconfigPathsPlugin = require("tsconfig-paths-webpack-plugin");
 const WindiCSS = require("windicss-webpack-plugin").default;
-const nodeExternals = require('webpack-node-externals');
 
 module.exports = {
   entry: {
@@ -58,9 +57,9 @@ module.exports = {
     plugins: [new TsconfigPathsPlugin()],
     extensions: [".ts", ".tsx", ".js"],
     alias: {
-      react: path.resolve("./node_modules/react"),
+      react: path.resolve("../../node_modules/react"),
       "@solana/wallet-ledger": path.resolve(
-        "./node_modules/@solana/wallet-ledger/dist/lib/index.js"
+        "../../node_modules/@solana/wallet-ledger/dist/lib/index.js"
       ),
     },
   },

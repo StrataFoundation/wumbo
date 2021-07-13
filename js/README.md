@@ -1,6 +1,6 @@
 ## Installing
 
 ```bash
-lerna bootstrap
-npx babel-loader-lerna-cra
+cp /path/to/metaplex/common packages/oyster-common
+npm-link-shared ./node_modules/@oyster/common/node_modules . react
 ```

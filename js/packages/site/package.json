@@ -5,6 +5,7 @@
 	"homepage": "https://wum.bo/",
 	"dependencies": {
 		"@craco/craco": "6.1.2",
+		"@oyster/common": "^0.0.1",
 		"@solana/spl-token-registry": "^0.2.176",
 		"@tailwindcss/forms": "0.3.3",
 		"@testing-library/jest-dom": "^5.11.4",
