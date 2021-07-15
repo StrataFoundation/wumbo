@@ -1,17 +1,13 @@
 import React, { Fragment, useEffect } from "react";
 import { useHistory } from "react-router-dom";
-import { WalletProvider } from "@solana/wallet-base";
 import { useWallet, WalletSelect } from "wumbo-common";
-import { Button, Alert } from "wumbo-common";
 import { WumboDrawer } from "../WumboDrawer";
-import { routes } from "@/constants/routes";
-import { usePrevious, useQuery } from "@/utils/utils";
+import { usePrevious, useQuery } from "wumbo-common";
 
 export const Wallet = () => {
   const history = useHistory();
   const query = useQuery();
-  const { connect, disconnect, wallet, setProviderUrl, setAutoConnect, error } =
-    useWallet();
+  const { wallet } = useWallet();
   const prevWallet = usePrevious(wallet);
 
   useEffect(() => {
@@ -23,6 +19,7 @@ export const Wallet = () => {
     if (wallet && wallet.publicKey && prevWallet && !prevWallet.publicKey) {
       const redirect = query.get("redirect");
       if (redirect) {
+        console.log(`Redirecting to ${redirect}`)
         history.push(redirect);
       }
     }

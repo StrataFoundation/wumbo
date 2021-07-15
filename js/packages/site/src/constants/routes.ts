@@ -5,10 +5,12 @@ type Route = {
 interface IRoutes {
   betaSplash: Route;
   claim: Route;
+  wallet: Route;
 }
 
 const routes: IRoutes = {
   claim: { path: "/claim" },
+  wallet: { path: "/wallet" },
   betaSplash: { path: "/" }
 };
 

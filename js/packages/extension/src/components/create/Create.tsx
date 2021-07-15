@@ -1,5 +1,5 @@
 import React, { Fragment, useState } from "react";
-import { Link, useHistory } from "react-router-dom";
+import { Link, useHistory, useLocation } from "react-router-dom";
 import { useConnection } from "@oyster/common";
 import { WumboDrawer } from "../WumboDrawer";
 import { useDrawer } from "@/contexts/drawerContext";
@@ -18,11 +18,12 @@ import { useAccount } from "@/utils/account";
 import { useWallet } from "wumbo-common";
 import { Avatar, Button, Spinner } from "wumbo-common";
 import { routes } from "@/constants/routes";
+import { useQuery } from "@/utils/utils";
 
 export const Create = () => {
   const history = useHistory();
-  const { state } = useDrawer();
-  const { creator } = state;
+  const location = useLocation();
+  const query = useQuery();
   const { wallet } = useWallet();
   const connection = useConnection();
   const [creationLoading, setCreationLoading] = useState<boolean>(false);
@@ -30,6 +31,7 @@ export const Create = () => {
     WUMBO_INSTANCE_KEY,
     WumboInstance.fromAccount
   );
+  const currentPath = `${location.pathname}${location.search}`;
 
   const createCreator = () => {
     setCreationLoading(true);
@@ -43,7 +45,7 @@ export const Create = () => {
       wumboInstance: WUMBO_INSTANCE_KEY,
       payer: wallet!,
       baseMint: wumboInstance!.wumboMint,
-      name: creator.name!,
+      name: query.get("name")!,
       founderRewardsPercentage: 5.5,
       nameParent: TWITTER_ROOT_PARENT_REGISTRY_KEY,
     })
@@ -53,7 +55,7 @@ export const Create = () => {
           routes.trade.path.replace(
             ":tokenBondingKey",
             tokenBondingKey.toBase58()
-          )
+          ) + `?name=${query.get("name")!}`
         );
       })
       .catch((err) => {
@@ -67,10 +69,10 @@ export const Create = () => {
       <WumboDrawer.Header title="Create Coin" />
       <WumboDrawer.Content>
         <div className="flex bg-gray-100 p-4 rounded-lg space-x-4">
-          <Avatar name={creator.name!} imgSrc={creator.img!} token />
+          <Avatar name={query.get("name")!} imgSrc={query.get("img")!} token />
           <div className="flex flex-col flex-grow justify-center text-gray-700">
             <div className="flex justify-between font-medium">
-              <span>@{creator.name}</span>
+              <span>{query.get("name")!}</span>
               <span>$0.00</span>
             </div>
             <div className="flex justify-between text-xs">
@@ -105,7 +107,7 @@ export const Create = () => {
               Create Coin
             </Button>
           ) : (
-            <Link to={routes.wallet.path + `?redirect=${location.pathname}${location.search}`} className="w-full">
+            <Link to={routes.wallet.path + `?redirect=${currentPath}`} className="w-full">
               <Button block color="primary" size="lg">
                 Connect Wallet
               </Button>

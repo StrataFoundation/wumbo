@@ -2,7 +2,7 @@ import React from "react";
 import Header from "./Header";
 import Footer from "./Footer";
 
-export default React.memo(({ children }: { children?: React.ReactElement }) => {
+export default React.memo(({ children = null as any }) => {
     return <div 
       className="flex flex-col min-h-screen font-sans font-medium bg-white"
     >

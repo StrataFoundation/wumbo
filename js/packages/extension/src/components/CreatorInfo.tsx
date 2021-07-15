@@ -40,7 +40,7 @@ const CreatorInfo: React.FC<Props> = ({ creatorName, creatorImg }: Props) => {
 
   if (!loading && !creatorInfo && wumboInstance && wallet) {
     return (
-      <Link to={routes.create.path}>
+      <Link to={routes.create.path + `?name=${creatorName}&src=${creatorImg}`}>
         <Button size="xs" color="primary" onClick={toggleDrawer}>
           Create Coin
         </Button>
@@ -56,7 +56,7 @@ const CreatorInfo: React.FC<Props> = ({ creatorName, creatorImg }: Props) => {
     routes.trade.path.replace(
       ":tokenBondingKey",
       creatorInfo.tokenBonding.publicKey.toBase58()
-    ) + `?name=@${creatorName}`;
+    ) + `?name=${creatorName}`;
 
   return (
     <Link to={path}>

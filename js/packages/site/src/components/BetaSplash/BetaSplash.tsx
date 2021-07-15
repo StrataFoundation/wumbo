@@ -19,7 +19,7 @@ const BetaSplash: React.FC = () => {
       }}
     >
       <Header>
-        <TwitterButton onClick={() => history.push("/claim")} />
+        <TwitterButton onClick={() => history.push("/claim")}>Beta Sign Up</TwitterButton>
       </Header>
       <Content />
       <div
