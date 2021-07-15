@@ -12,13 +12,12 @@ import {
   SPL_NAME_SERVICE_PROGRAM_ID,
   SPL_ASSOCIATED_TOKEN_ACCOUNT_PROGRAM_ID,
 } from "@/constants/globals";
-import { WumboInstance } from "@/wumbo-api/state";
-import { createWumboCreator } from "@/wumbo-api/bindings";
+import { createWumboCreator, WumboInstance } from "spl-wumbo";
 import { useAccount } from "@/utils/account";
 import { useWallet } from "wumbo-common";
 import { Avatar, Button, Spinner } from "wumbo-common";
 import { routes } from "@/constants/routes";
-import { useQuery } from "@/utils/utils";
+import { useQuery } from "wumbo-common";
 
 export const Create = () => {
   const history = useHistory();

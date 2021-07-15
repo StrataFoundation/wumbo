@@ -3,7 +3,7 @@ import { CreatorInfo } from "@/utils/creatorState";
 import { useMint } from "@/utils/mintState";
 import { PricingState, supplyAsNum, useBondingPricing } from "@/utils/pricing";
 import { PublicKey } from "@solana/web3.js";
-import { TokenBondingV0 } from "@/spl-token-bonding-api/state";
+import { TokenBondingV0 } from "spl-token-bonding";
 
 interface CoinDetailsProps {
   tokenBonding: TokenBondingV0;

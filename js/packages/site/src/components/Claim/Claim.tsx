@@ -2,108 +2,106 @@ import React, { useEffect, useState } from "react";
 import AppContainer from "../common/AppContainer";
 import { Redirect } from "react-router";
 import routes from "../../constants/routes";
-import { claimTwitterTransaction, useQuery, useWallet } from "wumbo-common";
+import { Alert, Button, claimTwitterTransaction, postTwitterRegistrarRequest, Spinner, useQuery, useWallet } from "wumbo-common";
 import { useLocation, useHistory } from "react-router-dom";
 import TwitterButton from "../BetaSplash/TwitterButton";
-import { auth0, auth0Options } from "wumbo-common";
-import Claiming from "./Claiming";
 import { Transaction, Connection } from "@solana/web3.js";
 import { useAsyncCallback } from "react-async-hook";
-import { useConnection, useLocalStorageState } from "@oyster/common";
+import { useConnection, useConnectionConfig, useLocalStorageState } from "@oyster/common";
 import { WalletAdapter } from "@solana/wallet-base";
 
-function makeId(length: number): string {
-    var result = '';
-    var characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-    var charactersLength = characters.length;
-    for (var i = 0; i < length; i++) {
-        result += characters.charAt(Math.floor(Math.random() *
-            charactersLength));
-    }
-    return result;
+interface ClaimTransactionState {
+  awaitingApproval: boolean;
+  claiming: boolean;
+  error: Error | undefined;
+  claim: (twitterHandle: string) => Promise<void>;
 }
 
-interface ClaimState {
-    loading: boolean;
-    error: Error | undefined;
-    execute: (twitterHandle: string) => void
-}
+function useClaim(): ClaimTransactionState {
+  const connection = useConnection();
+  const { wallet } = useWallet();
+  const [claiming, setClaiming] = useState<boolean>(false);
+  const query = useQuery();
+  const code = query.get("code");
+  const redirectUri = `${window.location.origin.replace(/\/$/, "")}${routes.claim.path}`
 
-function useClaim(): ClaimState {
-    const connection = useConnection();
-    const { wallet } = useWallet();
-    const setTransaction = useLocalStorageState("claim-txn")[1];
-    const setAuth0State = useLocalStorageState("auth0-state")[1];
-    const setRedirectUri = useLocalStorageState("redirect-uri")[1];
-    const setTwitterHandle = useLocalStorageState("twitter-handle")[1];
-    
-    const history = useHistory();
-    const location = useLocation();
+  async function exec(twitterHandle: string) {
+    if (wallet) {
+      try {
+        const transaction = await claimTwitterTransaction(connection, {
+          wallet,
+          twitterHandle
+        });
+        setClaiming(true);
+        await postTwitterRegistrarRequest(transaction, transaction.feePayer!, code!, redirectUri!, twitterHandle);
+      } finally {
+        setClaiming(false);
+      }
 
-    async function exec(twitterHandle: string) {
-        if (wallet) {
-            const state = makeId(6);
-            setAuth0State(state);
-            setTwitterHandle(twitterHandle)
-            setRedirectUri(window.location.href);
-            const transaction = await claimTwitterTransaction(connection, {
-                wallet,
-                twitterHandle
-            });
-            setTransaction(transaction.serialize({
-                requireAllSignatures: false,
-                verifySignatures: false,
-            }));
-
-            const auth0Url = auth0.client.buildAuthorizeUrl({
-                ...auth0Options,
-                scope: 'openid profile',
-                redirectUri: window.location.href,
-                responseType: 'code',
-                state,
-            })
-            window.location.href = auth0Url
-        }
     }
-    const { execute, loading, error } = useAsyncCallback(exec);
+  }
+  const { execute, loading, error } = useAsyncCallback(exec);
 
-    return {
-        loading,
-        error,
-        execute
-    }
+  return {
+    awaitingApproval: loading && !claiming,
+    claiming,
+    error,
+    claim: execute
+  }
 }
 
 export default React.memo(() => {
-    const { connected } = useWallet();
-    const location = useLocation();
-    const query = useQuery();
-    const [twitterHandle, setTwitterHandle] = useState<string>("");
-    const redirectUri = routes.wallet.path + `?redirect=${location.pathname}${location.search}`;
-    const { execute, error, loading } = useClaim();
+  const connectionConfig = useConnectionConfig();
+  connectionConfig.setEndpoint("https://wumbo.devnet.rpcpool.com/");
+  
+  const { wallet, connected } = useWallet();
+  const history = useHistory();
+  const location = useLocation();
+  const [twitterHandle, setTwitterHandle] = useState<string>("");
+  const redirectUri = routes.wallet.path + `?redirect=${location.pathname}${location.search}`;
+  const { claim, error, awaitingApproval, claiming } = useClaim();
 
-    if (error) {
-        console.error(error)
-    }
+  if (error) {
+    console.error(error)
+  }
 
-    if (!connected) {
-        return <Redirect to={redirectUri} />
-    }
+  if (!connected) {
+    return <Redirect to={redirectUri} />
+  }
 
-    const code = query.get("code");
-    if (code) {
-        return <AppContainer>
-            <Claiming code={code} />
-        </AppContainer>
-    }
+  return <AppContainer>
+    <div className="flex flex-col">
+      <span className="text-md">Twitter Handle</span>
+      <input
+        value={twitterHandle} onChange={(e) => setTwitterHandle(e.target.value)}
+        placeholder="@TeamWumbo"
+        className="p-2 border-1 mb-2 border-grey-300 rounded-lg hover:bg-grey-300"
+      />
 
-    return <AppContainer>
-        <input 
-            value={twitterHandle} onChange={(e) => setTwitterHandle(e.target.value)}
-            placeholder="Twitter Handle"
-            className="border-1 border-grey-300 rounded-lg hover:bg-grey-300"
-        />
+      {error &&
+        <Alert type="error" message={error.message} />
+      }
 
-        <TwitterButton loading={loading} onClick={() => execute(twitterHandle)}>Sign in to Claim</TwitterButton>
-    </AppContainer>
+      <Button
+        block
+        className="mt-2"
+        color="primary"
+        onClick={() => {
+          claim(twitterHandle).then(createCoin).then((tokenBonding) => {
+            history.push(routes.profile.path.replace(":key", wallet!.publicKey!.toBase58()))
+          })
+        }
+        disabled={claiming || awaitingApproval}
+      >
+        {(claiming || awaitingApproval) && (
+          <div className="mr-4">
+            <Spinner size="sm" />
+          </div>
+        )}
+        {awaitingApproval && "Awaiting Approval"}
+        {claiming && "Claiming"}
+        {!(awaitingApproval || claiming) && "Claim"}
+      </Button>
+    </div>
+  </AppContainer>
 })

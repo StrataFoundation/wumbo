@@ -1,6 +1,6 @@
 import { Connection, PublicKey } from "@solana/web3.js";
 import { AccountInfo as TokenAccountInfo, Token } from "@solana/spl-token";
-import { WumboInstance } from "../wumbo-api/state";
+import { WumboInstance } from "spl-wumbo";
 import {
   WUMBO_INSTANCE_KEY,
   SPL_ASSOCIATED_TOKEN_ACCOUNT_PROGRAM_ID,

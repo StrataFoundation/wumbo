@@ -1,9 +1,8 @@
 import React from "react";
-import { WumboCreator } from "../wumbo-api/state";
 import {
   buyBondingWithWallet,
   sellBondingWithWallet,
-} from "../wumbo-api/bindings";
+} from "spl-token-bonding";
 import {
   SPL_ASSOCIATED_TOKEN_ACCOUNT_PROGRAM_ID,
   TOKEN_BONDING_PROGRAM_ID,

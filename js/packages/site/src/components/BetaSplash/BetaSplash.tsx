@@ -4,9 +4,37 @@ import Content from "./Content";
 import Footer from "../common/Footer";
 import TwitterButton from "./TwitterButton";
 import { useHistory } from "react-router-dom";
+import { useLocalStorageState } from "@oyster/common";
+import { auth0, auth0Options } from "wumbo-common";
+import routes from "../../constants/routes";
+
+function makeId(length: number): string {
+  var result = '';
+  var characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+  var charactersLength = characters.length;
+  for (var i = 0; i < length; i++) {
+      result += characters.charAt(Math.floor(Math.random() *
+          charactersLength));
+  }
+  return result;
+}
 
 const BetaSplash: React.FC = () => {
-  const history = useHistory();
+  const setAuth0State = useLocalStorageState("auth0-state")[1];
+  const state = makeId(6);
+
+  function claim() {
+    const redirectUri = `${window.location.origin.replace(/\/$/, "")}${routes.claim.path}`
+    const auth0Url = auth0.client.buildAuthorizeUrl({
+      ...auth0Options,
+      scope: 'openid profile',
+      redirectUri,
+      responseType: 'code',
+      state,
+    })
+    setAuth0State(state)
+    window.location.href = auth0Url
+  }
 
   return (
     <div
@@ -19,7 +47,7 @@ const BetaSplash: React.FC = () => {
       }}
     >
       <Header>
-        <TwitterButton onClick={() => history.push("/claim")}>Beta Sign Up</TwitterButton>
+        <TwitterButton onClick={claim}>Beta Sign Up</TwitterButton>
       </Header>
       <Content />
       <div

@@ -10,7 +10,7 @@ import {
   WUM_TOKEN,
 } from "../constants/globals";
 import { Order } from "@project-serum/serum/lib/market";
-import { LogCurveV0, TokenBondingV0 } from "../spl-token-bonding-api/state";
+import { LogCurveV0, TokenBondingV0 } from "spl-token-bonding";
 import { MintInfo, u64 } from "@solana/spl-token";
 // @ts-ignore
 import { gsl_sf_lambert_W0 } from "./lambertw";

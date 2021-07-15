@@ -20,7 +20,7 @@
     "@popperjs/core": "^2.9.2",
     "@project-serum/serum": "0.13.38",
     "@project-serum/sol-wallet-adapter": "0.2.4",
-    "@solana/spl-token": "0.1.6",
+    "@solana/spl-token": "^0.1.6",
     "@solana/spl-token-swap": "0.1.0",
     "@solana/wallet-base": "0.0.1",
     "@solana/wallet-ledger": "0.0.1",
@@ -39,6 +39,9 @@
     "react-dom": "^17.0.2",
     "react-hook-form": "^7.9.0",
     "react-router-dom": "^5.2.0",
+    "spl-token-bonding": "^1.0.0",
+    "spl-wumbo": "^1.0.0",
+    "superstruct": "^0.15.2",
     "url-template": "^2.0.8",
     "wumbo-common": "^1.0.0"
   },

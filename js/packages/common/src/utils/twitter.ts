@@ -1,5 +1,5 @@
 
-import { getTwitterRegistry } from "@bonfida/spl-name-service";
+import { getTwitterRegistry, NameRegistryState } from "@bonfida/spl-name-service";
 import { WalletAdapter } from "@solana/wallet-base";
 import { Connection, Transaction } from "@solana/web3.js";
 import { createVerifiedTwitterRegistry } from "@bonfida/spl-name-service";
@@ -7,17 +7,16 @@ import { PublicKey } from "@solana/web3.js";
 import { useConnection, useWallet } from "@/../../oyster-common/dist/lib";
 
 export const TWITTER_REGISTRAR_SERVER_URL =
-  process.env.REACT_APP_TWITTER_REGISTRAR_SERVER || "http://localhost:3000/registrar/twitter-oauth";
+  process.env.REACT_APP_TWITTER_REGISTRAR_SERVER || "https://google.com";
 
-export const twitterHandleExists = async (
+export const getTwitterHandle = async (
   connection: Connection,
   twitterHandle: string
-) => {
+): Promise<NameRegistryState | null> => {
   try {
-    await getTwitterRegistry(connection, twitterHandle);
-    return true;
+    return getTwitterRegistry(connection, twitterHandle);
   } catch {
-    return false;
+    return null;
   }
 };
 
@@ -28,14 +27,21 @@ export async function apiPost(url: string, body: any, headers: any) {
       body: JSON.stringify(body),
       headers: headers,
     });
+    console.log(response);
     if (!response.ok) {
-      throw new Error(`Error apiPost - status ${response.status}`);
+      if (response.status == 400) {
+        throw new Error("Specified handle did not match the handle you logged in with, or the authorization expired. Please try again")
+      } else if (response.status == 500) {
+        throw new Error("Registration transaction failed, please report this error in our discord")
+      }
+
+      throw new Error(`Error apiPost - status ${response.status}. Please report this error in our discord`);
     }
     let json = await response.json();
     return json;
   } catch (err) {
     console.warn(err);
-    throw new Error(`Error apiPost - err ${err}`);
+    throw new Error(`Error apiPost - err ${err}. Please report this error in our discord`);
   }
 }
 
@@ -69,10 +75,16 @@ export interface ClaimArgs {
   twitterHandle: string
 }
 export async function claimTwitterTransaction(connection: Connection, { wallet, twitterHandle }: ClaimArgs) {
-  const alreadyExists = await twitterHandleExists(connection, twitterHandle);
-  if (alreadyExists) {
-    throw new Error("Twitter handle is already registered");
+  const nameRegistryItem = await getTwitterHandle(connection, twitterHandle);
+  if (nameRegistryItem) {
+    if (nameRegistryItem.owner != wallet.publicKey) {
+      throw new Error(`Twitter handle is already registered to wallet ${nameRegistryItem.owner}`);
+    }
+
+    // Exit. It's already been claimed
+    return
   }
+
   if (!wallet.publicKey) {
     throw new Error("Wallet not connected");
   }

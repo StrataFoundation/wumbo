@@ -16,7 +16,7 @@ import { useFiatPrice, useBondingPricing, useOwnedAmount } from "@/utils/pricing
 import { useAsyncCallback } from "react-async-hook";
 import { SuccessfulTransaction } from "./SuccessfulTransaction";
 import { PublicKey } from "@solana/web3.js";
-import { TokenBondingV0 } from "@/spl-token-bonding-api/state";
+import { TokenBondingV0 } from "spl-token-bonding";
 import TokenPill from "./TokenPill";
 import SolLogo from "../../../public/assets/img/sol.svg";
 import { WumboDrawer } from "../WumboDrawer";
