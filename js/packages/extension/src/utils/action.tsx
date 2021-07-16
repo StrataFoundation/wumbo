@@ -27,7 +27,7 @@ export const buy =
           SPL_ASSOCIATED_TOKEN_ACCOUNT_PROGRAM_ID,
         splTokenProgramId: TOKEN_PROGRAM_ID,
         tokenBonding,
-        purchaserWallet: wallet,
+        wallet,
         amount: Math.floor(amount * Math.pow(10, 9)),
         maxPrice: Math.floor(maxPrice * Math.pow(10, 9)),
       });
@@ -51,7 +51,7 @@ export const sell =
           SPL_ASSOCIATED_TOKEN_ACCOUNT_PROGRAM_ID,
         splTokenProgramId: TOKEN_PROGRAM_ID,
         tokenBonding,
-        sellerWallet: wallet,
+        wallet,
         amount: Math.floor(amount * Math.pow(10, 9)),
         minPrice: Math.floor(minPrice * Math.pow(10, 9)),
       });

@@ -17,11 +17,12 @@
         "style": "prettier --write \"src/**/*.{ts,tsx}\""
     },
     "dependencies": {
-        "@solana/spl-token": "0.1.4",
+        "@solana/spl-token": "0.1.6",
         "@solana/wallet-base": "0.0.1",
         "@solana/web3.js": "1.18.0",
         "borsh": "^0.4.0",
-        "spl-token-bonding": "^1.0.0"
+        "spl-token-bonding": "^1.0.0",
+        "superstruct": "^0.15.2"
     },
     "devDependencies": {
         "prettier": "2.3.1",

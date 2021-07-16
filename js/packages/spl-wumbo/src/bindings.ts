@@ -140,7 +140,9 @@ export async function createWumboCreator(
     params.splAssociatedTokenAccountProgramId,
     params.splTokenProgramId,
     targetMint.publicKey,
-    founderRewardsOwner
+    founderRewardsOwner,
+    // @ts-ignore
+    true
   );
 
   instructions.push(

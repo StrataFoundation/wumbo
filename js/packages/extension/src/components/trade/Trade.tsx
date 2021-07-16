@@ -21,7 +21,7 @@ import TokenPill from "./TokenPill";
 import SolLogo from "../../../public/assets/img/sol.svg";
 import { WumboDrawer } from "../WumboDrawer";
 import { useMint } from "@/utils/mintState";
-import { useQuery } from "@/utils/utils";
+import { useQuery } from "wumbo-common";
 
 function useName(tokenBonding: TokenBondingV0 | undefined): string | undefined {
   const query = useQuery();
