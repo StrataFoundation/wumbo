@@ -7,7 +7,6 @@ import { Button, Alert } from "../";
 export const WalletSelect = React.memo(() => {
   const { connected, disconnect, wallet, setProviderUrl, setAutoConnect, error } =
     useWallet();
-    console.log(wallet?.publicKey);
   return (
     <Fragment>
       {connected ? (

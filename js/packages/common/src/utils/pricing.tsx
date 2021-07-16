@@ -1,6 +1,6 @@
 import { Market } from "@project-serum/serum";
 import { Connection, PublicKey } from "@solana/web3.js";
-import React, { useContext, useEffect, useState } from "react";
+import React, { useContext, useEffect, useMemo, useState } from "react";
 import {
   SERUM_PROGRAM_ID,
   SOL_TOKEN,
@@ -17,7 +17,9 @@ import { gsl_sf_lambert_W0 } from "./lambertw";
 import { useAccount } from "./account";
 import { useMint } from "./mintState";
 import { useAssociatedAccount } from "./walletState";
-import { useWallet } from "wumbo-common";
+import { useWallet } from "./wallet";
+import { useConnection } from "@oyster/common";
+import { useAsyncCallback } from "react-async-hook";
 
 // TODO: Use actual connection. But this can't happen in dev
 let connection = new Connection("https://api.mainnet-beta.solana.com");
@@ -43,6 +45,34 @@ export function amountAsNum(amount: u64, mint: MintInfo): number {
   return amount
   .div(decimals)
   .toNumber() + decimal;
+}
+
+export function useRentExemptAmount(size: number): { loading: boolean, amount: number | undefined } {
+  const connection = useConnection();
+  const { execute, result, loading, error } = useAsyncCallback(connection.getMinimumBalanceForRentExemption.bind(connection));
+  useEffect(() => {
+    execute(size);
+  }, [connection])
+  const amount = useMemo(() => (result || 0) / Math.pow(10, 9), [result])
+  
+  return {
+    amount,
+    loading
+  }
+}
+
+export function useSolOwnedAmount(): { amount: number, loading: boolean } {
+  const { wallet } = useWallet();
+  const { info: lamports , loading } = useAccount<number>(wallet?.publicKey || undefined, (_, account) => account.lamports)
+  const result = React.useMemo(() => 
+    (lamports || 0) / Math.pow(10, 9),
+    [lamports]
+  )
+
+  return {
+    amount: result,
+    loading
+  }
 }
 
 export function useOwnedAmount(

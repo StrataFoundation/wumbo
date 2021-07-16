@@ -2,7 +2,7 @@ import React, { Fragment, useState } from "react";
 import { CoinDetails } from "./CoinDetails";
 import { ChevronUpIcon, ChevronDownIcon } from "@heroicons/react/solid";
 import { TokenBondingV0 } from "spl-token-bonding";
-import { useBondingPricing } from "@/utils/pricing";
+import { useBondingPricing } from "wumbo-common";
 
 interface TokenPillProps {
   name: String;

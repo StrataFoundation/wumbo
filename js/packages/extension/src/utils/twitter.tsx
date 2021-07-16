@@ -3,7 +3,7 @@ import { WalletAdapter } from "@solana/wallet-base";
 import { Connection, Transaction } from "@solana/web3.js";
 import { createVerifiedTwitterRegistry } from "@bonfida/spl-name-service";
 import { PublicKey } from "@solana/web3.js";
-import { TWITTER_REGISTRAR_SERVER_URL } from "../constants/globals";
+import { TWITTER_REGISTRAR_SERVER_URL } from "wumbo-common";
 
 export const twitterHandleExists = async (
   connection: Connection,

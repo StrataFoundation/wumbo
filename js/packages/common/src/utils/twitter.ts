@@ -1,20 +1,54 @@
 
-import { getTwitterRegistry, NameRegistryState } from "@bonfida/spl-name-service";
+import { createNameRegistry, getHashedName, getNameAccountKey, TWITTER_ROOT_PARENT_REGISTRY_KEY, NameRegistryState, TWITTER_VERIFICATION_AUTHORITY, NAME_PROGRAM_ID } from "@bonfida/spl-name-service";
 import { WalletAdapter } from "@solana/wallet-base";
-import { Connection, Transaction } from "@solana/web3.js";
-import { createVerifiedTwitterRegistry } from "@bonfida/spl-name-service";
+import { Account, Connection, sendAndConfirmRawTransaction, Transaction, TransactionInstruction } from "@solana/web3.js";
 import { PublicKey } from "@solana/web3.js";
-import { useConnection, useWallet } from "@/../../oyster-common/dist/lib";
+import { TWITTER_REGISTRAR_SERVER_URL } from "../constants/globals";
+import { createVerifiedTwitterRegistry, getTwitterRegistry } from "./testableNameServiceTwitter";
 
-export const TWITTER_REGISTRAR_SERVER_URL =
-  process.env.REACT_APP_TWITTER_REGISTRAR_SERVER || "https://google.com";
+const DEV_MODE = true;
+const DEV_TLD = "NoahTest";
+
+async function sendTransaction(
+  connection: Connection,
+  instructions: TransactionInstruction[],
+  wallet: WalletAdapter,
+  extraSigners?: Account[]
+): Promise<void> {
+  const transaction = new Transaction({
+    feePayer: wallet.publicKey || undefined,
+    recentBlockhash: (await connection.getRecentBlockhash()).blockhash,
+  });
+  transaction.instructions = instructions;
+
+  extraSigners && transaction.partialSign(...extraSigners);
+  const signed = await wallet.signTransaction(transaction);
+
+  await sendAndConfirmRawTransaction(connection, signed.serialize());
+}
+
+export async function createTestTld(connection: Connection, wallet: WalletAdapter) {
+  if (DEV_MODE) {
+    const tld = await getNameAccountKey(await getHashedName(DEV_TLD));
+    const account = await connection.getAccountInfo(tld);
+    if (!account) {
+      console.log("Testing tld doesn't exist, creating...")
+      const createInstruction = await createNameRegistry(connection, DEV_TLD, 1000, wallet.publicKey!, wallet.publicKey!);
+      console.log(await sendTransaction(connection, [createInstruction], wallet));
+    }
+  }
+}
+
+export async function getTld(): Promise<PublicKey> {
+  return DEV_MODE ? await getNameAccountKey(await getHashedName(DEV_TLD)) : TWITTER_ROOT_PARENT_REGISTRY_KEY
+}
 
 export const getTwitterHandle = async (
   connection: Connection,
   twitterHandle: string
 ): Promise<NameRegistryState | null> => {
   try {
-    return getTwitterRegistry(connection, twitterHandle);
+    return await getTwitterRegistry(connection, twitterHandle, await getTld());
   } catch {
     return null;
   }
@@ -46,70 +80,74 @@ export async function apiPost(url: string, body: any, headers: any) {
 }
 
 export const postTwitterRegistrarRequest = async (
-  transaction: Transaction,
-  userPubkey: PublicKey,
+  connection: Connection,
+  instructions: TransactionInstruction[],
+  wallet: WalletAdapter,
   code: string,
   redirectUri: string,
   twitterHandle: string
 ) => {
-  const transactionBuffer = transaction.serialize({
-    requireAllSignatures: false,
-    verifySignatures: false,
-  });
+  if (DEV_MODE) {
+    console.log("Sending dev mode claim twitter handle txn...")
+    await sendTransaction(connection, instructions, wallet);
+  } else {
+    const transaction = new Transaction({
+      feePayer: wallet.publicKey || undefined,
+      recentBlockhash: (await connection.getRecentBlockhash()).blockhash,
+    });
+    transaction.instructions = instructions;
+    const signed = await wallet.signTransaction(transaction);
 
-  const payload = {
-    transaction: JSON.stringify(transactionBuffer),
-    pubkey: userPubkey.toBase58(),
-    code,
-    redirectUri,
-    twitterHandle: twitterHandle,
-  };
-  const result = await apiPost(TWITTER_REGISTRAR_SERVER_URL, payload, {
-    "Content-type": "application/json",
-  });
-  return result;
+    const transactionBuffer = signed.serialize({
+      requireAllSignatures: false,
+      verifySignatures: false,
+    });
+
+    const payload = {
+      transaction: JSON.stringify(transactionBuffer),
+      pubkey: wallet.publicKey!.toBase58(),
+      code,
+      redirectUri,
+      twitterHandle: twitterHandle,
+    };
+    const result = await apiPost(TWITTER_REGISTRAR_SERVER_URL, payload, {
+      "Content-type": "application/json",
+    });
+    return result;
+  }
 };
 
 export interface ClaimArgs {
-  wallet: WalletAdapter,
+  owner: PublicKey,
   twitterHandle: string
 }
-export async function claimTwitterTransaction(connection: Connection, { wallet, twitterHandle }: ClaimArgs) {
+export const TWITTER_REGISTRY_SIZE = 1_000;
+export async function claimTwitterTransactionInstructions(connection: Connection, { owner, twitterHandle }: ClaimArgs) {
   const nameRegistryItem = await getTwitterHandle(connection, twitterHandle);
   if (nameRegistryItem) {
-    if (nameRegistryItem.owner != wallet.publicKey) {
+    if (nameRegistryItem.owner.toBase58() != owner.toBase58()) {
       throw new Error(`Twitter handle is already registered to wallet ${nameRegistryItem.owner}`);
     }
 
     // Exit. It's already been claimed
+    console.log("Twitter handle is already claimed by this wallet.")
     return
   }
 
-  if (!wallet.publicKey) {
-    throw new Error("Wallet not connected");
-  }
-
-  const balance = await connection.getBalance(wallet.publicKey);
+  const balance = await connection.getBalance(owner);
 
   if (balance === 0) {
     throw new Error("Insufficient Balance");
   }
 
-  const instruction = await createVerifiedTwitterRegistry(
+  return createVerifiedTwitterRegistry(
     connection,
     twitterHandle,
-    wallet.publicKey,
+    owner,
     1_000,
-    wallet.publicKey
+    owner,
+    NAME_PROGRAM_ID,
+    DEV_MODE ? owner : TWITTER_VERIFICATION_AUTHORITY,
+    await getTld()
   );
-  const transaction = new Transaction().add(...instruction);
-  transaction.recentBlockhash = (
-    await connection.getRecentBlockhash("max")
-  ).blockhash;
-
-  transaction.feePayer = wallet.publicKey;
-
-  await wallet.signTransaction(transaction);
-
-  return transaction;
 }

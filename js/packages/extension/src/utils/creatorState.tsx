@@ -4,53 +4,22 @@ import {
   WUMBO_INSTANCE_KEY,
   WUMBO_PROGRAM_ID,
   TWITTER_ROOT_PARENT_REGISTRY_KEY,
-} from "../constants/globals";
+  useBondingPricing, 
+  useWumboUsdPrice,
+  useAccount, 
+  UseAccountState,
+  useMint,
+  useCreator
+} from "wumbo-common";
 import { AccountInfo, PublicKey } from "@solana/web3.js";
 import { WumboCreator } from "spl-wumbo";
-import { useConnection } from "@oyster/common";
-import { useMint } from "./mintState";
-import { useBondingPricing, useWumboUsdPrice } from "./pricing";
 import { MintInfo } from "@solana/spl-token";
-import { useAccount, UseAccountState } from "./account";
 import { LogCurveV0, TokenBondingV0 } from "spl-token-bonding";
-
-export const useCreatorKey = (name: string): PublicKey | undefined => {
-  const [key, setKey] = useState<PublicKey>();
-
-  useEffect(() => {
-    (async () => {
-      const hashedName = await getHashedName(name);
-      const twitterHandleRegistryKey = await getNameAccountKey(
-        hashedName,
-        undefined,
-        TWITTER_ROOT_PARENT_REGISTRY_KEY
-      );
-      const [wumboCreatorKey, _] = await PublicKey.findProgramAddress(
-        [
-          Buffer.from("creator", "utf-8"),
-          WUMBO_INSTANCE_KEY.toBuffer(),
-          twitterHandleRegistryKey.toBuffer(),
-        ],
-        WUMBO_PROGRAM_ID
-      );
-
-      setKey(wumboCreatorKey);
-    })();
-  }, [name]);
-
-  return key;
-};
 
 interface CreatorState {
   creator?: WumboCreator;
   loading: boolean;
 }
-
-export const useCreator = (name: string): UseAccountState<WumboCreator> => {
-  const key = useCreatorKey(name);
-
-  return useAccount(key, WumboCreator.fromAccount);
-};
 
 export interface CreatorInfo {
   name: string;

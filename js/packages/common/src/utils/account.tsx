@@ -15,24 +15,24 @@ export type TypedAccountParser<T> = (
 
 export function useAccount<T>(
   key: undefined | PublicKey,
-  parser: TypedAccountParser<T>
+  parser?: TypedAccountParser<T>
 ): UseAccountState<T> {
   const connection = useConnection();
   const [state, setState] = useState<UseAccountState<T>>({
     loading: true,
   });
 
-  function parsedAccountBaseParser(
+  const parsedAccountBaseParser = (
     pubkey: PublicKey,
     data: AccountInfo<Buffer>
-  ): ParsedAccountBase {
-    const info = parser(pubkey, data);
+  ): ParsedAccountBase => {
+    const info = parser && parser(pubkey, data);
     return {
       pubkey,
       account: data,
       info,
     };
-  }
+  };
 
   const id = typeof key === "string" ? key : key?.toBase58();
 
@@ -43,13 +43,13 @@ export function useAccount<T>(
 
     cache
       .query(connection, id, parsedAccountBaseParser)
-      .then((acc) =>
+      .then((acc) => {
         setState({
           loading: false,
           info: acc.info as any,
           account: acc.account,
         })
-      )
+      })
       .catch((err) => {
         console.log(err);
         // Oyster's cache, while great, explodes and doesn't watch accounts that don't exist. Shim it in
@@ -70,13 +70,13 @@ export function useAccount<T>(
     const dispose = cache.emitter.onCache((e) => {
       const event = e;
       if (event.id === id) {
-        cache.query(connection, id, parsedAccountBaseParser).then((acc) =>
+        cache.query(connection, id, parsedAccountBaseParser).then((acc) => {
           setState({
             loading: false,
             info: acc.info as any,
             account: acc.account,
           })
-        );
+        });
       }
     });
     return () => {

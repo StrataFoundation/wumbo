@@ -1,5 +1,6 @@
 import React, {
   ButtonHTMLAttributes,
+  AnchorHTMLAttributes,
   ForwardedRef,
   forwardRef,
   ReactNode,
@@ -23,7 +24,24 @@ interface ButtonProps
   submit?: boolean;
 }
 
+
+interface LinkButtonProps
+  extends AnchorHTMLAttributes<HTMLAnchorElement>,
+    ButtonPropsWithChildren {
+  block?: Boolean;
+  children: ReactNode;
+  className?: string;
+  color?: "primary" | "secondary" | "twitterBlue";
+  disabled?: boolean;
+  outline?: boolean;
+  gradient?: boolean;
+  rounded?: boolean;
+  size?: "xs" | "sm" | "md" | "lg";
+  submit?: boolean;
+}
+
 type ButtonRef = ForwardedRef<HTMLButtonElement>;
+type LinkButtonRef = ForwardedRef<HTMLAnchorElement>;
 
 const style = {
   default: `text-white focus:outline-none shadow font-medium transition ease-in duration-200`,
@@ -109,5 +127,44 @@ export const Button = forwardRef(
     >
       {children}
     </button>
+  )
+);
+
+export const LinkButton = forwardRef(
+  (
+    {
+      block = false,
+      children,
+      className,
+      color,
+      disabled = false,
+      outline,
+      gradient,
+      rounded,
+      size = "md",
+      submit,
+      ...props
+    }: LinkButtonProps,
+    ref: LinkButtonRef
+  ) => (
+    <a
+      ref={ref}
+      {...props}
+      type={submit ? "submit" : "button"}
+      className={classNames(
+        className,
+        block && style.block,
+        disabled && style.disabled,
+        style.sizes[size],
+        style.default,
+        rounded ? style.rounded : "rounded-md",
+        color
+          ? colors(!!outline, !!gradient)[color]
+          : colors(false, false)["primary"],
+        "text-center"
+      )}
+    >
+      {children}
+    </a>
   )
 );

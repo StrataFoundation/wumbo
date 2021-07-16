@@ -1,18 +1,26 @@
 import React, { Fragment, useState, ReactNode, useEffect } from "react";
 import { Link, useParams, useLocation } from "react-router-dom";
 import { useConnection, Wallet } from "@oyster/common";
-import { useAccount } from "@/utils/account";
-import { useCreatorInfo } from "@/utils/creatorState";
 import { buy, sell } from "@/utils/action";
-import { useWallet, useAssociatedAccount } from "wumbo-common";
-import {
-  BASE_SLIPPAGE, WUM_BONDING, WUM_TOKEN,
-} from "@/constants/globals";
-import { Tabs, Tab, Badge, Spinner, Avatar } from "wumbo-common";
+import { 
+  BASE_SLIPPAGE, 
+  WUM_BONDING, 
+  WUM_TOKEN, 
+  useAccount, 
+  useWallet,
+  useFiatPrice, 
+  useBondingPricing, 
+  useOwnedAmount,
+  useQuery,
+  Tabs, 
+  Tab, 
+  Badge, 
+  Spinner, 
+  Avatar
+} from "wumbo-common";
 import { routes } from "@/constants/routes";
 import { TokenForm, FormValues } from "./TokenForm";
 import Logo from "../../../public/assets/img/logo.svg";
-import { useFiatPrice, useBondingPricing, useOwnedAmount } from "@/utils/pricing";
 import { useAsyncCallback } from "react-async-hook";
 import { SuccessfulTransaction } from "./SuccessfulTransaction";
 import { PublicKey } from "@solana/web3.js";
@@ -20,8 +28,6 @@ import { TokenBondingV0 } from "spl-token-bonding";
 import TokenPill from "./TokenPill";
 import SolLogo from "../../../public/assets/img/sol.svg";
 import { WumboDrawer } from "../WumboDrawer";
-import { useMint } from "@/utils/mintState";
-import { useQuery } from "wumbo-common";
 
 function useName(tokenBonding: TokenBondingV0 | undefined): string | undefined {
   const query = useQuery();

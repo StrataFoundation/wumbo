@@ -230,9 +230,10 @@ fn process_initialize_creator(program_id: &Pubkey, accounts: &[AccountInfo]) -> 
         Pubkey::default()
     };
 
+    let mut peekable = accounts_iter.peekable();
     // If this is the founder (they own the name), don't do anything.
-    if accounts_iter.peekable().peek().is_some() {
-        let name_owner = next_account_info(accounts_iter)?;
+    if peekable.peek().is_some() {
+        let name_owner = next_account_info(&mut peekable)?;
         if !name_owner.is_signer {
             return Err(WumboError::MissingSigner.into());
         }

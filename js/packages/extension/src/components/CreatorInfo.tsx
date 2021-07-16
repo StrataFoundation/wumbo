@@ -1,14 +1,15 @@
 import React from "react";
 import { Link } from "react-router-dom";
-import { WUMBO_INSTANCE_KEY } from "@/constants/globals";
+import { WUMBO_INSTANCE_KEY } from "wumbo-common";
 import { WumboInstance } from "spl-wumbo";
 import { useCreatorInfo } from "@/utils/creatorState";
 import { useWallet } from "wumbo-common";
-import { useAccount } from "@/utils/account";
+import { useAccount } from "wumbo-common";
 import { Button, Spinner } from "wumbo-common";
 
 import { useDrawer } from "@/contexts/drawerContext";
 import { routes } from "@/constants/routes";
+import { useConnection, useConnectionConfig } from "@oyster/common";
 
 type Props = {
   creatorName: string;

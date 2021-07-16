@@ -1,8 +1,5 @@
 import React from "react";
-import { CreatorInfo } from "@/utils/creatorState";
-import { useMint } from "@/utils/mintState";
-import { PricingState, supplyAsNum, useBondingPricing } from "@/utils/pricing";
-import { PublicKey } from "@solana/web3.js";
+import { PricingState, supplyAsNum, useBondingPricing, useMint } from "wumbo-common";
 import { TokenBondingV0 } from "spl-token-bonding";
 
 interface CoinDetailsProps {

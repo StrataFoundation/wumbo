@@ -7,7 +7,7 @@ import {
   SPL_ASSOCIATED_TOKEN_ACCOUNT_PROGRAM_ID,
   TOKEN_BONDING_PROGRAM_ID,
   TOKEN_PROGRAM_ID,
-} from "../constants/globals";
+} from "wumbo-common";
 import { Account, Connection } from "@solana/web3.js";
 import { WalletAdapter } from "@solana/wallet-base";
 import { PublicKey } from "@solana/web3.js";

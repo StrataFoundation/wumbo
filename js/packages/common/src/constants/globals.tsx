@@ -31,7 +31,9 @@ export const SPL_NAME_SERVICE_PROGRAM_ID = new PublicKey(
 export const TOKEN_BONDING_PROGRAM_ID = new PublicKey(
   "GNaAvtLUeVLMWJw2hafeVxFbK254UR3Y4mrxaqZHR4sY"
 );
-export const SOLANA_API_URL = "https://devnet.solana.com";
+// export const SOLANA_API_URL = "https://devnet.solana.com";
+export const SOLANA_API_URL = "https://wumbo.devnet.rpcpool.com/";
+
 export const SERUM_PROGRAM_ID = new PublicKey(
   "9xQeWvG816bUx9EPjHmaT23yvVM2ZWbrrpZb9PusVFin"
 );

@@ -5,7 +5,7 @@ import {
   WUMBO_INSTANCE_KEY,
   SPL_ASSOCIATED_TOKEN_ACCOUNT_PROGRAM_ID,
   TOKEN_PROGRAM_ID,
-} from "../constants/globals";
+} from "wumbo-common";
 import { TokenAccountParser } from "@oyster/common";
 
 const getAssociatedSolcloutAccount = async (

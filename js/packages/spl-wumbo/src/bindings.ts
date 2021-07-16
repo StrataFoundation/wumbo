@@ -56,9 +56,10 @@ async function sendTransaction(
   await sendAndConfirmRawTransaction(connection, signed.serialize());
 }
 
-interface CreateCreatorResult {
+export interface CreateCreatorResult {
   creatorKey: PublicKey;
   tokenBondingKey: PublicKey;
+  ownerKey: PublicKey
 }
 export async function createWumboCreator(
   connection: Connection,
@@ -235,5 +236,6 @@ export async function createWumboCreator(
   return {
     creatorKey: creator,
     tokenBondingKey: tokenBonding.publicKey,
+    ownerKey: founderRewardsOwner
   };
 }

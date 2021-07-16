@@ -11,9 +11,9 @@ import {
   TOKEN_BONDING_PROGRAM_ID,
   SPL_NAME_SERVICE_PROGRAM_ID,
   SPL_ASSOCIATED_TOKEN_ACCOUNT_PROGRAM_ID,
-} from "@/constants/globals";
+} from "wumbo-common";
 import { createWumboCreator, WumboInstance } from "spl-wumbo";
-import { useAccount } from "@/utils/account";
+import { useAccount } from "wumbo-common";
 import { useWallet } from "wumbo-common";
 import { Avatar, Button, Spinner } from "wumbo-common";
 import { routes } from "@/constants/routes";

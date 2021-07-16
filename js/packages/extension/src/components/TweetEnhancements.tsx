@@ -5,9 +5,6 @@ import CreatorInfo from "./CreatorInfo";
 import { ENDPOINTS, useConnectionConfig } from "@oyster/common";
 
 export default () => {
-  const connectionConfig = useConnectionConfig();
-  connectionConfig.setEndpoint("https://wumbo.devnet.rpcpool.com/");
-
   const tweets = useTweets();
   if (tweets) {
     const elCache = new Map<string, JSX.Element>();
