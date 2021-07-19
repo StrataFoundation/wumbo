@@ -3,8 +3,6 @@ import AppContainer from "../common/AppContainer";
 import { useHistory } from "react-router-dom";
 import { usePrevious, useQuery, useWallet, WalletSelect } from "wumbo-common";
 
-//@ts-ignore
-window.react1 = React;
 export default React.memo(() => {
   const history = useHistory();
   const query = useQuery();

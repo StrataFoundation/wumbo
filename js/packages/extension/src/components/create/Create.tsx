@@ -13,7 +13,7 @@ import {
   SPL_ASSOCIATED_TOKEN_ACCOUNT_PROGRAM_ID,
 } from "wumbo-common";
 import { createWumboCreator, WumboInstance } from "spl-wumbo";
-import { useAccount } from "wumbo-common";
+import { useAccount, getTld } from "wumbo-common";
 import { useWallet } from "wumbo-common";
 import { Avatar, Button, Spinner } from "wumbo-common";
 import { routes } from "@/constants/routes";
@@ -32,35 +32,34 @@ export const Create = () => {
   );
   const currentPath = `${location.pathname}${location.search}`;
 
-  const createCreator = () => {
+  const createCreator = async () => {
     setCreationLoading(true);
-    createWumboCreator(connection, {
-      splTokenBondingProgramId: TOKEN_BONDING_PROGRAM_ID,
-      splAssociatedTokenAccountProgramId:
-        SPL_ASSOCIATED_TOKEN_ACCOUNT_PROGRAM_ID,
-      splTokenProgramId: TOKEN_PROGRAM_ID,
-      splWumboProgramId: WUMBO_PROGRAM_ID,
-      splNameServicePogramId: SPL_NAME_SERVICE_PROGRAM_ID,
-      wumboInstance: WUMBO_INSTANCE_KEY,
-      payer: wallet!,
-      baseMint: wumboInstance!.wumboMint,
-      name: query.get("name")!,
-      founderRewardsPercentage: 5.5,
-      nameParent: TWITTER_ROOT_PARENT_REGISTRY_KEY,
-    })
-      .then(async ({ tokenBondingKey }) => {
-        setCreationLoading(false);
-        history.push(
-          routes.trade.path.replace(
-            ":tokenBondingKey",
-            tokenBondingKey.toBase58()
-          ) + `?name=${query.get("name")!}`
-        );
+    try {
+      const { tokenBondingKey } = await createWumboCreator(connection, {
+        splTokenBondingProgramId: TOKEN_BONDING_PROGRAM_ID,
+        splAssociatedTokenAccountProgramId:
+          SPL_ASSOCIATED_TOKEN_ACCOUNT_PROGRAM_ID,
+        splTokenProgramId: TOKEN_PROGRAM_ID,
+        splWumboProgramId: WUMBO_PROGRAM_ID,
+        splNameServicePogramId: SPL_NAME_SERVICE_PROGRAM_ID,
+        wumboInstance: WUMBO_INSTANCE_KEY,
+        payer: wallet!,
+        baseMint: wumboInstance!.wumboMint,
+        name: query.get("name")!,
+        founderRewardsPercentage: 5.5,
+        nameParent: await getTld(),
       })
-      .catch((err) => {
-        console.error(err);
-        setCreationLoading(false);
-      });
+      history.push(
+        routes.trade.path.replace(
+          ":tokenBondingKey",
+          tokenBondingKey.toBase58()
+        ) + `?name=${query.get("name")!}`
+      );
+    } catch(e) {
+      console.error(e)
+    } finally {
+      setCreationLoading(false);
+    }
   };
 
   return (
