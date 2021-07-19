@@ -159,7 +159,7 @@ export async function createWumboCreator(
 
   const tokenBonding = new Account();
   const [tokenBondingAuthority, _] = await PublicKey.findProgramAddress(
-    [Buffer.from("bonding-authority", "utf-8"), creator.toBuffer()],
+    [Buffer.from("bonding-authority", "utf-8"), founderRewardsOwner.toBuffer()],
     params.splWumboProgramId
   );
   const wumboInstance = await WumboInstance.retrieve(

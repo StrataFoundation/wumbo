@@ -181,7 +181,7 @@ export const Claim = React.memo(() => {
       onClick={() => {
         const twitterHandleSanitized = twitterHandle.replace("@", "");
         claim(twitterHandleSanitized).then(() => create(twitterHandleSanitized)).then(({ ownerKey }) => {
-          history.push(routes.profile.path.replace(":key", ownerKey.toBase58()))
+          history.push(routes.editProfile.path.replace(":ownerWalletKey", ownerKey.toBase58()))
         })
       }}
       disabled={loading}

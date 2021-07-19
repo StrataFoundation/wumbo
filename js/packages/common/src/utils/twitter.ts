@@ -1,13 +1,16 @@
 
-import { createNameRegistry, getHashedName, getNameAccountKey, TWITTER_ROOT_PARENT_REGISTRY_KEY, NameRegistryState, TWITTER_VERIFICATION_AUTHORITY, NAME_PROGRAM_ID } from "@bonfida/spl-name-service";
+import { useConnection } from "@oyster/common";
+import { createNameRegistry, getHashedName, getNameAccountKey, TWITTER_ROOT_PARENT_REGISTRY_KEY, NameRegistryState, TWITTER_VERIFICATION_AUTHORITY, NAME_PROGRAM_ID, ReverseTwitterRegistryState } from "@bonfida/spl-name-service";
 import { WalletAdapter } from "@solana/wallet-base";
 import { Account, Connection, sendAndConfirmRawTransaction, Transaction, TransactionInstruction } from "@solana/web3.js";
 import { PublicKey } from "@solana/web3.js";
+import { useState } from "react";
+import { useAsync, useAsyncCallback } from "react-async-hook";
 import { TWITTER_REGISTRAR_SERVER_URL } from "../constants/globals";
 import { createVerifiedTwitterRegistry, getTwitterRegistry } from "./testableNameServiceTwitter";
 
 const DEV_MODE = true;
-const DEV_TLD = "NoahTest";
+const DEV_TLD = "NoahTest2";
 
 async function sendTransaction(
   connection: Connection,
@@ -150,4 +153,35 @@ export async function claimTwitterTransactionInstructions(connection: Connection
     DEV_MODE ? owner : TWITTER_VERIFICATION_AUTHORITY,
     await getTld()
   );
+}
+
+export async function getTwitterReverse(connection: Connection, owner: PublicKey): Promise<ReverseTwitterRegistryState> {
+  const hashedName = await getHashedName(owner.toString());
+  const key = await getNameAccountKey(
+    hashedName,
+    DEV_MODE ? owner : TWITTER_VERIFICATION_AUTHORITY,
+    await getTld()
+  );
+
+  return ReverseTwitterRegistryState.retrieve(connection, key)
+}
+
+async function getTwitterName(connection: Connection, owner: PublicKey) {
+  return (await getTwitterReverse(connection, owner)).twitterHandle
+}
+
+interface ReverseTwitterState {
+  loading: boolean;
+  handle: string | undefined;
+  error: Error | undefined;
+}
+export function useReverseTwitter(owner: PublicKey): ReverseTwitterState {
+  const connection = useConnection();
+  const { loading, error, result: handle } = useAsync(getTwitterName, [connection, owner]);
+
+  return {
+    loading,
+    error,
+    handle
+  }
 }

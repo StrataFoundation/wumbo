@@ -1,5 +1,5 @@
 import React from "react";
-import { PricingState, supplyAsNum, useBondingPricing, useMint } from "wumbo-common";
+import { supplyAsNum, useBondingPricing, useMint } from ".";
 import { TokenBondingV0 } from "spl-token-bonding";
 
 interface CoinDetailsProps {

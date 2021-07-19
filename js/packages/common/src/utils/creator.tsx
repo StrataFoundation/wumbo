@@ -25,19 +25,22 @@ export async function getCreatorKey(name: string): Promise<PublicKey> {
   return key;
 }
 
-export const useCreatorKey = (name: string): PublicKey | undefined => {
+export const useCreatorKey = (name: string | undefined): PublicKey | undefined => {
   const [key, setKey] = useState<PublicKey>();
 
   useEffect(() => {
     (async () => {
-      setKey(await getCreatorKey(name));
+      if (name) {
+        const key = await getCreatorKey(name)
+        setKey(key);
+      }
     })();
   }, [name]);
 
   return key;
 };
 
-export const useCreator = (name: string): UseAccountState<WumboCreator> => {
+export const useCreator = (name: string | undefined): UseAccountState<WumboCreator> => {
   const key = useCreatorKey(name);
 
   return useAccount(key, WumboCreator.fromAccount);

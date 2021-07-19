@@ -2,21 +2,22 @@ import React, { Fragment, useState } from "react";
 import { CoinDetails } from "./CoinDetails";
 import { ChevronUpIcon, ChevronDownIcon } from "@heroicons/react/solid";
 import { TokenBondingV0 } from "spl-token-bonding";
-import { useBondingPricing } from "wumbo-common";
+import { useBondingPricing, useFiatPrice } from "./utils/pricing";
 
 interface TokenPillProps {
   name: String;
   ticker: String;
   icon: React.ReactElement;
   tokenBonding: TokenBondingV0;
-  toFiat(baseAmount: number): number;
 }
 
-export default React.memo(
-  ({ name, ticker, icon, tokenBonding, toFiat }: TokenPillProps) => {
+export const TokenPill = React.memo(
+  ({ name, ticker, icon, tokenBonding }: TokenPillProps) => {
     const [detailsVisible, setDetailsVisible] = useState<boolean>(false);
     const toggleDetails = () => setDetailsVisible(!detailsVisible);
     const { current } = useBondingPricing(tokenBonding.publicKey);
+    const fiatPrice = useFiatPrice(tokenBonding.baseMint)
+    const toFiat = (a: number) => (fiatPrice || 0) * a
 
     return (
       <Fragment>
@@ -24,11 +25,11 @@ export default React.memo(
           {icon}
           <div className="flex flex-col flex-grow justify-center text-gray-700">
             <div className="flex justify-between font-medium">
-              <span>{name}</span>
+              <span>{ticker}</span>
               <span>${toFiat(current).toFixed(2) || 0.0}</span>
             </div>
             <div className="flex justify-between text-xs">
-              <span>{ticker}</span>
+              <span>{name}</span>
               <span
                 className="flex align-center cursor-pointer"
                 onClick={toggleDetails}

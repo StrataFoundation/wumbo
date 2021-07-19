@@ -8,3 +8,4 @@ export * from "./constants";
 export * from "./Pages";
 export * from "./utils";
 export * from "./EndpointSetter";
+export * from "./TokenPill";

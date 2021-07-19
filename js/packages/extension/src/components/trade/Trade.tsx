@@ -16,7 +16,8 @@ import {
   Tab, 
   Badge, 
   Spinner, 
-  Avatar
+  Avatar,
+  TokenPill
 } from "wumbo-common";
 import { routes } from "@/constants/routes";
 import { TokenForm, FormValues } from "./TokenForm";
@@ -25,7 +26,6 @@ import { useAsyncCallback } from "react-async-hook";
 import { SuccessfulTransaction } from "./SuccessfulTransaction";
 import { PublicKey } from "@solana/web3.js";
 import { TokenBondingV0 } from "spl-token-bonding";
-import TokenPill from "./TokenPill";
 import SolLogo from "../../../public/assets/img/sol.svg";
 import { WumboDrawer } from "../WumboDrawer";
 
@@ -140,8 +140,8 @@ export const Trade = React.memo(({ baseTicker, baseIcon, name, icon, ticker, buy
   } | null>(null);
   const { wallet } = useWallet();
   const connection = useConnection();
-  const fiatPrice = useFiatPrice(tokenBonding.baseMint)
   const { targetToBasePrice, baseToTargetPrice, sellTargetToBasePrice, sellBaseToTargetPrice } = useBondingPricing(tokenBonding.publicKey);
+  const fiatPrice = useFiatPrice(tokenBonding.baseMint)
   const toFiat = (a: number) => (fiatPrice || 0) * a
   const fromFiat = (a: number) => a / (fiatPrice || 0)
 
@@ -206,7 +206,6 @@ export const Trade = React.memo(({ baseTicker, baseIcon, name, icon, ticker, buy
         tokenBonding={tokenBonding}
         name={name}
         icon={icon}
-        toFiat={toFiat}
         ticker={ticker}
       />
       <div className="flex justify-center mt-4">

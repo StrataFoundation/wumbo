@@ -137,8 +137,8 @@ pub fn creator_authority(
     Pubkey::find_program_address(seeds, program_id)
 }
 
-pub fn bonding_authority(program_id: &Pubkey, creator: &Pubkey) -> (Pubkey, u8) {
-    let seeds: &[&[u8]] = &[&BONDING_AUTHORITY_PREFIX.as_bytes(), &creator.to_bytes()];
+pub fn bonding_authority(program_id: &Pubkey, founder_rewards_owner: &Pubkey) -> (Pubkey, u8) {
+    let seeds: &[&[u8]] = &[&BONDING_AUTHORITY_PREFIX.as_bytes(), &founder_rewards_owner.to_bytes()];
     Pubkey::find_program_address(seeds, program_id)
 }
 
@@ -284,7 +284,8 @@ fn process_initialize_creator(program_id: &Pubkey, accounts: &[AccountInfo]) -> 
         return Err(WumboError::InvalidWumboInstanceOwner.into());
     }
 
-    let (token_bonding_authority_key, _) = bonding_authority(program_id, &creator.key);
+    let founder_rewards_owner = founder_rewards_account_data.owner;
+    let (token_bonding_authority_key, _) = bonding_authority(program_id, &founder_rewards_owner);
     if token_bonding_authority_key != token_bonding_data.authority.unwrap() {
         msg!("Invalid token bonding authority");
         return Err(WumboError::InvalidAuthority.into());

@@ -75,7 +75,7 @@ export const Avatar = ({
         )}
       >
         <span className={style.sizes[size].text}>
-          {name.substr(0, 2).toUpperCase()}
+          {name && name.substr(0, 2).toUpperCase()}
         </span>
       </span>
     )}
