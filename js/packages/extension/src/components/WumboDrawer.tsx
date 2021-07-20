@@ -5,7 +5,7 @@ import { Dialog, Transition } from "@headlessui/react";
 import { XIcon } from "@heroicons/react/outline";
 import { useDrawer } from "@/contexts/drawerContext";
 import { routes, IRoutes } from "@/constants/routes";
-import { useCreatorInfo } from "@/utils/creatorState";
+import { useUserInfo } from "@/utils/userState";
 
 export const WumboDrawer = (props: { children: ReactNode }) => {
   const { state, dispatch } = useDrawer();
@@ -106,8 +106,8 @@ WumboDrawer.Content = (props: { children: ReactNode }) => (
 
 WumboDrawer.Nav = () => {
   const { state } = useDrawer();
-  const creatorInfoState = useCreatorInfo(state.creator.name!);
-  const { creatorInfo, loading } = creatorInfoState;
+  const creatorInfoState = useUserInfo(state.creator.name!);
+  const { userInfo: creatorInfo, loading } = creatorInfoState;
 
   return (
     <div className="flex flex-row justify-around pt-2 px-2 border-t-1 border-gray-200">

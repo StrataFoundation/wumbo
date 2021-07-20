@@ -3,8 +3,42 @@ use {
     solana_program::{
         instruction::{AccountMeta, Instruction},
         sysvar, pubkey::Pubkey,
-    },
+    }
 };
+
+#[repr(C)]
+#[derive(BorshSerialize, BorshDeserialize, PartialEq, Debug, Clone)]
+pub struct Creator {
+    pub address: Pubkey,
+    pub verified: bool,
+    // In percentages, NOT basis points ;) Watch out!
+    pub share: u8,
+}
+
+#[repr(C)]
+#[derive(BorshSerialize, BorshDeserialize, PartialEq, Debug, Clone)]
+pub struct Data {
+    /// The name of the asset
+    pub name: String,
+    /// The symbol for the asset
+    pub symbol: String,
+    /// URI pointing to JSON representing the asset
+    pub uri: String,
+    /// Royalty basis points that goes to creators in secondary sales (0-10000)
+    pub seller_fee_basis_points: u16,
+    /// Array of creators, optional
+    pub creators: Option<Vec<Creator>>,
+}
+
+#[repr(C)]
+#[derive(BorshSerialize, BorshDeserialize, PartialEq, Debug, Clone)]
+/// Args for create call
+pub struct CreateMetadataAccountArgs {
+    /// Note that unique metadatas are disabled for now.
+    pub data: Data,
+    /// Whether you want your metadata to be updateable in the future.
+    pub is_mutable: bool,
+}
 
 /// Instructions supported by the Solclout program.
 #[derive(BorshSerialize, BorshDeserialize, Clone)]
@@ -117,7 +151,13 @@ pub enum TokenBondingInstruction {
     ///   1. `[signer]` Token bonding authority
     ChangeAuthorityV0 {
         new_authority: Option<Pubkey>
-    }
+    },
+
+    /// Proxy to the token metadata contract, first verifying that the authority of this curve signs off on the action.
+    ///   0. `[signer]` Token bonding authority
+    ///   1. `[]` Spl token metadata program id (will be checked against spl_token_metadata::id(), but needs to be inflated)
+    ///   ... all accounts on the CreateMetadataAccount call...
+    CreateTokenMetadata(CreateMetadataAccountArgs)
 }
 
 /// Creates an InitializeTokenBondingV0 instruction

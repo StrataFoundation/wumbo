@@ -92,7 +92,7 @@ export async function createReverseTwitterRegistry(
   let reverseTwitterRegistryStateBuff = serialize(
     ReverseTwitterRegistryState.schema,
     new ReverseTwitterRegistryState({
-      twitterRegistryKey: twitterRegistryKey.toBytes(),
+      twitterRegistryKey: twitterRegistryKey.toBuffer(),
       twitterHandle,
     })
   );

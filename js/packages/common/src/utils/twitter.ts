@@ -6,11 +6,8 @@ import { Account, Connection, sendAndConfirmRawTransaction, Transaction, Transac
 import { PublicKey } from "@solana/web3.js";
 import { useState } from "react";
 import { useAsync, useAsyncCallback } from "react-async-hook";
-import { TWITTER_REGISTRAR_SERVER_URL } from "../constants/globals";
+import { TWITTER_REGISTRAR_SERVER_URL, IS_DEV, DEV_TWITTER_TLD } from "../constants/globals";
 import { createVerifiedTwitterRegistry, getTwitterRegistry } from "./testableNameServiceTwitter";
-
-const DEV_MODE = true;
-const DEV_TLD = "NoahTest2";
 
 async function sendTransaction(
   connection: Connection,
@@ -31,19 +28,19 @@ async function sendTransaction(
 }
 
 export async function createTestTld(connection: Connection, wallet: WalletAdapter) {
-  if (DEV_MODE) {
-    const tld = await getNameAccountKey(await getHashedName(DEV_TLD));
+  if (IS_DEV) {
+    const tld = await getNameAccountKey(await getHashedName(DEV_TWITTER_TLD));
     const account = await connection.getAccountInfo(tld);
     if (!account) {
       console.log("Testing tld doesn't exist, creating...")
-      const createInstruction = await createNameRegistry(connection, DEV_TLD, 1000, wallet.publicKey!, wallet.publicKey!);
+      const createInstruction = await createNameRegistry(connection, DEV_TWITTER_TLD, 1000, wallet.publicKey!, wallet.publicKey!);
       console.log(await sendTransaction(connection, [createInstruction], wallet));
     }
   }
 }
 
 export async function getTld(): Promise<PublicKey> {
-  return DEV_MODE ? await getNameAccountKey(await getHashedName(DEV_TLD)) : TWITTER_ROOT_PARENT_REGISTRY_KEY
+  return IS_DEV ? await getNameAccountKey(await getHashedName(DEV_TWITTER_TLD)) : TWITTER_ROOT_PARENT_REGISTRY_KEY
 }
 
 export const getTwitterHandle = async (
@@ -90,7 +87,7 @@ export const postTwitterRegistrarRequest = async (
   redirectUri: string,
   twitterHandle: string
 ) => {
-  if (DEV_MODE) {
+  if (IS_DEV) {
     console.log("Sending dev mode claim twitter handle txn...")
     await sendTransaction(connection, instructions, wallet);
   } else {
@@ -150,7 +147,7 @@ export async function claimTwitterTransactionInstructions(connection: Connection
     1_000,
     owner,
     NAME_PROGRAM_ID,
-    DEV_MODE ? owner : TWITTER_VERIFICATION_AUTHORITY,
+    IS_DEV ? owner : TWITTER_VERIFICATION_AUTHORITY,
     await getTld()
   );
 }
@@ -159,7 +156,7 @@ export async function getTwitterReverse(connection: Connection, owner: PublicKey
   const hashedName = await getHashedName(owner.toString());
   const key = await getNameAccountKey(
     hashedName,
-    DEV_MODE ? owner : TWITTER_VERIFICATION_AUTHORITY,
+    IS_DEV ? owner : TWITTER_VERIFICATION_AUTHORITY,
     await getTld()
   );
 

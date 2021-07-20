@@ -96,6 +96,10 @@ pub fn process_instruction(
             msg!("Instruction: Change Authority V0");
             process_change_authority_v0(program_id, accounts, new_authority)
         }
+        TokenBondingInstruction::CreateTokenMetadata(args) => {
+          msg!("Instruction: Create Token Metadata");
+          Ok(())
+        }
     }
 }
 

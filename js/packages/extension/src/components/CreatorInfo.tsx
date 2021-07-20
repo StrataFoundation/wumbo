@@ -2,7 +2,7 @@ import React from "react";
 import { Link } from "react-router-dom";
 import { WUMBO_INSTANCE_KEY } from "wumbo-common";
 import { WumboInstance } from "spl-wumbo";
-import { useCreatorInfo } from "@/utils/creatorState";
+import { useUserInfo } from "@/utils/userState";
 import { useWallet } from "wumbo-common";
 import { useAccount } from "wumbo-common";
 import { Button, Spinner } from "wumbo-common";
@@ -19,8 +19,8 @@ type Props = {
 const CreatorInfo: React.FC<Props> = ({ creatorName, creatorImg }: Props) => {
   const { state, dispatch } = useDrawer();
 
-  const creatorInfoState = useCreatorInfo(creatorName);
-  const { creatorInfo, loading } = creatorInfoState;
+  const creatorInfoState = useUserInfo(creatorName);
+  const { userInfo: creatorInfo, loading } = creatorInfoState;
   const { wallet } = useWallet();
   const { info: wumboInstance } = useAccount(
     WUMBO_INSTANCE_KEY,

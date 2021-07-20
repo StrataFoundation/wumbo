@@ -2,26 +2,28 @@ import { AccountInfo, Connection, PublicKey } from "@solana/web3.js";
 import { deserializeUnchecked, Schema } from "borsh";
 import { MintInfo, MintLayout, u64 } from "@solana/spl-token";
 
-export class WumboCreator {
+export class TokenRef {
   // @ts-ignore
   publicKey: PublicKey; // Gets set on retrieve
   wumboInstance: PublicKey;
   tokenBonding: PublicKey;
-  name: PublicKey;
+  owner?: PublicKey;
+  name?: PublicKey;
+  is_claimed: boolean;
   initialized: boolean;
 
   static LEN = 1 + 32 * 4 + 2 + 1 + 1;
 
   static schema: Schema = new Map([
     [
-      WumboCreator,
+      TokenRef,
       {
         kind: "struct",
         fields: [
-          ["key", [1]],
+          ["key", 'u8'],
           ["wumboInstance", [32]],
           ["tokenBonding", [32]],
-          ["name", [32]],
+          ["ownerOrName", [32]],
           ["initialized", [1]],
         ],
       },
@@ -29,25 +31,27 @@ export class WumboCreator {
   ]);
 
   constructor(obj: {
-    key: Uint8Array;
+    key: number;
     wumboInstance: Uint8Array;
     tokenBonding: Uint8Array;
-    name: Uint8Array;
+    ownerOrName: Uint8Array;
     initialized: Uint8Array;
   }) {
+    this.is_claimed = obj.key === 2
     this.wumboInstance = new PublicKey(obj.wumboInstance);
     this.tokenBonding = new PublicKey(obj.tokenBonding);
-    this.name = new PublicKey(obj.name);
+    this.owner = this.is_claimed ? new PublicKey(obj.ownerOrName) : undefined;
+    this.name = this.is_claimed ?  undefined : new PublicKey(obj.ownerOrName);
     this.initialized = obj.initialized[0] === 1;
   }
 
   static fromAccount(
     key: PublicKey,
     account: AccountInfo<Buffer>
-  ): WumboCreator {
+  ): TokenRef {
     const value = deserializeUnchecked(
-      WumboCreator.schema,
-      WumboCreator,
+      TokenRef.schema,
+      TokenRef,
       account.data
     );
     value.publicKey = key;
@@ -58,7 +62,7 @@ export class WumboCreator {
   static async retrieve(
     connection: Connection,
     wumboCreator: PublicKey
-  ): Promise<WumboCreator | null> {
+  ): Promise<TokenRef | null> {
     let account = await connection.getAccountInfo(wumboCreator);
 
     if (!account) {

@@ -12,7 +12,7 @@ import {
   SPL_NAME_SERVICE_PROGRAM_ID,
   SPL_ASSOCIATED_TOKEN_ACCOUNT_PROGRAM_ID,
 } from "wumbo-common";
-import { createWumboCreator, WumboInstance } from "spl-wumbo";
+import { createWumboSocialToken, WumboInstance } from "spl-wumbo";
 import { useAccount, getTld } from "wumbo-common";
 import { useWallet } from "wumbo-common";
 import { Avatar, Button, Spinner } from "wumbo-common";
@@ -35,7 +35,7 @@ export const Create = () => {
   const createCreator = async () => {
     setCreationLoading(true);
     try {
-      const { tokenBondingKey } = await createWumboCreator(connection, {
+      const { tokenBondingKey } = await createWumboSocialToken(connection, {
         splTokenBondingProgramId: TOKEN_BONDING_PROGRAM_ID,
         splAssociatedTokenAccountProgramId:
           SPL_ASSOCIATED_TOKEN_ACCOUNT_PROGRAM_ID,

@@ -13,8 +13,8 @@ use solana_sdk::transaction::Transaction;
 use solana_program::pubkey::Pubkey;
 use spl_wumbo::instruction::initialize_wumbo;
 
-const NAME_PROGRAM_ID_STR: &str = "FV42ih6c4jfUTHRbqT8tCVo67UYFMssjavmT3XeNBsdX";
-const WUMBO_PORGRAM_ID_STR: &str = "AyvifSXGFuXadeve8y66cLQaPgRLfWwDBb8H7TJvTSse";
+const NAME_PROGRAM_ID_STR: &str = "namesLPneVptA9Z5rqUDD9tMTWEJwofgaYwp8cawRkX";
+const WUMBO_PORGRAM_ID_STR: &str = "AiYPQudWgXerJ1BdKfH5HkEamnPXSHAfPK2ThhKFkkDw";
 // BRbG1myx3zXz8JMBTuvyJPbTwgpSPZdxypVcvbGGnPcE
 fn main() {
     // let TOKEN_SWAP_PROGRAM_ID: Pubkey = Pubkey::from_str(TOKEN_SWAP_PROGRAM_ID_STR).unwrap();

@@ -11,7 +11,7 @@ use {
     crate::{
         error::WumboError,
         instruction::WumboInstruction,
-        state::{Key, WumboCreatorV0},
+        state::{Key, UnclaimedTokenRefV0},
     },
     borsh::{BorshDeserialize, BorshSerialize},
     solana_program::{
@@ -25,11 +25,9 @@ use {
     spl_token::state::Account,
 };
 
+use crate::instruction::CreateMetadataAccountArgs;
 use crate::solana_program::sysvar::Sysvar;
-use crate::state::{
-    WumboInstanceV0, BONDING_AUTHORITY_PREFIX, CREATOR_PREFIX, FOUNDER_REWARDS_AUTHORITY_PREFIX,
-    WUMBO_PREFIX,
-};
+use crate::state::{BONDING_AUTHORITY_PREFIX, CLAIMED_REF_PREFIX, ClaimedTokenRefV0, FOUNDER_REWARDS_AUTHORITY_PREFIX, UNCLAIMED_REF_PREFIX, WUMBO_PREFIX, WumboInstanceV0};
 use spl_name_service::state::NameRecordHeader;
 
 pub fn process_instruction(
@@ -44,9 +42,9 @@ pub fn process_instruction(
             msg!("Instruction: Initialize Wumbo V0");
             process_initialize_wumbo(program_id, accounts, name_program_id)
         }
-        WumboInstruction::InitializeCreatorV0 => {
-            msg!("Instruction: Initialize Creator V0");
-            process_initialize_creator(program_id, accounts)
+        WumboInstruction::InitializeSocialTokenV0 => {
+            msg!("Instruction: Initialize Social Token V0");
+            process_initialize_social_token(program_id, accounts)
         }
         WumboInstruction::OptOutV0 => {
             msg!("Instruction: Opt Out V0");
@@ -55,6 +53,10 @@ pub fn process_instruction(
         WumboInstruction::OptInV0 => {
             msg!("Instruction: Opt Out V0");
             process_opt(program_id, accounts, false)
+        }
+        WumboInstruction::CreateTokenMetadata(args) => {
+          msg!("Instruction: Create Token Metadata");
+          process_create_token_metadata(program_id, accounts, args)
         }
     }
 }
@@ -124,28 +126,41 @@ pub fn wumbo_authority(program_id: &Pubkey, wumbo_mint: &Pubkey) -> (Pubkey, u8)
     Pubkey::find_program_address(seeds, program_id)
 }
 
-pub fn creator_authority(
+pub fn unclaimed_pda(
     program_id: &Pubkey,
     wumbo_instance: &Pubkey,
     name: &Pubkey,
 ) -> (Pubkey, u8) {
     let seeds: &[&[u8]] = &[
-        &CREATOR_PREFIX.as_bytes(),
+        &UNCLAIMED_REF_PREFIX.as_bytes(),
         &wumbo_instance.to_bytes(),
         &name.to_bytes(),
     ];
     Pubkey::find_program_address(seeds, program_id)
 }
 
-pub fn bonding_authority(program_id: &Pubkey, founder_rewards_owner: &Pubkey) -> (Pubkey, u8) {
-    let seeds: &[&[u8]] = &[&BONDING_AUTHORITY_PREFIX.as_bytes(), &founder_rewards_owner.to_bytes()];
+pub fn claimed_pda(
+  program_id: &Pubkey,
+  wumbo_instance: &Pubkey,
+  owner: &Pubkey,
+) -> (Pubkey, u8) {
+  let seeds: &[&[u8]] = &[
+      &CLAIMED_REF_PREFIX.as_bytes(),
+      &wumbo_instance.to_bytes(),
+      &owner.to_bytes(),
+  ];
+  Pubkey::find_program_address(seeds, program_id)
+}
+
+pub fn bonding_authority(program_id: &Pubkey, token_ref: &Pubkey) -> (Pubkey, u8) {
+    let seeds: &[&[u8]] = &[&BONDING_AUTHORITY_PREFIX.as_bytes(), &token_ref.to_bytes()];
     Pubkey::find_program_address(seeds, program_id)
 }
 
-pub fn founder_rewards_authority(program_id: &Pubkey, creator: &Pubkey) -> (Pubkey, u8) {
+pub fn founder_rewards_authority(program_id: &Pubkey, token_ref: &Pubkey) -> (Pubkey, u8) {
     let seeds: &[&[u8]] = &[
         &FOUNDER_REWARDS_AUTHORITY_PREFIX.as_bytes(),
-        &creator.to_bytes(),
+        &token_ref.to_bytes(),
     ];
     Pubkey::find_program_address(seeds, program_id)
 }
@@ -204,10 +219,10 @@ fn process_initialize_wumbo(
     Ok(())
 }
 
-fn process_initialize_creator(program_id: &Pubkey, accounts: &[AccountInfo]) -> ProgramResult {
+fn process_initialize_social_token(program_id: &Pubkey, accounts: &[AccountInfo]) -> ProgramResult {
     let accounts_iter = &mut accounts.into_iter();
     let payer = next_account_info(accounts_iter)?;
-    let creator = next_account_info(accounts_iter)?;
+    let token_ref = next_account_info(accounts_iter)?;
     let wumbo_instance = next_account_info(accounts_iter)?;
     let name = next_account_info(accounts_iter)?;
     let founder_rewards_account = next_account_info(accounts_iter)?;
@@ -223,16 +238,25 @@ fn process_initialize_creator(program_id: &Pubkey, accounts: &[AccountInfo]) -> 
         return Err(WumboError::InvalidCurve.into());
     }
 
+    if *token_bonding.owner != spl_token_bonding::id() {
+      return Err(WumboError::InvalidTokenBondingProgramId.into());
+    }
+
     let name_specified_owner = if name.data.borrow().len() > 0 {
         let name_record_header = NameRecordHeader::unpack_from_slice(&name.data.borrow())?;
         name_record_header.owner
     } else {
         Pubkey::default()
     };
-
     let mut peekable = accounts_iter.peekable();
+    let is_claimed = peekable.peek().is_some();
     // If this is the founder (they own the name), don't do anything.
-    if peekable.peek().is_some() {
+    if is_claimed {
+      if wumbo_instance_data.name_program_id != *name.owner {
+        msg!("Name program id mismatch, was {}, expected {}", *name.owner, wumbo_instance_data.name_program_id);
+        return Err(WumboError::InvalidNameProgramId.into());
+      }
+  
         let name_owner = next_account_info(&mut peekable)?;
         if !name_owner.is_signer {
             return Err(WumboError::MissingSigner.into());
@@ -241,40 +265,83 @@ fn process_initialize_creator(program_id: &Pubkey, accounts: &[AccountInfo]) -> 
         if *name_owner.key != name_specified_owner {
             return Err(WumboError::NameOwnerMismatch.into());
         }
+
+        let (token_ref_key, bump) = claimed_pda(program_id, &wumbo_instance.key, name_owner.key);
+        if token_ref_key != *token_ref.key {
+            return Err(WumboError::InvalidProgramAddress.into());
+        }
+
+        if token_ref.data.borrow().len() > 0
+            && ClaimedTokenRefV0::unpack_from_slice(&token_ref.data.borrow())?.initialized
+        {
+            return Err(WumboError::AlreadyInitialized.into());
+        }
+
+        create_or_allocate_account_raw(
+            *program_id,
+            token_ref,
+            rent,
+            system_account_info,
+            payer,
+            ClaimedTokenRefV0::LEN,
+            &[
+                &CLAIMED_REF_PREFIX.as_bytes(),
+                &wumbo_instance.key.to_bytes(),
+                &name_owner.key.to_bytes(),
+                &[bump],
+            ],
+        )?;
+        let new_account_data = ClaimedTokenRefV0 {
+          key: Key::ClaimedTokenRefV0,
+          wumbo_instance: *wumbo_instance.key,
+          token_bonding: *token_bonding.key,
+          owner: *name_owner.key,
+          initialized: true,
+        };
+        new_account_data.serialize(&mut *token_ref.try_borrow_mut_data()?)?; 
     } else {
+        let (token_ref_key, bump) = unclaimed_pda(program_id, &wumbo_instance.key, &name.key);
+        if token_ref_key != *token_ref.key {
+            return Err(WumboError::InvalidProgramAddress.into());
+        }
+
         // This isn't the founder. Make sure the account is owned by our program to save for later
-        let (founder_rewards_authority, _) = founder_rewards_authority(program_id, creator.key);
+        let (founder_rewards_authority, _) = founder_rewards_authority(program_id, token_ref.key);
         if founder_rewards_account_data.owner != founder_rewards_authority {
             msg!("Invalid founder rewards authority");
             return Err(WumboError::InvalidAuthority.into());
         }
-    }
 
-    let (creator_key, bump) = creator_authority(program_id, &wumbo_instance.key, &name.key);
-    if creator_key != *creator.key {
-        return Err(WumboError::InvalidProgramAddress.into());
-    }
+        if token_ref.data.borrow().len() > 0
+            && UnclaimedTokenRefV0::unpack_from_slice(&token_ref.data.borrow())?.initialized
+        {
+            return Err(WumboError::AlreadyInitialized.into());
+        }
 
-    if creator.data.borrow().len() > 0
-        && WumboCreatorV0::unpack_from_slice(&creator.data.borrow())?.initialized
-    {
-        return Err(WumboError::AlreadyInitialized.into());
-    }
+        create_or_allocate_account_raw(
+            *program_id,
+            token_ref,
+            rent,
+            system_account_info,
+            payer,
+            UnclaimedTokenRefV0::LEN,
+            &[
+                &UNCLAIMED_REF_PREFIX.as_bytes(),
+                &wumbo_instance.key.to_bytes(),
+                &name.key.to_bytes(),
+                &[bump],
+            ],
+        )?;
 
-    create_or_allocate_account_raw(
-        *program_id,
-        creator,
-        rent,
-        system_account_info,
-        payer,
-        WumboCreatorV0::LEN,
-        &[
-            &CREATOR_PREFIX.as_bytes(),
-            &wumbo_instance.key.to_bytes(),
-            &name.key.to_bytes(),
-            &[bump],
-        ],
-    )?;
+        let new_account_data = UnclaimedTokenRefV0 {
+          key: Key::UnclaimedTokenRefV0,
+          wumbo_instance: *wumbo_instance.key,
+          token_bonding: *token_bonding.key,
+          name: *name.key,
+          initialized: true,
+        };
+        new_account_data.serialize(&mut *token_ref.try_borrow_mut_data()?)?;  
+    }
 
     if wumbo_instance_data.key != Key::WumboInstanceV0 {
         return Err(ProgramError::InvalidAccountData);
@@ -284,8 +351,7 @@ fn process_initialize_creator(program_id: &Pubkey, accounts: &[AccountInfo]) -> 
         return Err(WumboError::InvalidWumboInstanceOwner.into());
     }
 
-    let founder_rewards_owner = founder_rewards_account_data.owner;
-    let (token_bonding_authority_key, _) = bonding_authority(program_id, &founder_rewards_owner);
+    let (token_bonding_authority_key, _) = bonding_authority(program_id, token_ref.key);
     if token_bonding_authority_key != token_bonding_data.authority.unwrap() {
         msg!("Invalid token bonding authority");
         return Err(WumboError::InvalidAuthority.into());
@@ -299,75 +365,68 @@ fn process_initialize_creator(program_id: &Pubkey, accounts: &[AccountInfo]) -> 
         return Err(WumboError::MissingSigner.into());
     }
 
-    let new_account_data = WumboCreatorV0 {
-        key: Key::WumboCreatorV0,
-        wumbo_instance: *wumbo_instance.key,
-        token_bonding: *token_bonding.key,
-        name: *name.key,
-        initialized: true,
-    };
-    new_account_data.serialize(&mut *creator.try_borrow_mut_data()?)?;
-
     Ok(())
 }
 
 /// Verify all of the big requirements:
-///   1. Token bonding belongs to creator
+///   1. Token bonding belongs to ref
 ///   2. Signer (name owner) is the owner of name
-///   3. Creator is associated with this name
-///   4. Creator is part of this program id
-///   5. Token bonding authority is the correct pda of ['bonding-authority', Creator Pubkey]
-fn verify_creator(program_id: &Pubkey, accounts: &[AccountInfo]) -> Result<WumboCreatorV0, ProgramError> {
+///   3. Ref is associated with this name
+///   4. Ref is part of this program id
+///   5. Token bonding authority is the correct pda of ['bonding-authority', Token Ref Pubkey]
+fn verify_token_ref(program_id: &Pubkey, accounts: &[AccountInfo]) -> Result<ClaimedTokenRefV0, ProgramError> {
     let accounts_iter = &mut accounts.into_iter();
-    let creator = next_account_info(accounts_iter)?;
+    let token_ref = next_account_info(accounts_iter)?;
     let token_bonding = next_account_info(accounts_iter)?;
     let token_bonding_authority = next_account_info(accounts_iter)?;
-    let name = next_account_info(accounts_iter)?;
-    let name_owner = next_account_info(accounts_iter)?;
-    let creator_data = WumboCreatorV0::unpack_from_slice(&creator.data.borrow())?;
-    let name_record_header = NameRecordHeader::unpack_from_slice(&name.data.borrow())?;
+    let owner = next_account_info(accounts_iter)?;
+    let token_ref_data = ClaimedTokenRefV0::unpack_from_slice(&token_ref.data.borrow())?;
     let token_bonding_data = TokenBondingV0::unpack_from_slice(&token_bonding.data.borrow())?;
-    let name_specified_owner = name_record_header.owner;
-    if !name_owner.is_signer {
+    let specified_owner = token_ref_data.owner;
+    if !owner.is_signer {
         return Err(WumboError::MissingSigner.into());
     }
 
-    if creator_data.key != Key::WumboCreatorV0 {
+    if token_ref_data.key != Key::ClaimedTokenRefV0 {
+      return Err(ProgramError::InvalidArgument);
+    }
+
+    if *token_bonding.key != spl_token_bonding::id() {
+      return Err(WumboError::InvalidTokenBondingProgramId.into());
+    }
+
+    if token_ref_data.key != Key::UnclaimedTokenRefV0 {
         return Err(ProgramError::InvalidAccountData);
     }
 
-    if *name_owner.key != name_specified_owner {
-        return Err(WumboError::NameOwnerMismatch.into());
+    if *owner.key != specified_owner {
+        return Err(WumboError::OwnerMismatch.into());
     }
 
-    if *token_bonding.key != creator_data.token_bonding {
+    if *token_bonding.key != token_ref_data.token_bonding {
         return Err(WumboError::InavlidTokenBonding.into());
     }
 
-    if creator_data.name != *name.key {
-        return Err(WumboError::InvalidName.into());
-    }
-
-    let (token_bonding_authority_key, _) = bonding_authority(program_id, &creator.key);
+    let (token_bonding_authority_key, _) = bonding_authority(program_id, &token_ref.key);
     if token_bonding_authority_key != token_bonding_data.authority.unwrap() {
         msg!("Invalid token bonding authority");
         return Err(WumboError::InvalidAuthority.into());
     }
 
-    Ok(creator_data)
+    Ok(token_ref_data)
 }
 
 fn process_opt(program_id: &Pubkey, accounts: &[AccountInfo], opted_out: bool) -> ProgramResult {
     let accounts_iter = &mut accounts.into_iter();
-    let creator = next_account_info(accounts_iter)?;
-    let creator_data = verify_creator(program_id, accounts);
+    let token_ref = next_account_info(accounts_iter)?;
+    let token_ref_data = verify_token_ref(program_id, accounts);
     let token_bonding = next_account_info(accounts_iter)?;
     let token_bonding_authority = next_account_info(accounts_iter)?;
     
-    let (_, nonce) = bonding_authority(program_id, &creator.key);
+    let (_, nonce) = bonding_authority(program_id, &token_ref.key);
     let signer_seeds = &[
         BONDING_AUTHORITY_PREFIX.as_bytes(),
-        &creator.key.to_bytes(),
+        &token_ref.key.to_bytes(),
         &[nonce]
     ];
     if opted_out {
@@ -399,4 +458,47 @@ fn process_opt(program_id: &Pubkey, accounts: &[AccountInfo], opted_out: bool) -
     }
 
     Ok(())
+}
+
+fn process_create_token_metadata(program_id: &Pubkey, accounts: &[AccountInfo], args: CreateMetadataAccountArgs) -> ProgramResult {
+  let accounts_iter = &mut accounts.into_iter();
+  let token_bonding = next_account_info(accounts_iter)?;
+  let founder_rewards_account = next_account_info(accounts_iter)?;
+  let founder_rewards_owner = next_account_info(accounts_iter)?;
+  let token_bonding_authority = next_account_info(accounts_iter)?;
+  let token_bonding_program_id = next_account_info(accounts_iter)?;
+
+  let founder_rewards_account_data = Account::unpack(&founder_rewards_account.data.borrow())?;
+  let token_bonding_data = TokenBondingV0::unpack_from_slice(&token_bonding.data.borrow())?;
+
+  if *token_bonding.key != spl_token_bonding::id() || *token_bonding_program_id.key != spl_token_bonding::id() {
+    return Err(WumboError::InvalidTokenBondingProgramId.into());
+  }
+
+  if token_bonding_data.founder_rewards != *founder_rewards_account.key {
+    return Err(WumboError::InvalidFounderRewardsAccount.into());
+  }
+
+  if founder_rewards_account_data.owner != *founder_rewards_owner.key {
+    return Err(WumboError::InvalidFounderRewardsOwner.into());
+  }
+
+  // let (token_bonding_authority_key, nonce) = bonding_authority(program_id, token_ref.key);
+  // if token_bonding_authority_key != token_bonding_data.authority.unwrap() {
+  //     msg!("Invalid token bonding authority");
+  //     return Err(WumboError::InvalidAuthority.into());
+  // }
+
+  if !founder_rewards_owner.is_signer {
+    return Err(WumboError::MissingSigner.into());
+  }
+
+  // let signer_seeds = &[
+  //       BONDING_AUTHORITY_PREFIX.as_bytes(),
+  //       &token_ref.key.to_bytes(),
+  //       &[nonce]
+  //   ];
+    
+
+  return Ok(())
 }
