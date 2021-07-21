@@ -1,11 +1,12 @@
 use std::convert::TryInto;
 
+use solana_program::instruction::AccountMeta;
 use solana_program::program::{invoke, invoke_signed};
 use solana_program::program_error::ProgramError;
 use solana_program::system_instruction;
 use spl_token::solana_program::program_pack::Pack;
 use spl_token_bonding::state::{LogCurveV0, TokenBondingV0};
-use spl_token_bonding::instruction::{freeze_buy_v0_instruction, thaw_buy_v0_instruction};
+use spl_token_bonding::instruction::{CreateMetadataAccountArgs, freeze_buy_v0_instruction, thaw_buy_v0_instruction};
 
 use {
     crate::{
@@ -25,7 +26,6 @@ use {
     spl_token::state::Account,
 };
 
-use crate::instruction::CreateMetadataAccountArgs;
 use crate::solana_program::sysvar::Sysvar;
 use crate::state::{BONDING_AUTHORITY_PREFIX, CLAIMED_REF_PREFIX, ClaimedTokenRefV0, FOUNDER_REWARDS_AUTHORITY_PREFIX, UNCLAIMED_REF_PREFIX, WUMBO_PREFIX, WumboInstanceV0};
 use spl_name_service::state::NameRecordHeader;
@@ -462,43 +462,78 @@ fn process_opt(program_id: &Pubkey, accounts: &[AccountInfo], opted_out: bool) -
 
 fn process_create_token_metadata(program_id: &Pubkey, accounts: &[AccountInfo], args: CreateMetadataAccountArgs) -> ProgramResult {
   let accounts_iter = &mut accounts.into_iter();
+  let token_ref = next_account_info(accounts_iter)?;
+  let token_ref_owner = next_account_info(accounts_iter)?;
   let token_bonding = next_account_info(accounts_iter)?;
-  let founder_rewards_account = next_account_info(accounts_iter)?;
-  let founder_rewards_owner = next_account_info(accounts_iter)?;
   let token_bonding_authority = next_account_info(accounts_iter)?;
   let token_bonding_program_id = next_account_info(accounts_iter)?;
+  let spl_token_metadata_program_id = next_account_info(accounts_iter)?;
 
-  let founder_rewards_account_data = Account::unpack(&founder_rewards_account.data.borrow())?;
+  // Unused except for passthrough
+  let metadata_account = next_account_info(accounts_iter)?;
+  let mint = next_account_info(accounts_iter)?;
+  let mint_authority = next_account_info(accounts_iter)?;
+  let payer = next_account_info(accounts_iter)?;
+  let update_authority = next_account_info(accounts_iter)?;
+
   let token_bonding_data = TokenBondingV0::unpack_from_slice(&token_bonding.data.borrow())?;
+  let token_ref_data = ClaimedTokenRefV0::unpack_from_slice(&token_ref.data.borrow())?;
 
-  if *token_bonding.key != spl_token_bonding::id() || *token_bonding_program_id.key != spl_token_bonding::id() {
+  if *token_bonding.owner != spl_token_bonding::id() || *token_bonding_program_id.key != spl_token_bonding::id() {
     return Err(WumboError::InvalidTokenBondingProgramId.into());
   }
 
-  if token_bonding_data.founder_rewards != *founder_rewards_account.key {
-    return Err(WumboError::InvalidFounderRewardsAccount.into());
+  if *token_ref_owner.key != token_ref_data.owner {
+    return Err(WumboError::InvalidTokenRefOwner.into())
   }
 
-  if founder_rewards_account_data.owner != *founder_rewards_owner.key {
-    return Err(WumboError::InvalidFounderRewardsOwner.into());
+  if *token_ref.owner != *program_id {
+    return Err(ProgramError::IncorrectProgramId)
   }
 
-  // let (token_bonding_authority_key, nonce) = bonding_authority(program_id, token_ref.key);
-  // if token_bonding_authority_key != token_bonding_data.authority.unwrap() {
-  //     msg!("Invalid token bonding authority");
-  //     return Err(WumboError::InvalidAuthority.into());
-  // }
+  let (token_bonding_authority_key, nonce) = bonding_authority(program_id, token_ref.key);
+  if token_bonding_authority_key != token_bonding_data.authority.unwrap() {
+      msg!("Invalid token bonding authority");
+      return Err(WumboError::InvalidAuthority.into());
+  }
 
-  if !founder_rewards_owner.is_signer {
+  if !token_ref_owner.is_signer {
     return Err(WumboError::MissingSigner.into());
   }
 
-  // let signer_seeds = &[
-  //       BONDING_AUTHORITY_PREFIX.as_bytes(),
-  //       &token_ref.key.to_bytes(),
-  //       &[nonce]
-  //   ];
-    
+  let signer_seeds = &[
+      BONDING_AUTHORITY_PREFIX.as_bytes(),
+      &token_ref.key.to_bytes(),
+      &[nonce]
+  ];
+  
+  invoke_signed(
+    &spl_token_bonding::instruction::create_metadata_accounts(
+      *token_bonding_program_id.key,
+      *token_bonding.key,
+      *token_bonding_authority.key,
+      *spl_token_metadata_program_id.key,
+      *metadata_account.key,
+      *mint.key,
+      *mint_authority.key,
+      *payer.key,
+      *update_authority.key,
+      update_authority.is_signer,
+      args
+    ),
+    &[
+      token_bonding_program_id.clone(),
+      token_bonding.clone(),
+      token_bonding_authority.clone(),
+      spl_token_metadata_program_id.clone(),
+      metadata_account.clone(),
+      mint.clone(),
+      mint_authority.clone(),
+      payer.clone(),
+      update_authority.clone()
+    ],
+    &[signer_seeds],
+  )?;
 
   return Ok(())
 }

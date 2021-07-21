@@ -106,14 +106,11 @@ pub enum WumboError {
     #[error("Invalid creator mint")]
     InvalidCreatorMint,
 
-    #[error("Invalid creator owner, must be owned by wumbo program")]
-    InvalidCreatorOwner,
+    #[error("Invalid token ref owner")]
+    InvalidTokenRefOwner,
 
     #[error("Invalid Instance owner, must be owned by wumbo program")]
     InvalidWumboInstanceOwner,
-
-    #[error("Founder rewards account must be owned by either this program or the name account owner")]
-    InvalidFounderRewardsOwner,
 
     #[error("Name did not match the name found on the creator")]
     InvalidName,

@@ -6,40 +6,7 @@ use {
         sysvar,
     }
 };
-
-#[repr(C)]
-#[derive(BorshSerialize, BorshDeserialize, PartialEq, Debug, Clone)]
-pub struct Creator {
-    pub address: Pubkey,
-    pub verified: bool,
-    // In percentages, NOT basis points ;) Watch out!
-    pub share: u8,
-}
-
-#[repr(C)]
-#[derive(BorshSerialize, BorshDeserialize, PartialEq, Debug, Clone)]
-pub struct Data {
-    /// The name of the asset
-    pub name: String,
-    /// The symbol for the asset
-    pub symbol: String,
-    /// URI pointing to JSON representing the asset
-    pub uri: String,
-    /// Royalty basis points that goes to creators in secondary sales (0-10000)
-    pub seller_fee_basis_points: u16,
-    /// Array of creators, optional
-    pub creators: Option<Vec<Creator>>,
-}
-
-#[repr(C)]
-#[derive(BorshSerialize, BorshDeserialize, PartialEq, Debug, Clone)]
-/// Args for create call
-pub struct CreateMetadataAccountArgs {
-    /// Note that unique metadatas are disabled for now.
-    pub data: Data,
-    /// Whether you want your metadata to be updateable in the future.
-    pub is_mutable: bool,
-}
+use spl_token_bonding::instruction::{CreateMetadataAccountArgs};
 
 /// Instructions supported by the Wumbo program.
 #[derive(BorshSerialize, BorshDeserialize, Clone)]
@@ -87,9 +54,9 @@ pub enum WumboInstruction {
     OptInV0,
 
     /// Proxy to the token metadata contract, first verifying that the owner of the founder rewards account signs off on this action
-    ///   0. `[]` Token bonding
-    ///   1. `[]` Founder rewards account on this token bonding
-    ///   2. `[signer]` Token bonding founder rewards owner
+    ///   0. `[]` claimed token ref
+    ///   1. `[signer]` claimed token ref owner
+    ///   2. `[]` Token bonding
     ///   3. `[]` Token bonding authority (pda of ['bonding-authority', token ref pubkey])
     ///   4. `[]` Spl token bonding program id (will be checked against spl_token_bonding::id(), but needs to be inflated)
     ///   5. `[]` Spl token metadata program id (will be checked against spl_token_metadata::id(), but needs to be inflated)

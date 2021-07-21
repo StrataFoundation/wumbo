@@ -1,7 +1,11 @@
 use std::convert::TryInto;
+use std::str::FromStr;
 
+use solana_program::instruction::{AccountMeta, Instruction};
 use solana_program::program::{invoke, invoke_signed};
+use solana_program::sysvar;
 use solana_program::{program_error::ProgramError, system_instruction};
+use crate::instruction::{CreateMetadataAccountArgs, MetadataInstruction};
 use crate::precise_number::PreciseNumber;
 use spl_token::{native_mint, solana_program::program_pack::Pack};
 
@@ -28,6 +32,8 @@ use crate::{
     solana_program::sysvar::Sysvar,
     state::{BASE_STORAGE_AUTHORITY, BASE_STORAGE_KEY},
 };
+
+static TOKEN_METADATA_PROGRAM_ID_STR: &str = "metaqbxxUerdq28cj1RbAWkYQm3ybzjb6a8bt518x1s";
 
 pub fn process_instruction(
     program_id: &Pubkey,
@@ -98,7 +104,7 @@ pub fn process_instruction(
         }
         TokenBondingInstruction::CreateTokenMetadata(args) => {
           msg!("Instruction: Create Token Metadata");
-          Ok(())
+          process_create_token_metadata(program_id, accounts, args)
         }
     }
 }
@@ -786,6 +792,97 @@ fn process_change_authority_v0(program_id: &Pubkey, accounts: &[AccountInfo], ne
     new_account_data.serialize(&mut *token_bonding.try_borrow_mut_data()?)?;
 
     Ok(())
+}
+
+#[allow(clippy::too_many_arguments)]
+pub fn create_metadata_accounts(
+    program_id: Pubkey,
+    metadata_account: Pubkey,
+    mint: Pubkey,
+    mint_authority: Pubkey,
+    payer: Pubkey,
+    update_authority: Pubkey,
+    update_authority_is_signer: bool,
+    args: CreateMetadataAccountArgs
+) -> Instruction {
+    Instruction {
+        program_id,
+        accounts: vec![
+          AccountMeta::new(metadata_account, false),
+          AccountMeta::new_readonly(mint, false),
+            AccountMeta::new_readonly(mint_authority, true),
+            AccountMeta::new_readonly(payer, true),
+            AccountMeta::new_readonly(update_authority, update_authority_is_signer),
+            AccountMeta::new_readonly(solana_program::system_program::id(), false),
+            AccountMeta::new_readonly(sysvar::rent::id(), false),
+        ],
+        data: MetadataInstruction::CreateMetadataAccount(args)
+        .try_to_vec()
+        .unwrap(),
+    }
+}
+
+fn process_create_token_metadata(program_id: &Pubkey, accounts: &[AccountInfo], args: CreateMetadataAccountArgs) -> ProgramResult {
+  let accounts_iter = &mut accounts.into_iter();
+  let token_bonding = next_account_info(accounts_iter)?;
+  let token_bonding_authority = next_account_info(accounts_iter)?;
+  let spl_token_metadata_program_id = next_account_info(accounts_iter)?;
+
+  // Unused except for passthrough
+  let metadata_account = next_account_info(accounts_iter)?;
+  let mint = next_account_info(accounts_iter)?;
+  let mint_authority = next_account_info(accounts_iter)?;
+  let payer = next_account_info(accounts_iter)?;
+  let update_authority = next_account_info(accounts_iter)?;
+
+  let token_bonding_data = TokenBondingV0::unpack_from_slice(&token_bonding.data.borrow())?;
+
+  if *token_bonding.owner != *program_id {
+    return Err(ProgramError::IncorrectProgramId);
+  }
+
+  if !token_bonding_authority.is_signer {
+    return Err(TokenBondingError::MissingSigner.into());
+  }
+
+  if *token_bonding_authority.key != token_bonding_data.authority.ok_or::<ProgramError>(TokenBondingError::InvalidAuthority.into())? {
+    return Err(TokenBondingError::InvalidAuthority.into())
+  }
+
+  let (_, nonce) = target_authority(program_id, mint.key);
+  let signer_seeds = &[
+      TARGET_AUTHORITY.as_bytes(),
+      &mint.key.to_bytes(),
+      &[nonce]
+  ];
+
+  if *spl_token_metadata_program_id.key != Pubkey::from_str(TOKEN_METADATA_PROGRAM_ID_STR).unwrap() {
+    return Err(ProgramError::IncorrectProgramId);
+  }
+  
+  invoke_signed(
+    &create_metadata_accounts(
+      *spl_token_metadata_program_id.key,
+      *metadata_account.key,
+      *mint.key,
+      *mint_authority.key,
+      *payer.key,
+      *update_authority.key,
+      update_authority.is_signer,
+      args
+    ),
+    &[
+      spl_token_metadata_program_id.clone(),
+      metadata_account.clone(),
+      mint.clone(),
+      mint_authority.clone(),
+      payer.clone(),
+      update_authority.clone()
+    ],
+    &[signer_seeds],
+  )?;
+
+  return Ok(())
 }
 
 #[cfg(test)]
