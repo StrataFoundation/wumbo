@@ -7,14 +7,14 @@ import { classNames } from "./utils/utils";
  ** https://tailwindui.com/components/application-ui/elements/avatars
  */
 
-interface AvatarProps {
+export interface IAvatarProps {
   name: string;
   subText?: string;
   imgSrc?: string;
   rounded?: boolean;
   token?: boolean;
   showDetails?: boolean;
-  size?: "xs" | "sm" | "md" | "lg";
+  size?: "xxs" | "xs" | "sm" | "md" | "lg" | "xl";
 }
 
 const style = {
@@ -22,6 +22,10 @@ const style = {
   rounded: "!rounded-full",
   token: "!bg-gradient-to-r !from-yellow-400 !to-red-400",
   sizes: {
+    xxs: {
+      default: "h-6 w-6",
+      text: "text-xxs font-medium leading-none text-white",
+    },
     xs: {
       default: "h-8 w-8",
       text: "text-xs font-medium leading-none text-white",
@@ -53,7 +57,7 @@ export const Avatar = ({
   token = false,
   showDetails = false,
   size = "md",
-}: AvatarProps) => (
+}: IAvatarProps) => (
   <div className="flex items-center">
     {imgSrc && (
       <img

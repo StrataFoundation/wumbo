@@ -195,7 +195,7 @@ export const Trade = React.memo(
         );
         setTransactionSuccesful({
           showing: true,
-          amount: values.tokenAmount,
+          amount: Number(values.tokenAmount),
           tokenName: ticker,
         });
       } catch (e) {
