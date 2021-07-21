@@ -7,6 +7,7 @@ use solana_program::sysvar;
 use solana_program::{program_error::ProgramError, system_instruction};
 use crate::instruction::{CreateMetadataAccountArgs, MetadataInstruction};
 use crate::precise_number::PreciseNumber;
+use crate::state::TOKEN_BONDING_PREFIX;
 use spl_token::{native_mint, solana_program::program_pack::Pack};
 
 use {
@@ -171,6 +172,11 @@ pub fn storage_key(program_id: &Pubkey, token_bonding: &Pubkey) -> (Pubkey, u8) 
     Pubkey::find_program_address(seeds, program_id)
 }
 
+pub fn token_bonding_key(program_id: &Pubkey, target_mint: &Pubkey) -> (Pubkey, u8) {
+  let seeds: &[&[u8]] = &[&TOKEN_BONDING_PREFIX.as_bytes(), &target_mint.to_bytes()];
+  Pubkey::find_program_address(seeds, program_id)
+}
+
 fn unpack_curve(program_id: &Pubkey, curve: &AccountInfo) -> Result<Box<dyn Curve>, ProgramError> {
     if *curve.owner != *program_id {
         return Err(TokenBondingError::InvalidOwner.into());
@@ -263,6 +269,25 @@ fn process_initialize_token_bonding_v0(
     let system_program_info = next_account_info(accounts_iter)?;
     let rent = next_account_info(accounts_iter)?;
 
+    let (token_bonding_key, token_bonding_nonce) = token_bonding_key(program_id, target_mint.key);
+    if token_bonding_key != *token_bonding_account.key {
+      return Err(TokenBondingError::InvalidProgramAddress.into());
+    }
+    let token_bonding_seed = &[
+        TOKEN_BONDING_PREFIX.as_bytes(),
+        &target_mint.key.to_bytes(),
+        &[token_bonding_nonce],
+    ];
+   create_or_allocate_account_raw(
+        *program_id,
+        token_bonding_account,
+        rent,
+        system_program_info,
+        payer,
+        TokenBondingV0::LEN,
+        token_bonding_seed
+    )?;
+
     let (storage_key, storage_key_nonce) = storage_key(program_id, token_bonding_account.key);
 
     if storage_key != *base_storage.key {
@@ -344,16 +369,6 @@ fn process_initialize_token_bonding_v0(
 
     if *token_bonding_account.owner != *program_id {
         return Err(TokenBondingError::InvalidOwner.into());
-    }
-
-    let rent = &Rent::from_account_info(rent)?;
-    let required_lamports = rent
-        .minimum_balance(TokenBondingV0::LEN)
-        .max(1)
-        .saturating_sub(token_bonding_account.lamports());
-
-    if required_lamports > 0 {
-        return Err(TokenBondingError::NotRentExempt.into());
     }
 
     let new_account_data = TokenBondingV0 {
@@ -978,7 +993,6 @@ mod tests {
         let program_id = Pubkey::new_unique();
         let payer_key = Pubkey::new_unique();
         let payer = SolanaAccount::new(100000, 0, &program_id);
-        let (token_bonding_key, token_bonding) = get_account(TokenBondingV0::LEN, &program_id);
         let (token_bonding_authority_key, token_bonding_authority) = get_account(0, &program_id);
         let (curve_key, curve) = get_account(LogCurveV0::LEN, &program_id);
         let (base_mint_key, base_mint) = get_loaded_mint(
@@ -1004,6 +1018,8 @@ mod tests {
                 freeze_authority: COption::Some(target_mint_authority_key),
             },
         );
+        let (token_bonding_key, _) = token_bonding_key(&program_id, &target_mint_key);
+        let token_bonding = SolanaAccount::new(0, TokenBondingV0::LEN, &program_id);
         let (founder_rewards_key, founder_rewards) = get_loaded_mint_account(
             &token_program_id,
             Account {

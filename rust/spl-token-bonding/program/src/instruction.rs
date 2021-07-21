@@ -78,7 +78,7 @@ pub enum TokenBondingInstruction {
     /// The authority is a PDA of this program that gives it full authority of the target mint. No coins will be minted outside of this program
     ///
     ///   0. `[writeable signer]` Payer
-    ///   1. `[writeable signer]` Token bonding account to create
+    ///   1. `[writeable]` Token bonding account to create. Pda of ['token-bonding', target mint]
     ///   2. `[]` Bonding Curve, see Create<Type>Curve instructions
     ///   3. `[]` Base coin mint
     ///   4. `[]` Target coin mint. Must have mint and freeze authority as `create_program_address(['target-authority', target.pubKey])`
@@ -229,7 +229,7 @@ pub fn initialize_token_bonding_v0(
 ) -> Instruction {
     let accounts = vec![
         AccountMeta::new(*payer, true),
-        AccountMeta::new(*token_bonding, true),
+        AccountMeta::new(*token_bonding, false),
         AccountMeta::new_readonly(*curve, false),
         AccountMeta::new_readonly(*base_mint, false),
         AccountMeta::new_readonly(*target_mint, false),

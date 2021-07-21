@@ -19,6 +19,7 @@ pub const UNCLAIMED_REF_PREFIX: &str = "unclaimed-ref";
 pub const CLAIMED_REF_PREFIX: &str = "claimed-ref";
 pub const BONDING_AUTHORITY_PREFIX: &str = "bonding-authority";
 pub const FOUNDER_REWARDS_AUTHORITY_PREFIX: &str = "founder-rewards";
+pub const REVERSE_TOKEN_REF_PREFIX: &str = "reverse-token-ref";
 
 #[repr(C)]
 #[derive(BorshSerialize, BorshDeserialize, PartialEq, Debug, Clone)]

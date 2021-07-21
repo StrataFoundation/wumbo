@@ -29,7 +29,7 @@ use spl_token_bonding::{
 const TOKEN_SWAP_PROGRAM_ID_STR: &str = "F2LtPFtixA8vKbg8ark5zswM4QuJKBn85KZcqrzWNe4K";
 const TOKEN_PROGRAM_ID_STR: &str = "CiBbJADtSJnVQEsgXZpRfLyLNqDjwfvua8EMe9tPhKvo";
 const NAME_PROGRAM_ID_STR: &str = "CiBbJADtSJnVQEsgXZpRfLyLNqDjwfvua8EMe9tPhKvo";
-const TOKEN_BONDING_PROGRAM_ID_STR: &str = "GNaAvtLUeVLMWJw2hafeVxFbK254UR3Y4mrxaqZHR4sY";
+const TOKEN_BONDING_PROGRAM_ID_STR: &str = "4K8fnycnTESeyad4DqfXPF8TbkuyscPK4EjAwY35emyW";
 // const TOKEN_BONDING_PROGRAM_ID_STR: &str = "CBvX6GXQ7CfoqWNG99wW22zzufz1owyH2tPSfEyus7JV";
 
 fn main() {
@@ -253,23 +253,12 @@ fn main() {
                 )
             ];
 
-            let token_bonding = Keypair::new();
-            let token_bonding_key = token_bonding.pubkey();
-            let balance = client
-                .get_minimum_balance_for_rent_exemption(TokenBondingV0::LEN)
-                .unwrap();
+            let (token_bonding_key, _) = spl_token_bonding::processor::token_bonding_key(&TOKEN_BONDING_PROGRAM_ID, &target_key);
             let (base_storage_key, _) = storage_key(&TOKEN_BONDING_PROGRAM_ID, &token_bonding_key);
             let (storage_authority_key, _) =
                 storage_authority(&TOKEN_BONDING_PROGRAM_ID, &base_storage_key);
 
             let create_instructions: Vec<Instruction> = vec![
-                create_account(
-                    &fee_payer.pubkey(),
-                    &token_bonding_key,
-                    balance,
-                    TokenBondingV0::LEN as u64,
-                    &TOKEN_BONDING_PROGRAM_ID,
-                ),
                 initialize_token_bonding_v0(
                     &TOKEN_BONDING_PROGRAM_ID,
                     &TOKEN_PROGRAM_ID,
@@ -296,7 +285,7 @@ fn main() {
                 Transaction::new_with_payer(&instructions, Some(&fee_payer.pubkey()));
             let recent_blockhash = client.get_recent_blockhash().unwrap().0;
             transaction.sign(
-                &vec![fee_payer.as_ref(), &token_bonding, &target],
+                &vec![fee_payer.as_ref(), &target],
                 recent_blockhash,
             );
             client.send_transaction(&transaction).unwrap();

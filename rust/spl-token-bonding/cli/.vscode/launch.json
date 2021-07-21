@@ -55,7 +55,7 @@
                     "kind": "bin"
                 }
             },
-            "args": ["create-bonding", "96WfJjCyfxtvoPy28HVAPw4viFWxasb9XMvMaABY48V8", "So11111111111111111111111111111111111111112"],
+            "args": ["create-bonding", "GDoJt2q7igCWaE5DgAKuaoG14WZUUjTdWZ3sk53bzBEt", "So11111111111111111111111111111111111111112"],
             "cwd": "${workspaceFolder}"
         },
         {

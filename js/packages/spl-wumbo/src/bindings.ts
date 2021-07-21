@@ -170,7 +170,10 @@ export async function createWumboSocialToken(
     )
   );
 
-  const tokenBonding = new Account();
+  const [tokenBonding] = await PublicKey.findProgramAddress(
+    [Buffer.from("token-bonding", "utf-8"), targetMint.publicKey.toBuffer()],
+    params.splTokenBondingProgramId
+  )
   const [tokenBondingAuthority, _] = await PublicKey.findProgramAddress(
     [Buffer.from("bonding-authority", "utf-8"), tokenRef.toBuffer()],
     params.splWumboProgramId
@@ -179,25 +182,20 @@ export async function createWumboSocialToken(
     connection,
     params.wumboInstance
   );
-  const balance = await connection.getMinimumBalanceForRentExemption(
-    TokenBondingV0.LEN
-  );
-
-  instructions.push(
-    SystemProgram.createAccount({
-      fromPubkey: params.payer.publicKey,
-      newAccountPubkey: tokenBonding.publicKey,
-      lamports: balance,
-      space: TokenBondingV0.LEN,
-      programId: params.splTokenBondingProgramId,
-    })
-  );
+  const reverseTokenRef = (await PublicKey.findProgramAddress(
+    [
+      Buffer.from("reverse-token-ref", "utf-8"),
+      params.wumboInstance.toBuffer(),
+      tokenBonding.toBuffer(),
+    ],
+    params.splWumboProgramId
+  ))[0];
 
   // Setup base storage
   const [baseStorageKey] = await PublicKey.findProgramAddress(
     [
       Buffer.from("base-storage-key", "utf8"),
-      tokenBonding.publicKey.toBuffer(),
+      tokenBonding.toBuffer(),
     ],
     params.splTokenBondingProgramId
   );
@@ -211,7 +209,7 @@ export async function createWumboSocialToken(
       params.splTokenBondingProgramId,
       params.splTokenProgramId,
       params.payer.publicKey,
-      tokenBonding.publicKey,
+      tokenBonding,
       tokenBondingAuthority,
       wumboInstance.baseCurve,
       params.baseMint,
@@ -229,26 +227,26 @@ export async function createWumboSocialToken(
       params.splWumboProgramId,
       params.payer.publicKey,
       tokenRef,
+      reverseTokenRef,
       params.wumboInstance,
       nameKey,
       associatedFounderRewardsAddress,
-      tokenBonding.publicKey,
+      tokenBonding,
       nameExists ? founderRewardsOwner : undefined
     )
   );
 
   await sendTransaction(connection, instructions, params.payer, [
-    targetMint,
-    tokenBonding,
+    targetMint
   ]);
 
   console.log(
-    `Created social token ref with key ${tokenRef}, founder rewards account ${associatedFounderRewardsAddress}, token bonding ${tokenBonding.publicKey} and mint ${targetMint.publicKey}`
+    `Created social token ref with key ${tokenRef}, founder rewards account ${associatedFounderRewardsAddress}, token bonding ${tokenBonding} and mint ${targetMint.publicKey}`
   );
 
   return {
     tokenRefKey: tokenRef,
-    tokenBondingKey: tokenBonding.publicKey,
+    tokenBondingKey: tokenBonding,
     ownerKey: founderRewardsOwner
   };
 }

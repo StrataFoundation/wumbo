@@ -27,7 +27,7 @@ use {
 };
 
 use crate::solana_program::sysvar::Sysvar;
-use crate::state::{BONDING_AUTHORITY_PREFIX, CLAIMED_REF_PREFIX, ClaimedTokenRefV0, FOUNDER_REWARDS_AUTHORITY_PREFIX, UNCLAIMED_REF_PREFIX, WUMBO_PREFIX, WumboInstanceV0};
+use crate::state::{BONDING_AUTHORITY_PREFIX, CLAIMED_REF_PREFIX, ClaimedTokenRefV0, FOUNDER_REWARDS_AUTHORITY_PREFIX, REVERSE_TOKEN_REF_PREFIX, UNCLAIMED_REF_PREFIX, WUMBO_PREFIX, WumboInstanceV0};
 use spl_name_service::state::NameRecordHeader;
 
 pub fn process_instruction(
@@ -152,6 +152,19 @@ pub fn claimed_pda(
   Pubkey::find_program_address(seeds, program_id)
 }
 
+pub fn reverse_token_ref_key(
+  program_id: &Pubkey,
+  wumbo_instance: &Pubkey,
+  token_bonding: &Pubkey,
+) -> (Pubkey, u8) {
+  let seeds: &[&[u8]] = &[
+      &REVERSE_TOKEN_REF_PREFIX.as_bytes(),
+      &wumbo_instance.to_bytes(),
+      &token_bonding.to_bytes(),
+  ];
+  Pubkey::find_program_address(seeds, program_id)
+}
+
 pub fn bonding_authority(program_id: &Pubkey, token_ref: &Pubkey) -> (Pubkey, u8) {
     let seeds: &[&[u8]] = &[&BONDING_AUTHORITY_PREFIX.as_bytes(), &token_ref.to_bytes()];
     Pubkey::find_program_address(seeds, program_id)
@@ -223,6 +236,7 @@ fn process_initialize_social_token(program_id: &Pubkey, accounts: &[AccountInfo]
     let accounts_iter = &mut accounts.into_iter();
     let payer = next_account_info(accounts_iter)?;
     let token_ref = next_account_info(accounts_iter)?;
+    let reverse_token_ref = next_account_info(accounts_iter)?;
     let wumbo_instance = next_account_info(accounts_iter)?;
     let name = next_account_info(accounts_iter)?;
     let founder_rewards_account = next_account_info(accounts_iter)?;
@@ -248,6 +262,13 @@ fn process_initialize_social_token(program_id: &Pubkey, accounts: &[AccountInfo]
     } else {
         Pubkey::default()
     };
+
+
+    let (reverse_token_ref_key, reverse_bump) = reverse_token_ref_key(program_id, &wumbo_instance.key, token_bonding.key);
+    if reverse_token_ref_key != *reverse_token_ref.key {
+        return Err(WumboError::InvalidProgramAddress.into());
+    }
+
     let mut peekable = accounts_iter.peekable();
     let is_claimed = peekable.peek().is_some();
     // If this is the founder (they own the name), don't do anything.
@@ -291,6 +312,20 @@ fn process_initialize_social_token(program_id: &Pubkey, accounts: &[AccountInfo]
                 &[bump],
             ],
         )?;
+        create_or_allocate_account_raw(
+          *program_id,
+          reverse_token_ref,
+          rent,
+          system_account_info,
+          payer,
+          ClaimedTokenRefV0::LEN,
+          &[
+              &REVERSE_TOKEN_REF_PREFIX.as_bytes(),
+              &wumbo_instance.key.to_bytes(),
+              &token_bonding.key.to_bytes(),
+              &[reverse_bump],
+          ],
+      )?;
         let new_account_data = ClaimedTokenRefV0 {
           key: Key::ClaimedTokenRefV0,
           wumbo_instance: *wumbo_instance.key,
@@ -299,6 +334,7 @@ fn process_initialize_social_token(program_id: &Pubkey, accounts: &[AccountInfo]
           initialized: true,
         };
         new_account_data.serialize(&mut *token_ref.try_borrow_mut_data()?)?; 
+        new_account_data.serialize(&mut *reverse_token_ref.try_borrow_mut_data()?)?; 
     } else {
         let (token_ref_key, bump) = unclaimed_pda(program_id, &wumbo_instance.key, &name.key);
         if token_ref_key != *token_ref.key {
@@ -332,6 +368,20 @@ fn process_initialize_social_token(program_id: &Pubkey, accounts: &[AccountInfo]
                 &[bump],
             ],
         )?;
+        create_or_allocate_account_raw(
+          *program_id,
+          reverse_token_ref,
+          rent,
+          system_account_info,
+          payer,
+          UnclaimedTokenRefV0::LEN,
+          &[
+              &REVERSE_TOKEN_REF_PREFIX.as_bytes(),
+              &wumbo_instance.key.to_bytes(),
+              &token_bonding.key.to_bytes(),
+              &[reverse_bump],
+          ],
+      )?;
 
         let new_account_data = UnclaimedTokenRefV0 {
           key: Key::UnclaimedTokenRefV0,
@@ -341,6 +391,7 @@ fn process_initialize_social_token(program_id: &Pubkey, accounts: &[AccountInfo]
           initialized: true,
         };
         new_account_data.serialize(&mut *token_ref.try_borrow_mut_data()?)?;  
+        new_account_data.serialize(&mut *reverse_token_ref.try_borrow_mut_data()?)?;  
     }
 
     if wumbo_instance_data.key != Key::WumboInstanceV0 {

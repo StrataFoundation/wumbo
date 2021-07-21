@@ -27,9 +27,11 @@ pub enum WumboInstruction {
     /// full authority of the social token mint. No coins will be minted outside of this program
     ///
     ///   0. `[writeable signer]` Payer
-    ///   1. `[writeable]` Token Ref account to create, 
+    ///   1. `[writeable]` user --> bonding Token Ref account to create, 
     ///             If unclaimed, program derived address of ['unclaimed-ref', Wumbo Instance, Name pkey]
     ///             If claimed, program derived address of ['claimed-ref', Wumbo Instance, Name service owner pkey]
+    ///   2. `[writeable]` token bonding --> User Ref account to create, 
+    ///             program derived address of ['reverse-token-ref', Wumbo Instance, Token Bonding pkey]
     ///   2. `[]` Wumbo instance.
     ///   3. `[]` Name service name
     ///   4. `[]` Founder rewards account
@@ -92,10 +94,11 @@ pub fn initialize_wumbo(
 }
 
 /// Creates an InitializeSocialTokenV0 instruction
-pub fn initialize_creator(
+pub fn initialize_social_token_instruction(
     program_id: &Pubkey,
     payer: &Pubkey,
     token_ref: &Pubkey,
+    reverse_token_ref: &Pubkey,
     wumbo_instance: &Pubkey,
     name: &Pubkey,
     founder_rewards_account: &Pubkey,
@@ -105,6 +108,7 @@ pub fn initialize_creator(
     let mut accounts = vec![
         AccountMeta::new(*payer, true),
         AccountMeta::new(*token_ref, false),
+        AccountMeta::new(*reverse_token_ref, false),
         AccountMeta::new_readonly(*wumbo_instance, false),
         AccountMeta::new_readonly(*name, false),
         AccountMeta::new_readonly(*founder_rewards_account, false),

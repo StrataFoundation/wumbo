@@ -33,7 +33,7 @@ export function initializeTokenBondingV0Instruction(
       },
       {
         pubkey: tokenBondingAccount,
-        isSigner: true,
+        isSigner: false,
         isWritable: true,
       },
       {

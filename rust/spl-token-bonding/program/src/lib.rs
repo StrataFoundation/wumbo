@@ -13,4 +13,4 @@ pub mod ln;
 pub mod precise_number;
 pub mod uint;
 
-solana_program::declare_id!("GNaAvtLUeVLMWJw2hafeVxFbK254UR3Y4mrxaqZHR4sY");
+solana_program::declare_id!("4K8fnycnTESeyad4DqfXPF8TbkuyscPK4EjAwY35emyW");
