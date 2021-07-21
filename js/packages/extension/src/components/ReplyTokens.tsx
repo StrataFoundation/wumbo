@@ -1,6 +1,6 @@
 import React, { Fragment } from "react";
 import { WumboInstance } from "spl-wumbo";
-import { useCreatorInfo } from "@/utils/creatorState";
+import { useUserInfo } from "@/utils/userState";
 import {
   useWallet,
   useAccount,
@@ -16,21 +16,21 @@ interface IReplyTokensProps extends Pick<IAvatarProps, "size"> {
 
 export const ReplyTokens = React.memo(
   ({ creatorName, mentions, size = "xxs" }: IReplyTokensProps) => {
-    const creatorInfoState = useCreatorInfo(creatorName);
+    const creatorInfoState = useUserInfo(creatorName);
     const sanitizeMentions = (mentions: string[]) =>
       mentions.map((mention) => mention.replace("@", ""));
-    const { creatorInfo, loading } = creatorInfoState;
+    const { userInfo, loading } = creatorInfoState;
     const { wallet } = useWallet();
     const { info: wumboInstance } = useAccount(
       WUMBO_INSTANCE_KEY,
       WumboInstance.fromAccount
     );
 
-    if (!loading && !creatorInfo && wumboInstance && wallet) {
+    if (!loading && !userInfo && wumboInstance && wallet) {
       return null;
     }
 
-    if (loading || !creatorInfo || !wumboInstance) {
+    if (loading || !userInfo || !wumboInstance) {
       return null;
     }
 
