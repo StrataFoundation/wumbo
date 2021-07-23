@@ -4,8 +4,6 @@ import { AppendChildPortal } from "wumbo-common";
 import { MainButton } from "./MainButton";
 import { ReplyTokens } from "./ReplyTokens";
 
-type ElementCacheEntry = [JSX.Element, JSX.Element | null];
-
 export default () => {
   const tweets = useTweets();
   const btnCache = new Map<string, JSX.Element>();
@@ -32,15 +30,15 @@ export default () => {
           const name = nameEl.href.split("/").slice(-1)[0];
           const imgEl = nameEl.querySelector("img");
           const replyRow = tweet.children[1]?.children[1]?.firstChild;
-          const insertButtonDiv = tweet.querySelector("time")?.parentNode
-            ?.parentNode;
+          const insertButtonDiv = tweet.firstChild?.firstChild;
 
           // Will always have 1 mention ie the @ of the creator from then name
           // so if its longer than 1 we have other user mentions
-          const isReply = replyRow?.textContent?.startsWith("Replying to");
+          const isReply = tweet.textContent?.includes("Replying to");
           const replyMentions =
             isReply && replyRow!.textContent!.match(/\B@(\w+)/g);
-          const insertReplyDiv = tweet.children[1].children[1]?.firstChild;
+          const insertReplyDiv =
+            tweet.children[1].children[1]?.lastChild?.previousSibling;
 
           const buttonEl = insertButtonDiv
             ? getOrElseUpdate(btnCache, name, () => (
@@ -61,7 +59,7 @@ export default () => {
             return (
               <Fragment key={name}>
                 <AppendChildPortal container={insertButtonDiv as Element}>
-                  <div className="ml-2">{buttonEl}</div>
+                  <div className="flex justify-center mt-1.5">{buttonEl}</div>
                 </AppendChildPortal>
                 {isReply && (
                   <AppendChildPortal container={insertReplyDiv as Element}>

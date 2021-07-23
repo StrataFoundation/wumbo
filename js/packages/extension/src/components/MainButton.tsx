@@ -45,8 +45,8 @@ export const MainButton: React.FC<Props> = ({
   if (!loading && !creatorInfo && wumboInstance && wallet) {
     return (
       <Link to={routes.create.path + `?name=${creatorName}&src=${creatorImg}`}>
-        <Button size="xs" color="primary" onClick={toggleDrawer}>
-          Create Coin
+        <Button block size="xs" color="primary" onClick={toggleDrawer}>
+          Mint
         </Button>
       </Link>
     );
@@ -64,7 +64,7 @@ export const MainButton: React.FC<Props> = ({
 
   return (
     <Link to={path}>
-      <Button size="xs" color="secondary" onClick={toggleDrawer}>
+      <Button block size="xs" color="secondary" onClick={toggleDrawer}>
         <span className="!text-green-800">
           ${creatorInfo?.coinPriceUsd.toFixed(2)}
         </span>

@@ -4,12 +4,12 @@ import {
   WUMBO_INSTANCE_KEY,
   WUMBO_PROGRAM_ID,
   TWITTER_ROOT_PARENT_REGISTRY_KEY,
-  useBondingPricing, 
+  useBondingPricing,
   useWumboUsdPrice,
-  useAccount, 
+  useAccount,
   UseAccountState,
   useMint,
-  useTokenRef
+  useTokenRef,
 } from "wumbo-common";
 import { AccountInfo, PublicKey } from "@solana/web3.js";
 import { TokenRef } from "spl-wumbo";
@@ -44,6 +44,7 @@ export const useUserInfo = (name: string): UserInfoState => {
     tokenBonding?.curve,
     LogCurveV0.fromAccount
   );
+
   const mint = useMint(creator && tokenBonding?.targetMint);
   const wumboUsdPrice = useWumboUsdPrice();
   const [userInfo, setUserInfo] = useState<UserInfoState>({

@@ -5,7 +5,7 @@ import {
 } from "@solana/spl-token";
 
 export const IS_DEV = true;
-export const DEV_TWITTER_TLD = "NoahTest2";
+export const DEV_TWITTER_TLD = "BryTest";
 
 export const TWITTER_REGISTRAR_SERVER_URL =
   "http://localhost:3000/registrar/twitter-oauth";
@@ -53,8 +53,7 @@ export const SPL_ASSOCIATED_TOKEN_ACCOUNT_PROGRAM_ID: PublicKey = new PublicKey(
 );
 
 export const AR_SOL_HOLDER_ID = new PublicKey(
-  'HvwC9QSAzvGXhhVrgPmauVwFWcYZhne3hVot9EbHuFTm',
+  "HvwC9QSAzvGXhhVrgPmauVwFWcYZhne3hVot9EbHuFTm"
 );
-
 
 export const BASE_SLIPPAGE = 0.1;

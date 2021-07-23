@@ -20,6 +20,7 @@ import { useAssociatedAccount } from "./walletState";
 import { useWallet } from "./wallet";
 import { useConnection } from "@oyster/common";
 import { useAsyncCallback } from "react-async-hook";
+import { useTokenRef } from "./tokenRef";
 
 // TODO: Use actual connection. But this can't happen in dev
 let connection = new Connection("https://api.mainnet-beta.solana.com");
@@ -77,6 +78,50 @@ export function useSolOwnedAmount(): { amount: number; loading: boolean } {
     amount: result,
     loading,
   };
+}
+
+export function useOwnedAmountForOwnerAndHandle(
+  owner: PublicKey | undefined,
+  handle: string | undefined
+): { amount: number | undefined; loading: boolean } {
+  const [state, setState] = useState<{ amount: number; loading: boolean }>({
+    loading: true,
+    amount: 0,
+  });
+  const { info: tokenRef, loading: loadingRef } = useTokenRef(handle);
+  const { info: token, loading: loadingAmount } = useAccount(
+    tokenRef?.tokenBonding,
+    TokenBondingV0.fromAccount
+  );
+  const {
+    associatedAccount,
+    loading: loadingAssociatedAccount,
+  } = useAssociatedAccount(owner, token?.targetMint);
+  const mint = useMint(token?.targetMint);
+
+  useEffect(() => {
+    if (tokenRef && token && associatedAccount && mint) {
+      setState({
+        loading: false,
+        amount: amountAsNum(associatedAccount.amount, mint),
+      });
+    } else if (!loadingRef && !loadingAmount && !loadingAssociatedAccount) {
+      setState({
+        loading: false,
+        amount: undefined,
+      });
+    }
+  }, [
+    tokenRef,
+    token,
+    associatedAccount,
+    mint,
+    loadingRef,
+    loadingAmount,
+    loadingAssociatedAccount,
+  ]);
+
+  return state;
 }
 
 export function useOwnedAmount(
