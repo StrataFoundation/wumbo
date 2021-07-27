@@ -15,11 +15,16 @@
     "skipLibCheck": true,
     "strict": true,
     "target": "es6",
+    "types": ["chrome"],
     "typeRoots": ["node_modules/@types"],
     "paths": {
       "@/*": ["*"]
     }
   },
-  "include": ["src", "../common/src/utils/wallet.tsx", "../spl-wumbo/src/bindings.ts"],
+  "include": [
+    "src",
+    "../common/src/utils/wallet.tsx",
+    "../spl-wumbo/src/bindings.ts"
+  ],
   "exclude": ["dist", "node_modules"]
 }
