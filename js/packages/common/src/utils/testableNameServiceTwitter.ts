@@ -1,5 +1,22 @@
-import { createInstruction, getHashedName, getNameAccountKey, NameRegistryState, NAME_PROGRAM_ID, Numberu32, Numberu64, ReverseTwitterRegistryState, TWITTER_ROOT_PARENT_REGISTRY_KEY, TWITTER_VERIFICATION_AUTHORITY, updateInstruction } from "@bonfida/spl-name-service";
-import { Connection, PublicKey, SystemProgram, TransactionInstruction } from "@solana/web3.js";
+import {
+  createInstruction,
+  getHashedName,
+  getNameAccountKey,
+  NameRegistryState,
+  NAME_PROGRAM_ID,
+  Numberu32,
+  Numberu64,
+  ReverseTwitterRegistryState,
+  TWITTER_ROOT_PARENT_REGISTRY_KEY,
+  TWITTER_VERIFICATION_AUTHORITY,
+  updateInstruction,
+} from "@bonfida/spl-name-service";
+import {
+  Connection,
+  PublicKey,
+  SystemProgram,
+  TransactionInstruction,
+} from "@solana/web3.js";
 import { serialize } from "borsh";
 
 export async function getTwitterRegistry(
@@ -19,7 +36,6 @@ export async function getTwitterRegistry(
   );
   return registry;
 }
-
 
 export async function createVerifiedTwitterRegistry(
   connection: Connection,
@@ -71,7 +87,6 @@ export async function createVerifiedTwitterRegistry(
   return instructions;
 }
 
-
 export async function createReverseTwitterRegistry(
   connection: Connection,
   twitterHandle: string,
@@ -92,7 +107,7 @@ export async function createReverseTwitterRegistry(
   let reverseTwitterRegistryStateBuff = serialize(
     ReverseTwitterRegistryState.schema,
     new ReverseTwitterRegistryState({
-      twitterRegistryKey: twitterRegistryKey.toBytes(),
+      twitterRegistryKey: twitterRegistryKey.toBuffer(),
       twitterHandle,
     })
   );

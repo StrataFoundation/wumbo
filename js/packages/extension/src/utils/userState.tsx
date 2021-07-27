@@ -4,38 +4,38 @@ import {
   WUMBO_INSTANCE_KEY,
   WUMBO_PROGRAM_ID,
   TWITTER_ROOT_PARENT_REGISTRY_KEY,
-  useBondingPricing, 
+  useBondingPricing,
   useWumboUsdPrice,
-  useAccount, 
+  useAccount,
   UseAccountState,
   useMint,
-  useCreator
+  useTokenRef,
 } from "wumbo-common";
 import { AccountInfo, PublicKey } from "@solana/web3.js";
-import { WumboCreator } from "spl-wumbo";
+import { TokenRef } from "spl-wumbo";
 import { MintInfo } from "@solana/spl-token";
 import { LogCurveV0, TokenBondingV0 } from "spl-token-bonding";
 
-interface CreatorState {
-  creator?: WumboCreator;
+interface UserState {
+  tokenRef?: TokenRef;
   loading: boolean;
 }
 
-export interface CreatorInfo {
+export interface UserInfo {
   name: string;
   coinPriceUsd: number;
   coinPrice: number;
-  creator: WumboCreator;
+  tokenRef: TokenRef;
   tokenBonding: TokenBondingV0;
   curve: LogCurveV0;
   mint: MintInfo;
 }
-export interface CreatorInfoState {
-  creatorInfo?: CreatorInfo;
+export interface UserInfoState {
+  userInfo?: UserInfo;
   loading: boolean;
 }
-export const useCreatorInfo = (name: string): CreatorInfoState => {
-  const { info: creator, loading } = useCreator(name);
+export const useUserInfo = (name: string): UserInfoState => {
+  const { info: creator, loading } = useTokenRef(name);
   const { info: tokenBonding } = useAccount(
     creator?.tokenBonding,
     TokenBondingV0.fromAccount
@@ -44,19 +44,20 @@ export const useCreatorInfo = (name: string): CreatorInfoState => {
     tokenBonding?.curve,
     LogCurveV0.fromAccount
   );
+
   const mint = useMint(creator && tokenBonding?.targetMint);
   const wumboUsdPrice = useWumboUsdPrice();
-  const [creatorInfo, setCreatorInfo] = useState<CreatorInfoState>({
+  const [userInfo, setUserInfo] = useState<UserInfoState>({
     loading: true,
   });
   const { current } = useBondingPricing(creator?.tokenBonding);
 
   useEffect(() => {
     if (curve && tokenBonding && mint && creator) {
-      setCreatorInfo({
-        creatorInfo: {
+      setUserInfo({
+        userInfo: {
           name,
-          creator,
+          tokenRef: creator,
           mint,
           tokenBonding,
           curve,
@@ -66,9 +67,9 @@ export const useCreatorInfo = (name: string): CreatorInfoState => {
         loading: false,
       });
     } else if (!loading) {
-      setCreatorInfo({ loading: false });
+      setUserInfo({ loading: false });
     }
   }, [current, curve, tokenBonding, mint, creator, loading]);
 
-  return creatorInfo;
+  return userInfo;
 };

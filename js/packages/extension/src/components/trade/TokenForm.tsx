@@ -42,6 +42,7 @@ export const TokenForm = ({
   }: {
     target: { value: string };
   }) => {
+    setValue("fiatAmount", Number(value));
     setValue("tokenAmount", +tokenAmountFromFiatAmount(+value).toFixed(2));
   };
 
@@ -50,7 +51,7 @@ export const TokenForm = ({
   }: {
     target: { value: string };
   }) => {
-    // TODO on change of tokenAmount determine fiatAmount
+    setValue("tokenAmount", Number(value));
     setValue("fiatAmount", +fiatAmountFromTokenAmount(+value).toFixed(2));
   };
 
@@ -107,7 +108,13 @@ export const TokenForm = ({
             {!awaitingApproval && (type === "sell" ? "Sell" : "Buy")}
           </Button>
         ) : (
-          <Link to={routes.wallet.path + `?redirect=${location.pathname}${location.search}`} className="w-full">
+          <Link
+            to={
+              routes.wallet.path +
+              `?redirect=${location.pathname}${location.search}`
+            }
+            className="w-full"
+          >
             <Button block color="primary" size="lg">
               Connect Wallet
             </Button>

@@ -1,6 +1,6 @@
 export * from "./account";
 export * from "./auth0";
-export * from "./creator";
+export * from "./tokenRef";
 export * from "./mintState";
 export * from "./pricing";
 export * from "./twitter";

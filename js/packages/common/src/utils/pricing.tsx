@@ -19,7 +19,8 @@ import { useMint } from "./mintState";
 import { useAssociatedAccount } from "./walletState";
 import { useWallet } from "./wallet";
 import { useConnection } from "@oyster/common";
-import { useAsyncCallback } from "react-async-hook";
+import { useAsync } from "react-async-hook";
+import { useTokenRef } from "./tokenRef";
 
 // TODO: Use actual connection. But this can't happen in dev
 let connection = new Connection("https://api.mainnet-beta.solana.com");
@@ -42,37 +43,93 @@ export function supplyAsNum(mint: MintInfo): number {
 export function amountAsNum(amount: u64, mint: MintInfo): number {
   const decimals = new u64(Math.pow(10, mint.decimals).toString());
   const decimal = amount.mod(decimals).toNumber() / decimals.toNumber();
-  return amount
-  .div(decimals)
-  .toNumber() + decimal;
+  return amount.div(decimals).toNumber() + decimal;
 }
 
-export function useRentExemptAmount(size: number): { loading: boolean, amount: number | undefined } {
+export function useRentExemptAmount(
+  size: number
+): {
+  loading: boolean;
+  amount: number | undefined;
+  error: Error | undefined;
+} {
   const connection = useConnection();
-  const { execute, result, loading, error } = useAsyncCallback(connection.getMinimumBalanceForRentExemption.bind(connection));
-  useEffect(() => {
-    execute(size);
-  }, [connection])
-  const amount = useMemo(() => (result || 0) / Math.pow(10, 9), [result])
-  
+  const {
+    loading,
+    error,
+    result,
+  } = useAsync(connection.getMinimumBalanceForRentExemption, [size]);
+
+  const amount = useMemo(() => (result || 0) / Math.pow(10, 9), [result]);
+
   return {
     amount,
-    loading
-  }
+    error,
+    loading,
+  };
 }
 
-export function useSolOwnedAmount(): { amount: number, loading: boolean } {
+export function useSolOwnedAmount(): { amount: number; loading: boolean } {
   const { wallet } = useWallet();
-  const { info: lamports , loading } = useAccount<number>(wallet?.publicKey || undefined, (_, account) => account.lamports)
-  const result = React.useMemo(() => 
-    (lamports || 0) / Math.pow(10, 9),
-    [lamports]
-  )
+  const { info: lamports, loading } = useAccount<number>(
+    wallet?.publicKey || undefined,
+    (_, account) => account.lamports
+  );
+  const result = React.useMemo(() => (lamports || 0) / Math.pow(10, 9), [
+    lamports,
+  ]);
 
   return {
     amount: result,
-    loading
-  }
+    loading,
+  };
+}
+
+export function useOwnedAmountForOwnerAndHandle(
+  owner: PublicKey | undefined,
+  handle: string | undefined
+): { amount: number | undefined; loading: boolean } {
+  const [state, setState] = useState<{
+    amount: number | undefined;
+    loading: boolean;
+  }>({
+    loading: true,
+    amount: 0,
+  });
+  const { info: tokenRef, loading: loadingRef } = useTokenRef(handle);
+  const { info: token, loading: loadingAmount } = useAccount(
+    tokenRef?.tokenBonding,
+    TokenBondingV0.fromAccount
+  );
+  const {
+    associatedAccount,
+    loading: loadingAssociatedAccount,
+  } = useAssociatedAccount(owner, token?.targetMint);
+  const mint = useMint(token?.targetMint);
+
+  useEffect(() => {
+    if (tokenRef && token && associatedAccount && mint) {
+      setState({
+        loading: false,
+        amount: amountAsNum(associatedAccount.amount, mint),
+      });
+    } else if (!loadingRef && !loadingAmount && !loadingAssociatedAccount) {
+      setState({
+        loading: false,
+        amount: undefined,
+      });
+    }
+  }, [
+    tokenRef,
+    token,
+    associatedAccount,
+    mint,
+    loadingRef,
+    loadingAmount,
+    loadingAssociatedAccount,
+  ]);
+
+  return state;
 }
 
 export function useOwnedAmount(
@@ -89,7 +146,7 @@ export function useOwnedAmount(
     }
   }, [associatedAccount, mint]);
 
-  return amount;
+  return Number(amount);
 }
 
 // baseAmount = curve(supply + ret) * founder_rewards_percent
@@ -100,54 +157,52 @@ export function useOwnedAmount(
   This might help if you can't
   https://www.wolframalpha.com/input/?i=solve%5Bc*%281%2Fg+%2B+%28s+%2B+x%29%29+*+log%28g+*+%28s+%2B+x%29+%2B+1%29+-+c+*+%28s+%2B+x%29+%3D+k%2C+x%5D
 */
-export const inverseLogCurve =
-  (
-    curve: LogCurveV0,
-    base: MintInfo,
-    target: MintInfo,
-    founderRewardsPercentage: number
-  ) =>
-  (baseAmount: number): number => {
-    const c = curve.c;
-    const gNonBaseRel = curve.g;
-    const g = curve.isBaseRelative
-      ? gNonBaseRel / (1.0 + supplyAsNum(base))
-      : gNonBaseRel;
-    const s = supplyAsNum(target);
-    const rewardsDecimal = founderRewardsPercentage / 10000;
-    const k = baseAmount + generalLogCurve(c, g, s);
-    const exp = gsl_sf_lambert_W0((g * k - c) / (c * Math.E)) + 1;
+export const inverseLogCurve = (
+  curve: LogCurveV0,
+  base: MintInfo,
+  target: MintInfo,
+  founderRewardsPercentage: number
+) => (baseAmount: number): number => {
+  const c = curve.c;
+  const gNonBaseRel = curve.g;
+  const g = curve.isBaseRelative
+    ? gNonBaseRel / (1.0 + supplyAsNum(base))
+    : gNonBaseRel;
+  const s = supplyAsNum(target);
+  const rewardsDecimal = founderRewardsPercentage / 10000;
+  const k = baseAmount + generalLogCurve(c, g, s);
+  const exp = gsl_sf_lambert_W0((g * k - c) / (c * Math.E)) + 1;
 
-    return Math.abs(
-      (Math.pow(Math.E, exp) - g * s - 1) / ((1 + rewardsDecimal) * g)
-    );
-  };
+  return Math.abs(
+    (Math.pow(Math.E, exp) - g * s - 1) / ((1 + rewardsDecimal) * g)
+  );
+};
 
-const startFinishLogCurve =
-  (curve: LogCurveV0, base: MintInfo) => (start: number, finish: number) => {
-    const c = curve.c;
-    const gNonBaseRel = curve.g;
-    const g = curve.isBaseRelative
-      ? gNonBaseRel / (1.0 + supplyAsNum(base))
-      : gNonBaseRel;
+const startFinishLogCurve = (curve: LogCurveV0, base: MintInfo) => (
+  start: number,
+  finish: number
+) => {
+  const c = curve.c;
+  const gNonBaseRel = curve.g;
+  const g = curve.isBaseRelative
+    ? gNonBaseRel / (1.0 + supplyAsNum(base))
+    : gNonBaseRel;
 
-    return logCurveRange(c, g, start, finish);
-  };
+  return logCurveRange(c, g, start, finish);
+};
 
-export const logCurve =
-  (
-    curve: LogCurveV0,
-    base: MintInfo,
-    target: MintInfo,
-    founderRewardsPercentage: number
-  ) =>
-  (targetAmount: number): number => {
-    const rewardsDecimal = founderRewardsPercentage / 10000;
-    return startFinishLogCurve(curve, base)(
-      supplyAsNum(target),
-      supplyAsNum(target) + targetAmount * (1 + rewardsDecimal)
-    );
-  };
+export const logCurve = (
+  curve: LogCurveV0,
+  base: MintInfo,
+  target: MintInfo,
+  founderRewardsPercentage: number
+) => (targetAmount: number): number => {
+  const rewardsDecimal = founderRewardsPercentage / 10000;
+  return startFinishLogCurve(curve, base)(
+    supplyAsNum(target),
+    supplyAsNum(target) + targetAmount * (1 + rewardsDecimal)
+  );
+};
 
 export interface PricingState {
   loading: boolean;
@@ -194,14 +249,19 @@ export function useBondingPricing(
           target,
           bonding.founderRewardPercentage
         ),
-        sellTargetToBasePrice: (amount: number) => targetRangeToBasePrice(supplyAsNum(target) - amount, supplyAsNum(target)),
+        sellTargetToBasePrice: (amount: number) =>
+          targetRangeToBasePrice(
+            supplyAsNum(target) - amount,
+            supplyAsNum(target)
+          ),
         baseToTargetPrice: inverseLogCurve(
           curve,
           base,
           target,
           bonding.founderRewardPercentage
         ),
-        sellBaseToTargetPrice: (amount: number) => inverseLogCurve(curve, base, target, 0)(-amount),
+        sellBaseToTargetPrice: (amount: number) =>
+          inverseLogCurve(curve, base, target, 0)(-amount),
         targetRangeToBasePrice,
         current:
           curve.c *

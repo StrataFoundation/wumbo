@@ -9,7 +9,8 @@ import {
 export function initializeCreatorInstruction(
   programId: PublicKey,
   payer: PublicKey,
-  creator: PublicKey,
+  tokenRef: PublicKey,
+  reverseTokenRef: PublicKey,
   wumboInstance: PublicKey,
   name: PublicKey,
   founderRewardsAccount: PublicKey,
@@ -23,7 +24,12 @@ export function initializeCreatorInstruction(
       isWritable: true,
     },
     {
-      pubkey: creator,
+      pubkey: tokenRef,
+      isSigner: false,
+      isWritable: true,
+    },
+    {
+      pubkey: reverseTokenRef,
       isSigner: false,
       isWritable: true,
     },

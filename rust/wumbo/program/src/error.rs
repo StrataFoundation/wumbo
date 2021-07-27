@@ -27,8 +27,17 @@ pub enum WumboError {
     #[error("Name owner did not match the one specified")]
     NameOwnerMismatch,
 
+    #[error("Owner did not match the one specified")]
+    OwnerMismatch,
+
     #[error("Token program id did not match expected for this wumbo instance")]
     InvalidTokenProgramId,
+
+    #[error("Name program id did not match expected for this wumbo instance")]
+    InvalidNameProgramId,
+
+    #[error("Token bonding program id did not match expected")]
+    InvalidTokenBondingProgramId,
 
     #[error("Token bonding did not match the token bonding on the creator")]
     InavlidTokenBonding,
@@ -36,7 +45,7 @@ pub enum WumboError {
     #[error("Was not able to unpack an Account from the specified token account")]
     ExpectedAccount,
 
-    #[error("Was not able to derive authority program address from id and nonce")]
+    #[error("Invalid program address provided")]
     InvalidProgramAddress,
 
     /// Lamport balance below rent-exempt threshold for user. They could still withdraw
@@ -97,14 +106,11 @@ pub enum WumboError {
     #[error("Invalid creator mint")]
     InvalidCreatorMint,
 
-    #[error("Invalid creator owner, must be owned by wumbo program")]
-    InvalidCreatorOwner,
+    #[error("Invalid token ref owner")]
+    InvalidTokenRefOwner,
 
     #[error("Invalid Instance owner, must be owned by wumbo program")]
     InvalidWumboInstanceOwner,
-
-    #[error("Founder rewards account must be owned by either this program or the name account owner")]
-    InvalidFounderRewardsOwner,
 
     #[error("Name did not match the name found on the creator")]
     InvalidName,

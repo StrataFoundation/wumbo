@@ -5,7 +5,8 @@ import { Dialog, Transition } from "@headlessui/react";
 import { XIcon } from "@heroicons/react/outline";
 import { useDrawer } from "@/contexts/drawerContext";
 import { routes, IRoutes } from "@/constants/routes";
-import { useCreatorInfo } from "@/utils/creatorState";
+import { useUserInfo } from "@/utils/userState";
+import { Spinner } from "wumbo-common";
 
 export const WumboDrawer = (props: { children: ReactNode }) => {
   const { state, dispatch } = useDrawer();
@@ -63,7 +64,7 @@ export const WumboDrawer = (props: { children: ReactNode }) => {
 };
 
 interface HeaderNoChildren {
-  title: string;
+  title?: string;
 }
 
 interface HeaderWithChildren {
@@ -80,12 +81,14 @@ WumboDrawer.Header = (props: HeaderProps) => {
   return (
     <div className="px-4 py-3 border-b-1 border-gray-200">
       <div className="flex items-start justify-between">
-        {hasTitle && (
-          <p className="text-lg font-medium text-indigo-600">
-            {(props as HeaderNoChildren).title}
-          </p>
-        )}
-        {!hasTitle && (props as HeaderWithChildren).children}
+        <div className="w-full">
+          {hasTitle && (
+            <p className="text-lg font-medium text-indigo-600">
+              {(props as HeaderNoChildren).title}
+            </p>
+          )}
+          {!hasTitle && (props as HeaderWithChildren).children}
+        </div>
         <div className="ml-3 h-7 flex items-center">
           <button
             className="bg-white rounded-md text-gray-400 hover:text-gray-500 focus:outline-none"
@@ -106,8 +109,8 @@ WumboDrawer.Content = (props: { children: ReactNode }) => (
 
 WumboDrawer.Nav = () => {
   const { state } = useDrawer();
-  const creatorInfoState = useCreatorInfo(state.creator.name!);
-  const { creatorInfo, loading } = creatorInfoState;
+  const creatorInfoState = useUserInfo(state.creator.name!);
+  const { userInfo: creatorInfo, loading } = creatorInfoState;
 
   return (
     <div className="flex flex-row justify-around pt-2 px-2 border-t-1 border-gray-200">
@@ -144,3 +147,14 @@ WumboDrawer.Nav = () => {
     </div>
   );
 };
+
+WumboDrawer.Loading = () => (
+  <Fragment>
+    <WumboDrawer.Header />
+    <WumboDrawer.Content>
+      <div className="flex justify-center items-center h-full">
+        <Spinner size="lg" color="primary" />
+      </div>
+    </WumboDrawer.Content>
+  </Fragment>
+);

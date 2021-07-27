@@ -13,6 +13,7 @@ use {
 pub const TARGET_AUTHORITY: &str = "target-authority";
 pub const BASE_STORAGE_AUTHORITY: &str = "base-storage-authority";
 pub const BASE_STORAGE_KEY: &str = "base-storage-key";
+pub const TOKEN_BONDING_PREFIX: &str = "token-bonding";
 
 #[repr(C)]
 #[derive(BorshSerialize, BorshDeserialize, PartialEq, Debug, Clone)]

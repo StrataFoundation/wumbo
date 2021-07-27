@@ -3,8 +3,56 @@ use {
     solana_program::{
         instruction::{AccountMeta, Instruction},
         sysvar, pubkey::Pubkey,
-    },
+    }
 };
+
+#[repr(C)]
+#[derive(BorshSerialize, BorshDeserialize, PartialEq, Debug, Clone)]
+pub struct Creator {
+    pub address: Pubkey,
+    pub verified: bool,
+    // In percentages, NOT basis points ;) Watch out!
+    pub share: u8,
+}
+
+#[repr(C)]
+#[derive(BorshSerialize, BorshDeserialize, PartialEq, Debug, Clone)]
+pub struct Data {
+    /// The name of the asset
+    pub name: String,
+    /// The symbol for the asset
+    pub symbol: String,
+    /// URI pointing to JSON representing the asset
+    pub uri: String,
+    /// Royalty basis points that goes to creators in secondary sales (0-10000)
+    pub seller_fee_basis_points: u16,
+    /// Array of creators, optional
+    pub creators: Option<Vec<Creator>>,
+}
+
+/// Instructions supported by the Metadata program.
+#[derive(BorshSerialize, BorshDeserialize, Clone)]
+pub enum MetadataInstruction {
+    /// Create Metadata object.
+    ///   0. `[writable]`  Metadata key (pda of ['metadata', program id, mint id])
+    ///   1. `[]` Mint of token asset
+    ///   2. `[signer]` Mint authority
+    ///   3. `[signer]` payer
+    ///   4. `[]` update authority info
+    ///   5. `[]` System program
+    ///   6. `[]` Rent info
+    CreateMetadataAccount(CreateMetadataAccountArgs),
+}
+
+#[repr(C)]
+#[derive(BorshSerialize, BorshDeserialize, PartialEq, Debug, Clone)]
+/// Args for create call
+pub struct CreateMetadataAccountArgs {
+    /// Note that unique metadatas are disabled for now.
+    pub data: Data,
+    /// Whether you want your metadata to be updateable in the future.
+    pub is_mutable: bool,
+}
 
 /// Instructions supported by the Solclout program.
 #[derive(BorshSerialize, BorshDeserialize, Clone)]
@@ -30,7 +78,7 @@ pub enum TokenBondingInstruction {
     /// The authority is a PDA of this program that gives it full authority of the target mint. No coins will be minted outside of this program
     ///
     ///   0. `[writeable signer]` Payer
-    ///   1. `[writeable signer]` Token bonding account to create
+    ///   1. `[writeable]` Token bonding account to create. Pda of ['token-bonding', target mint]
     ///   2. `[]` Bonding Curve, see Create<Type>Curve instructions
     ///   3. `[]` Base coin mint
     ///   4. `[]` Target coin mint. Must have mint and freeze authority as `create_program_address(['target-authority', target.pubKey])`
@@ -117,8 +165,51 @@ pub enum TokenBondingInstruction {
     ///   1. `[signer]` Token bonding authority
     ChangeAuthorityV0 {
         new_authority: Option<Pubkey>
+    },
+
+    /// Proxy to the token metadata contract, first verifying that the authority of this curve signs off on the action.
+    ///   0. `[]` Token Bonding
+    ///   1. `[signer]` Token bonding authority
+    ///   1. `[]` Spl token metadata program id (will be checked against spl_token_metadata::id(), but needs to be inflated)
+    ///   ... all accounts on the CreateMetadataAccount call...
+    CreateTokenMetadata(CreateMetadataAccountArgs)
+}
+
+/// Creates an CreateMetadataAccounts instruction
+#[allow(clippy::too_many_arguments)]
+pub fn create_metadata_accounts(
+    program_id: Pubkey,
+    token_bonding: Pubkey,
+    token_bonding_authority: Pubkey,
+    spl_token_metadata_program_id: Pubkey,
+    metadata_account: Pubkey,
+    mint: Pubkey,
+    mint_authority: Pubkey,
+    payer: Pubkey,
+    update_authority: Pubkey,
+    update_authority_is_signer: bool,
+    args: CreateMetadataAccountArgs
+) -> Instruction {
+    Instruction {
+        program_id,
+        accounts: vec![
+          AccountMeta::new_readonly(token_bonding, false),
+          AccountMeta::new_readonly(token_bonding_authority, true),
+          AccountMeta::new_readonly(spl_token_metadata_program_id, false),
+          AccountMeta::new(metadata_account, false),
+          AccountMeta::new_readonly(mint, false),
+            AccountMeta::new_readonly(mint_authority, true),
+            AccountMeta::new_readonly(payer, true),
+            AccountMeta::new_readonly(update_authority, update_authority_is_signer),
+            AccountMeta::new_readonly(solana_program::system_program::id(), false),
+            AccountMeta::new_readonly(sysvar::rent::id(), false),
+        ],
+        data: MetadataInstruction::CreateMetadataAccount(args)
+        .try_to_vec()
+        .unwrap(),
     }
 }
+
 
 /// Creates an InitializeTokenBondingV0 instruction
 pub fn initialize_token_bonding_v0(
@@ -138,7 +229,7 @@ pub fn initialize_token_bonding_v0(
 ) -> Instruction {
     let accounts = vec![
         AccountMeta::new(*payer, true),
-        AccountMeta::new(*token_bonding, true),
+        AccountMeta::new(*token_bonding, false),
         AccountMeta::new_readonly(*curve, false),
         AccountMeta::new_readonly(*base_mint, false),
         AccountMeta::new_readonly(*target_mint, false),

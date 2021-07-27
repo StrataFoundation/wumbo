@@ -4,8 +4,9 @@ use {
         instruction::{AccountMeta, Instruction},
         pubkey::Pubkey,
         sysvar,
-    },
+    }
 };
+use spl_token_bonding::instruction::{CreateMetadataAccountArgs};
 
 /// Instructions supported by the Wumbo program.
 #[derive(BorshSerialize, BorshDeserialize, Clone)]
@@ -23,34 +24,46 @@ pub enum WumboInstruction {
 
     /// Initialize a new wumbo account. Note that you must already have created the mint,
     /// founder rewards account, and authority. The authority is a PDA of this program that gives it
-    /// full authority of the creator coin mint. No coins will be minted outside of this program
+    /// full authority of the social token mint. No coins will be minted outside of this program
     ///
     ///   0. `[writeable signer]` Payer
-    ///   1. `[writeable]` Creator account to create, Program derived address of ['creator', Wumbo Instance, Name pkey]
+    ///   1. `[writeable]` user --> bonding Token Ref account to create, 
+    ///             If unclaimed, program derived address of ['unclaimed-ref', Wumbo Instance, Name pkey]
+    ///             If claimed, program derived address of ['claimed-ref', Wumbo Instance, Name service owner pkey]
+    ///   2. `[writeable]` token bonding --> User Ref account to create, 
+    ///             program derived address of ['reverse-token-ref', Wumbo Instance, Token Bonding pkey]
     ///   2. `[]` Wumbo instance.
     ///   3. `[]` Name service name
     ///   4. `[]` Founder rewards account
-    ///   5. `[]` Token bonding. Authority must be set to program derived address of ['bonding-authority', Creator Pubkey]. Curve must be the base curve if name owner not signing
-    ///   7. `[]` System Program
-    ///   8. `[]` Rent sysvar
-    ///   9. (optional) `[signer]` Name service owner. If this is set, will not verify the owner of the founder rewards account
-    InitializeCreatorV0,
+    ///   5. `[]` Token bonding. Authority must be set to program derived address of ['bonding-authority', token ref pubkey]. Curve must be the base curve if name owner not signing
+    ///   6. `[]` System Program
+    ///   7. `[]` Rent sysvar
+    ///   8. (optional) `[signer]` Name service owner. If this is set, will not verify the owner of the founder rewards account
+    InitializeSocialTokenV0,
 
     /// Opt out of Wum.bo
-    ///   0. `[]` Creator to opt out
-    ///   1. `[writeable]` Token bonding for the creator
-    ///   2. `[] Token bonding authority. Should be a pda of ['bonding-authority', Creator Pubkey]
-    ///   3. `[]` Name service name
-    ///   4. `[signer]` Name service owner. If this is set, will not verify the owner of the founder rewards account
+    ///   0. `[]` Token ref to opt out
+    ///   1. `[writeable]` Token bonding for the user
+    ///   2. `[] Token bonding authority. Should be a pda of ['bonding-authority', token ref pubkey]
+    ///   3. `[signer]` Owner of the token ref
     OptOutV0,
 
-    /// Opt out of Wum.bo
-    ///   0. `[]` Creator to opt out
-    ///   1. `[writeable]` Token bonding for the creator
-    ///   2. `[] Token bonding authority. Should be a pda of ['bonding-authority', Creator Pubkey]
-    ///   3. `[]` Name service name
-    ///   4. `[signer]` Name service owner. If this is set, will not verify the owner of the founder rewards account
+    /// Opt back in of Wum.bo
+    ///   0. `[]` Token ref to opt in
+    ///   1. `[writeable]` Token bonding for the user
+    ///   2. `[] Token bonding authority. Should be a pda of ['bonding-authority', token ref pubkey]
+    ///   3. `[signer]` Owner of the token ref
     OptInV0,
+
+    /// Proxy to the token metadata contract, first verifying that the owner of the founder rewards account signs off on this action
+    ///   0. `[]` claimed token ref
+    ///   1. `[signer]` claimed token ref owner
+    ///   2. `[]` Token bonding
+    ///   3. `[]` Token bonding authority (pda of ['bonding-authority', token ref pubkey])
+    ///   4. `[]` Spl token bonding program id (will be checked against spl_token_bonding::id(), but needs to be inflated)
+    ///   5. `[]` Spl token metadata program id (will be checked against spl_token_metadata::id(), but needs to be inflated)
+    ///   ... all accounts on the CreateMetadataAccount call...
+    CreateTokenMetadata(CreateMetadataAccountArgs)
 }
 
 /// Creates an InitializeWumboV0 instruction
@@ -80,11 +93,12 @@ pub fn initialize_wumbo(
     }
 }
 
-/// Creates an InitializeCreatorV0 instruction
-pub fn initialize_creator(
+/// Creates an InitializeSocialTokenV0 instruction
+pub fn initialize_social_token_instruction(
     program_id: &Pubkey,
     payer: &Pubkey,
-    creator: &Pubkey,
+    token_ref: &Pubkey,
+    reverse_token_ref: &Pubkey,
     wumbo_instance: &Pubkey,
     name: &Pubkey,
     founder_rewards_account: &Pubkey,
@@ -93,7 +107,8 @@ pub fn initialize_creator(
 ) -> Instruction {
     let mut accounts = vec![
         AccountMeta::new(*payer, true),
-        AccountMeta::new(*creator, false),
+        AccountMeta::new(*token_ref, false),
+        AccountMeta::new(*reverse_token_ref, false),
         AccountMeta::new_readonly(*wumbo_instance, false),
         AccountMeta::new_readonly(*name, false),
         AccountMeta::new_readonly(*founder_rewards_account, false),
@@ -107,7 +122,7 @@ pub fn initialize_creator(
     Instruction {
         program_id: *program_id,
         accounts,
-        data: WumboInstruction::InitializeCreatorV0
+        data: WumboInstruction::InitializeSocialTokenV0
         .try_to_vec()
         .unwrap(),
     }
@@ -115,7 +130,7 @@ pub fn initialize_creator(
 
 pub fn opt_out_v0_instruction(
     program_id: &Pubkey,
-    creator: &Pubkey,
+    token_ref: &Pubkey,
     token_bonding: &Pubkey,
     token_bonding_authority: &Pubkey,
     name: &Pubkey,
@@ -124,7 +139,7 @@ pub fn opt_out_v0_instruction(
     Instruction {
         program_id: *program_id,
         accounts: vec![
-            AccountMeta::new_readonly(*creator, false),
+            AccountMeta::new_readonly(*token_ref, false),
             AccountMeta::new(*token_bonding, false),
             AccountMeta::new_readonly(*token_bonding_authority, false),
             AccountMeta::new_readonly(*name, false),
@@ -138,7 +153,7 @@ pub fn opt_out_v0_instruction(
 
 pub fn opt_in_v0_instruction(
     program_id: &Pubkey,
-    creator: &Pubkey,
+    token_ref: &Pubkey,
     token_bonding: &Pubkey,
     token_bonding_authority: &Pubkey,
     name: &Pubkey,
@@ -147,7 +162,7 @@ pub fn opt_in_v0_instruction(
     Instruction {
         program_id: *program_id,
         accounts: vec![
-            AccountMeta::new_readonly(*creator, false),
+            AccountMeta::new_readonly(*token_ref, false),
             AccountMeta::new(*token_bonding, false),
             AccountMeta::new_readonly(*token_bonding_authority, false),
             AccountMeta::new_readonly(*name, false),
