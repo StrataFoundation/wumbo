@@ -19,7 +19,7 @@ import { useMint } from "./mintState";
 import { useAssociatedAccount } from "./walletState";
 import { useWallet } from "./wallet";
 import { useConnection } from "@oyster/common";
-import { useAsyncCallback } from "react-async-hook";
+import { useAsync } from "react-async-hook";
 import { useTokenRef } from "./tokenRef";
 
 // TODO: Use actual connection. But this can't happen in dev
@@ -48,18 +48,23 @@ export function amountAsNum(amount: u64, mint: MintInfo): number {
 
 export function useRentExemptAmount(
   size: number
-): { loading: boolean; amount: number | undefined } {
+): {
+  loading: boolean;
+  amount: number | undefined;
+  error: Error | undefined;
+} {
   const connection = useConnection();
-  const { execute, result, loading, error } = useAsyncCallback(
-    connection.getMinimumBalanceForRentExemption.bind(connection)
-  );
-  useEffect(() => {
-    execute(size);
-  }, [connection]);
+  const {
+    loading,
+    error,
+    result,
+  } = useAsync(connection.getMinimumBalanceForRentExemption, [size]);
+
   const amount = useMemo(() => (result || 0) / Math.pow(10, 9), [result]);
 
   return {
     amount,
+    error,
     loading,
   };
 }
@@ -84,7 +89,10 @@ export function useOwnedAmountForOwnerAndHandle(
   owner: PublicKey | undefined,
   handle: string | undefined
 ): { amount: number | undefined; loading: boolean } {
-  const [state, setState] = useState<{ amount: number; loading: boolean }>({
+  const [state, setState] = useState<{
+    amount: number | undefined;
+    loading: boolean;
+  }>({
     loading: true,
     amount: 0,
   });
