@@ -56,6 +56,12 @@ chrome.runtime.onMessage.addListener((msg, _, sendResponse) => {
       });
     }
     if (msg.type == "WALLET_DISCONNECT") {
+      if (!walletAdapter) {
+        sendResponse({ error: new Error(`No wallet connected`) });
+        return;
+      }
+
+      await walletAdapter.disconnect();
       walletAdapter = null;
       publicKey = null;
       chrome.runtime.sendMessage({ type: "WALLET", data: {} });
