@@ -3,16 +3,14 @@ import { CoinDetails } from "./CoinDetails";
 import { ChevronUpIcon, ChevronDownIcon } from "@heroicons/react/solid";
 import { TokenBondingV0 } from "spl-token-bonding";
 import { useBondingPricing, useFiatPrice } from "./utils/pricing";
-import { PublicKey } from "@solana/web3.js";
 import { useTokenMetadata } from "./utils/metaplex/hooks";
-import { Avatar, MetadataAvatar } from "./Avatar";
+import { MetadataAvatar } from "./Avatar";
 import { Spinner } from "./Spinner";
 
 interface TokenPillProps {
   name?: String;
   ticker?: String;
   icon?: React.ReactElement;
-  useMetadata?: boolean;
   tokenBonding: TokenBondingV0;
 }
 
@@ -44,7 +42,7 @@ export const MetadataTokenPill = React.memo(
 );
 
 export const TokenPill = React.memo(
-  ({ name, ticker, icon, tokenBonding, useMetadata }: TokenPillProps) => {
+  ({ name, ticker, icon, tokenBonding }: TokenPillProps) => {
     const [detailsVisible, setDetailsVisible] = useState<boolean>(false);
     const toggleDetails = () => setDetailsVisible(!detailsVisible);
     const { current } = useBondingPricing(tokenBonding.publicKey);

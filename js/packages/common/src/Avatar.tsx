@@ -10,7 +10,7 @@ import { classNames } from "./utils/utils";
  */
 
 export interface IAvatarProps {
-  name: string;
+  name?: string;
   subText?: string;
   imgSrc?: string;
   rounded?: boolean;

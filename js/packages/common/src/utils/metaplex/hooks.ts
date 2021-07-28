@@ -143,7 +143,7 @@ export function useSetMetadata(
         )
       )[0];
       let files: File[];
-      let imageName: string | null = null;
+      let imageName: string | undefined = undefined;
       if (args.image) {
         files = [args.image];
         imageName = args.image.name;
