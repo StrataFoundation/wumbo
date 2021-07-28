@@ -48,15 +48,15 @@ export const Create = () => {
         name: query.get("name")!,
         founderRewardsPercentage: 5.5,
         nameParent: await getTld(),
-      })
+      });
       history.push(
         routes.trade.path.replace(
           ":tokenBondingKey",
           tokenBondingKey.toBase58()
         ) + `?name=${query.get("name")!}`
       );
-    } catch(e) {
-      console.error(e)
+    } catch (e) {
+      console.error(e);
     } finally {
       setCreationLoading(false);
     }
@@ -105,7 +105,10 @@ export const Create = () => {
               Create Coin
             </Button>
           ) : (
-            <Link to={routes.wallet.path + `?redirect=${currentPath}`} className="w-full">
+            <Link
+              to={routes.wallet.path + `?redirect=${currentPath}`}
+              className="w-full"
+            >
               <Button block color="primary" size="lg">
                 Connect Wallet
               </Button>

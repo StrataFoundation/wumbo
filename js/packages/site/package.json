@@ -36,7 +36,8 @@
 		"test": "craco test",
 		"eject": "react-scripts eject",
 		"predeploy": "craco build",
-		"deploy": "echo 'wum.bo' > ./build/CNAME && gh-pages -d build"
+		"deploy": "echo 'wum.bo' > ./build/CNAME && gh-pages -d build",
+    "style": "prettier --write \"src/**/*.{ts,tsx}\""
 	},
 	"browserslist": {
 		"production": [

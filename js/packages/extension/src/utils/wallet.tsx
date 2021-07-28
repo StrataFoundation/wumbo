@@ -2,10 +2,9 @@ import { useConnectionConfig } from "@oyster/common";
 import React, { useContext, useEffect, useMemo, useState } from "react";
 import { useLocalStorageState } from "@oyster/common";
 import { WalletAdapter } from "@solana/wallet-base";
-import { WalletContext, WALLET_PROVIDERS } from "wumbo-common"
+import { WalletContext, WALLET_PROVIDERS } from "wumbo-common";
 import { PublicKey, Transaction } from "@solana/web3.js";
 import EventEmitter from "eventemitter3";
-
 
 function sendMesssageAsync(message: any): Promise<any> {
   return new Promise<any>((resolve, reject) => {

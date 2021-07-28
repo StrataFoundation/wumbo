@@ -19,7 +19,7 @@ export const Wallet = () => {
     if (wallet && wallet.publicKey && prevWallet && !prevWallet.publicKey) {
       const redirect = query.get("redirect");
       if (redirect) {
-        console.log(`Redirecting to ${redirect}`)
+        console.log(`Redirecting to ${redirect}`);
         history.push(redirect);
       }
     }

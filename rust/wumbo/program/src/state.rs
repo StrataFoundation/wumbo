@@ -14,6 +14,7 @@ pub enum Key {
     ClaimedTokenRefV0,
 }
 
+pub const METADATA_UPDATE_AUTHORITY_PREFIX: &str = "metadata-update-authority";
 pub const WUMBO_PREFIX: &str = "wumbo";
 pub const UNCLAIMED_REF_PREFIX: &str = "unclaimed-ref";
 pub const CLAIMED_REF_PREFIX: &str = "claimed-ref";

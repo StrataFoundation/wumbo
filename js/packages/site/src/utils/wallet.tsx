@@ -1,7 +1,7 @@
 import { useConnectionConfig } from "@oyster/common";
 import React, { useContext, useEffect, useMemo, useState } from "react";
 import { useLocalStorageState } from "@oyster/common";
-import { WalletContext, WALLET_PROVIDERS } from "wumbo-common"
+import { WalletContext, WALLET_PROVIDERS } from "wumbo-common";
 
 export function WalletProvider({ children = null as any }) {
   const { endpoint } = useConnectionConfig();
@@ -31,7 +31,7 @@ export function WalletProvider({ children = null as any }) {
       wallet.on("disconnect", () => {
         setConnected(false);
       });
-    }  
+    }
   }, [wallet]);
 
   useEffect(() => {

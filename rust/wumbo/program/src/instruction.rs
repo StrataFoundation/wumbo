@@ -6,7 +6,16 @@ use {
         sysvar,
     }
 };
-use spl_token_bonding::instruction::{CreateMetadataAccountArgs};
+use spl_token_bonding::instruction::{CreateMetadataAccountArgs, Data};
+
+#[repr(C)]
+#[derive(BorshSerialize, BorshDeserialize, PartialEq, Debug, Clone)]
+/// Args for update call
+pub struct UpdateMetadataAccountArgs {
+    pub data: Option<Data>,
+    pub update_authority: Option<Pubkey>,
+    pub primary_sale_happened: Option<bool>,
+}
 
 /// Instructions supported by the Wumbo program.
 #[derive(BorshSerialize, BorshDeserialize, Clone)]
@@ -62,8 +71,14 @@ pub enum WumboInstruction {
     ///   3. `[]` Token bonding authority (pda of ['bonding-authority', token ref pubkey])
     ///   4. `[]` Spl token bonding program id (will be checked against spl_token_bonding::id(), but needs to be inflated)
     ///   5. `[]` Spl token metadata program id (will be checked against spl_token_metadata::id(), but needs to be inflated)
-    ///   ... all accounts on the CreateMetadataAccount call...
-    CreateTokenMetadata(CreateMetadataAccountArgs)
+    ///   ... all accounts on the CreateMetadataAccount call minus update authority. Update authority should be pda of ['metadata-update-authority', token ref]...
+    CreateTokenMetadata(CreateMetadataAccountArgs),
+    /// Proxy to the token metadata contract, first verifying that the authority of this curve signs off on the action.
+    ///   0. `[]` Token Bonding
+    ///   1. `[signer]` Token bonding authority
+    ///   1. `[]` Spl token metadata program id (will be checked against spl_token_metadata::id(), but needs to be inflated)
+    ///   ... all accounts on the UpdateMetadataAccount call...
+    UpdateMetadataAccount(UpdateMetadataAccountArgs),
 }
 
 /// Creates an InitializeWumboV0 instruction

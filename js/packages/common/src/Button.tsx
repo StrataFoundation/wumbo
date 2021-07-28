@@ -24,7 +24,6 @@ interface ButtonProps
   submit?: boolean;
 }
 
-
 interface LinkButtonProps
   extends AnchorHTMLAttributes<HTMLAnchorElement>,
     ButtonPropsWithChildren {

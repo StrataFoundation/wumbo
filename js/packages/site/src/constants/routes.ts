@@ -15,7 +15,7 @@ const routes: IRoutes = {
   wallet: { path: "/wallet" },
   profile: { path: "/profile/:ownerWalletKey" },
   editProfile: { path: "/profile/edit/:ownerWalletKey" },
-  betaSplash: { path: "/" }
+  betaSplash: { path: "/" },
 };
 
 export default routes;

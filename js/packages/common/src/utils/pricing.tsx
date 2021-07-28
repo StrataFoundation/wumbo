@@ -42,37 +42,43 @@ export function supplyAsNum(mint: MintInfo): number {
 export function amountAsNum(amount: u64, mint: MintInfo): number {
   const decimals = new u64(Math.pow(10, mint.decimals).toString());
   const decimal = amount.mod(decimals).toNumber() / decimals.toNumber();
-  return amount
-  .div(decimals)
-  .toNumber() + decimal;
+  return amount.div(decimals).toNumber() + decimal;
 }
 
-export function useRentExemptAmount(size: number): { loading: boolean, amount: number | undefined } {
+export function useRentExemptAmount(size: number): {
+  loading: boolean;
+  amount: number | undefined;
+} {
   const connection = useConnection();
-  const { execute, result, loading, error } = useAsyncCallback(connection.getMinimumBalanceForRentExemption.bind(connection));
+  const { execute, result, loading, error } = useAsyncCallback(
+    connection.getMinimumBalanceForRentExemption.bind(connection)
+  );
   useEffect(() => {
     execute(size);
-  }, [connection])
-  const amount = useMemo(() => (result || 0) / Math.pow(10, 9), [result])
-  
+  }, [connection]);
+  const amount = useMemo(() => (result || 0) / Math.pow(10, 9), [result]);
+
   return {
     amount,
-    loading
-  }
+    loading,
+  };
 }
 
-export function useSolOwnedAmount(): { amount: number, loading: boolean } {
+export function useSolOwnedAmount(): { amount: number; loading: boolean } {
   const { wallet } = useWallet();
-  const { info: lamports , loading } = useAccount<number>(wallet?.publicKey || undefined, (_, account) => account.lamports)
-  const result = React.useMemo(() => 
-    (lamports || 0) / Math.pow(10, 9),
+  const { info: lamports, loading } = useAccount<number>(
+    wallet?.publicKey || undefined,
+    (_, account) => account.lamports
+  );
+  const result = React.useMemo(
+    () => (lamports || 0) / Math.pow(10, 9),
     [lamports]
-  )
+  );
 
   return {
     amount: result,
-    loading
-  }
+    loading,
+  };
 }
 
 export function useOwnedAmount(
@@ -194,14 +200,19 @@ export function useBondingPricing(
           target,
           bonding.founderRewardPercentage
         ),
-        sellTargetToBasePrice: (amount: number) => targetRangeToBasePrice(supplyAsNum(target) - amount, supplyAsNum(target)),
+        sellTargetToBasePrice: (amount: number) =>
+          targetRangeToBasePrice(
+            supplyAsNum(target) - amount,
+            supplyAsNum(target)
+          ),
         baseToTargetPrice: inverseLogCurve(
           curve,
           base,
           target,
           bonding.founderRewardPercentage
         ),
-        sellBaseToTargetPrice: (amount: number) => inverseLogCurve(curve, base, target, 0)(-amount),
+        sellBaseToTargetPrice: (amount: number) =>
+          inverseLogCurve(curve, base, target, 0)(-amount),
         targetRangeToBasePrice,
         current:
           curve.c *

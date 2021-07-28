@@ -1,20 +1,41 @@
-
 import { useConnection } from "@oyster/common";
-import { createNameRegistry, getHashedName, getNameAccountKey, TWITTER_ROOT_PARENT_REGISTRY_KEY, NameRegistryState, TWITTER_VERIFICATION_AUTHORITY, NAME_PROGRAM_ID, ReverseTwitterRegistryState } from "@bonfida/spl-name-service";
+import {
+  createNameRegistry,
+  getHashedName,
+  getNameAccountKey,
+  TWITTER_ROOT_PARENT_REGISTRY_KEY,
+  NameRegistryState,
+  TWITTER_VERIFICATION_AUTHORITY,
+  NAME_PROGRAM_ID,
+  ReverseTwitterRegistryState,
+} from "@bonfida/spl-name-service";
 import { WalletAdapter } from "@solana/wallet-base";
-import { Account, Connection, sendAndConfirmRawTransaction, Transaction, TransactionInstruction } from "@solana/web3.js";
+import {
+  Account,
+  Connection,
+  sendAndConfirmRawTransaction,
+  Transaction,
+  TransactionInstruction,
+} from "@solana/web3.js";
 import { PublicKey } from "@solana/web3.js";
 import { useState } from "react";
 import { useAsync, useAsyncCallback } from "react-async-hook";
-import { TWITTER_REGISTRAR_SERVER_URL, IS_DEV, DEV_TWITTER_TLD } from "../constants/globals";
-import { createVerifiedTwitterRegistry, getTwitterRegistry } from "./testableNameServiceTwitter";
+import {
+  TWITTER_REGISTRAR_SERVER_URL,
+  IS_DEV,
+  DEV_TWITTER_TLD,
+} from "../constants/globals";
+import {
+  createVerifiedTwitterRegistry,
+  getTwitterRegistry,
+} from "./testableNameServiceTwitter";
 
 async function sendTransaction(
   connection: Connection,
   instructions: TransactionInstruction[],
   wallet: WalletAdapter,
   extraSigners?: Account[]
-): Promise<void> {
+): Promise<string> {
   const transaction = new Transaction({
     feePayer: wallet.publicKey || undefined,
     recentBlockhash: (await connection.getRecentBlockhash()).blockhash,
@@ -24,23 +45,36 @@ async function sendTransaction(
   extraSigners && transaction.partialSign(...extraSigners);
   const signed = await wallet.signTransaction(transaction);
 
-  await sendAndConfirmRawTransaction(connection, signed.serialize());
+  return sendAndConfirmRawTransaction(connection, signed.serialize());
 }
 
-export async function createTestTld(connection: Connection, wallet: WalletAdapter) {
+export async function createTestTld(
+  connection: Connection,
+  wallet: WalletAdapter
+) {
   if (IS_DEV) {
     const tld = await getNameAccountKey(await getHashedName(DEV_TWITTER_TLD));
     const account = await connection.getAccountInfo(tld);
     if (!account) {
-      console.log("Testing tld doesn't exist, creating...")
-      const createInstruction = await createNameRegistry(connection, DEV_TWITTER_TLD, 1000, wallet.publicKey!, wallet.publicKey!);
-      console.log(await sendTransaction(connection, [createInstruction], wallet));
+      console.log("Testing tld doesn't exist, creating...");
+      const createInstruction = await createNameRegistry(
+        connection,
+        DEV_TWITTER_TLD,
+        1000,
+        wallet.publicKey!,
+        wallet.publicKey!
+      );
+      console.log(
+        await sendTransaction(connection, [createInstruction], wallet)
+      );
     }
   }
 }
 
 export async function getTld(): Promise<PublicKey> {
-  return IS_DEV ? await getNameAccountKey(await getHashedName(DEV_TWITTER_TLD)) : TWITTER_ROOT_PARENT_REGISTRY_KEY
+  return IS_DEV
+    ? await getNameAccountKey(await getHashedName(DEV_TWITTER_TLD))
+    : TWITTER_ROOT_PARENT_REGISTRY_KEY;
 }
 
 export const getTwitterHandle = async (
@@ -64,18 +98,26 @@ export async function apiPost(url: string, body: any, headers: any) {
     console.log(response);
     if (!response.ok) {
       if (response.status == 400) {
-        throw new Error("Specified handle did not match the handle you logged in with, or the authorization expired. Please try again")
+        throw new Error(
+          "Specified handle did not match the handle you logged in with, or the authorization expired. Please try again"
+        );
       } else if (response.status == 500) {
-        throw new Error("Registration transaction failed, please report this error in our discord")
+        throw new Error(
+          "Registration transaction failed, please report this error in our discord"
+        );
       }
 
-      throw new Error(`Error apiPost - status ${response.status}. Please report this error in our discord`);
+      throw new Error(
+        `Error apiPost - status ${response.status}. Please report this error in our discord`
+      );
     }
     let json = await response.json();
     return json;
   } catch (err) {
     console.warn(err);
-    throw new Error(`Error apiPost - err ${err}. Please report this error in our discord`);
+    throw new Error(
+      `Error apiPost - err ${err}. Please report this error in our discord`
+    );
   }
 }
 
@@ -88,7 +130,7 @@ export const postTwitterRegistrarRequest = async (
   twitterHandle: string
 ) => {
   if (IS_DEV) {
-    console.log("Sending dev mode claim twitter handle txn...")
+    console.log("Sending dev mode claim twitter handle txn...");
     await sendTransaction(connection, instructions, wallet);
   } else {
     const transaction = new Transaction({
@@ -118,20 +160,25 @@ export const postTwitterRegistrarRequest = async (
 };
 
 export interface ClaimArgs {
-  owner: PublicKey,
-  twitterHandle: string
+  owner: PublicKey;
+  twitterHandle: string;
 }
 export const TWITTER_REGISTRY_SIZE = 1_000;
-export async function claimTwitterTransactionInstructions(connection: Connection, { owner, twitterHandle }: ClaimArgs) {
+export async function claimTwitterTransactionInstructions(
+  connection: Connection,
+  { owner, twitterHandle }: ClaimArgs
+) {
   const nameRegistryItem = await getTwitterHandle(connection, twitterHandle);
   if (nameRegistryItem) {
     if (nameRegistryItem.owner.toBase58() != owner.toBase58()) {
-      throw new Error(`Twitter handle is already registered to wallet ${nameRegistryItem.owner}`);
+      throw new Error(
+        `Twitter handle is already registered to wallet ${nameRegistryItem.owner}`
+      );
     }
 
     // Exit. It's already been claimed
-    console.log("Twitter handle is already claimed by this wallet.")
-    return
+    console.log("Twitter handle is already claimed by this wallet.");
+    return;
   }
 
   const balance = await connection.getBalance(owner);
@@ -152,7 +199,10 @@ export async function claimTwitterTransactionInstructions(connection: Connection
   );
 }
 
-export async function getTwitterReverse(connection: Connection, owner: PublicKey): Promise<ReverseTwitterRegistryState> {
+export async function getTwitterReverse(
+  connection: Connection,
+  owner: PublicKey
+): Promise<ReverseTwitterRegistryState> {
   const hashedName = await getHashedName(owner.toString());
   const key = await getNameAccountKey(
     hashedName,
@@ -160,11 +210,11 @@ export async function getTwitterReverse(connection: Connection, owner: PublicKey
     await getTld()
   );
 
-  return ReverseTwitterRegistryState.retrieve(connection, key)
+  return ReverseTwitterRegistryState.retrieve(connection, key);
 }
 
 async function getTwitterName(connection: Connection, owner: PublicKey) {
-  return (await getTwitterReverse(connection, owner)).twitterHandle
+  return (await getTwitterReverse(connection, owner)).twitterHandle;
 }
 
 interface ReverseTwitterState {
@@ -174,11 +224,15 @@ interface ReverseTwitterState {
 }
 export function useReverseTwitter(owner: PublicKey): ReverseTwitterState {
   const connection = useConnection();
-  const { loading, error, result: handle } = useAsync(getTwitterName, [connection, owner]);
+  const {
+    loading,
+    error,
+    result: handle,
+  } = useAsync(getTwitterName, [connection, owner]);
 
   return {
     loading,
     error,
-    handle
-  }
+    handle,
+  };
 }

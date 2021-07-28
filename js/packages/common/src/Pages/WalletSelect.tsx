@@ -5,19 +5,20 @@ import { WALLET_PROVIDERS } from "../constants/walletProviders";
 import { Button, Alert } from "../";
 
 export const WalletSelect = React.memo(() => {
-  const { connected, disconnect, wallet, setProviderUrl, setAutoConnect, error } =
-    useWallet();
+  const {
+    connected,
+    disconnect,
+    wallet,
+    setProviderUrl,
+    setAutoConnect,
+    error,
+  } = useWallet();
   return (
     <Fragment>
       {connected ? (
         <div className="flex flex-col space-y-4 px-4">
           <span className="test-sm">Wallet Connected!</span>
-          <Button
-            block
-            size="lg"
-            color="primary"
-            onClick={disconnect}
-          >
+          <Button block size="lg" color="primary" onClick={disconnect}>
             Disconnect
           </Button>
         </div>

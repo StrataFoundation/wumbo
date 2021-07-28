@@ -5,7 +5,7 @@ import {
 } from "@solana/spl-token";
 
 export const IS_DEV = true;
-export const DEV_TWITTER_TLD = "NoahTest2";
+export const DEV_TWITTER_TLD = "NoahTest3";
 
 export const TWITTER_REGISTRAR_SERVER_URL =
   "http://localhost:3000/registrar/twitter-oauth";
@@ -13,13 +13,13 @@ export const TWITTER_REGISTRAR_SERVER_URL =
 // export const SOLANA_API_URL = "https://api.mainnet-beta.solana.com"
 export const WUM_REWARDS_PERCENTAGE = 1000;
 export const WUM_BONDING = new PublicKey(
-  "yBHEqugu4spKEPdkVagZZ16uFXSHHFxs7rc4fQM8ns8"
+  "T8d8nTqeybQBcJgmFVEZHJebNuNEG2BvkZEQS2RuAhQ"
 );
 export const WUM_TOKEN = new PublicKey(
-  "5ca8vePnyYCKNVSLNvdp6fUw5nLxccJxEzEoLvod4qmw"
+  "3y8K5ZAqJYgHbHeQr9uownFTtSLSG6MraVq38cobKRgb"
 );
 export const WUMBO_INSTANCE_KEY: PublicKey = new PublicKey(
-  "A4Kxyi1zR2faFZ2HcLSwrdx6ea7LYziF4aQbTJHcEUBC"
+  "VyCsQR6LmmW4TMazay9CS2FEJpRk92yDavqp3Saw9Pc"
 );
 export const WUMBO_PROGRAM_ID: PublicKey = new PublicKey(
   "AiYPQudWgXerJ1BdKfH5HkEamnPXSHAfPK2ThhKFkkDw"
@@ -53,8 +53,7 @@ export const SPL_ASSOCIATED_TOKEN_ACCOUNT_PROGRAM_ID: PublicKey = new PublicKey(
 );
 
 export const AR_SOL_HOLDER_ID = new PublicKey(
-  'HvwC9QSAzvGXhhVrgPmauVwFWcYZhne3hVot9EbHuFTm',
+  "HvwC9QSAzvGXhhVrgPmauVwFWcYZhne3hVot9EbHuFTm"
 );
-
 
 export const BASE_SLIPPAGE = 0.1;

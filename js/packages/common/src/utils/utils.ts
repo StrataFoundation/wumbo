@@ -15,10 +15,12 @@ export function usePrevious<T extends unknown>(value: T): T | undefined {
 
 export function useQuery(): URLSearchParams {
   const search = useLocation().search;
-  const [query, setQuery] = useState<URLSearchParams>(new URLSearchParams(search))
+  const [query, setQuery] = useState<URLSearchParams>(
+    new URLSearchParams(search)
+  );
 
   useEffect(() => {
-    setQuery(new URLSearchParams(search))
-  }, [search])
-  return query
+    setQuery(new URLSearchParams(search));
+  }, [search]);
+  return query;
 }

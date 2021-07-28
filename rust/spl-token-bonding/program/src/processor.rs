@@ -826,7 +826,7 @@ pub fn create_metadata_accounts(
           AccountMeta::new(metadata_account, false),
           AccountMeta::new_readonly(mint, false),
             AccountMeta::new_readonly(mint_authority, true),
-            AccountMeta::new_readonly(payer, true),
+            AccountMeta::new(payer, true),
             AccountMeta::new_readonly(update_authority, update_authority_is_signer),
             AccountMeta::new_readonly(solana_program::system_program::id(), false),
             AccountMeta::new_readonly(sysvar::rent::id(), false),
@@ -849,6 +849,8 @@ fn process_create_token_metadata(program_id: &Pubkey, accounts: &[AccountInfo], 
   let mint_authority = next_account_info(accounts_iter)?;
   let payer = next_account_info(accounts_iter)?;
   let update_authority = next_account_info(accounts_iter)?;
+  let system = next_account_info(accounts_iter)?;
+  let rent = next_account_info(accounts_iter)?;
 
   let token_bonding_data = TokenBondingV0::unpack_from_slice(&token_bonding.data.borrow())?;
 
@@ -864,12 +866,16 @@ fn process_create_token_metadata(program_id: &Pubkey, accounts: &[AccountInfo], 
     return Err(TokenBondingError::InvalidAuthority.into())
   }
 
-  let (_, nonce) = target_authority(program_id, mint.key);
+  let (mint_authority_key, nonce) = target_authority(program_id, mint.key);
   let signer_seeds = &[
       TARGET_AUTHORITY.as_bytes(),
       &mint.key.to_bytes(),
       &[nonce]
   ];
+
+  if mint_authority_key != *mint_authority.key {
+    return Err(TokenBondingError::InvalidMintAuthority.into());
+  }
 
   if *spl_token_metadata_program_id.key != Pubkey::from_str(TOKEN_METADATA_PROGRAM_ID_STR).unwrap() {
     return Err(ProgramError::IncorrectProgramId);
@@ -892,7 +898,9 @@ fn process_create_token_metadata(program_id: &Pubkey, accounts: &[AccountInfo], 
       mint.clone(),
       mint_authority.clone(),
       payer.clone(),
-      update_authority.clone()
+      update_authority.clone(),
+      system.clone(),
+      rent.clone()
     ],
     &[signer_seeds],
   )?;

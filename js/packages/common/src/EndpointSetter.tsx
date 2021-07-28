@@ -6,13 +6,13 @@ export const EndpointSetter = ({ children = null as any }) => {
   const config = useConnectionConfig();
   useEffect(() => {
     if (config.endpoint != SOLANA_API_URL) {
-      config.setEndpoint(SOLANA_API_URL)
+      config.setEndpoint(SOLANA_API_URL);
     }
   }, [config.endpoint, config.setEndpoint]);
 
   if (config.endpoint == SOLANA_API_URL) {
-    return children
+    return children;
   }
 
   return null;
-}
+};

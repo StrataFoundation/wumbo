@@ -2,7 +2,15 @@ import React from "react";
 import { ReactComponent as Logo } from "../../assets/images/logo.svg";
 import { classNames } from "wumbo-common";
 
-const Header = ({ children, gradient = true, size = "lg" }: { children?: React.ReactElement, gradient?: boolean, size?: "lg" | "sm" }) => (
+const Header = ({
+  children,
+  gradient = true,
+  size = "lg",
+}: {
+  children?: React.ReactElement;
+  gradient?: boolean;
+  size?: "lg" | "sm";
+}) => (
   <div
     className={classNames(
       "flex flex-row items-center justify-between px-4 md:px-10",
@@ -10,7 +18,9 @@ const Header = ({ children, gradient = true, size = "lg" }: { children?: React.R
       size == "sm" && "py-3"
     )}
     style={{
-      background: gradient ? `linear-gradient(to top, rgba(0, 0, 0, 0), rgba(0, 0, 0, 0.28)` : "",
+      background: gradient
+        ? `linear-gradient(to top, rgba(0, 0, 0, 0), rgba(0, 0, 0, 0.28)`
+        : "",
     }}
   >
     <div className="flex flex-row items-center">
@@ -18,7 +28,7 @@ const Header = ({ children, gradient = true, size = "lg" }: { children?: React.R
       <p className="text-xl">Wum.bo</p>
     </div>
 
-    { children }
+    {children}
   </div>
 );
 
