@@ -16,7 +16,10 @@ type Props = {
   creatorImg: string;
 };
 
-const CreatorInfo: React.FC<Props> = ({ creatorName, creatorImg }: Props) => {
+export const MainButton: React.FC<Props> = ({
+  creatorName,
+  creatorImg,
+}: Props) => {
   const { state, dispatch } = useDrawer();
 
   const creatorInfoState = useUserInfo(creatorName);
@@ -42,8 +45,8 @@ const CreatorInfo: React.FC<Props> = ({ creatorName, creatorImg }: Props) => {
   if (!loading && !creatorInfo && wumboInstance && wallet) {
     return (
       <Link to={routes.create.path + `?name=${creatorName}&src=${creatorImg}`}>
-        <Button size="xs" color="primary" onClick={toggleDrawer}>
-          Create Coin
+        <Button block size="xs" color="primary" onClick={toggleDrawer}>
+          Mint
         </Button>
       </Link>
     );
@@ -61,7 +64,7 @@ const CreatorInfo: React.FC<Props> = ({ creatorName, creatorImg }: Props) => {
 
   return (
     <Link to={path}>
-      <Button size="xs" color="secondary" onClick={toggleDrawer}>
+      <Button block size="xs" color="secondary" onClick={toggleDrawer}>
         <span className="!text-green-800">
           ${creatorInfo?.coinPriceUsd.toFixed(2)}
         </span>
@@ -69,5 +72,3 @@ const CreatorInfo: React.FC<Props> = ({ creatorName, creatorImg }: Props) => {
     </Link>
   );
 };
-
-export default CreatorInfo;

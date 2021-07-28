@@ -48,10 +48,7 @@ async function sendTransaction(
   return sendAndConfirmRawTransaction(connection, signed.serialize());
 }
 
-export async function createTestTld(
-  connection: Connection,
-  wallet: WalletAdapter
-) {
+export async function createTestTld(connection: Connection, wallet: WalletAdapter) {
   if (IS_DEV) {
     const tld = await getNameAccountKey(await getHashedName(DEV_TWITTER_TLD));
     const account = await connection.getAccountInfo(tld);

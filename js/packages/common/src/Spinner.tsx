@@ -14,7 +14,7 @@ const style = {
     lg: "h-8 w-8",
   },
   color: {
-    primary: "text-purple-700",
+    primary: "text-indigo-600",
     secondary: "text-green-400",
     white: "text-white",
   },

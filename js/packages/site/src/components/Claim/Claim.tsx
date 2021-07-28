@@ -112,25 +112,27 @@ function useCreateCoin(): CreateState {
   async function exec(twitterHandle: string) {
     let result;
     try {
-      setCreating(true);
+      setCreating(true)
       const key = await getTokenRefKey(connection, twitterHandle);
       const account = await connection.getAccountInfo(key);
       if (!account) {
-        console.log("Creator does not exist, creating");
-        result = await createWumboSocialToken(connection, {
-          splTokenBondingProgramId: TOKEN_BONDING_PROGRAM_ID,
-          splAssociatedTokenAccountProgramId:
-            SPL_ASSOCIATED_TOKEN_ACCOUNT_PROGRAM_ID,
-          splTokenProgramId: TOKEN_PROGRAM_ID,
-          splWumboProgramId: WUMBO_PROGRAM_ID,
-          splNameServicePogramId: SPL_NAME_SERVICE_PROGRAM_ID,
-          wumboInstance: WUMBO_INSTANCE_KEY,
-          payer: wallet!,
-          baseMint: wumboInstance!.wumboMint,
-          name: twitterHandle,
-          founderRewardsPercentage: 5.5,
-          nameParent: await getTld(),
-        });
+        console.log("Creator does not exist, creating")
+        result = await createWumboSocialToken(
+          connection,
+          {
+            splTokenBondingProgramId: TOKEN_BONDING_PROGRAM_ID,
+            splAssociatedTokenAccountProgramId: SPL_ASSOCIATED_TOKEN_ACCOUNT_PROGRAM_ID,
+            splTokenProgramId: TOKEN_PROGRAM_ID,
+            splWumboProgramId: WUMBO_PROGRAM_ID,
+            splNameServicePogramId: SPL_NAME_SERVICE_PROGRAM_ID,
+            wumboInstance: WUMBO_INSTANCE_KEY,
+            payer: wallet!,
+            baseMint: wumboInstance!.wumboMint,
+            name: twitterHandle,
+            founderRewardsPercentage: 5.5,
+            nameParent: await getTld(),
+          }
+        )
       } else {
         const creator = TokenRef.fromAccount(key, account);
         result = {
@@ -179,10 +181,7 @@ export const Claim = React.memo(() => {
   } = useCreateCoin();
 
   const { amount: sol, loading: solLoading } = useSolOwnedAmount();
-  const { amount: amountNeeded, loading: amountNeededLoading } =
-    useRentExemptAmount(
-      TWITTER_REGISTRY_SIZE + TokenRef.LEN + TokenBondingV0.LEN
-    );
+  const { amount: amountNeeded, loading: amountNeededLoading } = useRentExemptAmount(TWITTER_REGISTRY_SIZE + TokenRef.LEN + TokenBondingV0.LEN)
 
   if (error) {
     console.error(error);

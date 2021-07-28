@@ -42,6 +42,7 @@ export const TokenForm = ({
   }: {
     target: { value: string };
   }) => {
+    setValue("fiatAmount", Number(value));
     setValue("tokenAmount", +tokenAmountFromFiatAmount(+value).toFixed(2));
   };
 
@@ -50,7 +51,7 @@ export const TokenForm = ({
   }: {
     target: { value: string };
   }) => {
-    // TODO on change of tokenAmount determine fiatAmount
+    setValue("tokenAmount", Number(value));
     setValue("fiatAmount", +fiatAmountFromTokenAmount(+value).toFixed(2));
   };
 

@@ -1,12 +1,12 @@
 import { useConnectionConfig } from "@oyster/common";
-import React, { useContext, useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { useLocalStorageState } from "@oyster/common";
 import { WalletAdapter } from "@solana/wallet-base";
 import { WalletContext, WALLET_PROVIDERS } from "wumbo-common";
 import { PublicKey, Transaction } from "@solana/web3.js";
 import EventEmitter from "eventemitter3";
 
-function sendMesssageAsync(message: any): Promise<any> {
+function sendMessageAsync(message: any): Promise<any> {
   return new Promise<any>((resolve, reject) => {
     chrome.runtime.sendMessage(message, (result) => {
       if (result && result.error) {
@@ -93,20 +93,20 @@ class BackgroundWalletAdapter extends EventEmitter implements WalletAdapter {
   }
 
   connect() {
-    return sendMesssageAsync({
+    return sendMessageAsync({
       type: "WALLET_CONNECT",
       data: { providerUrl: this.providerUrl, endpoint: this.endpoint },
     });
   }
 
   disconnect() {
-    return sendMesssageAsync({ type: "WALLET_DISCONNECT" });
+    return sendMessageAsync({ type: "WALLET_DISCONNECT" });
   }
 
   async signTransaction(transaction: Transaction): Promise<Transaction> {
     this.setAwaitingApproval(true);
     const transactionResult: Uint8Array = (
-      await sendMesssageAsync({
+      await sendMessageAsync({
         type: "SIGN_TRANSACTION",
         data: {
           transaction: transaction.serialize({
@@ -124,7 +124,7 @@ class BackgroundWalletAdapter extends EventEmitter implements WalletAdapter {
     transactions: Transaction[]
   ): Promise<Transaction[]> {
     this.setAwaitingApproval(true);
-    const transactionResult: Uint8Array[] = await sendMesssageAsync({
+    const transactionResult: Uint8Array[] = await sendMessageAsync({
       type: "SIGN_TRANSACTIONS",
       data: {
         transactions: transactions.map((t) =>
@@ -141,8 +141,12 @@ const LOCAL_WALLETS = new Set(["Ledger", "Phantom"]);
 
 export function WalletProvider({ children = null as any }) {
   const { endpoint } = useConnectionConfig();
-  const { error, providerUrl, publicKey, setProviderUrl } =
-    useBackgroundState();
+  const {
+    error,
+    providerUrl,
+    publicKey,
+    setProviderUrl,
+  } = useBackgroundState();
   const [autoConnect, setAutoConnect] = useState(false);
   const [awaitingApproval, setAwaitingApproval] = useState<boolean>();
   const wallet = useMemo(

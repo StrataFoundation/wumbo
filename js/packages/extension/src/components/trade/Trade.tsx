@@ -101,7 +101,7 @@ interface TradeParams {
   icon: React.ReactElement;
   baseTicker: string;
   baseIcon: React.ReactElement;
-  buyBaseLink: React.ReactElement;
+  buyBaseLink: (arg0: boolean) => React.ReactElement;
 }
 
 export const TradeRoute = React.memo(() => {
@@ -117,33 +117,33 @@ export const TradeRoute = React.memo(() => {
   const fiatPrice = useFiatPrice(tokenBonding?.baseMint);
   const toFiat = (a: number) => (fiatPrice || 0) * a;
 
-  if (loading || !tokenBonding || !name) {
-    // TODO: Bry wtf is happening, and why does this error out if there's no input to focus on
-    return (
-      <div>
-        <input></input>
-      </div>
-    );
-    // return <Spinner />
+  if (!tokenBonding || !name || !icon) {
+    return <WumboDrawer.Loading />;
   }
+
   const isTargetWUM =
     tokenBonding.targetMint.toBase58() == WUM_TOKEN.toBase58();
-  const buyBaseLink = isTargetWUM ? (
-    <Link to={"/undefined"}>
-      <Badge rounded hoverable color="neutral">
-        <SolLogo width="20" height="20" className="mr-2" /> Buy SOL
-      </Badge>
-    </Link>
-  ) : (
-    <Link
-      to={routes.trade.path.replace(":tokenBondingKey", WUM_BONDING.toBase58())}
-    >
-      <Badge rounded hoverable color="primary">
-        <Logo width="20" height="20" className="mr-2" />$
-        {toFiat(ownedWUM || 0).toFixed(2) || "Buy WUM"}
-      </Badge>
-    </Link>
-  );
+  const buyBaseLink = (showFiat = true) =>
+    isTargetWUM ? (
+      <Link to={"/undefined"}>
+        <Badge rounded hoverable color="neutral">
+          <SolLogo width="20" height="20" className="mr-2" /> Buy SOL
+        </Badge>
+      </Link>
+    ) : (
+      <Link
+        to={routes.trade.path.replace(
+          ":tokenBondingKey",
+          WUM_BONDING.toBase58()
+        )}
+      >
+        <Badge rounded hoverable color="primary">
+          <Logo width="20" height="20" className="mr-2" />
+          {showFiat && "$"}
+          {(showFiat && toFiat(ownedWUM || 0).toFixed(2)) || "Buy WUM"}
+        </Badge>
+      </Link>
+    );
 
   return (
     <Fragment>
@@ -151,7 +151,7 @@ export const TradeRoute = React.memo(() => {
         <div className="flex justify-between w-full">
           <p className="text-lg font-medium text-indigo-600">Trade WUM</p>
           {/* TODO: link to ftx pay */}
-          {buyBaseLink}
+          {buyBaseLink()}
         </div>
       </WumboDrawer.Header>
       <WumboDrawer.Content>
@@ -224,7 +224,7 @@ export const Trade = React.memo(
         );
         setTransactionSuccesful({
           showing: true,
-          amount: values.tokenAmount,
+          amount: Number(values.tokenAmount),
           tokenName: ticker,
         });
       } catch (e) {
@@ -302,7 +302,9 @@ export const Trade = React.memo(
                     {baseToTargetPrice(ownedBase || 0).toFixed(4)} {ticker}{" "}
                     coins!
                   </span>
-                  <div className="flex justify-center mt-4">{buyBaseLink}</div>
+                  <div className="flex justify-center mt-4">
+                    {buyBaseLink(false)}
+                  </div>
                 </div>
               </div>
             </Tab>

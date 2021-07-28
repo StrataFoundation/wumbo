@@ -44,6 +44,7 @@ export const useUserInfo = (name: string): UserInfoState => {
     tokenBonding?.curve,
     LogCurveV0.fromAccount
   );
+
   const mint = useMint(creator && tokenBonding?.targetMint);
   const wumboUsdPrice = useWumboUsdPrice();
   const [userInfo, setUserInfo] = useState<UserInfoState>({
