@@ -61,7 +61,7 @@ const PopoverToken = ({ owner, mention }: IPopoverTokenProps) => {
       <Avatar
         name={(isClaimed && mention) || "UNCLAIMED"}
         subText={`@${mention}`}
-        size="sm"
+        size="xs"
         showDetails
       />
       <span className="ml-8 font-medium text-gray-700">
