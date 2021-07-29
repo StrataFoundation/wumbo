@@ -10,16 +10,14 @@ function getElementsBySelector(selector: string): Element[] {
   );
 }
 
-export const useProfile = (): {
+interface IParsedProfile {
   name: string;
-  buttonTarget: Element | null;
+  buttonTarget: HTMLElement | null;
   avatar?: string;
-} | null => {
-  const [result, setResult] = useState<{
-    name: string;
-    buttonTarget: Element | null;
-    avatar?: string;
-  } | null>(null);
+}
+
+export const useProfile = (): IParsedProfile | null => {
+  const [result, setResult] = useState<IParsedProfile | null>(null);
 
   useInterval(() => {
     let newResult = null;
@@ -51,7 +49,7 @@ export const useProfile = (): {
           newResult = {
             name,
             avatar: imgEl?.src,
-            buttonTarget: buttonTarget as Element,
+            buttonTarget: buttonTarget as HTMLElement,
           };
         }
       }
@@ -83,16 +81,16 @@ export const useStatus = (): { isStatus: boolean } | null => {
   return result;
 };
 
-interface ITweet {
+interface IParsedTweet {
   name: string;
-  buttonTarget: Element | null;
+  buttonTarget: HTMLElement | null;
   avatar?: string;
   mentions?: string[] | null;
   replyTokensTarget?: Element | null;
 }
 
-export const useTweets = (): ITweet[] | null => {
-  const [tweets, setTweets] = useState<ITweet[]>([]);
+export const useTweets = (): IParsedTweet[] | null => {
+  const [tweets, setTweets] = useState<IParsedTweet[]>([]);
 
   useEffect(() => {
     const cache = new Set<Element>();
@@ -100,7 +98,7 @@ export const useTweets = (): ITweet[] | null => {
       return !cache.has(el);
     };
 
-    const getTweets = () => {
+    const getTwets = () => {
       const tweets = getElementsBySelector('div[data-testid="tweet"]').filter(
         notCached
       );
@@ -108,108 +106,97 @@ export const useTweets = (): ITweet[] | null => {
       if (tweets.length > 0) {
         tweets.forEach((t) => cache.add(t));
 
-        const parsedTweets = tweets.reduce((acc: any, tweet: any): ITweet[] => {
-          const nameEl = tweet.querySelector("a");
-          if (nameEl) {
-            const name = nameEl.href.split("/").slice(-1)[0];
-            const imgEl = nameEl.querySelector("img");
-            const buttonTarget = tweet.firstChild?.firstChild;
-            let mentions: string[] | null = null;
-            let replyTokensTarget: Element | null = null;
+        const parsedTweets = tweets.reduce(
+          (acc: any, tweet: any): IParsedTweet[] => {
+            const nameEl = tweet.querySelector("a");
+            if (nameEl) {
+              const name = nameEl.href.split("/").slice(-1)[0];
+              const imgEl = nameEl.querySelector("img");
+              const buttonTarget = tweet.firstChild?.firstChild;
+              let mentions: string[] | null = null;
+              let replyTokensTarget: Element | null = null;
 
-            if (buttonTarget) {
-              mentions = tweet.parentNode.innerText
-                .split("\n")
-                .join(" ")
-                .match(twitterMentionRegex);
+              if (buttonTarget) {
+                mentions = tweet.parentNode.innerText
+                  .split("\n")
+                  .join(" ")
+                  .match(twitterMentionRegex);
 
-              if (mentions?.length) {
-                replyTokensTarget =
-                  tweet.children[1].children[1]?.lastChild?.previousSibling ||
-                  tweet.parentNode.lastElementChild.children[
-                    tweet.parentNode.lastElementChild.childNodes.length - 4
-                  ];
+                if (mentions?.length) {
+                  replyTokensTarget =
+                    tweet.children[1].children[1]?.lastChild?.previousSibling ||
+                    tweet.parentNode.lastElementChild.children[
+                      tweet.parentNode.lastElementChild.childNodes.length - 4
+                    ];
+                }
               }
+
+              return [
+                ...acc,
+                {
+                  name,
+                  avatar: imgEl?.src,
+                  buttonTarget,
+                  mentions,
+                  replyTokensTarget,
+                },
+              ];
             }
 
-            return [
-              ...acc,
-              {
-                name,
-                avatar: imgEl?.src,
-                buttonTarget,
-                mentions,
-                replyTokensTarget,
-              },
-            ];
-          }
-
-          return acc;
-        }, []);
+            return acc;
+          },
+          []
+        );
 
         setTweets((oldTweets) => [...(oldTweets || []), ...parsedTweets]);
       }
     };
 
-    setInterval(getTweets, 1000);
+    setInterval(getTwets, 1000);
   }, []);
 
   return tweets;
 };
 
-export const useUserCells = ():
-  | {
-      name: string;
-      buttonTarget: HTMLElement | null;
-      avatar?: string;
-    }[]
-  | null => {
-  const [userCells, setUserCells] = useState<
-    { name: string; buttonTarget: HTMLElement | null; avatar?: string }[]
-  >([]);
+interface IParsedUserCell {
+  name: string;
+  buttonTarget: HTMLElement | null;
+  avatar?: string;
+}
 
-  useEffect(() => {
-    const cache = new Set<Element>();
-    const notCached = (el: Element): boolean => {
-      return !cache.has(el);
-    };
+export const useUserCells = (): IParsedUserCell[] | null => {
+  const [userCells, setUserCells] = useState<IParsedUserCell[]>([]);
 
-    const getUserCells = () => {
-      const userCells = getElementsBySelector(
-        'div[data-testid="UserCell"]'
-      ).filter(notCached);
+  useInterval(() => {
+    const userCells = getElementsBySelector('div[data-testid="UserCell"]');
 
-      if (userCells.length > 0) {
-        userCells.forEach((uc) => cache.add(uc));
+    if (userCells.length > 0) {
+      const parsedUserCells = userCells.reduce((acc: any, cell: any) => {
+        const nameEl = cell.querySelector("a");
+        if (nameEl) {
+          const name = nameEl.href.split("/").slice(-1)[0];
+          const imgEl = nameEl.querySelector("img");
+          const buttonTarget =
+            cell.querySelector('div[data-testid$="follow"')?.parentNode || null;
 
-        const parsedUserCells = userCells.reduce((acc: any, cell: any) => {
-          const nameEl = cell.querySelector("a");
-          if (nameEl) {
-            const name = nameEl.href.split("/").slice(-1)[0];
-            const imgEl = nameEl.querySelector("img");
-            const buttonTarget =
-              cell.querySelector('div[data-testid$="follow"')?.parentNode ||
-              null;
+          return [
+            ...acc,
+            {
+              name,
+              avatar: imgEl?.src,
+              buttonTarget,
+            },
+          ];
+        }
 
-            return [
-              ...acc,
-              {
-                name,
-                avatar: imgEl?.src,
-                buttonTarget,
-              },
-            ];
-          }
+        return acc;
+      }, []);
 
-          return acc;
-        }, []);
-
-        setUserCells((oldCells) => [...(oldCells || []), ...parsedUserCells]);
+      if (!isEqual(parsedUserCells, userCells)) {
+        setUserCells(parsedUserCells);
       }
-    };
-
-    setInterval(getUserCells, 1000);
-  }, []);
+    }
+  }, 1000);
 
   return userCells;
 };
