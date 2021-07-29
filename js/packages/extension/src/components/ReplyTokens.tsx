@@ -101,7 +101,9 @@ export const ReplyTokens = ({
     }
   }, [sizes.width, sizes.height, forceUpdate]);
 
-  const sanitizedMentions = mentions.map((mention) => mention.replace("@", ""));
+  const sanitizedMentions = mentions.map((mention) =>
+    mention.replace(/[@ ]/g, "")
+  );
 
   const nullState =
     (!loading && !tokenRef) || loading || !tokenRef || !tokenRef.is_claimed;
