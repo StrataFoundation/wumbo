@@ -24,7 +24,7 @@ export const UserCellEnhancer = () => {
                 creatorName={cell.name}
                 creatorImg={cell.avatar || ""}
                 btnProps={{
-                  className: "!py-1",
+                  className: "!px-4 !py-1.5",
                   size: "md",
                   rounded: true,
                 }}
