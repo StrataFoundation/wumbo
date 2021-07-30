@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { FC, useState } from "react";
 import { Button, Alert } from "wumbo-common";
 import { WebAuth } from "auth0-js";
 
@@ -7,7 +7,7 @@ const auth0 = new WebAuth({
   domain: "wumbo.us.auth0.com",
 });
 
-const Popup: React.FC = () => {
+const Popup: FC = () => {
   const [showWalletConnect, setShowWalletConnect] = useState<boolean>(false);
 
   return (

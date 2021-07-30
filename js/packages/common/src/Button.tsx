@@ -9,11 +9,11 @@ import { classNames } from "./utils/utils";
 
 interface ButtonPropsWithChildren {}
 
-interface ButtonProps
+export interface IButtonProps
   extends ButtonHTMLAttributes<HTMLButtonElement>,
     ButtonPropsWithChildren {
   block?: Boolean;
-  children: ReactNode;
+  children?: ReactNode;
   className?: string;
   color?: "primary" | "secondary" | "twitterBlue";
   disabled?: boolean;
@@ -24,11 +24,11 @@ interface ButtonProps
   submit?: boolean;
 }
 
-interface LinkButtonProps
+interface ILinkButtonProps
   extends AnchorHTMLAttributes<HTMLAnchorElement>,
     ButtonPropsWithChildren {
   block?: Boolean;
-  children: ReactNode;
+  children?: ReactNode;
   className?: string;
   color?: "primary" | "secondary" | "twitterBlue";
   disabled?: boolean;
@@ -51,23 +51,23 @@ const style = {
     xs: "px-2 py-1 text-xs",
     sm: "px-6 py-1 text-sm",
     md: "px-6 py-2",
-    lg: "px-6 py-3",
+    lg: "px-6 py-2.5",
   },
   color: {
     primary: {
       bg: `bg-indigo-600 hover:bg-indigo-800`,
       gradient: `bg-gradient-to-tr from-blue-600 via-indigo-600 to-purple-600 hover:from-indigo-800 hover:to-purple-800`,
-      outline: `border-purple-700 border-2 text-purple-700 active:bg-purple-700 active:text-white`,
+      outline: `border-indigo-600 border-1 text-indigo-600 active:bg-indigo-600 active:text-white hover:bg-indigo-600 hover:bg-opacity-10`,
     },
     secondary: {
       bg: `bg-green-400 hover:bg-green-600`,
       gradient: `bg-gradient-to-tr from-green-400 to-green-600 hover:from-green-500 hover:to-green-700`,
-      outline: `border-green-400 border-2 text-green-400 active:bg-green-400 active:text-white`,
+      outline: `border-green-400 border-1 text-green-400 active:bg-green-400 active:text-white hover:bg-green-400 hover:bg-opacity-10`,
     },
     twitterBlue: {
       bg: `bg-twitter`,
       gradient: `bg-gradient-to-tr from-blue-500 via-indigo-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700`,
-      outline: `border-indigo-500 border-2 text-indigo-500 active:bg-indigo-500 active:text-white`,
+      outline: `border-indigo-500 border-1 text-indigo-500 active:bg-indigo-500 active:text-white hover:bg-indigo-500 hover:bg-opacity-10`,
     },
   },
 };
@@ -104,7 +104,7 @@ export const Button = forwardRef(
       size = "md",
       submit,
       ...props
-    }: ButtonProps,
+    }: IButtonProps,
     ref: ButtonRef
   ) => (
     <button
@@ -143,7 +143,7 @@ export const LinkButton = forwardRef(
       size = "md",
       submit,
       ...props
-    }: LinkButtonProps,
+    }: ILinkButtonProps,
     ref: LinkButtonRef
   ) => (
     <a

@@ -1,7 +1,7 @@
 import React from "react";
 import { classNames } from "./utils/utils";
 
-interface SpinnerProps {
+export interface ISpinnerProps {
   color?: "primary" | "secondary" | "white";
   size?: "xs" | "sm" | "md" | "lg";
 }
@@ -20,7 +20,7 @@ const style = {
   },
 };
 
-export const Spinner = ({ color = "white", size = "sm" }: SpinnerProps) => (
+export const Spinner = ({ color = "white", size = "sm" }: ISpinnerProps) => (
   <div>
     <svg
       className={classNames(
