@@ -54,6 +54,8 @@ const style = {
 export const Avatar = ({
   name,
   imgSrc,
+  subText,
+  showDetails,
   rounded = true,
   token = false,
   size = "md",
@@ -82,6 +84,14 @@ export const Avatar = ({
           {name && name.substr(0, 2).toUpperCase()}
         </span>
       </span>
+    )}
+    {showDetails && (
+      <div className="ml-3">
+        <p className="font-medium text-gray-700">{name}</p>
+        {subText && (
+          <p className="text-xs font-medium text-gray-700">{subText}</p>
+        )}
+      </div>
     )}
   </div>
 );
