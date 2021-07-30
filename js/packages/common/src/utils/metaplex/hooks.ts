@@ -49,7 +49,7 @@ async function getSignedTransaction(
   return wallet.signTransaction(transaction);
 }
 
-type TokenMetadata = {
+export type TokenMetadata = {
   key: PublicKey | undefined;
   image: string | undefined;
   metadata: Metadata | undefined;

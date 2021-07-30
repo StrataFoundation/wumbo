@@ -104,7 +104,7 @@ WumboDrawer.Header = (props: HeaderProps) => {
 };
 
 WumboDrawer.Content = (props: { children: ReactNode }) => (
-  <div className="mt-4 relative flex-1 px-4">{props.children}</div>
+  <div className="mt-4 overflow-y-auto relative flex-1 px-4">{props.children}</div>
 );
 
 WumboDrawer.Nav = () => {
