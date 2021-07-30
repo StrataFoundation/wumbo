@@ -24,22 +24,15 @@ interface IMentionTokenProps extends Pick<IAvatarProps, "size"> {
 
 const MentionToken = ({ owner, mention, size }: IMentionTokenProps) => {
   const { info: tokenRef, loading } = useTwitterTokenRef(mention);
-  const { amount, loading: loadingAmount } = useOwnedAmountForOwnerAndHandle(
-    owner,
-    mention
-  );
-
   const isClaimed = tokenRef?.is_claimed;
-  const isLoading = loading || loadingAmount;
-  const nullState =
-    (!loading && !tokenRef) || (!loadingAmount && !amount) || isLoading;
+  const isLoading = loading;
+  const nullState = (!loading && !tokenRef) || isLoading;
 
   if (nullState) return null;
 
   return (
-    <div className="flex items-center">
+    <div className="flex items-center inline-block rounded-full ring-2 ring-black">
       <Avatar name={(isClaimed && mention) || "UNCLAIMED"} size={size} />
-      <span className="pl-1">{humanizeAmount(amount!)}</span>
     </div>
   );
 };
@@ -67,7 +60,7 @@ const PopoverToken = ({ owner, mention }: IPopoverTokenProps) => {
       <Avatar
         name={(isClaimed && mention) || "UNCLAIMED"}
         subText={`@${mention}`}
-        size="sm"
+        size="xs"
         showDetails
       />
       <span className="ml-8 font-medium text-gray-700">
@@ -101,7 +94,9 @@ export const ReplyTokens = ({
     }
   }, [sizes.width, sizes.height, forceUpdate]);
 
-  const sanitizedMentions = mentions.map((mention) => mention.replace("@", ""));
+  const sanitizedMentions = mentions.map((mention) =>
+    mention.replace(/[@ ]/g, "")
+  );
 
   const nullState =
     (!loading && !tokenRef) || loading || !tokenRef || !tokenRef.is_claimed;
@@ -111,14 +106,16 @@ export const ReplyTokens = ({
   return (
     <Popover className="flex items-center text-white text-xs mt-2">
       <Popover.Button className="flex items-center space-x-2" ref={setRefEl}>
-        {sanitizedMentions.map((mention) => (
-          <MentionToken
-            key={`mention${mention}`}
-            owner={tokenRef?.owner}
-            mention={mention}
-            size={size}
-          />
-        ))}
+        <div className="flex -space-x-1 overflow-hidden">
+          {sanitizedMentions.map((mention) => (
+            <MentionToken
+              key={`mention${mention}`}
+              owner={tokenRef?.owner}
+              mention={mention}
+              size={size}
+            />
+          ))}
+        </div>
       </Popover.Button>
 
       {createPortal(
