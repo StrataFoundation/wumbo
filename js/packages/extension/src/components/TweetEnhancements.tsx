@@ -50,14 +50,14 @@ export default () => {
             ? getOrElseUpdate(tokenReplyCache, `${name}${tweetIndex}`, () => (
                 <ReplyTokens
                   creatorName={name}
-                  mentions={replyMentions as string[]}
+                  mentions={(replyMentions || []) as string[]}
                 />
               ))
             : null;
 
           if (buttonEl) {
             return (
-              <Fragment key={name}>
+              <Fragment key={name + tweetIndex}>
                 <AppendChildPortal container={insertButtonDiv as Element}>
                   <div className="flex justify-center mt-1.5">{buttonEl}</div>
                 </AppendChildPortal>

@@ -1,22 +1,51 @@
 import { useWallet, useClaimedTokenRef, Profile as CommonProfile } from "wumbo-common";
 import React, { Fragment } from "react";
 import { WumboDrawer } from "../WumboDrawer";
-import { useHistory } from 'react-router-dom';
-import { routes } from "@/constants/routes";
+import { useHistory, useParams } from 'react-router-dom';
+import { tradePath, viewProfilePath } from "@/constants/routes";
+import WalletRedirect from "../wallet/WalletRedirect";
+import { PublicKey } from "@solana/web3.js";
 
 export const Profile = () => {
-  const { wallet } = useWallet()
+  const params = useParams<{ tokenBondingKey: string | undefined }>();
+  const { wallet, connected } = useWallet();
+  const { info: tokenRef, loading } = useClaimedTokenRef(wallet?.publicKey || undefined);
   const history = useHistory();
-  const { info: tokenRef, loading } = useClaimedTokenRef(wallet?.publicKey);
+
+  let tokenBondingKey: PublicKey;
+  if (params.tokenBondingKey) {
+    tokenBondingKey = new PublicKey(params.tokenBondingKey);
+  } else {
+    if (!connected) {
+      return <WalletRedirect />
+    }
+
+    if (loading) {
+      return <WumboDrawer.Loading />
+    }
+
+    if (!tokenRef) {
+      return <Fragment>
+        <WalletRedirect />
+        <WumboDrawer.Header title="Profile" />
+        <WumboDrawer.Content>
+          It looks like you haven't claimed a coin yet
+        </WumboDrawer.Content>
+        <WumboDrawer.Nav />
+      </Fragment>
+    };
+
+    tokenBondingKey = tokenRef.tokenBonding
+  }
 
   return (
     <Fragment>
       <WumboDrawer.Header title="Profile" />
       <WumboDrawer.Content>
         <CommonProfile 
-          ownerWalletKey={wallet?.publicKey} 
-          onAccountClick={(account) => history.push(routes.profile.path.replace(":ownerWalletKey", account.owner.toBase58()))}
-          onTradeClick={() => history.push(routes.trade.path.replace(":tokenBondingKey", tokenRef.tokenBonding))}
+          tokenBondingKey={tokenBondingKey}
+          onAccountClick={(tokenBonding) => history.push(viewProfilePath(tokenBonding))}
+          onTradeClick={() => history.push(tradePath(tokenBondingKey))}
         />
       </WumboDrawer.Content>
       <WumboDrawer.Nav />

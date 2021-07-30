@@ -1,89 +1,80 @@
-import { getHashedName, getNameAccountKey, NameRegistryState } from "@bonfida/spl-name-service";
-import { getTld, getTwitterHandle } from "./twitter";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Connection, PublicKey } from "@solana/web3.js";
-import { WUMBO_INSTANCE_KEY, WUMBO_PROGRAM_ID } from "../constants/globals";
 import { useConnection } from "@oyster/common";
 import { useAccount, UseAccountState } from "./account";
-import { TokenRef } from "spl-wumbo";
+import { TokenRef, Wumbo } from "spl-wumbo";
 import { useAsync, useAsyncCallback } from "react-async-hook";
 import { TokenBondingV0 } from "spl-token-bonding";
 import { TokenMetadata, useTokenMetadata } from "./metaplex/hooks";
+import { getWumbo } from "../constants/wumbo";
 
-export async function getUnclaimedTokenRefKey(name: string): Promise<PublicKey> {
-  const hashedName = await getHashedName(name);
-  const twitterHandleRegistryKey = await getNameAccountKey(
-    hashedName,
-    undefined,
-    await getTld()
-  );
-  const [key, _] = await PublicKey.findProgramAddress(
-    [
-      Buffer.from("unclaimed-ref", "utf-8"),
-      WUMBO_INSTANCE_KEY.toBuffer(),
-      twitterHandleRegistryKey.toBuffer(),
-    ],
-    WUMBO_PROGRAM_ID
-  );
+export function useWumbo(): Wumbo | undefined {
+  const { result } = useAsync(getWumbo, []);
 
-  return key;
+  return result;
 }
 
-export async function getClaimedTokenRefKeyFromOwner(owner: PublicKey | undefined): Promise<PublicKey | undefined> {
-  if (!owner) {
-    return undefined;
-  }
-
-  return (await PublicKey.findProgramAddress(
-    [
-      Buffer.from("claimed-ref", "utf-8"),
-      WUMBO_INSTANCE_KEY.toBuffer(),
-      owner.toBuffer(),
-    ],
-    WUMBO_PROGRAM_ID
-  ))[0];
-}
-
-export async function getClaimedTokenRefKey(connection: Connection, name: string): Promise<PublicKey | undefined> {
-  const header = await getTwitterHandle(connection, name)
-  if (header) {
-    return getClaimedTokenRefKeyFromOwner(header.owner)
-  }
-}
-
-export async function getTokenRefKey(connection: Connection, name: string): Promise<PublicKey> {
-  return await getUnclaimedTokenRefKey(name) || await getClaimedTokenRefKey(connection, name)
-}
-
-export const useTokenRefKey = (name: string | undefined): PublicKey | undefined => {
-  const [key, setKey] = useState<PublicKey>();
+export const useUnclaimedTwitterTokenRefKey = (name: string | undefined): PublicKey | undefined => {
   const connection = useConnection();
-  useEffect(() => {
-    (async () => {
-      if (name) {
-        setKey(await getTokenRefKey(connection, name));
+  const wumbo = useWumbo()
+  const { result: key } = useAsync(async (wumbo: Wumbo | undefined, name: string | undefined) => {
+      if (connection && name && wumbo) {
+        return wumbo.getTwitterUnclaimedTokenRefKey(name)
       }
-    })();
-  }, [name]);
+    },
+    [wumbo, name]
+  )
+  return key;
+};
 
+
+export const useClaimedTwitterTokenRefKey = (name: string | undefined): PublicKey | undefined => {
+  const connection = useConnection();
+  const wumbo = useWumbo()
+  const { result: key } = useAsync(async (connection: Connection | undefined, wumbo: Wumbo | undefined, name: string | undefined) => {
+      if (connection && name && wumbo) {
+        return wumbo.getTwitterClaimedTokenRefKey(connection, name)
+      }
+    },
+    [connection, wumbo, name]
+  )
   return key;
 };
 
 export const useClaimedTokenRefKey = (owner: PublicKey | undefined): PublicKey | undefined => {
-  const { result } = useAsync(getClaimedTokenRefKeyFromOwner, [owner]);
+  const wumbo = useWumbo()
+  const { result } = useAsync(async (wumbo: Wumbo | undefined, owner: PublicKey | undefined) => wumbo?.getTokenRefKeyFromOwner(owner), [wumbo, owner]);
 
   return result;
 };
+
+export function useTokenRefFromBonding(tokenBonding: PublicKey | undefined): UseAccountState<TokenRef> {
+  const wumbo = useWumbo()
+  const { result: key } = useAsync(async (wumbo: Wumbo | undefined, tokenBonding: PublicKey | undefined) =>
+    wumbo?.getTokenRefKeyFromBonding(tokenBonding),
+    [wumbo, tokenBonding]
+  );
+  return useAccount(key, TokenRef.fromAccount)
+}
 
 export function useClaimedTokenRef(owner: PublicKey | undefined): UseAccountState<TokenRef> {
   const key = useClaimedTokenRefKey(owner);
   return useAccount(key, TokenRef.fromAccount)
 }
 
-export const useTokenRef = (name: string | undefined): UseAccountState<TokenRef> => {
-  const key = useTokenRefKey(name);
+export const useTwitterTokenRef = (name: string | undefined): UseAccountState<TokenRef> => {
+  const claimedKey = useClaimedTwitterTokenRefKey(name);
+  const unclaimedKey = useUnclaimedTwitterTokenRefKey(name);
+  const claimed = useAccount(claimedKey, TokenRef.fromAccount);
+  const unclaimed = useAccount(unclaimedKey, TokenRef.fromAccount);
+  const result = useMemo(() => {
+    if (claimed.info) {
+      return claimed;
+    }
+    return unclaimed;
+  }, [claimed, unclaimed])
 
-  return useAccount(key, TokenRef.fromAccount);
+  return result
 };
 
 export function useSocialTokenMetadata(owner: PublicKey | undefined): TokenMetadata {

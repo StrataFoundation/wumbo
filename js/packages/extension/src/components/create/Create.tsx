@@ -2,13 +2,12 @@ import React, { Fragment, useState } from "react";
 import { Link, useHistory, useLocation } from "react-router-dom";
 import { useConnection } from "@oyster/common";
 import { WumboDrawer } from "../WumboDrawer";
-import { createWumboSocialToken, WumboInstance } from "spl-wumbo";
+import { WumboInstance, Wumbo } from "spl-wumbo";
 import { routes } from "@/constants/routes";
 import {
   WUMBO_INSTANCE_KEY,
   WUMBO_PROGRAM_ID,
   TOKEN_PROGRAM_ID,
-  TWITTER_ROOT_PARENT_REGISTRY_KEY,
   TOKEN_BONDING_PROGRAM_ID,
   SPL_NAME_SERVICE_PROGRAM_ID,
   SPL_ASSOCIATED_TOKEN_ACCOUNT_PROGRAM_ID,
@@ -37,7 +36,7 @@ export const Create = () => {
   const createCreator = async () => {
     setCreationLoading(true);
     try {
-      const { tokenBondingKey } = await createWumboSocialToken(connection, {
+      const { tokenBondingKey } = await Wumbo.createWumboSocialToken(connection, {
         splTokenBondingProgramId: TOKEN_BONDING_PROGRAM_ID,
         splAssociatedTokenAccountProgramId: SPL_ASSOCIATED_TOKEN_ACCOUNT_PROGRAM_ID,
         splTokenProgramId: TOKEN_PROGRAM_ID,

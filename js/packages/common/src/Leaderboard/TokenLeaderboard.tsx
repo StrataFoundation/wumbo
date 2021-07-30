@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useState } from 'react';
+import React, { Fragment, useContext, useEffect, useState } from 'react';
 import { Spinner } from '../Spinner';
 import { AccountInfo as TokenAccountInfo } from '@solana/spl-token';
 import { PublicKey, Connection } from '@solana/web3.js';
@@ -22,10 +22,11 @@ const PageChevron = ({ direction, onClick }: { direction: "up" | "down", onClick
   </div>
 )
 
-const TokenAccountsContext = React.createContext<{ accounts: AccountAndRank[], loading: boolean }>([]);
+const TokenAccountsContext = React.createContext<{ accounts: AccountAndRank[], loading: boolean }>({ accounts: [], loading: true });
 
 async function getAllTokenAccounts(connection: Connection, mint: PublicKey | undefined): Promise<AccountAndRank[]> {
   if (mint) {
+    // @ts-ignore
     const vals = (await connection.getProgramAccounts(TOKEN_PROGRAM_ID, {
       filters: [{
         memcmp: {
@@ -35,7 +36,7 @@ async function getAllTokenAccounts(connection: Connection, mint: PublicKey | und
       }]
     }))
       .map(({ account, pubkey }) => TokenAccountParser(pubkey, account).info)
-      .sort((a, b) => a.amount.toNumber() - b.amount.toNumber())
+      .sort((a, b) => b.amount.toNumber() - a.amount.toNumber())
       .map((account, index) => ({
         rank: index + 1,
         account
@@ -43,6 +44,8 @@ async function getAllTokenAccounts(connection: Connection, mint: PublicKey | und
 
     return vals;
   }
+
+  return []
 }
 
 export function TokenAccountsContextProvider({ children = null as any, mint }: { children: any, mint: PublicKey | undefined }): React.ReactElement {
@@ -107,25 +110,27 @@ function useAccountsPagination(mintKey: PublicKey | undefined, findAmount?: numb
   }
 }
 
-export const TokenLeaderboard = React.memo(({ mint, onAccountClick }: { mint: PublicKey, onAccountClick?: (account: TokenAccountInfo) => void }) => {
+export const TokenLeaderboard = React.memo(({ mint, onAccountClick }: { mint: PublicKey, onAccountClick?: (tokenBondingKey: PublicKey) => void }) => {
   const ownedAmount = useOwnedAmount(mint)
   const top = useAccountsPagination(mint);
   const local = useAccountsPagination(mint, ownedAmount);
+  const { accounts } = useTokenAccounts();
   const { wallet } = useWallet();
+  const userIndex = accounts.findIndex(a => a.account.owner.toBase58() == wallet?.publicKey?.toBase58())
+
   if (top.loading || local.loading) {
     return <div className="flex flex-col items-center flex-grow">
       <Spinner color="primary" size="lg" />
     </div>
   }
 
-  return <div className="pt-2 flex flex-col items-stretch">
-    <WhiteCard>
-      <Leaderboard
-        numbers={top.accounts.map(({ rank }) => <LeaderboardNumber key={"num" + rank}>{rank}</LeaderboardNumber>)}
-        elements={top.accounts.map(({ rank, account }) => <MetadataLeaderboardElement onClick={onAccountClick} key={"el" + rank} account={account} />)}
-      />
-      <PageChevron direction="down" onClick={top.pageDown} />
-    </WhiteCard>
+  if (accounts.length === 0) {
+    return <div>
+      No token holders
+    </div>
+  }
+
+  const localLeaderboard = <Fragment>
     <div className="text-center text-bold text-2xl text-gray-500 mb-2">
       ...
     </div>
@@ -137,5 +142,16 @@ export const TokenLeaderboard = React.memo(({ mint, onAccountClick }: { mint: Pu
       />
       <PageChevron direction="down" onClick={local.pageDown} />
     </WhiteCard>
+  </Fragment>
+
+  return <div className="pt-2 flex flex-col items-stretch">
+    <WhiteCard>
+      <Leaderboard
+        numbers={top.accounts.map(({ rank, account }) => <LeaderboardNumber selected={account.owner.toBase58() == wallet?.publicKey?.toBase58()} key={"num" + rank}>{rank}</LeaderboardNumber>)}
+        elements={top.accounts.map(({ rank, account }) => <MetadataLeaderboardElement onClick={onAccountClick} key={"el" + rank} account={account} />)}
+      />
+      <PageChevron direction="down" onClick={top.pageDown} />
+    </WhiteCard>
+    { userIndex > (top.accounts.length - 1) && localLeaderboard}
   </div>
 })

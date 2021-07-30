@@ -11,7 +11,7 @@ import {
   Avatar,
   TokenPill,
   useReverseTwitter,
-  useTokenRef,
+  useTwitterTokenRef,
   useAccount,
   Alert,
   Button,

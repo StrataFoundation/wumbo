@@ -7,7 +7,7 @@ import useResizeAware from "react-resize-aware";
 import {
   Avatar,
   IAvatarProps,
-  useTokenRef,
+  useTwitterTokenRef,
   useOwnedAmountForOwnerAndHandle,
 } from "wumbo-common";
 
@@ -23,7 +23,7 @@ interface IMentionTokenProps extends Pick<IAvatarProps, "size"> {
 }
 
 const MentionToken = ({ owner, mention, size }: IMentionTokenProps) => {
-  const { info: tokenRef, loading } = useTokenRef(mention);
+  const { info: tokenRef, loading } = useTwitterTokenRef(mention);
   const { amount, loading: loadingAmount } = useOwnedAmountForOwnerAndHandle(
     owner,
     mention
@@ -50,7 +50,7 @@ interface IPopoverTokenProps {
 }
 
 const PopoverToken = ({ owner, mention }: IPopoverTokenProps) => {
-  const { info: tokenRef, loading } = useTokenRef(mention);
+  const { info: tokenRef, loading } = useTwitterTokenRef(mention);
   const { amount, loading: loadingAmount } = useOwnedAmountForOwnerAndHandle(
     owner,
     mention
@@ -87,7 +87,7 @@ export const ReplyTokens = ({
   mentions,
   size = "xxs",
 }: IReplyTokensProps) => {
-  const { info: tokenRef, loading } = useTokenRef(creatorName);
+  const { info: tokenRef, loading } = useTwitterTokenRef(creatorName);
   const [refEl, setRefEl] = useState<HTMLButtonElement | null>(null);
   const [popperEl, setPopperEl] = useState<HTMLDivElement | null>(null);
   const [resizeListener, sizes] = useResizeAware();

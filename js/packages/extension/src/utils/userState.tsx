@@ -9,7 +9,7 @@ import {
   useAccount,
   UseAccountState,
   useMint,
-  useTokenRef,
+  useTwitterTokenRef,
 } from "wumbo-common";
 import { AccountInfo, PublicKey } from "@solana/web3.js";
 import { TokenRef } from "spl-wumbo";
@@ -35,7 +35,7 @@ export interface UserInfoState {
   loading: boolean;
 }
 export const useUserInfo = (name: string): UserInfoState => {
-  const { info: creator, loading } = useTokenRef(name);
+  const { info: creator, loading } = useTwitterTokenRef(name);
   const { info: tokenBonding } = useAccount(
     creator?.tokenBonding,
     TokenBondingV0.fromAccount
@@ -44,7 +44,6 @@ export const useUserInfo = (name: string): UserInfoState => {
     tokenBonding?.curve,
     LogCurveV0.fromAccount
   );
-
   const mint = useMint(creator && tokenBonding?.targetMint);
   const wumboUsdPrice = useWumboUsdPrice();
   const [userInfo, setUserInfo] = useState<UserInfoState>({

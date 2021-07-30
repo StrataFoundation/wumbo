@@ -210,7 +210,11 @@ export async function getTwitterReverse(
   return ReverseTwitterRegistryState.retrieve(connection, key);
 }
 
-async function getTwitterName(connection: Connection, owner: PublicKey) {
+async function getTwitterName(connection: Connection, owner: PublicKey | undefined) {
+  if (!owner) {
+    return;
+  }
+
   return (await getTwitterReverse(connection, owner)).twitterHandle;
 }
 
@@ -219,7 +223,7 @@ interface ReverseTwitterState {
   handle: string | undefined;
   error: Error | undefined;
 }
-export function useReverseTwitter(owner: PublicKey): ReverseTwitterState {
+export function useReverseTwitter(owner: PublicKey | undefined): ReverseTwitterState {
   const connection = useConnection();
   const {
     loading,

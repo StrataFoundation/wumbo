@@ -20,6 +20,14 @@ function sendWallet() {
 chrome.runtime.onMessage.addListener((msg, _, sendResponse) => {
   // @ts-ignore
   (async () => {
+    // Forward along
+    if (msg.type == "CLAIM") {
+      chrome.tabs.query({}, function (tabs) {
+        tabs.forEach(
+          (tab) => tab.id && chrome.tabs.sendMessage(tab.id, msg, () => {})
+        );
+      });
+    }
     if (msg.type == "WALLET_CONNECT") {
       const adapter = WALLET_PROVIDERS.find(
         (p) => p.url == msg.data.providerUrl

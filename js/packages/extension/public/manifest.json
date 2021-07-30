@@ -33,7 +33,7 @@
       "all_frames": true
     },
     {
-      "matches": ["https://hello.com/*"],
+      "matches": ["https://wum.bo/extension-oauth"],
       "js": ["oauth.js"],
       "run_at": "document_end",
       "all_frames": true

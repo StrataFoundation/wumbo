@@ -2,21 +2,42 @@ import React from 'react';
 import { PublicKey } from '@solana/web3.js';
 import { useParams } from 'react-router';
 import AppContainer from '../../common/AppContainer';
-import { Profile } from "wumbo-common";
-import { AccountInfo as TokenAccountInfo } from '@solana/spl-token';
+import { Profile, Spinner, useClaimedTokenRef, useWallet, useWumbo } from "wumbo-common";
 import { useHistory } from 'react-router-dom';
-import routes from '../../../constants/routes';
+import { profilePath } from '../../../constants/routes';
+import WalletRedirect from '../../Wallet/WalletRedirect';
 
 export const ViewProfileRoute = React.memo(() => {
-  const params = useParams<{ ownerWalletKey: string }>();
-  const ownerWalletKey = new PublicKey(params.ownerWalletKey);
+  const params = useParams<{ tokenBondingKey: string | undefined }>();
+  const { wallet, connected } = useWallet();
+  const { info: tokenRef, loading } = useClaimedTokenRef(wallet?.publicKey || undefined);
   const history = useHistory();
+
+  let tokenBondingKey: PublicKey;
+  if (params.tokenBondingKey) {
+    tokenBondingKey = new PublicKey(params.tokenBondingKey);
+  } else {
+    if (!connected) {
+      return <WalletRedirect />
+    }
+
+    if (loading) {
+      return <AppContainer>
+        <Spinner />
+      </AppContainer>
+    }
+
+    tokenBondingKey = tokenRef!.tokenBonding
+  }
+
 
   return (
     <AppContainer>
       <Profile
-        ownerWalletKey={ownerWalletKey}
-        onAccountClick={(account) => history.push(routes.profile.path.replace(":ownerWalletKey", account.owner.toBase58()))}
+        tokenBondingKey={tokenBondingKey}
+        onAccountClick={(tokenBondingKey: PublicKey) => {
+          history.push(profilePath(tokenBondingKey))
+        }}
       />
     </AppContainer>
   );

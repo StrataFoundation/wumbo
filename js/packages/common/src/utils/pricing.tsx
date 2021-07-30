@@ -20,7 +20,7 @@ import { useAssociatedAccount } from "./walletState";
 import { useWallet } from "./wallet";
 import { useConnection } from "@oyster/common";
 import { useAsync } from "react-async-hook";
-import { useTokenRef } from "./tokenRef";
+import { useTwitterTokenRef } from "./tokenRef";
 
 // TODO: Use actual connection. But this can't happen in dev
 let connection = new Connection("https://api.mainnet-beta.solana.com");
@@ -96,7 +96,7 @@ export function useOwnedAmountForOwnerAndHandle(
     loading: true,
     amount: 0,
   });
-  const { info: tokenRef, loading: loadingRef } = useTokenRef(handle);
+  const { info: tokenRef, loading: loadingRef } = useTwitterTokenRef(handle);
   const { info: token, loading: loadingAmount } = useAccount(
     tokenRef?.tokenBonding,
     TokenBondingV0.fromAccount
@@ -146,7 +146,7 @@ export function useOwnedAmount(
     }
   }, [associatedAccount, mint]);
 
-  return Number(amount);
+  return amount && Number(amount);
 }
 
 // baseAmount = curve(supply + ret) * founder_rewards_percent

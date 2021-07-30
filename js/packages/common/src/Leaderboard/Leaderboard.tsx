@@ -1,4 +1,4 @@
-import { amountAsNum, classNames, useAccount, useClaimedTokenRef, useMint, useSocialTokenMetadata, useTokenMetadata, useTokenRef } from '../utils';
+import { amountAsNum, classNames, useAccount, useClaimedTokenRef, useMint, useSocialTokenMetadata, useTokenMetadata, useTwitterTokenRef } from '../utils';
 import React from 'react';
 import { AccountInfo as TokenAccountInfo, Token } from "@solana/spl-token";
 import { Spinner } from '../Spinner';
