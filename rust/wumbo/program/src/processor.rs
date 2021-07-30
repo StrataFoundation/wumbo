@@ -1,6 +1,7 @@
 use std::convert::TryInto;
+use std::str::FromStr;
 
-use solana_program::instruction::AccountMeta;
+use solana_program::instruction::{AccountMeta, Instruction};
 use solana_program::program::{invoke, invoke_signed};
 use solana_program::program_error::ProgramError;
 use solana_program::system_instruction;
@@ -17,7 +18,6 @@ use {
     borsh::{BorshDeserialize, BorshSerialize},
     solana_program::{
         account_info::{next_account_info, AccountInfo},
-        borsh::try_from_slice_unchecked,
         entrypoint::ProgramResult,
         msg,
         pubkey::Pubkey,
@@ -26,9 +26,12 @@ use {
     spl_token::state::Account,
 };
 
+use crate::instruction::UpdateMetadataAccountArgs;
 use crate::solana_program::sysvar::Sysvar;
-use crate::state::{BONDING_AUTHORITY_PREFIX, CLAIMED_REF_PREFIX, ClaimedTokenRefV0, FOUNDER_REWARDS_AUTHORITY_PREFIX, REVERSE_TOKEN_REF_PREFIX, UNCLAIMED_REF_PREFIX, WUMBO_PREFIX, WumboInstanceV0};
+use crate::state::{BONDING_AUTHORITY_PREFIX, CLAIMED_REF_PREFIX, ClaimedTokenRefV0, FOUNDER_REWARDS_AUTHORITY_PREFIX, METADATA_UPDATE_AUTHORITY_PREFIX, REVERSE_TOKEN_REF_PREFIX, UNCLAIMED_REF_PREFIX, WUMBO_PREFIX, WumboInstanceV0};
 use spl_name_service::state::NameRecordHeader;
+
+static TOKEN_METADATA_PROGRAM_ID_STR: &str = "metaqbxxUerdq28cj1RbAWkYQm3ybzjb6a8bt518x1s";
 
 pub fn process_instruction(
     program_id: &Pubkey,
@@ -57,6 +60,10 @@ pub fn process_instruction(
         WumboInstruction::CreateTokenMetadata(args) => {
           msg!("Instruction: Create Token Metadata");
           process_create_token_metadata(program_id, accounts, args)
+        }
+        WumboInstruction::UpdateMetadataAccount(args) => {
+          msg!("Instruction: Update Metadata Account");
+          process_update_metadata_account(program_id, accounts, args)
         }
     }
 }
@@ -162,6 +169,11 @@ pub fn reverse_token_ref_key(
       &wumbo_instance.to_bytes(),
       &token_bonding.to_bytes(),
   ];
+  Pubkey::find_program_address(seeds, program_id)
+}
+
+pub fn metadata_update_authority(program_id: &Pubkey, token_ref: &Pubkey) -> (Pubkey, u8) {
+  let seeds: &[&[u8]] = &[&METADATA_UPDATE_AUTHORITY_PREFIX.as_bytes(), &token_ref.to_bytes()];
   Pubkey::find_program_address(seeds, program_id)
 }
 
@@ -526,9 +538,16 @@ fn process_create_token_metadata(program_id: &Pubkey, accounts: &[AccountInfo], 
   let mint_authority = next_account_info(accounts_iter)?;
   let payer = next_account_info(accounts_iter)?;
   let update_authority = next_account_info(accounts_iter)?;
+  let system = next_account_info(accounts_iter)?;
+  let rent = next_account_info(accounts_iter)?;
 
   let token_bonding_data = TokenBondingV0::unpack_from_slice(&token_bonding.data.borrow())?;
   let token_ref_data = ClaimedTokenRefV0::unpack_from_slice(&token_ref.data.borrow())?;
+
+  let (update_authority_key, _) = metadata_update_authority(program_id, token_ref.key);
+  if update_authority_key != *update_authority.key {
+    return Err(WumboError::InvalidAuthority.into());
+  }
 
   if *token_bonding.owner != spl_token_bonding::id() || *token_bonding_program_id.key != spl_token_bonding::id() {
     return Err(WumboError::InvalidTokenBondingProgramId.into());
@@ -581,6 +600,98 @@ fn process_create_token_metadata(program_id: &Pubkey, accounts: &[AccountInfo], 
       mint.clone(),
       mint_authority.clone(),
       payer.clone(),
+      update_authority.clone(),
+      system.clone(),
+      rent.clone()
+    ],
+    &[signer_seeds],
+  )?;
+
+  return Ok(())
+}
+
+/// Instructions supported by the Metadata program.
+#[derive(BorshSerialize, BorshDeserialize, Clone)]
+pub enum MetadataInstruction {
+    /// Create Metadata object.
+    ///   0. `[writable]`  Metadata key (pda of ['metadata', program id, mint id])
+    ///   1. `[]` Mint of token asset
+    ///   2. `[signer]` Mint authority
+    ///   3. `[signer]` payer
+    ///   4. `[]` update authority info
+    ///   5. `[]` System program
+    ///   6. `[]` Rent info
+    CreateMetadataAccount(CreateMetadataAccountArgs),
+    UpdateMetadataAccount(UpdateMetadataAccountArgs),
+}
+
+pub fn update_metadata_accounts(
+  program_id: Pubkey,
+  metadata_account: Pubkey,
+  update_authority: Pubkey,
+  args: UpdateMetadataAccountArgs
+) -> Instruction {
+  Instruction {
+    program_id,
+    accounts: vec![
+      AccountMeta::new(metadata_account, false),
+      AccountMeta::new_readonly(update_authority, true),
+    ],
+    data: MetadataInstruction::UpdateMetadataAccount(args)
+    .try_to_vec()
+    .unwrap(),
+  }
+}
+
+fn process_update_metadata_account(program_id: &Pubkey, accounts: &[AccountInfo], args: UpdateMetadataAccountArgs) -> ProgramResult {
+  let accounts_iter = &mut accounts.into_iter();
+  let token_ref = next_account_info(accounts_iter)?;
+  let token_ref_owner = next_account_info(accounts_iter)?;
+  let spl_token_metadata_program_id = next_account_info(accounts_iter)?;
+
+  // Unused except for passthrough
+  let metadata_account = next_account_info(accounts_iter)?;
+  let update_authority = next_account_info(accounts_iter)?;
+
+  let token_ref_data = ClaimedTokenRefV0::unpack_from_slice(&token_ref.data.borrow())?;
+
+  let (update_authority_key, nonce) = metadata_update_authority(program_id, token_ref.key);
+  if update_authority_key != *update_authority.key {
+    return Err(WumboError::InvalidAuthority.into());
+  }
+
+  if *token_ref_owner.key != token_ref_data.owner {
+    return Err(WumboError::InvalidTokenRefOwner.into())
+  }
+
+  if *token_ref.owner != *program_id {
+    return Err(ProgramError::IncorrectProgramId)
+  }
+
+  if !token_ref_owner.is_signer {
+    return Err(WumboError::MissingSigner.into());
+  }
+
+  if *spl_token_metadata_program_id.key != Pubkey::from_str(TOKEN_METADATA_PROGRAM_ID_STR).unwrap() {
+    return Err(ProgramError::IncorrectProgramId);
+  }
+
+  let signer_seeds = &[
+      METADATA_UPDATE_AUTHORITY_PREFIX.as_bytes(),
+      &token_ref.key.to_bytes(),
+      &[nonce]
+  ];
+  
+  invoke_signed(
+    &update_metadata_accounts(
+      *spl_token_metadata_program_id.key,
+      *metadata_account.key,
+      *update_authority.key,
+      args
+    ),
+    &[
+      spl_token_metadata_program_id.clone(),
+      metadata_account.clone(),
       update_authority.clone()
     ],
     &[signer_seeds],

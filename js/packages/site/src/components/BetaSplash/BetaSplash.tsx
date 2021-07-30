@@ -9,12 +9,12 @@ import { auth0, auth0Options } from "wumbo-common";
 import routes from "../../constants/routes";
 
 function makeId(length: number): string {
-  var result = '';
-  var characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+  var result = "";
+  var characters =
+    "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
   var charactersLength = characters.length;
   for (var i = 0; i < length; i++) {
-      result += characters.charAt(Math.floor(Math.random() *
-          charactersLength));
+    result += characters.charAt(Math.floor(Math.random() * charactersLength));
   }
   return result;
 }
@@ -24,16 +24,18 @@ const BetaSplash: React.FC = () => {
   const state = makeId(6);
 
   function claim() {
-    const redirectUri = `${window.location.origin.replace(/\/$/, "")}${routes.claim.path}`
+    const redirectUri = `${window.location.origin.replace(/\/$/, "")}${
+      routes.claim.path
+    }`;
     const auth0Url = auth0.client.buildAuthorizeUrl({
       ...auth0Options,
-      scope: 'openid profile',
+      scope: "openid profile",
       redirectUri,
-      responseType: 'code',
+      responseType: "code",
       state,
-    })
-    setAuth0State(state)
-    window.location.href = auth0Url
+    });
+    setAuth0State(state);
+    window.location.href = auth0Url;
   }
 
   return (
@@ -59,6 +61,6 @@ const BetaSplash: React.FC = () => {
       </div>
     </div>
   );
-}
+};
 
 export default BetaSplash;

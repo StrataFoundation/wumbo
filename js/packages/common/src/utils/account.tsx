@@ -48,7 +48,7 @@ export function useAccount<T>(
           loading: false,
           info: acc.info as any,
           account: acc.account,
-        })
+        });
       })
       .catch((err) => {
         console.log(err);
@@ -75,7 +75,7 @@ export function useAccount<T>(
             loading: false,
             info: acc.info as any,
             account: acc.account,
-          })
+          });
         });
       }
     });

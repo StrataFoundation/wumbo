@@ -2,10 +2,10 @@ import React from "react";
 import { Switch, Route } from "react-router-dom";
 import Routes from "../../constants/routes";
 import BetaSplash from "../BetaSplash/BetaSplash";
-import {ClaimRoute} from "../Claim/Claim";
-import {EditProfileRoute} from "../Profile/Edit/EditProfile";
+import { ClaimRoute } from "../Claim/Claim";
+import { EditProfileRoute } from "../Profile/Edit/EditProfile";
 import Wallet from "../Wallet/Wallet";
-import "./index.css"
+import "./index.css";
 import { ContextProviders } from "./ContextProviders";
 
 const App: React.FC = () => (

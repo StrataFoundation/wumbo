@@ -1,6 +1,10 @@
 import React, { useEffect } from "react";
 import { EndpointSetter } from "wumbo-common";
-import { ConnectionProvider, AccountsProvider, useLocalStorageState } from "@oyster/common";
+import {
+  ConnectionProvider,
+  AccountsProvider,
+  useLocalStorageState,
+} from "@oyster/common";
 import { WalletProvider } from "../../utils/wallet";
 
 export const ContextProviders: React.FC = ({ children }) => {
@@ -8,11 +12,9 @@ export const ContextProviders: React.FC = ({ children }) => {
     <ConnectionProvider>
       <EndpointSetter>
         <AccountsProvider>
-          <WalletProvider>
-            {children}
-          </WalletProvider>
+          <WalletProvider>{children}</WalletProvider>
         </AccountsProvider>
       </EndpointSetter>
     </ConnectionProvider>
   );
-}
+};

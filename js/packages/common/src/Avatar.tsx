@@ -1,4 +1,6 @@
 import React from "react";
+import { Spinner, useTokenMetadata } from ".";
+import { TokenBondingV0 } from "../../spl-token-bonding/dist/lib";
 import { classNames } from "./utils/utils";
 
 /*
@@ -8,7 +10,7 @@ import { classNames } from "./utils/utils";
  */
 
 export interface IAvatarProps {
-  name: string;
+  name?: string;
   subText?: string;
   imgSrc?: string;
   rounded?: boolean;
@@ -51,11 +53,11 @@ const style = {
 
 export const Avatar = ({
   name,
-  subText,
   imgSrc,
+  subText,
+  showDetails,
   rounded = true,
   token = false,
-  showDetails = false,
   size = "md",
 }: IAvatarProps) => (
   <div className="flex items-center">
@@ -92,4 +94,28 @@ export const Avatar = ({
       </div>
     )}
   </div>
+);
+
+interface MetadataAvatarProps extends IAvatarProps {
+  tokenBonding: TokenBondingV0 | undefined;
+}
+export const MetadataAvatar = React.memo(
+  ({ name, imgSrc, tokenBonding, ...props }: MetadataAvatarProps) => {
+    const {
+      image: metadataImage,
+      metadata,
+      loading,
+    } = useTokenMetadata(tokenBonding?.targetMint);
+    if (loading) {
+      return <Spinner />;
+    }
+
+    return (
+      <Avatar
+        {...props}
+        name={metadata?.data.symbol || name}
+        imgSrc={metadataImage || imgSrc}
+      />
+    );
+  }
 );

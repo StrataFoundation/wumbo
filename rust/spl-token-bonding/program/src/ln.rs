@@ -46,6 +46,8 @@ impl NaturalLog for PreciseNumber {
         }
 
         let more_than_two = self.greater_than(&TWO_PREC);
+        // TODO: I bet we can use something like this to multiply and add ln(2)
+        // let num_nonzero = 128 - self.value.leading_zeros();
         if more_than_two {
             // ln(x) = ln(x/2 * 2) = ln(x/2) + ln(2)
             let over_two = PreciseNumber { value: self.value >> 1 };

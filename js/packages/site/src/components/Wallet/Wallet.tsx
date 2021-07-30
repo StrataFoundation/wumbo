@@ -11,12 +11,14 @@ export default React.memo(() => {
   useEffect(() => {
     const redirect = query.get("redirect");
     if (connected && redirect) {
-      console.log(`Redirecting to ${redirect}`)
+      console.log(`Redirecting to ${redirect}`);
       history.push(redirect);
     }
   }, [connected, query.get("redirect"), history]);
 
-  return <AppContainer>
-    <WalletSelect />
-  </AppContainer>
-})
+  return (
+    <AppContainer>
+      <WalletSelect />
+    </AppContainer>
+  );
+});

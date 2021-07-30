@@ -1,4 +1,10 @@
-import React, { Fragment, useState, ReactNode, useEffect } from "react";
+import React, {
+  Fragment,
+  useState,
+  ReactNode,
+  useEffect,
+  useMemo,
+} from "react";
 import { Link, useParams, useLocation } from "react-router-dom";
 import { useConnection, Wallet } from "@oyster/common";
 import { buy, sell } from "@/utils/action";
@@ -18,6 +24,9 @@ import {
   Spinner,
   Avatar,
   TokenPill,
+  MetadataTokenPill,
+  useTokenMetadata,
+  MetadataAvatar,
 } from "wumbo-common";
 import { routes } from "@/constants/routes";
 import { TokenForm, FormValues } from "./TokenForm";
@@ -29,40 +38,60 @@ import { TokenBondingV0 } from "spl-token-bonding";
 import SolLogo from "../../../public/assets/img/sol.svg";
 import { WumboDrawer } from "../WumboDrawer";
 
-function useName(tokenBonding: TokenBondingV0 | undefined): string | undefined {
-  const query = useQuery();
-  const [name, setName] = useState<string>();
-
-  useEffect(() => {
-    if (tokenBonding) {
-      if (tokenBonding.targetMint.toBase58() == WUM_TOKEN.toBase58()) {
-        setName("WUM");
-      } else {
-        setName(query.get("name") || undefined);
-      }
-    }
-  }, [query.get("name"), tokenBonding]);
-
-  return name;
+interface TokenInfo {
+  name?: string;
+  ticker?: string;
+  icon: React.ReactElement;
+  loading: boolean;
+  error: Error | undefined;
 }
-
-function useImage(
-  tokenBonding: TokenBondingV0 | undefined
-): React.ReactElement {
+function useTokenInfo(tokenBonding: TokenBondingV0 | undefined): TokenInfo {
   const query = useQuery();
-  const [icon, setIcon] = useState<React.ReactElement>(<div />);
+  const { metadata, error, loading } = useTokenMetadata(
+    tokenBonding?.targetMint
+  );
 
-  useEffect(() => {
+  return useMemo(() => {
     if (tokenBonding) {
       if (tokenBonding.targetMint.toBase58() == WUM_TOKEN.toBase58()) {
-        setIcon(<Logo width="45" height="45" />);
-      } else {
-        setIcon(<Avatar name="UNCLAIMED" />);
+        return {
+          loading,
+          error,
+          ticker: "WUM",
+          icon: <Logo width="45" height="45" />,
+          name: "WUM",
+        };
+      } else if (metadata) {
+        return {
+          loading,
+          error,
+          ticker: metadata.data.symbol,
+          icon: (
+            <MetadataAvatar
+              token
+              tokenBonding={tokenBonding}
+              name={"UNCLAIMED"}
+            />
+          ),
+          name: metadata.data.name,
+        };
+      } else if (!loading) {
+        return {
+          loading,
+          error,
+          ticker: "UNCLAIMED",
+          icon: <Avatar token name={"UNCLAIMED"} />,
+          name: query.get("name") || undefined,
+        };
       }
     }
-  }, [tokenBonding]);
 
-  return icon;
+    return {
+      loading,
+      error,
+      icon: <Spinner />,
+    };
+  }, [metadata, loading, query.get("name"), error]);
 }
 
 interface TradeParams {
@@ -82,8 +111,8 @@ export const TradeRoute = React.memo(() => {
     tokenBondingKey,
     TokenBondingV0.fromAccount
   );
-  const name = useName(tokenBonding);
-  const icon = useImage(tokenBonding);
+  const info = useTokenInfo(tokenBonding);
+  const { name, ticker, icon, loading } = info;
   const ownedWUM = useOwnedAmount(WUM_TOKEN);
   const fiatPrice = useFiatPrice(tokenBonding?.baseMint);
   const toFiat = (a: number) => (fiatPrice || 0) * a;
@@ -135,7 +164,7 @@ export const TradeRoute = React.memo(() => {
               <Logo width="45" height="45" />
             )
           }
-          ticker={isTargetWUM ? "WUM" : "UNCLAIMED"}
+          ticker={isTargetWUM ? "WUM" : ticker || ""}
           name={name}
           tokenBonding={tokenBonding}
           icon={icon}
@@ -243,10 +272,9 @@ export const Trade = React.memo(
 
     return (
       <Fragment>
-        <TokenPill
+        <MetadataTokenPill
           tokenBonding={tokenBonding}
           name={name}
-          icon={icon}
           ticker={ticker}
         />
         <div className="flex justify-center mt-4">

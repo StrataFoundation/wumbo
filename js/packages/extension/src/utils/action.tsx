@@ -1,8 +1,5 @@
 import React from "react";
-import {
-  buyBondingWithWallet,
-  sellBondingWithWallet,
-} from "spl-token-bonding";
+import { buyBondingWithWallet, sellBondingWithWallet } from "spl-token-bonding";
 import {
   SPL_ASSOCIATED_TOKEN_ACCOUNT_PROGRAM_ID,
   TOKEN_BONDING_PROGRAM_ID,

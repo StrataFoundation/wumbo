@@ -52,7 +52,7 @@ export const useTokenRefKey = (name: string | undefined): PublicKey | undefined 
   useEffect(() => {
     (async () => {
       if (name) {
-        setKey(await getTokenRefKey(connection, name))
+        setKey(await getTokenRefKey(connection, name));
       }
     })();
   }, [name]);
