@@ -5,7 +5,11 @@ import {
 } from "@solana/spl-token";
 
 export const IS_DEV = true;
-export const DEV_TWITTER_TLD = "NoahTest3";
+export const DEV_TWITTER_TLD = "WumboDevTwitter";
+const key = [243,99,226,76,228,180,49,28,35,61,133,124,225,80,78,147,2,107,58,142,6,245,23,211,113,62,255,181,222,50,4,23,51,146,66,205,166,190,240,181,45,146,254,237,136,217,114,62,55,249,200,102,79,120,51,44,187,84,64,129,102,120,70,131]
+export const DEV_TWITTER_VERIFIER: Keypair = Keypair.fromSecretKey(
+  Uint8Array.of(...key)
+)
 
 export const TWITTER_REGISTRAR_SERVER_URL =
   "http://localhost:3000/registrar/twitter-oauth";
