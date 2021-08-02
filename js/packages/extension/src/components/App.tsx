@@ -27,7 +27,8 @@ const App: FC = () => (
           <Route path={routes.myCoins.path} component={MyCoins} />
           <Route path={routes.wallet.path} component={Wallet} />
           <Route path={routes.search.path} component={Search} />
-          <Route path={routes.profile.path} component={Profile} />
+          <Route path={routes.viewProfile.path} component={Profile} />
+          <Route path={routes.profile.path} exact component={Profile} />
         </Switch>
       </WumboDrawer>
     </ContextProviders>

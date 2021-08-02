@@ -3,7 +3,6 @@ import AppContainer from "../common/AppContainer";
 import { Redirect } from "react-router";
 import routes from "../../constants/routes";
 import {
-  getTokenRefKey,
   createTestTld,
   useAccount,
   useRentExemptAmount,
@@ -26,13 +25,14 @@ import {
   SPL_NAME_SERVICE_PROGRAM_ID,
   TWITTER_ROOT_PARENT_REGISTRY_KEY,
   getTld,
+  getWumbo
 } from "wumbo-common";
 import { useLocation, useHistory } from "react-router-dom";
 import {
-  createWumboSocialToken,
-  TokenRef,
-  WumboInstance,
   CreateSocialTokenResult,
+  TokenRef,
+  Wumbo,
+  WumboInstance
 } from "spl-wumbo";
 import { TokenBondingV0 } from "spl-token-bonding";
 import { useAsyncCallback } from "react-async-hook";
@@ -113,11 +113,12 @@ function useCreateCoin(): CreateState {
     let result;
     try {
       setCreating(true)
-      const key = await getTokenRefKey(connection, twitterHandle);
+      const wumbo = await getWumbo();
+      const key = await wumbo.getTwitterUnclaimedTokenRefKey(twitterHandle);
       const account = await connection.getAccountInfo(key);
       if (!account) {
         console.log("Creator does not exist, creating")
-        result = await createWumboSocialToken(
+        result = await Wumbo.createWumboSocialToken(
           connection,
           {
             splTokenBondingProgramId: TOKEN_BONDING_PROGRAM_ID,

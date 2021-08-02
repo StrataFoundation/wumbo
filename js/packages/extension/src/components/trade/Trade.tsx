@@ -9,6 +9,7 @@ import { Link, useParams, useLocation } from "react-router-dom";
 import { useConnection, Wallet } from "@oyster/common";
 import { buy, sell } from "@/utils/action";
 import {
+  useClaimedTokenRef,
   BASE_SLIPPAGE,
   WUM_BONDING,
   WUM_TOKEN,
@@ -27,8 +28,9 @@ import {
   MetadataTokenPill,
   useTokenMetadata,
   MetadataAvatar,
+  useTokenRefFromBonding,
 } from "wumbo-common";
-import { routes } from "@/constants/routes";
+import { routes, viewProfilePath } from "@/constants/routes";
 import { TokenForm, FormValues } from "./TokenForm";
 import Logo from "../../../public/assets/img/logo.svg";
 import { useAsyncCallback } from "react-async-hook";
@@ -208,6 +210,7 @@ export const Trade = React.memo(
 
     const ownedBase = useOwnedAmount(tokenBonding.baseMint);
     const ownedTarget = useOwnedAmount(tokenBonding.targetMint);
+    const location = useLocation();
 
     const {
       execute: onHandleBuy,
@@ -276,6 +279,7 @@ export const Trade = React.memo(
           tokenBonding={tokenBonding}
           name={name}
           ticker={ticker}
+          detailsPath={viewProfilePath(tokenBonding.publicKey) + location.search}
         />
         <div className="flex justify-center mt-4">
           {/* TODO: show owned amount in both tabs */}

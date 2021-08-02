@@ -13,6 +13,7 @@ import { WalletAdapter } from "@solana/wallet-base";
 import {
   Account,
   Connection,
+  Keypair,
   sendAndConfirmRawTransaction,
   Transaction,
   TransactionInstruction,
@@ -24,6 +25,7 @@ import {
   TWITTER_REGISTRAR_SERVER_URL,
   IS_DEV,
   DEV_TWITTER_TLD,
+  DEV_TWITTER_VERIFIER,
 } from "../constants/globals";
 import {
   createVerifiedTwitterRegistry,
@@ -59,7 +61,7 @@ export async function createTestTld(connection: Connection, wallet: WalletAdapte
         DEV_TWITTER_TLD,
         1000,
         wallet.publicKey!,
-        wallet.publicKey!
+        getTwitterVerifier()
       );
       console.log(
         await sendTransaction(connection, [createInstruction], wallet)
@@ -72,6 +74,10 @@ export async function getTld(): Promise<PublicKey> {
   return IS_DEV
     ? await getNameAccountKey(await getHashedName(DEV_TWITTER_TLD))
     : TWITTER_ROOT_PARENT_REGISTRY_KEY;
+}
+
+export function getTwitterVerifier(): PublicKey {
+  return IS_DEV ? DEV_TWITTER_VERIFIER.publicKey : TWITTER_VERIFICATION_AUTHORITY
 }
 
 export const getTwitterHandle = async (
@@ -128,7 +134,7 @@ export const postTwitterRegistrarRequest = async (
 ) => {
   if (IS_DEV) {
     console.log("Sending dev mode claim twitter handle txn...");
-    await sendTransaction(connection, instructions, wallet);
+    await sendTransaction(connection, instructions, wallet, [new Account(DEV_TWITTER_VERIFIER.secretKey)]);
   } else {
     const transaction = new Transaction({
       feePayer: wallet.publicKey || undefined,
@@ -191,7 +197,7 @@ export async function claimTwitterTransactionInstructions(
     1_000,
     owner,
     NAME_PROGRAM_ID,
-    IS_DEV ? owner : TWITTER_VERIFICATION_AUTHORITY,
+    IS_DEV ? DEV_TWITTER_VERIFIER.publicKey : TWITTER_VERIFICATION_AUTHORITY,
     await getTld()
   );
 }
@@ -210,7 +216,11 @@ export async function getTwitterReverse(
   return ReverseTwitterRegistryState.retrieve(connection, key);
 }
 
-async function getTwitterName(connection: Connection, owner: PublicKey) {
+async function getTwitterName(connection: Connection, owner: PublicKey | undefined) {
+  if (!owner) {
+    return;
+  }
+
   return (await getTwitterReverse(connection, owner)).twitterHandle;
 }
 
@@ -219,7 +229,7 @@ interface ReverseTwitterState {
   handle: string | undefined;
   error: Error | undefined;
 }
-export function useReverseTwitter(owner: PublicKey): ReverseTwitterState {
+export function useReverseTwitter(owner: PublicKey | undefined): ReverseTwitterState {
   const connection = useConnection();
   const {
     loading,

@@ -10,3 +10,5 @@ export * from "./utils";
 export * from "./EndpointSetter";
 export * from "./TokenPill";
 export * from "./Portals";
+export * from "./Leaderboard";
+export * from "./StatCard";

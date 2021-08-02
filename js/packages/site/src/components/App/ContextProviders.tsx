@@ -1,5 +1,5 @@
 import React, { useEffect } from "react";
-import { EndpointSetter } from "wumbo-common";
+import { EndpointSetter, UsdWumboPriceProvider } from "wumbo-common";
 import {
   ConnectionProvider,
   AccountsProvider,
@@ -12,7 +12,9 @@ export const ContextProviders: React.FC = ({ children }) => {
     <ConnectionProvider>
       <EndpointSetter>
         <AccountsProvider>
-          <WalletProvider>{children}</WalletProvider>
+          <UsdWumboPriceProvider>
+            <WalletProvider>{children}</WalletProvider>
+          </UsdWumboPriceProvider>
         </AccountsProvider>
       </EndpointSetter>
     </ConnectionProvider>

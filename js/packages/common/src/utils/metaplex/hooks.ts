@@ -49,7 +49,7 @@ async function getSignedTransaction(
   return wallet.signTransaction(transaction);
 }
 
-type TokenMetadata = {
+export type TokenMetadata = {
   key: PublicKey | undefined;
   image: string | undefined;
   metadata: Metadata | undefined;
@@ -74,7 +74,7 @@ export function useTokenMetadata(token: PublicKey | undefined): TokenMetadata {
   } = useAsync(getImage, [metadata?.data.uri]);
 
   return {
-    loading: loading || accountLoading || imageLoading,
+    loading: Boolean(token && (loading || accountLoading || imageLoading)),
     error: error || imageError,
     metadata,
     image,

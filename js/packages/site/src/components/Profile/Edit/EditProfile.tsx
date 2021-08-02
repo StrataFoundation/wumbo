@@ -11,15 +11,15 @@ import {
   Avatar,
   TokenPill,
   useReverseTwitter,
-  useTokenRef,
+  useTwitterTokenRef,
   useAccount,
   Alert,
   Button,
   Spinner,
+  useClaimedTokenRef
 } from "wumbo-common";
 import { SubmitHandler, useForm } from "react-hook-form";
 import { TokenBondingV0 } from "spl-token-bonding";
-
 import WalletRedirect from "../../Wallet/WalletRedirect";
 
 export const EditProfileRoute = React.memo(() => {
@@ -36,7 +36,7 @@ export const EditProfile = React.memo(
   ({ ownerWalletKey }: { ownerWalletKey: PublicKey }) => {
     const hiddenFileInput = React.useRef<HTMLInputElement>(null);
     const { handle } = useReverseTwitter(ownerWalletKey);
-    const { info: tokenRef } = useTokenRef(handle);
+    const { info: tokenRef } = useClaimedTokenRef(ownerWalletKey);
     const { watch, register, handleSubmit, setValue, reset } =
       useForm<SetMetadataArgs>({
         defaultValues: {

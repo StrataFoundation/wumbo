@@ -1,6 +1,7 @@
 import BN from "bn.js";
 import assert from "assert";
 
+
 export class Numberu8 extends BN {
   /**
    * Convert to Buffer representation
