@@ -1,5 +1,5 @@
 import React, { Fragment, useEffect } from "react";
-import { WalletProvider } from "@solana/wallet-base";
+import { Wallet } from "@solana/wallet-adapter-wallets";
 import { useWallet } from "../utils/wallet";
 import { WALLET_PROVIDERS } from "../constants/walletProviders";
 import { Button, Alert } from "../";
@@ -8,7 +8,6 @@ export const WalletSelect = React.memo(() => {
   const {
     connected,
     disconnect,
-    wallet,
     setProviderUrl,
     setAutoConnect,
     error,
@@ -32,7 +31,7 @@ export const WalletSelect = React.memo(() => {
             </a>
           </span>
           <div className="grid grid-flow-row gap-4">
-            {WALLET_PROVIDERS.map((provider: WalletProvider, idx: number) => {
+            {WALLET_PROVIDERS.map((provider: Wallet, idx: number) => {
               const onClick = function () {
                 setProviderUrl(provider.url);
                 setAutoConnect(true);

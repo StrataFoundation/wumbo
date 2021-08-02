@@ -1,10 +1,12 @@
-import { useConnectionConfig } from "@oyster/common";
 import React, { useEffect, useMemo, useState } from "react";
-import { useLocalStorageState } from "@oyster/common";
-import { WalletAdapter } from "@solana/wallet-base";
+import { useConnectionConfig, useLocalStorageState } from "@oyster/common";
+import {
+  EventEmitter,
+  WalletAdapter,
+  WalletAdapterEvents,
+} from "@solana/wallet-adapter-base";
 import { WalletContext, WALLET_PROVIDERS } from "wumbo-common";
 import { PublicKey, Transaction } from "@solana/web3.js";
-import EventEmitter from "eventemitter3";
 
 function sendMessageAsync(message: any): Promise<any> {
   return new Promise<any>((resolve, reject) => {
@@ -73,29 +75,64 @@ export const useBackgroundState = (): BackgroundState => {
   };
 };
 
-class BackgroundWalletAdapter extends EventEmitter implements WalletAdapter {
+export interface BackgroundWalletAdapterConfig {
   publicKey: PublicKey | null;
   providerUrl: string;
   endpoint: string;
   setAwaitingApproval: (awaitingApproval: boolean) => void;
+}
 
-  constructor(
-    publicKey: PublicKey | null,
-    providerUrl: string,
-    endpoint: string,
-    setAwaitingApproval: (awaitingApproval: boolean) => void
-  ) {
+class BackgroundWalletAdapter
+  extends EventEmitter<WalletAdapterEvents>
+  implements WalletAdapter {
+  private _publicKey: PublicKey | null;
+  private _providerUrl: string;
+  private _endpoint: string;
+  private _connecting: boolean;
+  private _setAwaitingApproval: (awaitingApproval: boolean) => void;
+
+  constructor(config: BackgroundWalletAdapterConfig) {
     super();
-    this.publicKey = publicKey;
-    this.providerUrl = providerUrl;
-    this.endpoint = endpoint;
-    this.setAwaitingApproval = setAwaitingApproval;
+    this._publicKey = config.publicKey || null;
+    this._providerUrl = config.providerUrl;
+    this._endpoint = config.endpoint;
+    this._connecting = false;
+    this._setAwaitingApproval = config.setAwaitingApproval;
+  }
+
+  get publicKey(): PublicKey | null {
+    return this._publicKey;
+  }
+
+  get providerUrl(): string {
+    return this._providerUrl;
+  }
+
+  get endpoint(): string {
+    return this._endpoint;
+  }
+
+  get connecting(): boolean {
+    return this._connecting;
+  }
+
+  get ready(): boolean {
+    // @FIXME
+    return true;
+  }
+
+  get connected(): boolean {
+    return !!this._publicKey;
+  }
+
+  get autoApprove(): boolean {
+    return false;
   }
 
   connect() {
     return sendMessageAsync({
       type: "WALLET_CONNECT",
-      data: { providerUrl: this.providerUrl, endpoint: this.endpoint },
+      data: { providerUrl: this._providerUrl, endpoint: this._endpoint },
     });
   }
 
@@ -104,7 +141,7 @@ class BackgroundWalletAdapter extends EventEmitter implements WalletAdapter {
   }
 
   async signTransaction(transaction: Transaction): Promise<Transaction> {
-    this.setAwaitingApproval(true);
+    this._setAwaitingApproval(true);
     const transactionResult: Uint8Array = (
       await sendMessageAsync({
         type: "SIGN_TRANSACTION",
@@ -116,14 +153,14 @@ class BackgroundWalletAdapter extends EventEmitter implements WalletAdapter {
         },
       })
     ).data;
-    this.setAwaitingApproval(false);
+    this._setAwaitingApproval(false);
     return Transaction.from(transactionResult);
   }
 
   async signAllTransactions(
     transactions: Transaction[]
   ): Promise<Transaction[]> {
-    this.setAwaitingApproval(true);
+    this._setAwaitingApproval(true);
     const transactionResult: Uint8Array[] = await sendMessageAsync({
       type: "SIGN_TRANSACTIONS",
       data: {
@@ -132,7 +169,7 @@ class BackgroundWalletAdapter extends EventEmitter implements WalletAdapter {
         ),
       },
     });
-    this.setAwaitingApproval(false);
+    this._setAwaitingApproval(false);
     return transactionResult.map(Transaction.from);
   }
 }
@@ -154,15 +191,15 @@ export function WalletProvider({ children = null as any }) {
       if (providerUrl && !error && endpoint) {
         const adapter = WALLET_PROVIDERS.find((p) => p.url == providerUrl);
         if (adapter && LOCAL_WALLETS.has(adapter.name)) {
-          // @ts-ignore
-          return new adapter.adapter(providerUrl, endpoint);
+          return adapter.adapter();
         }
-        return new BackgroundWalletAdapter(
-          publicKey || null,
+
+        return new BackgroundWalletAdapter({
+          publicKey: publicKey || null,
           providerUrl,
           endpoint,
-          setAwaitingApproval
-        );
+          setAwaitingApproval,
+        });
       }
     },
     [publicKey, error, providerUrl, endpoint]

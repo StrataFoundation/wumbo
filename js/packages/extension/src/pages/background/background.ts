@@ -1,5 +1,5 @@
 // import {WALLET_PROVIDERS} from "./utils/wallet";
-import { WalletAdapter } from "@solana/wallet-base";
+import { WalletAdapter } from "@solana/wallet-adapter-base";
 import { WALLET_PROVIDERS } from "wumbo-common";
 import { Transaction } from "@solana/web3.js";
 
@@ -40,13 +40,7 @@ chrome.runtime.onMessage.addListener((msg, _, sendResponse) => {
       }
 
       providerUrl = msg.data.providerUrl;
-
-      // @ts-ignore
-      walletAdapter = new adapter.adapter(
-        adapter.url,
-        msg.data.endpoint
-      ) as WalletAdapter;
-
+      walletAdapter = adapter.adapter();
       walletAdapter.connect().catch((error: Error) => sendResponse({ error }));
 
       walletAdapter.on("connect", () => {

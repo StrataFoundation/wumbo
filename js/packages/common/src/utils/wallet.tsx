@@ -1,5 +1,5 @@
 import React, { useContext } from "react";
-import { WalletAdapter } from "@solana/wallet-base";
+import { WalletAdapter } from "@solana/wallet-adapter-base";
 import { WALLET_PROVIDERS } from "../constants/walletProviders";
 
 export const WalletContext = React.createContext<{

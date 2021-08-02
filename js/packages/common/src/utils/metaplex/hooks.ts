@@ -16,7 +16,7 @@ import {
   Transaction,
   TransactionInstruction,
 } from "@solana/web3.js";
-import { WalletAdapter } from "@solana/wallet-base";
+import { WalletAdapter } from "@solana/wallet-adapter-base";
 import { getFilesWithMetadata, getImage, getMetadataKey } from "./utils";
 import { useWallet } from "../wallet";
 import { TokenRef } from "spl-wumbo";
@@ -63,10 +63,10 @@ export function useTokenMetadata(token: PublicKey | undefined): TokenMetadata {
     loading,
     error,
   } = useAsync(getMetadataKey, [token]);
-  const { info: metadata, loading: accountLoading } = useAccount(
-    metadataAccountKey,
-    (_, acct) => decodeMetadata(acct.data)
-  );
+  const {
+    info: metadata,
+    loading: accountLoading,
+  } = useAccount(metadataAccountKey, (_, acct) => decodeMetadata(acct.data));
   const {
     result: image,
     loading: imageLoading,
@@ -110,7 +110,9 @@ type MetadataFiniteState =
 type SetMetadataState = {
   state: MetadataFiniteState;
   error: Error | undefined;
-  setMetadata: (args: SetMetadataArgs) => Promise<{
+  setMetadata: (
+    args: SetMetadataArgs
+  ) => Promise<{
     metadataAccount: PublicKey;
   } | void>;
 };

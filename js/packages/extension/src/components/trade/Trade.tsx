@@ -279,7 +279,9 @@ export const Trade = React.memo(
           tokenBonding={tokenBonding}
           name={name}
           ticker={ticker}
-          detailsPath={viewProfilePath(tokenBonding.publicKey) + location.search}
+          detailsPath={
+            viewProfilePath(tokenBonding.publicKey) + location.search
+          }
         />
         <div className="flex justify-center mt-4">
           {/* TODO: show owned amount in both tabs */}

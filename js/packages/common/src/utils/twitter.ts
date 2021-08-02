@@ -9,7 +9,7 @@ import {
   NAME_PROGRAM_ID,
   ReverseTwitterRegistryState,
 } from "@bonfida/spl-name-service";
-import { WalletAdapter } from "@solana/wallet-base";
+import { WalletAdapter } from "@solana/wallet-adapter-base";
 import {
   Account,
   Connection,
@@ -50,7 +50,10 @@ async function sendTransaction(
   return sendAndConfirmRawTransaction(connection, signed.serialize());
 }
 
-export async function createTestTld(connection: Connection, wallet: WalletAdapter) {
+export async function createTestTld(
+  connection: Connection,
+  wallet: WalletAdapter
+) {
   if (IS_DEV) {
     const tld = await getNameAccountKey(await getHashedName(DEV_TWITTER_TLD));
     const account = await connection.getAccountInfo(tld);
@@ -77,7 +80,9 @@ export async function getTld(): Promise<PublicKey> {
 }
 
 export function getTwitterVerifier(): PublicKey {
-  return IS_DEV ? DEV_TWITTER_VERIFIER.publicKey : TWITTER_VERIFICATION_AUTHORITY
+  return IS_DEV
+    ? DEV_TWITTER_VERIFIER.publicKey
+    : TWITTER_VERIFICATION_AUTHORITY;
 }
 
 export const getTwitterHandle = async (
@@ -134,7 +139,9 @@ export const postTwitterRegistrarRequest = async (
 ) => {
   if (IS_DEV) {
     console.log("Sending dev mode claim twitter handle txn...");
-    await sendTransaction(connection, instructions, wallet, [new Account(DEV_TWITTER_VERIFIER.secretKey)]);
+    await sendTransaction(connection, instructions, wallet, [
+      new Account(DEV_TWITTER_VERIFIER.secretKey),
+    ]);
   } else {
     const transaction = new Transaction({
       feePayer: wallet.publicKey || undefined,
@@ -216,7 +223,10 @@ export async function getTwitterReverse(
   return ReverseTwitterRegistryState.retrieve(connection, key);
 }
 
-async function getTwitterName(connection: Connection, owner: PublicKey | undefined) {
+async function getTwitterName(
+  connection: Connection,
+  owner: PublicKey | undefined
+) {
   if (!owner) {
     return;
   }
@@ -229,13 +239,14 @@ interface ReverseTwitterState {
   handle: string | undefined;
   error: Error | undefined;
 }
-export function useReverseTwitter(owner: PublicKey | undefined): ReverseTwitterState {
+export function useReverseTwitter(
+  owner: PublicKey | undefined
+): ReverseTwitterState {
   const connection = useConnection();
-  const {
-    loading,
-    error,
-    result: handle,
-  } = useAsync(getTwitterName, [connection, owner]);
+  const { loading, error, result: handle } = useAsync(getTwitterName, [
+    connection,
+    owner,
+  ]);
 
   return {
     loading,
