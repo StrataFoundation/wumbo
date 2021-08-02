@@ -97,7 +97,7 @@ export const TokenForm = ({
         </div>
       </div>
       <div className="flex mt-4">
-        {wallet && wallet.publicKey ? (
+        {wallet && wallet.publicKey && (
           <Button block submit color="primary" size="lg" disabled={submitting}>
             {submitting && (
               <div className="mr-4">
@@ -107,19 +107,7 @@ export const TokenForm = ({
             {awaitingApproval && "Awaiting Approval"}
             {!awaitingApproval && (type === "sell" ? "Sell" : "Buy")}
           </Button>
-        ) : (
-          <Link
-            to={
-              routes.wallet.path +
-              `?redirect=${location.pathname}${location.search}`
-            }
-            className="w-full"
-          >
-            <Button block color="primary" size="lg">
-              Connect Wallet
-            </Button>
-          </Link>
-        )}
+        ) }
       </div>
     </form>
   );
