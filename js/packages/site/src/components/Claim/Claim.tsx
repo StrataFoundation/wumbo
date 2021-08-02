@@ -25,20 +25,20 @@ import {
   SPL_NAME_SERVICE_PROGRAM_ID,
   TWITTER_ROOT_PARENT_REGISTRY_KEY,
   getTld,
-  getWumbo
+  getWumbo,
 } from "wumbo-common";
 import { useLocation, useHistory } from "react-router-dom";
 import {
   CreateSocialTokenResult,
   TokenRef,
   Wumbo,
-  WumboInstance
+  WumboInstance,
 } from "spl-wumbo";
 import { TokenBondingV0 } from "spl-token-bonding";
 import { useAsyncCallback } from "react-async-hook";
 import { useConnection } from "@oyster/common";
 import { Connection } from "@solana/web3.js";
-import { WalletAdapter } from "@solana/wallet-base";
+import { WalletAdapter } from "@solana/wallet-adapter-base";
 import WalletRedirect from "../Wallet/WalletRedirect";
 
 interface ClaimTransactionState {
@@ -112,28 +112,25 @@ function useCreateCoin(): CreateState {
   async function exec(twitterHandle: string) {
     let result;
     try {
-      setCreating(true)
+      setCreating(true);
       const wumbo = await getWumbo();
       const key = await wumbo.getTwitterUnclaimedTokenRefKey(twitterHandle);
       const account = await connection.getAccountInfo(key);
       if (!account) {
-        console.log("Creator does not exist, creating")
-        result = await Wumbo.createWumboSocialToken(
-          connection,
-          {
-            splTokenBondingProgramId: TOKEN_BONDING_PROGRAM_ID,
-            splAssociatedTokenAccountProgramId: SPL_ASSOCIATED_TOKEN_ACCOUNT_PROGRAM_ID,
-            splTokenProgramId: TOKEN_PROGRAM_ID,
-            splWumboProgramId: WUMBO_PROGRAM_ID,
-            splNameServicePogramId: SPL_NAME_SERVICE_PROGRAM_ID,
-            wumboInstance: WUMBO_INSTANCE_KEY,
-            payer: wallet!,
-            baseMint: wumboInstance!.wumboMint,
-            name: twitterHandle,
-            founderRewardsPercentage: 5.5,
-            nameParent: await getTld(),
-          }
-        )
+        console.log("Creator does not exist, creating");
+        result = await Wumbo.createWumboSocialToken(connection, {
+          splTokenBondingProgramId: TOKEN_BONDING_PROGRAM_ID,
+          splAssociatedTokenAccountProgramId: SPL_ASSOCIATED_TOKEN_ACCOUNT_PROGRAM_ID,
+          splTokenProgramId: TOKEN_PROGRAM_ID,
+          splWumboProgramId: WUMBO_PROGRAM_ID,
+          splNameServicePogramId: SPL_NAME_SERVICE_PROGRAM_ID,
+          wumboInstance: WUMBO_INSTANCE_KEY,
+          payer: wallet!,
+          baseMint: wumboInstance!.wumboMint,
+          name: twitterHandle,
+          founderRewardsPercentage: 5.5,
+          nameParent: await getTld(),
+        });
       } else {
         const creator = TokenRef.fromAccount(key, account);
         result = {
@@ -182,7 +179,12 @@ export const Claim = React.memo(() => {
   } = useCreateCoin();
 
   const { amount: sol, loading: solLoading } = useSolOwnedAmount();
-  const { amount: amountNeeded, loading: amountNeededLoading } = useRentExemptAmount(TWITTER_REGISTRY_SIZE + TokenRef.LEN + TokenBondingV0.LEN)
+  const {
+    amount: amountNeeded,
+    loading: amountNeededLoading,
+  } = useRentExemptAmount(
+    TWITTER_REGISTRY_SIZE + TokenRef.LEN + TokenBondingV0.LEN
+  );
 
   if (error) {
     console.error(error);
