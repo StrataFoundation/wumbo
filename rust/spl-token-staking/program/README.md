@@ -20,7 +20,7 @@ amount
 owner
 create_timestamp // unix timestamp
 last_withdraw_timestamp // unix timestamp
-lockup_end_time // Optional, when set, this voucher cannot be liquidated until the end of the lockup.
+lockup_end_time // Optional, when set, this voucher cannot be unstaked until the end of the lockup.
 ```
 
 ### Address
@@ -39,7 +39,7 @@ stake_reward_def // struct, see below.
 
 ### Continuous
 
-Continuous rewards vouchers can be liquidated for their associated token a stake at any time. They provide a simple token b stream over time defined by:
+Continuous rewards vouchers can be liquidated/unstaked for their associated token a stake at any time. They provide a simple token b stream over time defined by:
 
 ```
 stake_instance_key
@@ -63,7 +63,7 @@ theoretical_b_supply = b_amount_unredeemed + mint_b.supply + periods(current_tim
 
 ### LinearLockup
 
-`LinearLockup`s reward locking up tokens with higher rewards percentages. In exchange for more risk, i.e. not being able to liquidate into the base token, the user receives a higher reward. This will set `lockup_end_time` on the voucher. After the lockup is ended, the `Voucher` will continue to accumulate rewards, but can be liquidated at any time.
+`LinearLockup`s reward locking up tokens with higher rewards percentages. In exchange for more risk, i.e. not being able to liquidate into the base token, the user receives a higher reward. This will set `lockup_end_time` on the voucher. After the lockup is ended, the `Voucher` will continue to accumulate rewards, but can be unstaked at any time.
 
 The reward percentage scales as a linear model, defined by:
 
@@ -101,7 +101,7 @@ The contract will have the following commands
   * `create_stake_instance`
   * `stake`
   * `withdraw`
-  * `liquidate`
+  * `unstake`
 
 ## create_stake_instance
 
@@ -115,6 +115,6 @@ This command allows you to stake `a_amount` of token a for rewards in `token_b`.
 
 This command allows you to withdraw your rewards in terms of `token_b` given your `Voucher`.
 
-## liquidate
+## unstake
 
 Liquidate a `Voucher` to reclaim your token a. This can only be done after `lockup_end_time`
