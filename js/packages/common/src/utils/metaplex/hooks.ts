@@ -132,7 +132,6 @@ export function useSetMetadata(
   const [state, setState] = useState<MetadataFiniteState>("idle");
   const mint = useMint(tokenBonding?.targetMint);
 
-  console.log(inflated);
   async function exec(args: SetMetadataArgs) {
     if (wallet && wallet.publicKey && tokenRefKey) {
       setState("gathering-files");
@@ -230,7 +229,8 @@ export function useSetMetadata(
         // Use the uploaded arweave files in token metadata
         setState("submit-solana");
         let metadataInstructions;
-        if (metadataAccountKey) {
+        const metadataAccount = metadataAccountKey && await connection.getAccountInfo(metadataAccountKey);
+        if (metadataAccount && metadataAccountKey) {
           metadataInstructions = await updateMetadataWithArweave(
             tokenRef!.publicKey,
             tokenRef!.owner!,

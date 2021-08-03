@@ -16,7 +16,7 @@ const App: React.FC = () => (
       <Route path={Routes.claim.path} component={ClaimRoute} />
       <Route path={Routes.wallet.path} component={Wallet} />
       <Route path={Routes.viewProfile.path} component={ViewProfileRoute} />
-      <Route path={Routes.profile.path} component={ViewProfileRoute} />
+      <Route path={Routes.profile.path} exact component={ViewProfileRoute} />
       <Route path={Routes.editProfile.path} component={EditProfileRoute} />
     </Switch>
   </ContextProviders>

@@ -18,7 +18,6 @@ export const MetadataLeaderboardElement = React.memo(({ account, onClick }: { on
   const { handle } = useReverseTwitter(account.owner);
 
   if (loading || !mint) {
-    console.log(loading);
     return <Spinner />
   }
 

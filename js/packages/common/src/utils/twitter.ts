@@ -209,7 +209,7 @@ export async function getTwitterReverse(
   const hashedName = await getHashedName(owner.toString());
   const key = await getNameAccountKey(
     hashedName,
-    IS_DEV ? owner : TWITTER_VERIFICATION_AUTHORITY,
+    IS_DEV ? DEV_TWITTER_VERIFIER.publicKey : TWITTER_VERIFICATION_AUTHORITY,
     await getTld()
   );
 
