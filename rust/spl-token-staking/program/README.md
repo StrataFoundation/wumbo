@@ -19,8 +19,8 @@ stake_instance_key
 amount
 owner
 create_timestamp // unix timestamp
-last_withdraw_timestamp // unix timestamp
-lockup_end_time // Optional, when set, this voucher cannot be unstaked until the end of the lockup.
+last_withdraw_time // unix timestamp of last withdraw
+lockup_periods // Number of periods this voucher is locked for
 ```
 
 ### Address
@@ -28,42 +28,18 @@ The address of this should be a PDA of ["voucher", owner, stake_instance_key, ac
 
 ## StakeInstance
 
-A stake instance holds the state for an instance that allows staking base token for target token. This struct contains a stake reward def, which can be either `Continuous` or `LinearLockup`.
+A stake instance holds the state for an instance that allows staking base token for target token with a set reward definition
 
 ```
 base_mint
 target_mint
-stake_reward_definition // struct, see below.
+create_timestamp // Unix timestamp
+...stake_reward_definition... // See below
 ```
 
-### Continuous
+### Stake Reward Definition
 
-Continuous rewards vouchers can be liquidated/unstaked for their associated base token stake at any time. They provide a simple target token stream over time defined by:
-
-```
-period_unit // SECONDS, MINUTES, HOURS, DAYS, MONTHS, YEARS
-period // Number of seconds, minutes, hours, etc. 
-
-
-reward_percent // Percentage of total base_amount that vests for each period
-
-// Data needed to compute total theoretical token_b in circulation
-base_amount_invested
-target_amount_unredeemed // At the last_withdraw_timestamp
-last_withdraw_timestamp
-```
-
-For every `period`, the voucher holder may redeem `reward_percent` times their total base_amount staked.
-
-It is important we keep track of `base_amount_invested, target_amount_unredeemed, last_withdraw_timestamp` so that it is possible to calculate the total theoretical token_b's in circulation. Token_b mint supply is not a trustwothy souce, as it does not account for unclaimed rewards. The formula is
-
-```
-theoretical_target_supply = target_amount_unredeemed + target_mint.supply + periods(current_timestamp - last_withdraw_timestamp) * base_amount_invested * reward_percent
-```
-
-### LinearLockup
-
-`LinearLockup`s reward locking up tokens with higher rewards percentages. In exchange for more risk, i.e. not being able to liquidate into the base token, the user receives a higher reward. This will set `lockup_end_time` on the voucher. After the lockup is ended, the `Voucher` will continue to accumulate rewards, but can be unstaked at any time.
+Staking rewards longer lock ups with higher percentages. In exchange for more risk, i.e. not being able to unstake back into the base token, the user receives a higher reward. This will set `lockup_periods` on the voucher. After the lockup is ended, the `Voucher` will continue to accumulate rewards, but can be unstaked at any time.
 
 The reward percentage scales as a linear model, defined by:
 
@@ -72,19 +48,19 @@ period_unit // SECONDS, MINUTES, HOURS, DAYS, MONTHS, YEARS
 period // Number of seconds, minutes, hours, etc. 
 
 reward_percent_per_period_locked // The reward percentage as a function of the number of periods locked.
-max_lockup // The maximum number of periods this rewards def can be active for. 
+max_lockup_periods // The maximum number of periods vouchers can be locked for additional rewards
 
 base_amount_invested // Good to keep track of, not needed for any calculation
 
-// Data needed to compute total theoretical token_b in circulation
+// Data needed to compute total theoretical target tokens in circulation
 target_amount_per_period // Given all of our contracts, how many b accumulate per period?
 target_amount_unredeemed // At the last_withdraw_timestamp
 last_withdraw_timestamp
 ```
 
-So, for example, we may create a `LinearLockup` that rewards daily, with a max lockup of 1 year, resulting in a 10% APY at a year. We would set `period_unit = DAYS`, `period = 1`, `reward_per_period_locked = 0.0274`, `max_lockup = 365`. If we stake for 365 days, the `reward_percent` is `0.0274 * 365 = 10`. If we stake for 6 months, it follows that the APY would be 5%.
+So, for example, we may create a definition that rewards daily, with a max lockup of 1 year, resulting in a 10% APY at a year. We would set `period_unit = DAYS`, `period = 1`, `reward_per_period_locked = 0.0274`, `max_lockup = 365`. If we stake for 365 days, the `reward_percent` is `0.0274 * 365 = 10`. If we stake for 6 months, it follows that the APY would be 5%.
 
-With a LinearLockup, the formula for theoretical_target_supply is
+It is important we keep track of metadata such that it is possible to calculate the total theoretical target tokens in circulation. Target mint supply is not a trustwothy souce, as it does not account for unclaimed rewards. The formula is
 
 ```
 theoretical_target_supply = target_amount_unredeemed + target_mint.supply + periods(current_timestamp - last_withdraw_timestamp) * target_amount_per_period
@@ -109,11 +85,11 @@ This command creates the `StakeInstance` as defined above. It must have mint aut
 
 ## stake
 
-This command allows you to stake `base_amount` of base token for rewards in `token_b`. Initializes a `Voucher` instance as defiend above.
+This command allows you to stake `base_amount` of base token for rewards in `target_token`. Initializes a `Voucher` instance as defiend above.
 
 ## withdraw
 
-This command allows you to withdraw your rewards in terms of `token_b` given your `Voucher`.
+This command allows you to withdraw your rewards in terms of `target_token` given your `Voucher`.
 
 ## unstake
 
