@@ -15,9 +15,9 @@ test-bpf = []
 [dependencies]
 num-derive = "0.3"
 num-traits = "0.2"
-solana-program = "1.7.4"
+solana-program = "1.7.9"
 spl-token = { version = "3.1.1", features = [ "no-entrypoint" ] }
-spl-name-service = { version = "0.1.0", git = "https://github.com/solana-labs/solana-program-library.git", features = [ "no-entrypoint" ] }
+spl-name-service = { version = "0.1.1", git = "https://github.com/solana-labs/solana-program-library.git", features = [ "no-entrypoint" ] }
 spl-token-bonding = { version = "0.0.1", features = [ "no-entrypoint" ], path = "../../spl-token-bonding/program" }
 thiserror = "1.0.26"
 borsh = "0.9.0"
@@ -25,9 +25,9 @@ zeroize = "1.3.0"
 
 [dev-dependencies]
 proptest = "0.10"
-solana-program-test = "1.7.4"
+solana-program-test = "1.7.9"
 assert_matches = "1.5.0"
-solana-sdk = "1.7.4"
+solana-sdk = "1.7.9"
 log = "0.4.14"
 
 [lib]

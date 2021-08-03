@@ -1,0 +1,11 @@
+
+[workspace]
+members = [
+  "wumbo/cli",
+  "wumbo/program",
+  "spl-token-bonding/cli",
+  "spl-token-bonding/program",
+]
+exclude = []
+[profile.dev]
+split-debuginfo = "unpacked"
