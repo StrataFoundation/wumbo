@@ -5,6 +5,7 @@ members = [
   "wumbo/program",
   "spl-token-bonding/cli",
   "spl-token-bonding/program",
+  "spl-token-staking/program"
 ]
 exclude = []
 [profile.dev]

@@ -1,10 +1,10 @@
 [package]
-authors = ["Solana Maintainers <maintainers@solana.foundation>"]
-description = "SPL-SolClout Command-line Utility"
+authors = ["Wum.bo <maintainers@wum.bo>"]
+repository = "https://github.com/ChewingGlassFund/wumbo"
+description = "SPL-Token-Bonding Command-line Utility"
 edition = "2018"
 license = "Apache-2.0"
 name = "spl-token-bonding-cli"
-repository = "https://github.com/solana-labs/solana-program-library"
 version = "0.0.1"
 
 [dependencies]

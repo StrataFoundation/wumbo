@@ -3664,6 +3664,23 @@ dependencies = [
 ]
 
 [[package]]
+name = "spl-token-staking"
+version = "0.0.1"
+dependencies = [
+ "assert_matches",
+ "borsh 0.9.1",
+ "log",
+ "num-derive",
+ "num-traits",
+ "proptest 1.0.0",
+ "solana-program",
+ "solana-program-test",
+ "solana-sdk",
+ "spl-token",
+ "thiserror",
+]
+
+[[package]]
 name = "spl-token-swap"
 version = "2.1.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"

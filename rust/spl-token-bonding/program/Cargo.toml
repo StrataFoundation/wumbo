@@ -2,8 +2,8 @@
 name = "spl-token-bonding"
 version = "0.0.1"
 description = "Solana Program Metadata"
-authors = ["Solana Maintainers <maintainers@solana.foundation>"]
-repository = "https://github.com/solana-labs/solana-program-library"
+authors = ["Wum.bo <maintainers@wum.bo>"]
+repository = "https://github.com/ChewingGlassFund/wumbo"
 license = "Apache-2.0"
 edition = "2018"
 exclude = ["js/**"]
