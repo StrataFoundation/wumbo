@@ -1,7 +1,10 @@
-// import {WALLET_PROVIDERS} from "./utils/wallet";
-import { WalletAdapter } from "@solana/wallet-adapter-base";
-import { WALLET_PROVIDERS } from "wumbo-common";
+import {
+  WalletAdapter,
+  WalletNotConnectedError,
+  WalletNotInstalledError,
+} from "@solana/wallet-adapter-base";
 import { Transaction } from "@solana/web3.js";
+import { WALLET_PROVIDERS } from "wumbo-common";
 
 let publicKey: Buffer | null = null;
 let walletAdapter: WalletAdapter | null = null;
@@ -28,14 +31,14 @@ chrome.runtime.onMessage.addListener((msg, _, sendResponse) => {
         );
       });
     }
+
     if (msg.type == "WALLET_CONNECT") {
       const adapter = WALLET_PROVIDERS.find(
         (p) => p.url == msg.data.providerUrl
       );
+
       if (!adapter) {
-        sendResponse({
-          error: new Error(`No adapter for ${msg.data.providerUrl}`),
-        });
+        sendResponse({ error: new WalletNotInstalledError() });
         return;
       }
 
@@ -59,7 +62,7 @@ chrome.runtime.onMessage.addListener((msg, _, sendResponse) => {
     }
     if (msg.type == "WALLET_DISCONNECT") {
       if (!walletAdapter) {
-        sendResponse({ error: new Error(`No wallet connected`) });
+        sendResponse({ error: new WalletNotConnectedError() });
         return;
       }
 
@@ -72,7 +75,7 @@ chrome.runtime.onMessage.addListener((msg, _, sendResponse) => {
 
     if (msg.type == "SIGN_TRANSACTION") {
       if (!walletAdapter) {
-        sendResponse({ error: new Error(`No wallet connected`) });
+        sendResponse({ error: new WalletNotConnectedError() });
         return;
       }
 
@@ -88,7 +91,7 @@ chrome.runtime.onMessage.addListener((msg, _, sendResponse) => {
 
     if (msg.type == "SIGN_TRANSACTIONS") {
       if (!walletAdapter) {
-        sendResponse({ error: new Error(`No wallet connected`) });
+        sendResponse({ error: new WalletNotConnectedError() });
         return;
       }
       const transactions = msg.data.transactions.map((t: any) =>

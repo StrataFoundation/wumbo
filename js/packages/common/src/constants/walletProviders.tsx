@@ -11,5 +11,5 @@ export const WALLET_PROVIDERS: Wallet[] = [
   getLedgerWallet(),
   getPhantomWallet(),
   // TODO: get Torus clientId
-  // getTorusWallet({ clientId : '' }),
+  getTorusWallet({ clientId: "" }),
 ];

@@ -39,5 +39,6 @@
       "all_frames": true
     }
   ],
+  "web_accessible_resources": ["phantom_proxy.js"],
   "permissions": ["storage", "<all_urls>"]
 }

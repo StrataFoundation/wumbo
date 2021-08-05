@@ -3,20 +3,14 @@ import ReactDOM from "react-dom";
 import App from "../../components/App";
 import "windi.css";
 
-const mountElem = document.createElement("div");
-document.body.append(mountElem);
+const appMountElem = document.createElement("div");
+document.body.append(appMountElem);
 
-window.addEventListener("message", function (event) {
-  console.log("content_script.js got message:", event);
-  // check event.type and event.data
-});
+const scriptMountElem = document.createElement("script");
+scriptMountElem.src = chrome.runtime.getURL("phantom_proxy.js");
+scriptMountElem.onload = function () {
+  (this as any).remove();
+};
+(document.head || document.documentElement).appendChild(scriptMountElem);
 
-setTimeout(function () {
-  console.log("cs sending message");
-  window.postMessage(
-    { type: "content_script_type", text: "Hello from content_script.js!" },
-    "*" /* targetOrigin: any */
-  );
-}, 1000);
-
-ReactDOM.render(<App />, mountElem);
+ReactDOM.render(<App />, appMountElem);

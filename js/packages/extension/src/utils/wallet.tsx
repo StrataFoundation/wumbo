@@ -7,6 +7,7 @@ import {
 } from "@solana/wallet-adapter-base";
 import { WalletContext, WALLET_PROVIDERS } from "wumbo-common";
 import { PublicKey, Transaction } from "@solana/web3.js";
+import { InjectedWalletAdapter } from "./wallets/injectedAdapter";
 
 function sendMessageAsync(message: any): Promise<any> {
   return new Promise<any>((resolve, reject) => {
@@ -174,7 +175,7 @@ class BackgroundWalletAdapter
   }
 }
 
-const LOCAL_WALLETS = new Set(["Ledger", "Phantom"]);
+const LOCAL_WALLETS = new Set(["Ledger"]);
 
 export function WalletProvider({ children = null as any }) {
   const { endpoint } = useConnectionConfig();
@@ -192,6 +193,15 @@ export function WalletProvider({ children = null as any }) {
         const adapter = WALLET_PROVIDERS.find((p) => p.url == providerUrl);
         if (adapter && LOCAL_WALLETS.has(adapter.name)) {
           return adapter.adapter();
+        }
+
+        if (adapter && adapter.name === "Phantom") {
+          return new InjectedWalletAdapter({
+            publicKey: publicKey || null,
+            providerUrl,
+            endpoint,
+            setAwaitingApproval,
+          });
         }
 
         return new BackgroundWalletAdapter({
