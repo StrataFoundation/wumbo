@@ -3,7 +3,7 @@ import {
   getSolletWallet,
   getLedgerWallet,
   getPhantomWallet,
-  getTorusWallet,
+  /*   getTorusWallet, */
 } from "@solana/wallet-adapter-wallets";
 
 export const WALLET_PROVIDERS: Wallet[] = [
@@ -11,5 +11,5 @@ export const WALLET_PROVIDERS: Wallet[] = [
   getLedgerWallet(),
   getPhantomWallet(),
   // TODO: get Torus clientId
-  getTorusWallet({ clientId: "" }),
+  /*   getTorusWallet({ clientId: "" }), */
 ];

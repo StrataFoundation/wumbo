@@ -1,8 +1,7 @@
 import React, { Fragment, useEffect } from "react";
 import { useHistory } from "react-router-dom";
-import { useWallet, WalletSelect } from "wumbo-common";
+import { useWallet, usePrevious, useQuery, WalletSelect } from "wumbo-common";
 import { WumboDrawer } from "../WumboDrawer";
-import { usePrevious, useQuery } from "wumbo-common";
 
 export const Wallet = () => {
   const history = useHistory();

@@ -10,22 +10,55 @@ import {
 } from "@solana/wallet-adapter-base";
 import { PublicKey, Transaction } from "@solana/web3.js";
 
-interface IError {
-  name: string;
-  messsage: string;
+export enum MessageType {
+  WALLET_CONNECT = "WALLET_CONNECT",
+  WALLET_DISCONNECT = "WALLET_DISCONNECT",
+  WALLET_RESET = "WALLET_RESET",
+  SIGN_TRANSACTION = "SIGN_TRANSACTION",
+  SIGN_TRANSACTIONS = "SIGN_TRANSACTIONS",
 }
 
-export interface IMessage {
-  type: string;
-  data?: any;
-  error?: IError;
-}
+export type ConnectMessage = {
+  type: MessageType.WALLET_CONNECT;
+  providerUrl: string | null;
+};
+
+export type DisconnectMessage = {
+  type: MessageType.WALLET_DISCONNECT;
+};
+
+export type SignTransactionMessage = {
+  type: MessageType.SIGN_TRANSACTION;
+  transaction: Buffer;
+};
+
+export type SignTransactionsMessage = {
+  type: MessageType.SIGN_TRANSACTIONS;
+  transactions: Buffer[];
+};
+
+export type ResetMessage = MessageEvent<{
+  type: MessageType.WALLET_RESET;
+}>;
+
+export type Message =
+  | ConnectMessage
+  | DisconnectMessage
+  | ResetMessage
+  | SignTransactionMessage
+  | SignTransactionsMessage;
 
 export interface IInjectedWalletAdapterConfig {
-  publicKey: PublicKey | null;
-  providerUrl: string;
   endpoint: string;
-  setAwaitingApproval: (awaitingApproval: boolean) => void;
+  publicKey: [
+    PublicKey | null,
+    React.Dispatch<React.SetStateAction<PublicKey | null>>
+  ];
+  providerUrl: [
+    string | null,
+    React.Dispatch<React.SetStateAction<string | null>>
+  ];
+  awaitingApproval: [boolean, React.Dispatch<React.SetStateAction<boolean>>];
 }
 
 export class InjectedWalletAdapter
@@ -34,18 +67,36 @@ export class InjectedWalletAdapter
   private _publicKey: PublicKey | null;
   private _connecting: boolean;
   private _connected: boolean;
-  private _providerUrl: string;
+  private _providerUrl: string | null;
   private _endpoint: string;
+  private _setProviderUrl: (url: string | null) => void;
+  private _setPublicKey: (key: PublicKey | null) => void;
+  private _awaitingApproval: boolean;
   private _setAwaitingApproval: (awaitingApproval: boolean) => void;
 
   constructor(config: IInjectedWalletAdapterConfig) {
     super();
-    this._publicKey = config.publicKey || null;
+    [this._publicKey, this._setPublicKey] = config.publicKey;
+    [this._providerUrl, this._setProviderUrl] = config.providerUrl;
+    [
+      this._awaitingApproval,
+      this._setAwaitingApproval,
+    ] = config.awaitingApproval;
     this._connecting = false;
     this._connected = false;
-    this._providerUrl = config.providerUrl;
     this._endpoint = config.endpoint;
-    this._setAwaitingApproval = config.setAwaitingApproval;
+
+    const self = this;
+
+    window.addEventListener("message", (e: MessageEvent<Message>) => {
+      switch (e.data.type) {
+        case MessageType.WALLET_RESET: {
+          self._setPublicKey(null);
+          self._setProviderUrl(null);
+          break;
+        }
+      }
+    });
   }
 
   get publicKey(): PublicKey | null {
@@ -55,6 +106,10 @@ export class InjectedWalletAdapter
   get ready(): boolean {
     // TODO: @FIXME
     return true;
+  }
+
+  get providerUrl(): string | null {
+    return this._providerUrl;
   }
 
   get connecting(): boolean {
@@ -69,18 +124,13 @@ export class InjectedWalletAdapter
     return false;
   }
 
-  async sendInjectedMessage(m: IMessage): Promise<any> {
+  async sendInjectedMessage(m: Message): Promise<any> {
     return new Promise((resolve) => {
       const messageChannel = new MessageChannel();
-      messageChannel.port1.onmessage = (e: IMessage) => resolve(e.data);
-      window.postMessage(m, "*", [messageChannel.port2]);
-    });
-  }
 
-  async sendLocalMessage(m: IMessage): Promise<any> {
-    return new Promise<void>((resolve) => {
-      chrome.runtime.sendMessage(m, () => {});
-      resolve();
+      // TODO: fix any type
+      messageChannel.port1.onmessage = (e: any) => resolve(e.data);
+      window.postMessage(m, "*", [messageChannel.port2]);
     });
   }
 
@@ -96,21 +146,13 @@ export class InjectedWalletAdapter
           providerUrl: string;
           publicKey: Buffer;
         } = await this.sendInjectedMessage({
-          type: "WALLET_CONNECT",
+          type: MessageType.WALLET_CONNECT,
+          providerUrl: this._providerUrl,
         });
 
         publicKey = new PublicKey(res.publicKey);
 
-        await this.sendLocalMessage({
-          type: "WALLET",
-          data: {
-            providerUrl: res.providerUrl,
-            publicKey: {
-              type: "String",
-              data: new PublicKey(res.publicKey).toString(),
-            },
-          },
-        });
+        this._setPublicKey(publicKey);
       } catch (error) {
         if (error instanceof WalletError) throw error;
         throw new WalletConnectionError(error?.message, error);
@@ -123,18 +165,11 @@ export class InjectedWalletAdapter
   }
 
   async disconnect(): Promise<void> {
-    console.log("wtf");
-    console.log(this._publicKey);
     if (this._publicKey) {
       try {
-        await this.sendInjectedMessage({ type: "WALLET_DISCONNECT" });
-        await this.sendLocalMessage({
-          type: "WALLET",
-          data: {
-            providerUrl: null,
-            publicKey: null,
-          },
-        });
+        await this.sendInjectedMessage({ type: MessageType.WALLET_DISCONNECT });
+        this._setPublicKey(null);
+        this._setProviderUrl(null);
       } catch (error) {
         throw new WalletDisconnectionError();
       }
@@ -146,10 +181,18 @@ export class InjectedWalletAdapter
       if (!this._publicKey) throw new WalletNotConnectedError();
 
       try {
-        return this.sendInjectedMessage({
-          type: "WUMBO_signTransaction",
-          data: transaction,
+        this._setAwaitingApproval(true);
+
+        const res = await this.sendInjectedMessage({
+          type: MessageType.SIGN_TRANSACTION,
+          transaction: transaction.serialize({
+            requireAllSignatures: false,
+            verifySignatures: false,
+          }),
         });
+
+        this._setAwaitingApproval(false);
+        return Transaction.from(res);
       } catch (error) {
         throw new WalletSignatureError(error?.message, error);
       }
@@ -165,10 +208,21 @@ export class InjectedWalletAdapter
       if (!this._publicKey) throw new WalletNotConnectedError();
 
       try {
-        return this.sendInjectedMessage({
-          type: "WUMBO_signAllTransactions",
-          data: transactions,
+        this._setAwaitingApproval(true);
+
+        const res = await this.sendInjectedMessage({
+          type: MessageType.SIGN_TRANSACTIONS,
+          transactions: transactions.map((t) =>
+            t.serialize({
+              requireAllSignatures: false,
+              verifySignatures: false,
+            })
+          ),
         });
+
+        this._setAwaitingApproval(false);
+
+        return res.map(Transaction.from);
       } catch (error) {
         throw new WalletSignatureError(error?.message, error);
       }

@@ -12,6 +12,7 @@ export const WalletSelect = React.memo(() => {
     setAutoConnect,
     error,
   } = useWallet();
+
   return (
     <Fragment>
       {connected ? (

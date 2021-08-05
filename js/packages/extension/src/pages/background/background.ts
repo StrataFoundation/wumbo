@@ -61,6 +61,7 @@ chrome.runtime.onMessage.addListener((msg, _, sendResponse) => {
       });
     }
     if (msg.type == "WALLET_DISCONNECT") {
+      console.log("test");
       if (!walletAdapter) {
         sendResponse({ error: new WalletNotConnectedError() });
         return;
@@ -74,6 +75,7 @@ chrome.runtime.onMessage.addListener((msg, _, sendResponse) => {
     }
 
     if (msg.type == "SIGN_TRANSACTION") {
+      console.log("test");
       if (!walletAdapter) {
         sendResponse({ error: new WalletNotConnectedError() });
         return;
