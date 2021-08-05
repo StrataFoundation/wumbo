@@ -2,7 +2,6 @@ import React, { FC } from "react";
 import { Link } from "react-router-dom";
 import { WumboInstance } from "spl-wumbo";
 import { useUserInfo } from "@/utils/userState";
-import { useWallet } from "wumbo-common";
 import { useAccount } from "wumbo-common";
 import {
   WUMBO_INSTANCE_KEY,
@@ -32,7 +31,6 @@ export const MainButton: FC<Props> = ({
 
   const creatorInfoState = useUserInfo(creatorName);
   const { userInfo: creatorInfo, loading } = creatorInfoState;
-  const { wallet } = useWallet();
   const { info: wumboInstance } = useAccount(
     WUMBO_INSTANCE_KEY,
     WumboInstance.fromAccount
@@ -50,7 +48,7 @@ export const MainButton: FC<Props> = ({
       });
   };
 
-  if (!loading && !creatorInfo && wumboInstance && wallet) {
+  if (!loading && !creatorInfo && wumboInstance) {
     return (
       <Link to={routes.create.path + `?name=${creatorName}&src=${creatorImg}`}>
         <Button
