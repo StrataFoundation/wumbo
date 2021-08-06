@@ -13,7 +13,7 @@ module.exports = {
     background: path.join(srcDir, "/pages/background/background.ts"),
     content_script: path.join(srcDir, "pages/content/index.tsx"),
     oauth: path.join((srcDir, "pages/oauth/index.tsx")),
-    phantom_proxy: path.join((srcDir, "pages/phantom-proxy/index.ts")),
+    wallet_proxy: path.join((srcDir, "pages/wallet-proxy/index.ts")),
   },
   output: {
     path: path.join(__dirname, "../dist"),

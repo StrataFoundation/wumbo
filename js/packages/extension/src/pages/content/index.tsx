@@ -7,7 +7,7 @@ const appMountElem = document.createElement("div");
 document.body.append(appMountElem);
 
 const scriptMountElem = document.createElement("script");
-scriptMountElem.src = chrome.runtime.getURL("phantom_proxy.js");
+scriptMountElem.src = chrome.runtime.getURL("wallet_proxy.js");
 scriptMountElem.onload = function () {
   (this as any).remove();
 };
