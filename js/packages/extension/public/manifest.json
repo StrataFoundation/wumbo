@@ -33,9 +33,9 @@
       "all_frames": true
     },
     {
-      "matches": ["https://wum.bo/extension-oauth"],
+      "matches": ["http://localhost:3000/claim*"],
       "js": ["oauth.js"],
-      "run_at": "document_end",
+      "run_at": "document_start",
       "all_frames": true
     }
   ],

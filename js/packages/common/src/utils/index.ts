@@ -8,3 +8,5 @@ export * from "./twitter";
 export * from "./utils";
 export * from "./wallet";
 export * from "./walletState";
+export * from "./claim";
+export * from "./ftxPay";

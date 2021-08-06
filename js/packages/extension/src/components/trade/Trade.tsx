@@ -29,9 +29,11 @@ import {
   useTokenMetadata,
   MetadataAvatar,
   useTokenRefFromBonding,
+  useFtxPayLink
 } from "wumbo-common";
 import { routes, viewProfilePath } from "@/constants/routes";
 import { TokenForm, FormValues } from "./TokenForm";
+import { CashIcon } from "@heroicons/react/solid";
 import Logo from "../../../public/assets/img/logo.svg";
 import { useAsyncCallback } from "react-async-hook";
 import { SuccessfulTransaction } from "./SuccessfulTransaction";
@@ -49,7 +51,7 @@ interface TokenInfo {
 }
 function useTokenInfo(tokenBonding: TokenBondingV0 | undefined): TokenInfo {
   const query = useQuery();
-  const { metadata, error, loading } = useTokenMetadata(
+  const { metadata, image, error, loading } = useTokenMetadata(
     tokenBonding?.targetMint
   );
 
@@ -78,11 +80,12 @@ function useTokenInfo(tokenBonding: TokenBondingV0 | undefined): TokenInfo {
           name: metadata.data.name,
         };
       } else if (!loading) {
+        const name = metadata?.data?.name || "UNCLAIMED"
         return {
           loading,
           error,
           ticker: "UNCLAIMED",
-          icon: <Avatar token name={"UNCLAIMED"} />,
+          icon: <Avatar token imgSrc={image} name={name} />,
           name: query.get("name") || undefined,
         };
       }
@@ -107,6 +110,7 @@ interface TradeParams {
 }
 
 export const TradeRoute = React.memo(() => {
+  const { connected } = useWallet();
   const params = useParams<{ tokenBondingKey: string }>();
   const tokenBondingKey = new PublicKey(params.tokenBondingKey);
   const { info: tokenBonding } = useAccount(
@@ -118,6 +122,8 @@ export const TradeRoute = React.memo(() => {
   const ownedWUM = useOwnedAmount(WUM_TOKEN);
   const fiatPrice = useFiatPrice(tokenBonding?.baseMint);
   const toFiat = (a: number) => (fiatPrice || 0) * a;
+  const ftxPayLink = useFtxPayLink();
+  const location = useLocation();
 
   if (!tokenBonding || !name || !icon) {
     return <WumboDrawer.Loading />;
@@ -125,28 +131,39 @@ export const TradeRoute = React.memo(() => {
 
   const isTargetWUM =
     tokenBonding.targetMint.toBase58() == WUM_TOKEN.toBase58();
-  const buyBaseLink = (showFiat = true) =>
-    isTargetWUM ? (
-      <Link to={"/undefined"}>
+  const buyBaseLink = (showFiat = true) => {
+    if (!connected) {
+      return <Link to={routes.wallet.path + `?redirect=${location.pathname}${location.search}`}>
         <Badge rounded hoverable color="neutral">
-          <SolLogo width="20" height="20" className="mr-2" /> Buy SOL
+          <CashIcon width="20" height="20" className="mr-2" /> Connect Wallet
         </Badge>
       </Link>
-    ) : (
-      <Link
-        to={routes.trade.path.replace(
-          ":tokenBondingKey",
-          WUM_BONDING.toBase58()
-        )}
-      >
-        <Badge rounded hoverable color="primary">
-          <Logo width="20" height="20" className="mr-2" />
-          {showFiat && "$"}
-          {(showFiat && toFiat(ownedWUM || 0).toFixed(2)) || "Buy WUM"}
-        </Badge>
-      </Link>
-    );
-
+    } else if (isTargetWUM) {
+      return (
+        <Link target="_blank" to={{ pathname: ftxPayLink }}>
+          <Badge rounded hoverable color="neutral">
+            <SolLogo width="20" height="20" className="mr-2" /> Buy SOL
+          </Badge>
+        </Link>
+      )
+    } else {
+      return (
+        <Link
+          to={routes.trade.path.replace(
+            ":tokenBondingKey",
+            WUM_BONDING.toBase58()
+          )}
+        >
+          <Badge rounded hoverable color="primary">
+            <Logo width="20" height="20" className="mr-2" />
+            {showFiat && "$"}
+            {(showFiat && toFiat(ownedWUM || 0).toFixed(2)) || "Buy WUM"}
+          </Badge>
+        </Link>
+      );
+    }
+  }
+  
   return (
     <Fragment>
       <WumboDrawer.Header>
@@ -275,13 +292,12 @@ export const Trade = React.memo(
 
     return (
       <Fragment>
-        <MetadataTokenPill
+        <TokenPill
           tokenBonding={tokenBonding}
           name={name}
           ticker={ticker}
-          detailsPath={
-            viewProfilePath(tokenBonding.publicKey) + location.search
-          }
+          icon={icon}
+          detailsPath={viewProfilePath(tokenBonding.publicKey) + location.search}
         />
         <div className="flex justify-center mt-4">
           {/* TODO: show owned amount in both tabs */}

@@ -25,7 +25,10 @@ module.exports = defineConfig({
       },
       fontSize: {
         xxs: ".675rem",
-      }
+      },
+      colors: {
+        twitter: "#1DA1F2"
+      },
     },
     fontFamily: {
       sans: [

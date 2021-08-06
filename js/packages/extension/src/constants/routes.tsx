@@ -16,6 +16,7 @@ type Route = {
 
 export interface IRoutes {
   create: Route;
+  claim: Route;
   customize: Route;
   trade: Route;
   myCoins: Route;
@@ -34,8 +35,13 @@ export function tradePath(tokenBondingKey: PublicKey): string {
   return routes.trade.path.replace(":tokenBondingKey", tokenBondingKey.toBase58())
 }
 
+export function claimPath({ code, name, redirectUri }: { code: string | undefined, name: string | undefined, redirectUri: string | undefined }): string {
+  return `${routes.claim.path}?name=${name}&code=${code}&redirectUri=${redirectUri}`
+}
+
 export const routes: IRoutes = {
   create: { path: "/create", Icon: null, isDrawerNav: false },
+  claim: { path: "/claim", Icon: null, isDrawerNav: false },
   customize: { path: "/customize", Icon: null, isDrawerNav: false },
   trade: {
     path: "/trade/:tokenBondingKey",
