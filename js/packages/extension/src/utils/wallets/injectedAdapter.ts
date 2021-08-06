@@ -18,10 +18,7 @@ import { deserializeError } from "serialize-error";
 
 export interface IInjectedWalletAdapterConfig {
   endpoint: string;
-  publicKey: [
-    PublicKey | null,
-    React.Dispatch<React.SetStateAction<PublicKey | null>>
-  ];
+  publicKey: [PublicKey | null, (pk: PublicKey | null) => void];
   providerUrl: [
     string | null,
     React.Dispatch<React.SetStateAction<string | null>>
@@ -55,7 +52,6 @@ export class InjectedWalletAdapter
     this._connected = false;
     this._endpoint = config.endpoint;
     this._resetWallet = () => {
-      this._setPublicKey(null);
       this._setProviderUrl(null);
     };
 

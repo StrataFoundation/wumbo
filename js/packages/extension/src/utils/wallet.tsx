@@ -14,10 +14,7 @@ interface BackgroundState {
     string | undefined,
     React.Dispatch<React.SetStateAction<string | undefined>>
   ];
-  publicKey: [
-    PublicKey | null,
-    React.Dispatch<React.SetStateAction<PublicKey | null>>
-  ];
+  publicKey: [PublicKey | null, (pk: PublicKey | null) => void];
   providerUrl: [
     string | null,
     React.Dispatch<React.SetStateAction<string | null>>
@@ -26,13 +23,23 @@ interface BackgroundState {
 
 // TODO: Logged in account provider
 export const useBackgroundState = (): BackgroundState => {
-  const [publicKey, setPublicKey] = useState<PublicKey | null>(null);
+  const [publicKey, setPublicKey] = useLocalStorageState("walletPubKey");
   const [providerUrl, setProviderUrl] = useLocalStorageState("walletProvider");
   const [error, setError] = useState<string>();
 
+  const handleSetPublicKey = (pk: PublicKey | null) => {
+    setPublicKey(pk ? pk.toBase58() : null);
+  };
+
+  const handleReturnPubKey = (pk: PublicKey | null) => {
+    return pk ? new PublicKey(pk) : null;
+  };
+
+  console.log(handleReturnPubKey(publicKey));
+
   return {
     error: [error, setError],
-    publicKey: [publicKey, setPublicKey],
+    publicKey: [handleReturnPubKey(publicKey), handleSetPublicKey],
     providerUrl: [providerUrl, setProviderUrl],
   };
 };
@@ -70,7 +77,7 @@ export function WalletProvider({ children = null as any }) {
         error,
         wallet,
         provider: WALLET_PROVIDERS.find((p) => p.url == providerUrl),
-        connected: !!publicKey,
+        connected: !!wallet?.connected,
         setAutoConnect,
         setProviderUrl,
         awaitingApproval: !!awaitingApproval,
