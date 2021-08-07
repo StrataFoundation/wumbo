@@ -231,7 +231,7 @@ export const Trade = ({
           sellTargetToBasePrice(values.tokenAmount) -
           BASE_SLIPPAGE * sellTargetToBasePrice(values.tokenAmount);
         console.log(`Selling ${values.tokenAmount} with min ${minPrice}`);
-        await sell(wallet)(connection, tokenBonding.publicKey, values.tokenAmount, minPrice);
+        await sell(walletAdapter)(connection, tokenBonding.publicKey, values.tokenAmount, minPrice);
         setTransactionSuccesful({
           showing: true,
           amount: sellTargetToBasePrice(values.tokenAmount),

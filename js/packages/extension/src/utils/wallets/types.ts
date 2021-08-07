@@ -1,12 +1,18 @@
 import { WalletName } from "@solana/wallet-adapter-wallets";
 
 export enum MessageType {
+  WALLET_READY = "WALLET_READY",
   WALLET_CONNECT = "WALLET_CONNECT",
   WALLET_DISCONNECT = "WALLET_DISCONNECT",
   WALLET_RESET = "WALLET_RESET",
   SIGN_TRANSACTION = "SIGN_TRANSACTION",
   SIGN_TRANSACTIONS = "SIGN_TRANSACTIONS",
 }
+
+export type ReadyMessage = {
+  type: MessageType.WALLET_READY;
+  name: WalletName | null;
+};
 
 export type ConnectMessage = {
   type: MessageType.WALLET_CONNECT;
@@ -32,6 +38,7 @@ export type ResetMessage = MessageEvent<{
 }>;
 
 export type Message =
+  | ReadyMessage
   | ConnectMessage
   | DisconnectMessage
   | ResetMessage

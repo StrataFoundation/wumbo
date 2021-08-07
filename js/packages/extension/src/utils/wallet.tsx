@@ -1,6 +1,5 @@
 import React, { FC, ReactNode, useCallback, useEffect, useMemo, useState } from "react";
 import {
-  WalletAdapter,
   WalletError,
   WalletNotConnectedError,
   WalletNotReadyError,
@@ -17,19 +16,21 @@ export interface IWalletProviderProps {
 export class WalletNotSelectedError extends WalletError {}
 
 export const WalletProvider: FC<IWalletProviderProps> = ({ children }) => {
-  const [name, setName] = useLocalStorage<WalletName | null>("walletName", null);
+  const [selectCount, setSelectCount] = useState<number>(0);
+  const [name, setName] = useState<WalletName | null>(null);
   const [wallet, setWallet] = useState<Wallet>();
-  const [adapter, setAdapter] = useState<WalletAdapter>();
+  const [adapter, setAdapter] = useState<InjectedWalletAdapter>();
   const [ready, setReady] = useState(false);
   const [connecting, setConnecting] = useState(false);
   const [disconnecting, setDisconnecting] = useState(false);
   const [connected, setConnected] = useState(false);
   const [autoApprove, setAutoApprove] = useState(false);
-  const [publicKey, setPublicKey] = useState<PublicKey | null>(null);
+  const [publicKey, setPublicKey] = useLocalStorage<string | null>("walletPublicKey", null);
   const [awaitingApproval, setAwaitingApproval] = useState<boolean>(false);
-  const [error, setError] = useState<string>();
+  const [error, setError] = useState<WalletError>();
 
   const onError = useCallback((error: WalletError) => console.error(error), []);
+
   const walletsByName = useMemo(
     () =>
       WALLET_PROVIDERS.reduce((walletsByName, wallet) => {
@@ -41,10 +42,11 @@ export const WalletProvider: FC<IWalletProviderProps> = ({ children }) => {
 
   const select = useCallback(
     async (selected: WalletName | null) => {
+      setSelectCount(selectCount + 1);
       if (name === selected) return;
       setName(selected);
     },
-    [name, setName]
+    [name, setName, selectCount, setSelectCount]
   );
 
   const reset = useCallback(() => {
@@ -53,16 +55,8 @@ export const WalletProvider: FC<IWalletProviderProps> = ({ children }) => {
     setDisconnecting(false);
     setConnected(false);
     setAutoApprove(false);
-    setPublicKey(null);
-  }, [
-    setReady,
-    setConnecting,
-    setDisconnecting,
-    setConnected,
-    setAutoApprove,
-    setPublicKey,
-    setAdapter,
-  ]);
+    setError(undefined);
+  }, [setReady, setConnecting, setDisconnecting, setConnected, setAutoApprove, setError]);
 
   const onReady = useCallback(() => setReady(true), [setReady]);
 
@@ -71,7 +65,7 @@ export const WalletProvider: FC<IWalletProviderProps> = ({ children }) => {
 
     setConnected(true);
     setAutoApprove(adapter.autoApprove);
-    setPublicKey(adapter.publicKey);
+    setPublicKey(adapter.publicKey?.toBase58() || null);
   }, [adapter, setConnected, setAutoApprove, setPublicKey]);
 
   const onDisconnect = useCallback(() => reset(), [reset]);
@@ -157,13 +151,16 @@ export const WalletProvider: FC<IWalletProviderProps> = ({ children }) => {
   // Reset state and set the wallet, adapter, and ready state when the name changes
   useEffect(() => {
     reset();
-
     const wallet = name ? walletsByName[name] : undefined;
     const adapter = wallet ? new InjectedWalletAdapter({ name }) : undefined;
+    const asyncReady = async () => {
+      const ready = adapter ? await adapter.readyAsync : false;
+      setReady(ready);
+    };
 
     setWallet(wallet);
     setAdapter(adapter);
-    setReady(adapter ? adapter.ready : false);
+    asyncReady();
   }, [reset, name, walletsByName, setWallet, setAdapter, setReady]);
 
   // Setup and teardown event listeners when the adapter changes
@@ -182,13 +179,37 @@ export const WalletProvider: FC<IWalletProviderProps> = ({ children }) => {
     }
   }, [adapter, onReady, onConnect, onDisconnect, onError]);
 
+  // Try to connect when the adapter changes and is ready
+  useEffect(() => {
+    (async function () {
+      if (adapter) {
+        const ready = await adapter?.readyAsync;
+
+        if (!ready && wallet?.name === name) {
+          window.open(wallet!.url, "_blank");
+        }
+
+        if (ready && wallet?.name === name) {
+          setConnecting(true);
+          try {
+            await adapter.connect();
+          } catch (error) {
+            // Don't throw error, but onError will still be called
+          } finally {
+            setConnecting(false);
+          }
+        }
+      }
+    })();
+  }, [selectCount, adapter, ready, setConnecting]);
+
   return (
     <WalletContext.Provider
       value={{
         wallet,
         walletAdapter: adapter,
         select,
-        publicKey,
+        publicKey: publicKey ? new PublicKey(publicKey) : null,
         ready,
         connecting,
         disconnecting,
@@ -199,6 +220,7 @@ export const WalletProvider: FC<IWalletProviderProps> = ({ children }) => {
         signTransaction,
         signAllTransactions,
         awaitingApproval,
+        error,
       }}
     >
       {children}

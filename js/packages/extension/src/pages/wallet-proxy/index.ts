@@ -33,7 +33,6 @@ const resetWallet = () => window.postMessage({ type: MessageType.WALLET_RESET },
           const {
             data: { name },
           } = e as MessageEvent<ConnectMessage>;
-
           const provider = getProvider(name!);
           adapter = provider?.adapter();
           adapter?.on("disconnect", resetWallet);
@@ -47,6 +46,23 @@ const resetWallet = () => window.postMessage({ type: MessageType.WALLET_RESET },
             sendReply({ error });
           }
 
+          break;
+        }
+
+        case MessageType.WALLET_READY: {
+          const {
+            data: { name },
+          } = e as MessageEvent<ConnectMessage>;
+
+          const provider = getProvider(name!);
+          adapter = provider?.adapter();
+
+          try {
+            const ready = adapter?.ready;
+            sendReply({ ready });
+          } catch (error) {
+            sendReply({ error });
+          }
           break;
         }
 

@@ -9,9 +9,11 @@ import { PencilAltIcon } from "@heroicons/react/solid";
 
 export const Profile = () => {
   const params = useParams<{ tokenBondingKey: string | undefined }>();
-  const { walletAdapter, publicKey } = useWallet();
-  const { info: tokenRef, loading } = useClaimedTokenRef(walletAdapter?.publicKey || undefined);
+  const { publicKey } = useWallet();
+  const { info: tokenRef, loading } = useClaimedTokenRef(publicKey || undefined);
+
   const history = useHistory();
+
   const tokenBondingKey = useMemo(() => {
     if (params.tokenBondingKey) {
       return new PublicKey(params.tokenBondingKey);
@@ -21,7 +23,7 @@ export const Profile = () => {
   }, [params.tokenBondingKey, tokenRef]);
 
   if (!params.tokenBondingKey) {
-    if (!walletAdapter?.publicKey) {
+    if (!publicKey) {
       return <WalletRedirect />;
     }
 
@@ -33,7 +35,6 @@ export const Profile = () => {
   if (!tokenBondingKey) {
     return (
       <Fragment>
-        <WalletRedirect />
         <WumboDrawer.Header title="Profile" />
         <WumboDrawer.Content>It looks like you haven't claimed a coin yet</WumboDrawer.Content>
         <WumboDrawer.Nav />

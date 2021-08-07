@@ -53,8 +53,26 @@ export class InjectedWalletAdapter
   }
 
   get ready(): boolean {
-    // TODO: @FIXME
+    // dont use this
+    // need to vallidate extending
+    // use readyAsync
     return true;
+  }
+
+  get readyAsync(): Promise<boolean> {
+    return (async () => {
+      try {
+        const { ready } = await this.sendMessage({
+          type: MessageType.WALLET_READY,
+          name: this._name,
+        });
+
+        return ready;
+      } catch (error) {
+        if (error instanceof WalletError) throw error;
+        throw new WalletConnectionError(error?.message, error);
+      }
+    })();
   }
 
   get connecting(): boolean {

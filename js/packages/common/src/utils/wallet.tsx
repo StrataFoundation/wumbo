@@ -1,4 +1,4 @@
-import { WalletAdapter } from "@solana/wallet-adapter-base";
+import { WalletAdapter, WalletError } from "@solana/wallet-adapter-base";
 import { Wallet, WalletName } from "@solana/wallet-adapter-wallets";
 import { PublicKey, Transaction } from "@solana/web3.js";
 import { createContext, useContext } from "react";
@@ -15,6 +15,7 @@ export interface WalletContextState {
   connected: boolean;
   autoApprove: boolean;
   awaitingApproval: boolean;
+  error: WalletError | undefined;
 
   connect: () => Promise<void>;
   disconnect: () => Promise<void>;
