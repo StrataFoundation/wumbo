@@ -11,9 +11,6 @@ export const Profile = () => {
   const params = useParams<{ tokenBondingKey: string | undefined }>();
   const { walletAdapter, publicKey } = useWallet();
   const { info: tokenRef, loading } = useClaimedTokenRef(walletAdapter?.publicKey || undefined);
-
-  console.log(walletAdapter?.publicKey);
-  console.log(publicKey);
   const history = useHistory();
   const tokenBondingKey = useMemo(() => {
     if (params.tokenBondingKey) {
