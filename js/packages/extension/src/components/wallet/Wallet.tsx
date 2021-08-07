@@ -6,18 +6,18 @@ import { WumboDrawer } from "../WumboDrawer";
 export const Wallet = () => {
   const history = useHistory();
   const query = useQuery();
-  const { connected, publicKey } = useWallet();
+  const { connected } = useWallet();
   const prevConnected = usePrevious(connected);
 
   useEffect(() => {
-    if (connected && publicKey && !prevConnected) {
+    if (connected && !prevConnected) {
       const redirect = query.get("redirect");
       if (redirect) {
         console.log(`Redirecting to ${redirect}`);
         history.push(redirect);
       }
     }
-  }, [connected, publicKey, prevConnected]);
+  }, [connected, prevConnected]);
 
   return (
     <Fragment>
