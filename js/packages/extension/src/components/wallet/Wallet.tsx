@@ -1,24 +1,23 @@
 import React, { Fragment, useEffect } from "react";
 import { useHistory } from "react-router-dom";
-import { useWallet, useQuery, WalletSelect } from "wumbo-common";
+import { useWallet, useQuery, WalletSelect, usePrevious } from "wumbo-common";
 import { WumboDrawer } from "../WumboDrawer";
 
 export const Wallet = () => {
   const history = useHistory();
   const query = useQuery();
-  const { wallet } = useWallet();
+  const { connected, publicKey } = useWallet();
+  const prevConnected = usePrevious(connected);
 
   useEffect(() => {
-    if (wallet) {
-      wallet.on("connect", () => {
-        const redirect = query.get("redirect");
-        if (redirect) {
-          console.log(`Redirecting to ${redirect}`);
-          history.push(redirect);
-        }
-      });
+    if (connected && publicKey && !prevConnected) {
+      const redirect = query.get("redirect");
+      if (redirect) {
+        console.log(`Redirecting to ${redirect}`);
+        history.push(redirect);
+      }
     }
-  }, [wallet]);
+  }, [connected, publicKey, prevConnected]);
 
   return (
     <Fragment>

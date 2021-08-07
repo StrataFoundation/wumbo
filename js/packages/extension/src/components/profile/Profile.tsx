@@ -1,45 +1,48 @@
 import { useWallet, useClaimedTokenRef, Profile as CommonProfile, Badge } from "wumbo-common";
 import React, { Fragment, useMemo } from "react";
 import { WumboDrawer } from "../WumboDrawer";
-import { Link, useHistory, useParams } from 'react-router-dom';
+import { Link, useHistory, useParams } from "react-router-dom";
 import { routes, tradePath, viewProfilePath } from "@/constants/routes";
 import WalletRedirect from "../wallet/WalletRedirect";
 import { PublicKey } from "@solana/web3.js";
-import { PencilAltIcon  } from "@heroicons/react/solid";
+import { PencilAltIcon } from "@heroicons/react/solid";
 
 export const Profile = () => {
   const params = useParams<{ tokenBondingKey: string | undefined }>();
-  const { wallet, connected } = useWallet();
-  const { info: tokenRef, loading } = useClaimedTokenRef(wallet?.publicKey || undefined);
+  const { walletAdapter, publicKey } = useWallet();
+  const { info: tokenRef, loading } = useClaimedTokenRef(walletAdapter?.publicKey || undefined);
+
+  console.log(walletAdapter?.publicKey);
+  console.log(publicKey);
   const history = useHistory();
   const tokenBondingKey = useMemo(() => {
     if (params.tokenBondingKey) {
       return new PublicKey(params.tokenBondingKey);
     } else if (tokenRef) {
-      return tokenRef.tokenBonding
+      return tokenRef.tokenBonding;
     }
   }, [params.tokenBondingKey, tokenRef]);
 
   if (!params.tokenBondingKey) {
-    if (!connected) {
-      return <WalletRedirect />
+    if (!walletAdapter?.publicKey) {
+      return <WalletRedirect />;
     }
 
     if (loading) {
-      return <WumboDrawer.Loading />
+      return <WumboDrawer.Loading />;
     }
   }
 
   if (!tokenBondingKey) {
-    return <Fragment>
-      <WalletRedirect />
-      <WumboDrawer.Header title="Profile" />
-      <WumboDrawer.Content>
-        It looks like you haven't claimed a coin yet
-      </WumboDrawer.Content>
-      <WumboDrawer.Nav />
-    </Fragment>
-  };
+    return (
+      <Fragment>
+        <WalletRedirect />
+        <WumboDrawer.Header title="Profile" />
+        <WumboDrawer.Content>It looks like you haven't claimed a coin yet</WumboDrawer.Content>
+        <WumboDrawer.Nav />
+      </Fragment>
+    );
+  }
 
   return (
     <Fragment>
@@ -54,7 +57,7 @@ export const Profile = () => {
         </div>
       </WumboDrawer.Header>
       <WumboDrawer.Content>
-        <CommonProfile 
+        <CommonProfile
           tokenBondingKey={tokenBondingKey}
           onAccountClick={(tokenBonding) => history.push(viewProfilePath(tokenBonding))}
           onTradeClick={() => history.push(tradePath(tokenBondingKey))}
@@ -62,5 +65,5 @@ export const Profile = () => {
       </WumboDrawer.Content>
       <WumboDrawer.Nav />
     </Fragment>
-  )
+  );
 };

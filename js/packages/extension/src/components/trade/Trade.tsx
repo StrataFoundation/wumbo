@@ -1,10 +1,4 @@
-import React, {
-  Fragment,
-  useState,
-  ReactNode,
-  useEffect,
-  useMemo,
-} from "react";
+import React, { Fragment, useState, ReactNode, useEffect, useMemo } from "react";
 import { Link, useParams, useLocation } from "react-router-dom";
 import { useConnection, Wallet } from "@oyster/common";
 import { buy, sell } from "@/utils/action";
@@ -51,9 +45,7 @@ interface TokenInfo {
 }
 function useTokenInfo(tokenBonding: TokenBondingV0 | undefined): TokenInfo {
   const query = useQuery();
-  const { metadata, image, error, loading } = useTokenMetadata(
-    tokenBonding?.targetMint
-  );
+  const { metadata, image, error, loading } = useTokenMetadata(tokenBonding?.targetMint);
 
   return useMemo(() => {
     if (tokenBonding) {
@@ -70,13 +62,7 @@ function useTokenInfo(tokenBonding: TokenBondingV0 | undefined): TokenInfo {
           loading,
           error,
           ticker: metadata.data.symbol,
-          icon: (
-            <MetadataAvatar
-              token
-              tokenBonding={tokenBonding}
-              name={"UNCLAIMED"}
-            />
-          ),
+          icon: <MetadataAvatar token tokenBonding={tokenBonding} name={"UNCLAIMED"} />,
           name: metadata.data.name,
         };
       } else if (!loading) {
@@ -109,14 +95,11 @@ interface TradeParams {
   buyBaseLink: (arg0: boolean) => React.ReactElement;
 }
 
-export const TradeRoute = React.memo(() => {
+export const TradeRoute = () => {
   const { connected } = useWallet();
   const params = useParams<{ tokenBondingKey: string }>();
   const tokenBondingKey = new PublicKey(params.tokenBondingKey);
-  const { info: tokenBonding } = useAccount(
-    tokenBondingKey,
-    TokenBondingV0.fromAccount
-  );
+  const { info: tokenBonding } = useAccount(tokenBondingKey, TokenBondingV0.fromAccount);
   const info = useTokenInfo(tokenBonding);
   const { name, ticker, icon, loading } = info;
   const ownedWUM = useOwnedAmount(WUM_TOKEN);
@@ -129,17 +112,11 @@ export const TradeRoute = React.memo(() => {
     return <WumboDrawer.Loading />;
   }
 
-  const isTargetWUM =
-    tokenBonding.targetMint.toBase58() == WUM_TOKEN.toBase58();
+  const isTargetWUM = tokenBonding.targetMint.toBase58() == WUM_TOKEN.toBase58();
   const buyBaseLink = (showFiat = true) => {
     if (!connected) {
       return (
-        <Link
-          to={
-            routes.wallet.path +
-            `?redirect=${location.pathname}${location.search}`
-          }
-        >
+        <Link to={routes.wallet.path + `?redirect=${location.pathname}${location.search}`}>
           <Badge rounded hoverable color="neutral">
             <CashIcon width="20" height="20" className="mr-2" /> Connect Wallet
           </Badge>
@@ -155,12 +132,7 @@ export const TradeRoute = React.memo(() => {
       );
     } else {
       return (
-        <Link
-          to={routes.trade.path.replace(
-            ":tokenBondingKey",
-            WUM_BONDING.toBase58()
-          )}
-        >
+        <Link to={routes.trade.path.replace(":tokenBondingKey", WUM_BONDING.toBase58())}>
           <Badge rounded hoverable color="primary">
             <Logo width="20" height="20" className="mr-2" />
             {showFiat && "$"}
@@ -184,11 +156,7 @@ export const TradeRoute = React.memo(() => {
         <Trade
           baseTicker={isTargetWUM ? "SOL" : "WUM"}
           baseIcon={
-            isTargetWUM ? (
-              <SolLogo width="45" height="45" />
-            ) : (
-              <Logo width="45" height="45" />
-            )
+            isTargetWUM ? <SolLogo width="45" height="45" /> : <Logo width="45" height="45" />
           }
           ticker={isTargetWUM ? "WUM" : ticker || ""}
           name={name}
@@ -200,49 +168,45 @@ export const TradeRoute = React.memo(() => {
       <WumboDrawer.Nav />
     </Fragment>
   );
-});
+};
 
-export const Trade = React.memo(
-  ({
-    baseTicker,
-    baseIcon,
-    name,
-    icon,
-    ticker,
-    buyBaseLink,
-    tokenBonding,
-  }: TradeParams) => {
-    // TODO: should move this to a context vvv
-    const [transactionSuccesful, setTransactionSuccesful] = useState<{
-      showing: boolean;
-      amount: number;
-      tokenSvg?: ReactNode;
-      tokenSrc?: string;
-      tokenName: string;
-    } | null>(null);
-    const { wallet } = useWallet();
-    const connection = useConnection();
-    const {
-      targetToBasePrice,
-      baseToTargetPrice,
-      sellTargetToBasePrice,
-      sellBaseToTargetPrice,
-    } = useBondingPricing(tokenBonding.publicKey);
-    const fiatPrice = useFiatPrice(tokenBonding.baseMint);
-    const toFiat = (a: number) => (fiatPrice || 0) * a;
-    const fromFiat = (a: number) => a / (fiatPrice || 0);
+export const Trade = ({
+  baseTicker,
+  baseIcon,
+  name,
+  icon,
+  ticker,
+  buyBaseLink,
+  tokenBonding,
+}: TradeParams) => {
+  // TODO: should move this to a context vvv
+  const [transactionSuccesful, setTransactionSuccesful] = useState<{
+    showing: boolean;
+    amount: number;
+    tokenSvg?: ReactNode;
+    tokenSrc?: string;
+    tokenName: string;
+  } | null>(null);
+  const { walletAdapter } = useWallet();
+  const connection = useConnection();
+  const {
+    targetToBasePrice,
+    baseToTargetPrice,
+    sellTargetToBasePrice,
+    sellBaseToTargetPrice,
+  } = useBondingPricing(tokenBonding.publicKey);
+  const fiatPrice = useFiatPrice(tokenBonding.baseMint);
+  const toFiat = (a: number) => (fiatPrice || 0) * a;
+  const fromFiat = (a: number) => a / (fiatPrice || 0);
 
-    const ownedBase = useOwnedAmount(tokenBonding.baseMint);
-    const ownedTarget = useOwnedAmount(tokenBonding.targetMint);
-    const location = useLocation();
+  const ownedBase = useOwnedAmount(tokenBonding.baseMint);
+  const ownedTarget = useOwnedAmount(tokenBonding.targetMint);
+  const location = useLocation();
 
-    const {
-      execute: onHandleBuy,
-      error: buyError,
-      loading: buyIsSubmitting,
-    } = useAsyncCallback(async (values: FormValues) => {
+  const { execute: onHandleBuy, error: buyError, loading: buyIsSubmitting } = useAsyncCallback(
+    async (values: FormValues) => {
       try {
-        await buy(wallet)(
+        await buy(walletAdapter)(
           connection,
           tokenBonding.publicKey,
           values.tokenAmount,
@@ -257,24 +221,17 @@ export const Trade = React.memo(
       } catch (e) {
         console.error(e);
       }
-    });
+    }
+  );
 
-    const {
-      execute: onHandleSell,
-      error: sellError,
-      loading: sellIsSubmitting,
-    } = useAsyncCallback(async (values: FormValues) => {
+  const { execute: onHandleSell, error: sellError, loading: sellIsSubmitting } = useAsyncCallback(
+    async (values: FormValues) => {
       try {
         const minPrice =
           sellTargetToBasePrice(values.tokenAmount) -
           BASE_SLIPPAGE * sellTargetToBasePrice(values.tokenAmount);
         console.log(`Selling ${values.tokenAmount} with min ${minPrice}`);
-        await sell(wallet)(
-          connection,
-          tokenBonding.publicKey,
-          values.tokenAmount,
-          minPrice
-        );
+        await sell(wallet)(connection, tokenBonding.publicKey, values.tokenAmount, minPrice);
         setTransactionSuccesful({
           showing: true,
           amount: sellTargetToBasePrice(values.tokenAmount),
@@ -284,89 +241,81 @@ export const Trade = React.memo(
       } catch (e) {
         console.log(e);
       }
-    });
+    }
+  );
 
-    const Info = (
-      <Fragment>
-        <span className="text-xxs">
-          Amounts shown in <span className="text-indigo-600">USD</span>
-        </span>
-        <div className="text-xxs w-full text-right">
-          Own: {(ownedTarget || 0).toFixed(4)}
-        </div>
-      </Fragment>
-    );
+  const Info = (
+    <Fragment>
+      <span className="text-xxs">
+        Amounts shown in <span className="text-indigo-600">USD</span>
+      </span>
+      <div className="text-xxs w-full text-right">Own: {(ownedTarget || 0).toFixed(4)}</div>
+    </Fragment>
+  );
 
-    return (
-      <Fragment>
-        <TokenPill
-          tokenBonding={tokenBonding}
-          name={name}
-          ticker={ticker}
-          icon={icon}
-          detailsPath={
-            viewProfilePath(tokenBonding.publicKey) + location.search
-          }
-        />
-        <div className="flex justify-center mt-4">
-          {/* TODO: show owned amount in both tabs */}
-          <Tabs>
-            <Tab title="Buy">
-              <div className="mt-2">
-                {Info}
-                <TokenForm
-                  fiatAmountFromTokenAmount={(tokenAmount: number) =>
-                    toFiat(targetToBasePrice(tokenAmount))
-                  }
-                  tokenAmountFromFiatAmount={(fiatAmount: number) =>
-                    baseToTargetPrice(fromFiat(fiatAmount))
-                  }
-                  icon={icon}
-                  ticker={ticker}
-                  type="buy"
-                  onSubmit={onHandleBuy}
-                  submitting={buyIsSubmitting}
-                />
-                <div className="flex flex-col justify-center mt-4">
-                  <span className="flex justify-center text-xxs">
-                    You can buy up to{" "}
-                    {baseToTargetPrice(ownedBase || 0).toFixed(4)} {ticker}{" "}
-                    coins!
-                  </span>
-                  <div className="flex justify-center mt-4">
-                    {buyBaseLink(false)}
-                  </div>
-                </div>
+  return (
+    <Fragment>
+      <TokenPill
+        tokenBonding={tokenBonding}
+        name={name}
+        ticker={ticker}
+        icon={icon}
+        detailsPath={viewProfilePath(tokenBonding.publicKey) + location.search}
+      />
+      <div className="flex justify-center mt-4">
+        {/* TODO: show owned amount in both tabs */}
+        <Tabs>
+          <Tab title="Buy">
+            <div className="mt-2">
+              {Info}
+              <TokenForm
+                fiatAmountFromTokenAmount={(tokenAmount: number) =>
+                  toFiat(targetToBasePrice(tokenAmount))
+                }
+                tokenAmountFromFiatAmount={(fiatAmount: number) =>
+                  baseToTargetPrice(fromFiat(fiatAmount))
+                }
+                icon={icon}
+                ticker={ticker}
+                type="buy"
+                onSubmit={onHandleBuy}
+                submitting={buyIsSubmitting}
+              />
+              <div className="flex flex-col justify-center mt-4">
+                <span className="flex justify-center text-xxs">
+                  You can buy up to {baseToTargetPrice(ownedBase || 0).toFixed(4)} {ticker} coins!
+                </span>
+                <div className="flex justify-center mt-4">{buyBaseLink(false)}</div>
               </div>
-            </Tab>
-            <Tab title="Sell">
-              <div className="mt-2">
-                {Info}
-                <TokenForm
-                  fiatAmountFromTokenAmount={(fiatAmount: number) =>
-                    toFiat(sellTargetToBasePrice(fiatAmount))
-                  }
-                  tokenAmountFromFiatAmount={(tokenAmount: number) =>
-                    sellBaseToTargetPrice(fromFiat(tokenAmount))
-                  }
-                  icon={icon}
-                  ticker={ticker}
-                  type="sell"
-                  onSubmit={onHandleSell}
-                  submitting={sellIsSubmitting}
-                />
-              </div>
-            </Tab>
-          </Tabs>
-        </div>
-        <SuccessfulTransaction
-          isShowing={transactionSuccesful?.showing || false}
-          tokenName={transactionSuccesful?.tokenName}
-          tokenSvg={transactionSuccesful?.tokenSvg}
-          amount={transactionSuccesful?.amount}
-          toggleShowing={() => setTransactionSuccesful(null)}
-        />
-      </Fragment>
-    );
-  }
-);
+            </div>
+          </Tab>
+          <Tab title="Sell">
+            <div className="mt-2">
+              {Info}
+              <TokenForm
+                fiatAmountFromTokenAmount={(fiatAmount: number) =>
+                  toFiat(sellTargetToBasePrice(fiatAmount))
+                }
+                tokenAmountFromFiatAmount={(tokenAmount: number) =>
+                  sellBaseToTargetPrice(fromFiat(tokenAmount))
+                }
+                icon={icon}
+                ticker={ticker}
+                type="sell"
+                onSubmit={onHandleSell}
+                submitting={sellIsSubmitting}
+              />
+            </div>
+          </Tab>
+        </Tabs>
+      </div>
+      <SuccessfulTransaction
+        isShowing={transactionSuccesful?.showing || false}
+        tokenName={transactionSuccesful?.tokenName}
+        tokenSvg={transactionSuccesful?.tokenSvg}
+        amount={transactionSuccesful?.amount}
+        toggleShowing={() => setTransactionSuccesful(null)}
+      />
+    </Fragment>
+  );
+};

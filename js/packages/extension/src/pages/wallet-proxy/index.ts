@@ -10,13 +10,12 @@ import {
   SignTransactionsMessage,
 } from "../../utils/wallets";
 
-const getProvider = (providerUrl: string): any | undefined =>
-  INJECTED_PROVIDERS.find((p) => p.url == providerUrl);
+const getProvider = (name: string): any | undefined =>
+  INJECTED_PROVIDERS.find((p) => p.name === name);
 
 let adapter: WalletAdapter | undefined;
 
-const resetWallet = () =>
-  window.postMessage({ type: MessageType.WALLET_RESET }, "*");
+const resetWallet = () => window.postMessage({ type: MessageType.WALLET_RESET }, "*");
 
 (window as Window).addEventListener(
   "message",
@@ -32,10 +31,10 @@ const resetWallet = () =>
       switch ((e.data as Message).type) {
         case MessageType.WALLET_CONNECT: {
           const {
-            data: { providerUrl },
+            data: { name },
           } = e as MessageEvent<ConnectMessage>;
 
-          const provider = getProvider(providerUrl!);
+          const provider = getProvider(name!);
           adapter = provider?.adapter();
           adapter?.on("disconnect", resetWallet);
 
@@ -43,7 +42,6 @@ const resetWallet = () =>
             await adapter?.connect();
             sendReply({
               publicKey: adapter!.publicKey!.toBuffer(),
-              providerUrl: provider?.url,
             });
           } catch (error) {
             sendReply({ error });

@@ -1,89 +1,207 @@
-import React, { useEffect, useMemo, useState } from "react";
-import { useConnectionConfig, useLocalStorageState } from "@oyster/common";
+import React, { FC, ReactNode, useCallback, useEffect, useMemo, useState } from "react";
 import {
-  EventEmitter,
   WalletAdapter,
-  WalletAdapterEvents,
+  WalletError,
+  WalletNotConnectedError,
+  WalletNotReadyError,
 } from "@solana/wallet-adapter-base";
-import { WalletContext, WALLET_PROVIDERS } from "wumbo-common";
-import { PublicKey } from "@solana/web3.js";
+import { WalletContext, WALLET_PROVIDERS, useLocalStorage } from "wumbo-common";
+import { PublicKey, Transaction } from "@solana/web3.js";
 import { InjectedWalletAdapter } from "./wallets/injectedAdapter";
+import { Wallet, WalletName } from "@solana/wallet-adapter-wallets";
 
-interface BackgroundState {
-  error: [
-    string | undefined,
-    React.Dispatch<React.SetStateAction<string | undefined>>
-  ];
-  publicKey: [PublicKey | null, (pk: PublicKey | null) => void];
-  providerUrl: [
-    string | null,
-    React.Dispatch<React.SetStateAction<string | null>>
-  ];
+export interface IWalletProviderProps {
+  children: ReactNode;
 }
 
-// TODO: Logged in account provider
-export const useBackgroundState = (): BackgroundState => {
-  const [publicKey, setPublicKey] = useLocalStorageState("walletPubKey");
-  const [providerUrl, setProviderUrl] = useLocalStorageState("walletProvider");
+export class WalletNotSelectedError extends WalletError {}
+
+export const WalletProvider: FC<IWalletProviderProps> = ({ children }) => {
+  const [name, setName] = useLocalStorage<WalletName | null>("walletName", null);
+  const [wallet, setWallet] = useState<Wallet>();
+  const [adapter, setAdapter] = useState<WalletAdapter>();
+  const [ready, setReady] = useState(false);
+  const [connecting, setConnecting] = useState(false);
+  const [disconnecting, setDisconnecting] = useState(false);
+  const [connected, setConnected] = useState(false);
+  const [autoApprove, setAutoApprove] = useState(false);
+  const [publicKey, setPublicKey] = useState<PublicKey | null>(null);
+  const [awaitingApproval, setAwaitingApproval] = useState<boolean>(false);
   const [error, setError] = useState<string>();
 
-  const handleSetPublicKey = (pk: PublicKey | null) => {
-    setPublicKey(pk ? pk.toBase58() : null);
-  };
+  const onError = useCallback((error: WalletError) => console.error(error), []);
+  const walletsByName = useMemo(
+    () =>
+      WALLET_PROVIDERS.reduce((walletsByName, wallet) => {
+        walletsByName[wallet.name] = wallet;
+        return walletsByName;
+      }, {} as { [name in WalletName]: Wallet }),
+    [WALLET_PROVIDERS]
+  );
 
-  const handleReturnPubKey = (pk: PublicKey | null) => {
-    return pk ? new PublicKey(pk) : null;
-  };
+  const select = useCallback(
+    async (selected: WalletName | null) => {
+      if (name === selected) return;
+      setName(selected);
+    },
+    [name, setName]
+  );
 
-  console.log(handleReturnPubKey(publicKey));
+  const reset = useCallback(() => {
+    setReady(false);
+    setConnecting(false);
+    setDisconnecting(false);
+    setConnected(false);
+    setAutoApprove(false);
+    setPublicKey(null);
+  }, [
+    setReady,
+    setConnecting,
+    setDisconnecting,
+    setConnected,
+    setAutoApprove,
+    setPublicKey,
+    setAdapter,
+  ]);
 
-  return {
-    error: [error, setError],
-    publicKey: [handleReturnPubKey(publicKey), handleSetPublicKey],
-    providerUrl: [providerUrl, setProviderUrl],
-  };
-};
+  const onReady = useCallback(() => setReady(true), [setReady]);
 
-export function WalletProvider({ children = null as any }) {
-  const { endpoint } = useConnectionConfig();
-  const {
-    error: [error, setError],
-    publicKey: [publicKey, setPublicKey],
-    providerUrl: [providerUrl, setProviderUrl],
-  } = useBackgroundState();
-  const [autoConnect, setAutoConnect] = useState(false);
-  const [awaitingApproval, setAwaitingApproval] = useState<boolean>(false);
-  const wallet = useMemo(() => {
-    if (providerUrl && !error && endpoint) {
-      return new InjectedWalletAdapter({
-        publicKey: [publicKey, setPublicKey],
-        providerUrl: [providerUrl, setProviderUrl],
-        awaitingApproval: [awaitingApproval, setAwaitingApproval],
-        endpoint,
-      });
+  const onConnect = useCallback(() => {
+    if (!adapter) return;
+
+    setConnected(true);
+    setAutoApprove(adapter.autoApprove);
+    setPublicKey(adapter.publicKey);
+  }, [adapter, setConnected, setAutoApprove, setPublicKey]);
+
+  const onDisconnect = useCallback(() => reset(), [reset]);
+
+  const connect = useCallback(async () => {
+    if (connecting || disconnecting || connected) return;
+
+    if (!wallet || !adapter) {
+      const error = new WalletNotSelectedError();
+      onError(error);
+      throw error;
     }
-  }, [providerUrl]);
 
+    if (!ready) {
+      window.open(wallet!.url, "_blank");
+
+      const error = new WalletNotReadyError();
+      onError(error);
+      throw error;
+    }
+
+    setConnecting(true);
+    try {
+      await adapter!.connect();
+    } finally {
+      setConnecting(false);
+    }
+  }, [connecting, disconnecting, connected, adapter, onError, ready, wallet, setConnecting]);
+
+  const disconnect = useCallback(async () => {
+    if (disconnecting) return;
+
+    if (!adapter) {
+      await select(null);
+      return;
+    }
+
+    setDisconnecting(true);
+    try {
+      await adapter.disconnect();
+    } finally {
+      setDisconnecting(false);
+      await select(null);
+    }
+  }, [disconnecting, adapter, select, setDisconnecting]);
+
+  const signTransaction = useCallback(
+    async (transaction: Transaction) => {
+      if (!connected) {
+        const error = new WalletNotConnectedError();
+        onError(error);
+        throw error;
+      }
+
+      setAwaitingApproval(true);
+      try {
+        return await adapter!.signTransaction(transaction);
+      } finally {
+        setAwaitingApproval(false);
+      }
+    },
+    [adapter, onError, connected, setAwaitingApproval]
+  );
+
+  const signAllTransactions = useCallback(
+    async (transactions: Transaction[]) => {
+      if (!connected) {
+        const error = new WalletNotConnectedError();
+        onError(error);
+        throw error;
+      }
+
+      setAwaitingApproval(true);
+      try {
+        return await adapter!.signAllTransactions(transactions);
+      } finally {
+        setAwaitingApproval(false);
+      }
+    },
+    [adapter, onError, connected]
+  );
+
+  // Reset state and set the wallet, adapter, and ready state when the name changes
   useEffect(() => {
-    if (wallet && autoConnect) {
-      wallet.connect();
-      setAutoConnect(false);
+    reset();
+
+    const wallet = name ? walletsByName[name] : undefined;
+    const adapter = wallet ? new InjectedWalletAdapter({ name }) : undefined;
+
+    setWallet(wallet);
+    setAdapter(adapter);
+    setReady(adapter ? adapter.ready : false);
+  }, [reset, name, walletsByName, setWallet, setAdapter, setReady]);
+
+  // Setup and teardown event listeners when the adapter changes
+  useEffect(() => {
+    if (adapter) {
+      adapter.on("ready", onReady);
+      adapter.on("connect", onConnect);
+      adapter.on("disconnect", onDisconnect);
+      adapter.on("error", onError);
+      return () => {
+        adapter.off("ready", onReady);
+        adapter.off("connect", onConnect);
+        adapter.off("disconnect", onDisconnect);
+        adapter.off("error", onError);
+      };
     }
-  }, [wallet, autoConnect]);
+  }, [adapter, onReady, onConnect, onDisconnect, onError]);
 
   return (
     <WalletContext.Provider
       value={{
-        error,
         wallet,
-        provider: WALLET_PROVIDERS.find((p) => p.url == providerUrl),
-        connected: !!wallet?.connected,
-        setAutoConnect,
-        setProviderUrl,
-        awaitingApproval: !!awaitingApproval,
+        walletAdapter: adapter,
+        select,
+        publicKey,
+        ready,
+        connecting,
+        disconnecting,
+        connected,
+        autoApprove,
+        connect,
+        disconnect,
+        signTransaction,
+        signAllTransactions,
+        awaitingApproval,
       }}
     >
       {children}
     </WalletContext.Provider>
   );
-}
+};

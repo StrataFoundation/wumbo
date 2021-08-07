@@ -16,7 +16,6 @@ import {
   Transaction,
   TransactionInstruction,
 } from "@solana/web3.js";
-import { WalletAdapter } from "@solana/wallet-adapter-base";
 import { getFilesWithMetadata, getImage, getMetadataKey } from "./utils";
 import { useWallet } from "../wallet";
 import { TokenRef } from "spl-wumbo";
@@ -36,17 +35,18 @@ const RESERVED_TXN_MANIFEST = "manifest.json";
 async function getSignedTransaction(
   connection: Connection,
   instructions: TransactionInstruction[],
-  wallet: WalletAdapter,
   extraSigners?: Account[]
 ): Promise<Transaction> {
+  const { signTransaction, publicKey } = useWallet();
   const transaction = new Transaction({
-    feePayer: wallet.publicKey || undefined,
+    feePayer: publicKey || undefined,
     recentBlockhash: (await connection.getRecentBlockhash()).blockhash,
   });
+
   transaction.instructions = instructions;
 
   extraSigners && transaction.partialSign(...extraSigners);
-  return wallet.signTransaction(transaction);
+  return signTransaction(transaction);
 }
 
 export type TokenMetadata = {
@@ -58,20 +58,13 @@ export type TokenMetadata = {
 };
 
 export function useTokenMetadata(token: PublicKey | undefined): TokenMetadata {
-  const {
-    result: metadataAccountKey,
-    loading,
-    error,
-  } = useAsync(getMetadataKey, [token]);
-  const {
-    info: metadata,
-    loading: accountLoading,
-  } = useAccount(metadataAccountKey, (_, acct) => decodeMetadata(acct.data));
-  const {
-    result: image,
-    loading: imageLoading,
-    error: imageError,
-  } = useAsync(getImage, [metadata?.data.uri]);
+  const { result: metadataAccountKey, loading, error } = useAsync(getMetadataKey, [token]);
+  const { info: metadata, loading: accountLoading } = useAccount(metadataAccountKey, (_, acct) =>
+    decodeMetadata(acct.data)
+  );
+  const { result: image, loading: imageLoading, error: imageError } = useAsync(getImage, [
+    metadata?.data.uri,
+  ]);
 
   return {
     loading: Boolean(token && (loading || accountLoading || imageLoading)),
@@ -82,11 +75,7 @@ export function useTokenMetadata(token: PublicKey | undefined): TokenMetadata {
   };
 }
 
-async function getFileFromUrl(
-  url: string,
-  name: string,
-  defaultType = "image/jpeg"
-) {
+async function getFileFromUrl(url: string, name: string, defaultType = "image/jpeg") {
   const response = await fetch(url);
   const data = await response.blob();
   return new File([data], name, {
@@ -116,26 +105,19 @@ type SetMetadataState = {
     metadataAccount: PublicKey;
   } | void>;
 };
-export function useSetMetadata(
-  tokenRefKey: PublicKey | undefined
-): SetMetadataState {
+export function useSetMetadata(tokenRefKey: PublicKey | undefined): SetMetadataState {
   const connection = useConnection();
   const { info: tokenRef } = useAccount(tokenRefKey, TokenRef.fromAccount);
-  const { info: tokenBonding } = useAccount(
-    tokenRef?.tokenBonding,
-    TokenBondingV0.fromAccount
+  const { info: tokenBonding } = useAccount(tokenRef?.tokenBonding, TokenBondingV0.fromAccount);
+  const { key: metadataAccountKey, image, metadata: inflated } = useTokenMetadata(
+    tokenBonding?.targetMint
   );
-  const {
-    key: metadataAccountKey,
-    image,
-    metadata: inflated,
-  } = useTokenMetadata(tokenBonding?.targetMint);
-  const { wallet } = useWallet();
+  const { publicKey } = useWallet();
   const [state, setState] = useState<MetadataFiniteState>("idle");
   const mint = useMint(tokenBonding?.targetMint);
 
   async function exec(args: SetMetadataArgs) {
-    if (wallet && wallet.publicKey && tokenRefKey) {
+    if (publicKey && tokenRefKey) {
       setState("gathering-files");
       const updateAuthority = (
         await PublicKey.findProgramAddress(
@@ -185,21 +167,11 @@ export function useSetMetadata(
       const realFiles = getFilesWithMetadata(files, metadata);
       try {
         // Prepay for the arweave upload we're about to do
-        const prepayTxnInstructions = await prepPayForFilesInstructions(
-          wallet?.publicKey,
-          realFiles
-        );
+        const prepayTxnInstructions = await prepPayForFilesInstructions(publicKey, realFiles);
         setState("awaiting-approval");
-        const prepayTxn = await getSignedTransaction(
-          connection,
-          prepayTxnInstructions,
-          wallet
-        );
+        const prepayTxn = await getSignedTransaction(connection, prepayTxnInstructions);
         setState("submit-solana");
-        const txid = await sendAndConfirmRawTransaction(
-          connection,
-          prepayTxn.serialize()
-        );
+        const txid = await sendAndConfirmRawTransaction(connection, prepayTxn.serialize());
         try {
           await connection.confirmTransaction(txid, "max");
         } catch {
@@ -208,14 +180,8 @@ export function useSetMetadata(
 
         // Do the arweave upload
         setState("submit-arweave");
-        const result = await uploadToArweave(
-          txid,
-          tokenBonding!.targetMint,
-          realFiles
-        );
-        const metadataFile = result.messages?.find(
-          (m) => m.filename === RESERVED_TXN_MANIFEST
-        );
+        const result = await uploadToArweave(txid, tokenBonding!.targetMint, realFiles);
+        const metadataFile = result.messages?.find((m) => m.filename === RESERVED_TXN_MANIFEST);
         console.log(JSON.stringify(metadataFile, null, 2));
 
         // For testing
@@ -231,7 +197,8 @@ export function useSetMetadata(
         // Use the uploaded arweave files in token metadata
         setState("submit-solana");
         let metadataInstructions;
-        const metadataAccount = metadataAccountKey && await connection.getAccountInfo(metadataAccountKey);
+        const metadataAccount =
+          metadataAccountKey && (await connection.getAccountInfo(metadataAccountKey));
         if (metadataAccount && metadataAccountKey) {
           metadataInstructions = await updateMetadataWithArweave(
             tokenRef!.publicKey,
@@ -246,7 +213,7 @@ export function useSetMetadata(
           metadataInstructions = (
             await createMetadataWithArweave(
               updateAuthority,
-              wallet.publicKey,
+              publicKey,
               metadataFile,
               tokenBonding!.targetMint,
               tokenRef!.publicKey,
@@ -260,16 +227,9 @@ export function useSetMetadata(
         }
 
         setState("awaiting-approval");
-        const createMetadataTxn = await getSignedTransaction(
-          connection,
-          metadataInstructions,
-          wallet
-        );
+        const createMetadataTxn = await getSignedTransaction(connection, metadataInstructions);
         setState("submit-solana");
-        await sendAndConfirmRawTransaction(
-          connection,
-          createMetadataTxn.serialize()
-        );
+        await sendAndConfirmRawTransaction(connection, createMetadataTxn.serialize());
 
         return {
           metadataAccount: metadataAccountKey!,

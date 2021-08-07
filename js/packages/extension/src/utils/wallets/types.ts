@@ -1,3 +1,5 @@
+import { WalletName } from "@solana/wallet-adapter-wallets";
+
 export enum MessageType {
   WALLET_CONNECT = "WALLET_CONNECT",
   WALLET_DISCONNECT = "WALLET_DISCONNECT",
@@ -8,7 +10,7 @@ export enum MessageType {
 
 export type ConnectMessage = {
   type: MessageType.WALLET_CONNECT;
-  providerUrl: string | null;
+  name: WalletName | null;
 };
 
 export type DisconnectMessage = {
