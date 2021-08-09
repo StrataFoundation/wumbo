@@ -1,19 +1,14 @@
-import React, { Fragment, useState } from "react";
-import { Link, useHistory, useLocation } from "react-router-dom";
+import React, { Fragment } from "react";
+import { Link, useLocation } from "react-router-dom";
 import { WumboDrawer } from "../WumboDrawer";
 import { routes } from "@/constants/routes";
-import {
-  useWallet,
-  useQuery,
-  Avatar,
-  Button,
-} from "wumbo-common";
+import { useWallet, useQuery, Avatar, Button } from "wumbo-common";
 import ClaimOrCreate from "./ClaimOrCreate";
 
 export const Create = () => {
   const location = useLocation();
   const query = useQuery();
-  const { wallet } = useWallet();
+  const { connected, publicKey } = useWallet();
   const currentPath = `${location.pathname}${location.search}`;
 
   return (
@@ -34,19 +29,15 @@ export const Create = () => {
             <span className="font-bold">
               You will be the first to mint & own this person's token!
             </span>{" "}
-            It will remain unverified until this person verifies it. Should the
-            person opt out, no new tokens may be purchased and exisiting tokens
-            may still be sold.
+            It will remain unverified until this person verifies it. Should the person opt out, no
+            new tokens may be purchased and exisiting tokens may still be sold.
           </div>
         </div>
         <div className="flex mt-4">
-          {wallet && wallet.publicKey ? (
+          {connected && publicKey ? (
             <ClaimOrCreate />
           ) : (
-            <Link
-              to={routes.wallet.path + `?redirect=${currentPath}`}
-              className="w-full"
-            >
+            <Link to={routes.wallet.path + `?redirect=${currentPath}`} className="w-full">
               <Button block color="primary" size="lg">
                 Connect Wallet
               </Button>

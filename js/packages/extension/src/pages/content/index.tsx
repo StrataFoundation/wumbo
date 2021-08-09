@@ -3,7 +3,14 @@ import ReactDOM from "react-dom";
 import App from "../../components/App";
 import "windi.css";
 
-const mountElem = document.createElement("div");
-document.body.append(mountElem);
+const appMountElem = document.createElement("div");
+document.body.append(appMountElem);
 
-ReactDOM.render(<App />, mountElem);
+const scriptMountElem = document.createElement("script");
+scriptMountElem.src = chrome.runtime.getURL("wallet_proxy.js");
+scriptMountElem.onload = function () {
+  (this as any).remove();
+};
+(document.head || document.documentElement).appendChild(scriptMountElem);
+
+ReactDOM.render(<App />, appMountElem);

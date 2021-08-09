@@ -1,17 +1,26 @@
 import { useState } from "react";
-import {
-  CreateSocialTokenResult,
-  TokenRef,
-  Wumbo,
-  WumboInstance
-} from "spl-wumbo";
+import { CreateSocialTokenResult, TokenRef, Wumbo, WumboInstance } from "spl-wumbo";
 import { TokenBondingV0 } from "spl-token-bonding";
 import { useAsyncCallback } from "react-async-hook";
-import { SPL_ASSOCIATED_TOKEN_ACCOUNT_PROGRAM_ID, TOKEN_PROGRAM_ID, useConnection } from "@oyster/common";
+import {
+  SPL_ASSOCIATED_TOKEN_ACCOUNT_PROGRAM_ID,
+  TOKEN_PROGRAM_ID,
+  useConnection,
+} from "@oyster/common";
 import { useWallet } from "./wallet";
-import { createTestTld, claimTwitterTransactionInstructions, postTwitterRegistrarRequest, getTld } from "./twitter"
+import {
+  createTestTld,
+  claimTwitterTransactionInstructions,
+  postTwitterRegistrarRequest,
+  getTld,
+} from "./twitter";
 import { useAccount } from "./account";
-import { SPL_NAME_SERVICE_PROGRAM_ID, TOKEN_BONDING_PROGRAM_ID, WUMBO_INSTANCE_KEY, WUMBO_PROGRAM_ID } from "../constants/globals";
+import {
+  SPL_NAME_SERVICE_PROGRAM_ID,
+  TOKEN_BONDING_PROGRAM_ID,
+  WUMBO_INSTANCE_KEY,
+  WUMBO_PROGRAM_ID,
+} from "../constants/globals";
 import { getWumbo } from "../constants/wumbo";
 
 interface ClaimTransactionState {
@@ -20,28 +29,31 @@ interface ClaimTransactionState {
   error: Error | undefined;
   claim: (twitterHandle: string) => Promise<void>;
 }
-export function useClaim({ redirectUri, code }: { redirectUri: string, code: string }): ClaimTransactionState {
+export function useClaim({
+  redirectUri,
+  code,
+}: {
+  redirectUri: string;
+  code: string;
+}): ClaimTransactionState {
   const connection = useConnection();
-  const { wallet } = useWallet();
+  const { walletAdapter } = useWallet();
   const [claiming, setClaiming] = useState<boolean>(false);
 
   async function exec(twitterHandle: string) {
-    if (wallet) {
+    if (walletAdapter) {
       try {
-        await createTestTld(connection, wallet);
-        const instructions = await claimTwitterTransactionInstructions(
-          connection,
-          {
-            owner: wallet.publicKey!,
-            twitterHandle,
-          }
-        );
+        await createTestTld(connection, walletAdapter);
+        const instructions = await claimTwitterTransactionInstructions(connection, {
+          owner: walletAdapter.publicKey!,
+          twitterHandle,
+        });
         if (instructions) {
           setClaiming(true);
           await postTwitterRegistrarRequest(
             connection,
             instructions,
-            wallet,
+            walletAdapter,
             code!,
             redirectUri!,
             twitterHandle
@@ -70,44 +82,40 @@ interface CreateState {
 }
 export function useCreateCoin(): CreateState {
   const connection = useConnection();
-  const { wallet } = useWallet();
+  const { walletAdapter } = useWallet();
   const [creating, setCreating] = useState<boolean>(false);
-  const { info: wumboInstance } = useAccount(
-    WUMBO_INSTANCE_KEY,
-    WumboInstance.fromAccount
-  );
+  const { info: wumboInstance } = useAccount(WUMBO_INSTANCE_KEY, WumboInstance.fromAccount);
 
   async function exec(twitterHandle: string) {
     let result;
     try {
-      setCreating(true)
+      setCreating(true);
       const wumbo = await getWumbo();
-      const key = await wumbo.getTwitterClaimedTokenRefKey(connection, twitterHandle) || await wumbo.getTwitterUnclaimedTokenRefKey(twitterHandle);
+      const key =
+        (await wumbo.getTwitterClaimedTokenRefKey(connection, twitterHandle)) ||
+        (await wumbo.getTwitterUnclaimedTokenRefKey(twitterHandle));
       const account = await connection.getAccountInfo(key);
       if (!account) {
-        console.log("Creator does not exist, creating")
-        result = await Wumbo.createWumboSocialToken(
-          connection,
-          {
-            splTokenBondingProgramId: TOKEN_BONDING_PROGRAM_ID,
-            splAssociatedTokenAccountProgramId: SPL_ASSOCIATED_TOKEN_ACCOUNT_PROGRAM_ID,
-            splTokenProgramId: TOKEN_PROGRAM_ID,
-            splWumboProgramId: WUMBO_PROGRAM_ID,
-            splNameServicePogramId: SPL_NAME_SERVICE_PROGRAM_ID,
-            wumboInstance: WUMBO_INSTANCE_KEY,
-            payer: wallet!,
-            baseMint: wumboInstance!.wumboMint,
-            name: twitterHandle,
-            founderRewardsPercentage: 5.5,
-            nameParent: await getTld(),
-          }
-        )
+        console.log("Creator does not exist, creating");
+        result = await Wumbo.createWumboSocialToken(connection, {
+          splTokenBondingProgramId: TOKEN_BONDING_PROGRAM_ID,
+          splAssociatedTokenAccountProgramId: SPL_ASSOCIATED_TOKEN_ACCOUNT_PROGRAM_ID,
+          splTokenProgramId: TOKEN_PROGRAM_ID,
+          splWumboProgramId: WUMBO_PROGRAM_ID,
+          splNameServicePogramId: SPL_NAME_SERVICE_PROGRAM_ID,
+          wumboInstance: WUMBO_INSTANCE_KEY,
+          payer: walletAdapter!,
+          baseMint: wumboInstance!.wumboMint,
+          name: twitterHandle,
+          founderRewardsPercentage: 5.5,
+          nameParent: await getTld(),
+        });
       } else {
         const creator = TokenRef.fromAccount(key, account);
         result = {
           tokenRefKey: creator.publicKey,
           tokenBondingKey: creator.tokenBonding,
-          ownerKey: wallet?.publicKey!,
+          ownerKey: walletAdapter?.publicKey!,
         };
       }
     } finally {

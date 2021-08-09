@@ -54,11 +54,7 @@ export function useRentExemptAmount(
   error: Error | undefined;
 } {
   const connection = useConnection();
-  const {
-    loading,
-    error,
-    result,
-  } = useAsync(connection.getMinimumBalanceForRentExemption, [size]);
+  const { loading, error, result } = useAsync(connection.getMinimumBalanceForRentExemption, [size]);
 
   const amount = useMemo(() => (result || 0) / Math.pow(10, 9), [result]);
 
@@ -70,14 +66,12 @@ export function useRentExemptAmount(
 }
 
 export function useSolOwnedAmount(): { amount: number; loading: boolean } {
-  const { wallet } = useWallet();
+  const { walletAdapter } = useWallet();
   const { info: lamports, loading } = useAccount<number>(
-    wallet?.publicKey || undefined,
+    walletAdapter?.publicKey || undefined,
     (_, account) => account.lamports
   );
-  const result = React.useMemo(() => (lamports || 0) / Math.pow(10, 9), [
-    lamports,
-  ]);
+  const result = React.useMemo(() => (lamports || 0) / Math.pow(10, 9), [lamports]);
 
   return {
     amount: result,
@@ -101,10 +95,10 @@ export function useOwnedAmountForOwnerAndHandle(
     tokenRef?.tokenBonding,
     TokenBondingV0.fromAccount
   );
-  const {
-    associatedAccount,
-    loading: loadingAssociatedAccount,
-  } = useAssociatedAccount(owner, token?.targetMint);
+  const { associatedAccount, loading: loadingAssociatedAccount } = useAssociatedAccount(
+    owner,
+    token?.targetMint
+  );
   const mint = useMint(token?.targetMint);
 
   useEffect(() => {
@@ -132,11 +126,9 @@ export function useOwnedAmountForOwnerAndHandle(
   return state;
 }
 
-export function useOwnedAmount(
-  token: PublicKey | undefined
-): number | undefined {
-  const { wallet } = useWallet();
-  const { associatedAccount } = useAssociatedAccount(wallet?.publicKey, token);
+export function useOwnedAmount(token: PublicKey | undefined): number | undefined {
+  const { walletAdapter } = useWallet();
+  const { associatedAccount } = useAssociatedAccount(walletAdapter?.publicKey, token);
   const mint = useMint(token);
   const [amount, setAmount] = useState<number>();
 
@@ -165,17 +157,13 @@ export const inverseLogCurve = (
 ) => (baseAmount: number): number => {
   const c = curve.c;
   const gNonBaseRel = curve.g;
-  const g = curve.isBaseRelative
-    ? gNonBaseRel / (1.0 + supplyAsNum(base))
-    : gNonBaseRel;
+  const g = curve.isBaseRelative ? gNonBaseRel / (1.0 + supplyAsNum(base)) : gNonBaseRel;
   const s = supplyAsNum(target);
   const rewardsDecimal = founderRewardsPercentage / 10000;
   const k = baseAmount + generalLogCurve(c, g, s);
   const exp = gsl_sf_lambert_W0((g * k - c) / (c * Math.E)) + 1;
 
-  return Math.abs(
-    (Math.pow(Math.E, exp) - g * s - 1) / ((1 + rewardsDecimal) * g)
-  );
+  return Math.abs((Math.pow(Math.E, exp) - g * s - 1) / ((1 + rewardsDecimal) * g));
 };
 
 const startFinishLogCurve = (curve: LogCurveV0, base: MintInfo) => (
@@ -184,9 +172,7 @@ const startFinishLogCurve = (curve: LogCurveV0, base: MintInfo) => (
 ) => {
   const c = curve.c;
   const gNonBaseRel = curve.g;
-  const g = curve.isBaseRelative
-    ? gNonBaseRel / (1.0 + supplyAsNum(base))
-    : gNonBaseRel;
+  const g = curve.isBaseRelative ? gNonBaseRel / (1.0 + supplyAsNum(base)) : gNonBaseRel;
 
   return logCurveRange(c, g, start, finish);
 };
@@ -218,9 +204,7 @@ export interface PricingState {
   // The current price of target in terms of base
   current: number;
 }
-export function useBondingPricing(
-  tokenBonding: PublicKey | undefined
-): PricingState {
+export function useBondingPricing(tokenBonding: PublicKey | undefined): PricingState {
   const [state, setState] = useState<PricingState>({
     loading: true,
     targetToBasePrice: () => 0,
@@ -230,10 +214,7 @@ export function useBondingPricing(
     targetRangeToBasePrice: () => 0,
     current: 0,
   });
-  const { info: bonding } = useAccount(
-    tokenBonding,
-    TokenBondingV0.fromAccount
-  );
+  const { info: bonding } = useAccount(tokenBonding, TokenBondingV0.fromAccount);
   const { info: curve } = useAccount(bonding?.curve, LogCurveV0.fromAccount);
 
   const base = useMint(bonding?.baseMint);
@@ -243,32 +224,16 @@ export function useBondingPricing(
       const targetRangeToBasePrice = startFinishLogCurve(curve, base);
       setState({
         loading: false,
-        targetToBasePrice: logCurve(
-          curve,
-          base,
-          target,
-          bonding.founderRewardPercentage
-        ),
+        targetToBasePrice: logCurve(curve, base, target, bonding.founderRewardPercentage),
         sellTargetToBasePrice: (amount: number) =>
-          targetRangeToBasePrice(
-            supplyAsNum(target) - amount,
-            supplyAsNum(target)
-          ),
-        baseToTargetPrice: inverseLogCurve(
-          curve,
-          base,
-          target,
-          bonding.founderRewardPercentage
-        ),
-        sellBaseToTargetPrice: (amount: number) =>
-          inverseLogCurve(curve, base, target, 0)(-amount),
+          targetRangeToBasePrice(supplyAsNum(target) - amount, supplyAsNum(target)),
+        baseToTargetPrice: inverseLogCurve(curve, base, target, bonding.founderRewardPercentage),
+        sellBaseToTargetPrice: (amount: number) => inverseLogCurve(curve, base, target, 0)(-amount),
         targetRangeToBasePrice,
         current:
           curve.c *
           Math.log(
-            1 +
-              (curve.g * supplyAsNum(target)) /
-                (curve.isBaseRelative ? supplyAsNum(base) : 1)
+            1 + (curve.g * supplyAsNum(target)) / (curve.isBaseRelative ? supplyAsNum(base) : 1)
           ),
       });
     }
@@ -292,19 +257,12 @@ export const useWumboUsdPrice = () => {
   return useContext(UsdWumboPriceContext);
 };
 
-export const useMarketPrice = (
-  marketAddress: PublicKey
-): number | undefined => {
+export const useMarketPrice = (marketAddress: PublicKey): number | undefined => {
   const [price, setPrice] = useState<number>();
   useEffect(() => {
     const fetch = async () => {
       try {
-        let market = await Market.load(
-          connection,
-          marketAddress,
-          undefined,
-          SERUM_PROGRAM_ID
-        );
+        let market = await Market.load(connection, marketAddress, undefined, SERUM_PROGRAM_ID);
         const book = await market.loadAsks(connection);
         const top = book.items(false).next().value as Order;
         setPrice(top.price);

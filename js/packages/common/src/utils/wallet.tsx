@@ -1,48 +1,30 @@
-import React, { useContext } from "react";
-import { WalletAdapter } from "@solana/wallet-base";
-import { WALLET_PROVIDERS } from "../constants/walletProviders";
+import { WalletAdapter, WalletError } from "@solana/wallet-adapter-base";
+import { Wallet, WalletName } from "@solana/wallet-adapter-wallets";
+import { PublicKey, Transaction } from "@solana/web3.js";
+import { createContext, useContext } from "react";
 
-export const WalletContext = React.createContext<{
-  wallet: WalletAdapter | undefined;
-  awaitingApproval: boolean;
-  error?: string;
+export interface WalletContextState {
+  wallet: Wallet | undefined;
+  walletAdapter: WalletAdapter | undefined;
+  select: (walletName: WalletName) => void;
+
+  publicKey: PublicKey | null;
+  ready: boolean;
+  connecting: boolean;
+  disconnecting: boolean;
   connected: boolean;
-  setProviderUrl: (url: string) => void;
-  setAutoConnect: (val: boolean) => void;
-  provider: typeof WALLET_PROVIDERS[number] | undefined;
-}>({
-  wallet: undefined,
-  error: undefined,
-  connected: false,
-  awaitingApproval: false,
-  setProviderUrl() {},
-  setAutoConnect() {},
-  provider: undefined,
-});
+  autoApprove: boolean;
+  awaitingApproval: boolean;
+  error: WalletError | undefined;
 
-export const useWallet = () => {
-  const {
-    error,
-    setAutoConnect,
-    wallet,
-    connected,
-    provider,
-    setProviderUrl,
-    awaitingApproval,
-  } = useContext(WalletContext);
-  return {
-    error,
-    wallet,
-    connected,
-    provider,
-    setProviderUrl,
-    setAutoConnect,
-    awaitingApproval,
-    connect() {
-      wallet?.connect();
-    },
-    disconnect() {
-      wallet?.disconnect();
-    },
-  };
-};
+  connect: () => Promise<void>;
+  disconnect: () => Promise<void>;
+  signTransaction: (transaction: Transaction) => Promise<Transaction>;
+  signAllTransactions: (transaction: Transaction[]) => Promise<Transaction[]>;
+}
+
+export const WalletContext = createContext<WalletContextState>({} as WalletContextState);
+
+export function useWallet(): WalletContextState {
+  return useContext(WalletContext);
+}

@@ -11,45 +11,45 @@ import {
   Data,
   Creator,
   findProgramAddress,
-} from '@oyster/common';
-import React from 'react';
-import { MintLayout, Token } from '@solana/spl-token';
-import { WalletAdapter } from '@solana/wallet-base';
+} from "@oyster/common";
+import React from "react";
+import { MintLayout, Token } from "@solana/spl-token";
+import { WalletAdapter } from "@solana/wallet-adapter-base";
 import {
   Keypair,
   Connection,
   PublicKey,
   SystemProgram,
   TransactionInstruction,
-} from '@solana/web3.js';
-import crypto from 'crypto';
-import { AR_SOL_HOLDER_ID, IS_DEV } from '../constants/globals';
-import BN from 'bn.js';
-const RESERVED_TXN_MANIFEST = 'manifest.json';
+} from "@solana/web3.js";
+import crypto from "crypto";
+import { AR_SOL_HOLDER_ID, IS_DEV } from "../constants/globals";
+import BN from "bn.js";
+const RESERVED_TXN_MANIFEST = "manifest.json";
 
 export const LAMPORT_MULTIPLIER = 10 ** 9;
 const WINSTON_MULTIPLIER = 10 ** 12;
 
 async function getAssetCostToStore(files: File[]) {
   const totalBytes = files.reduce((sum, f) => (sum += f.size), 0);
-  console.log('Total bytes', totalBytes);
+  console.log("Total bytes", totalBytes);
   const txnFeeInWinstons = parseInt(
-    await (await fetch('https://arweave.net/price/0')).text(),
+    await (await fetch("https://arweave.net/price/0")).text()
   );
-  console.log('txn fee', txnFeeInWinstons);
+  console.log("txn fee", txnFeeInWinstons);
   const byteCostInWinstons = parseInt(
     await (
-      await fetch('https://arweave.net/price/' + totalBytes.toString())
-    ).text(),
+      await fetch("https://arweave.net/price/" + totalBytes.toString())
+    ).text()
   );
-  console.log('byte cost', byteCostInWinstons);
+  console.log("byte cost", byteCostInWinstons);
   const totalArCost =
     (txnFeeInWinstons * files.length + byteCostInWinstons) / WINSTON_MULTIPLIER;
 
-  console.log('total ar', totalArCost);
+  console.log("total ar", totalArCost);
 
   let conversionRates = JSON.parse(
-    localStorage.getItem('conversionRates') || '{}',
+    localStorage.getItem("conversionRates") || "{}"
   );
 
   if (
@@ -57,36 +57,35 @@ async function getAssetCostToStore(files: File[]) {
     !conversionRates.expiry ||
     conversionRates.expiry < Date.now()
   ) {
-    console.log('Calling conversion rate');
+    console.log("Calling conversion rate");
     conversionRates = {
       value: JSON.parse(
         await (
           await fetch(
-            'https://api.coingecko.com/api/v3/simple/price?ids=solana,arweave&vs_currencies=usd',
+            "https://api.coingecko.com/api/v3/simple/price?ids=solana,arweave&vs_currencies=usd"
           )
-        ).text(),
+        ).text()
       ),
       expiry: Date.now() + 5 * 60 * 1000,
     };
 
     if (conversionRates.value.solana)
-      localStorage.setItem('conversionRates', JSON.stringify(conversionRates));
+      localStorage.setItem("conversionRates", JSON.stringify(conversionRates));
   }
 
   // To figure out how many lamports are required, multiply ar byte cost by this number
   const arMultiplier =
     conversionRates.value.arweave.usd / conversionRates.value.solana.usd;
-  console.log('Ar mult', arMultiplier);
+  console.log("Ar mult", arMultiplier);
   // We also always make a manifest file, which, though tiny, needs payment.
   return LAMPORT_MULTIPLIER * totalArCost * arMultiplier * 1.1;
 }
-
 
 interface IArweaveResult {
   error?: string;
   messages?: Array<{
     filename: string;
-    status: 'success' | 'fail';
+    status: "success" | "fail";
     transactionId?: string;
     error?: string;
   }>;
@@ -126,7 +125,7 @@ export const setTokenMetadata = async (
     external_url: metadata.external_url,
     properties: {
       ...metadata.properties,
-      creators: metadata.creators?.map(creator => {
+      creators: metadata.creators?.map((creator) => {
         return {
           address: creator.address.toBase58(),
           share: creator.share,
@@ -137,11 +136,13 @@ export const setTokenMetadata = async (
 
   const realFiles: File[] = [
     ...files,
-    new File([JSON.stringify(metadataContent)], 'metadata.json'),
+    new File([JSON.stringify(metadataContent)], "metadata.json"),
   ];
 
-  const { instructions: pushInstructions, signers: pushSigners } =
-    await prepPayForFilesTxn(wallet, realFiles, metadata);
+  const {
+    instructions: pushInstructions,
+    signers: pushSigners,
+  } = await prepPayForFilesTxn(wallet, realFiles, metadata);
 
   // This owner is a temporary signer and owner of metadata we use to circumvent requesting signing
   // twice post Arweave. We store in an account (payer) and use it post-Arweave to update MD with new link
@@ -152,11 +153,11 @@ export const setTokenMetadata = async (
     connection,
     wallet,
     pushInstructions,
-    pushSigners,
+    pushSigners
   );
 
   try {
-    await connection.confirmTransaction(txid, 'max');
+    await connection.confirmTransaction(txid, "max");
   } catch {
     // ignore
   }
@@ -166,14 +167,14 @@ export const setTokenMetadata = async (
 
   const tags = realFiles.reduce(
     (acc: Record<string, Array<{ name: string; value: string }>>, f) => {
-      acc[f.name] = [{ name: 'mint', value: mintKey.toBase58() }];
+      acc[f.name] = [{ name: "mint", value: mintKey.toBase58() }];
       return acc;
     },
-    {},
+    {}
   );
-  data.append('tags', JSON.stringify(tags));
-  data.append('transaction', txid);
-  realFiles.map(f => data.append('file[]', f));
+  data.append("tags", JSON.stringify(tags));
+  data.append("transaction", txid);
+  realFiles.map((f) => data.append("file[]", f));
 
   // TODO: convert to absolute file name for image
 
@@ -181,17 +182,17 @@ export const setTokenMetadata = async (
     await fetch(
       // TODO: add CNAME
       IS_DEV
-        ? 'https://us-central1-principal-lane-200702.cloudfunctions.net/uploadFile2'
-        : 'https://us-central1-principal-lane-200702.cloudfunctions.net/uploadFileProd2',
+        ? "https://us-central1-principal-lane-200702.cloudfunctions.net/uploadFile2"
+        : "https://us-central1-principal-lane-200702.cloudfunctions.net/uploadFileProd2",
       {
-        method: 'POST',
+        method: "POST",
         body: data,
-      },
+      }
     )
   ).json();
 
   const metadataFile = result.messages?.find(
-    m => m.filename === RESERVED_TXN_MANIFEST,
+    (m) => m.filename === RESERVED_TXN_MANIFEST
   );
   if (metadataFile?.transactionId && wallet.publicKey) {
     console.log("Found transaction and file, creating metadata");
@@ -211,7 +212,7 @@ export const setTokenMetadata = async (
       mintKey,
       payerPublicKey,
       instructions,
-      wallet.publicKey,
+      wallet.publicKey
     );
 
     // TODO: enable when using payer account to avoid 2nd popup
@@ -238,7 +239,7 @@ export const setTokenMetadata = async (
       connection,
       wallet,
       instructions,
-      [],
+      []
     );
 
     console.log("Arweave link", arweaveLink);
@@ -251,13 +252,12 @@ export const setTokenMetadata = async (
   // TODO:
   // 1. Jordan: --- upload file and metadata to storage API
   // 2. pay for storage by hashing files and attaching memo for each file
-
 };
 
 export const prepPayForFilesTxn = async (
   wallet: WalletAdapter,
   files: File[],
-  metadata: any,
+  metadata: any
 ): Promise<{
   instructions: TransactionInstruction[];
   signers: Keypair[];
@@ -273,19 +273,19 @@ export const prepPayForFilesTxn = async (
         fromPubkey: wallet.publicKey,
         toPubkey: AR_SOL_HOLDER_ID,
         lamports: await getAssetCostToStore(files),
-      }),
+      })
     );
 
   for (let i = 0; i < files.length; i++) {
-    const hashSum = crypto.createHash('sha256');
+    const hashSum = crypto.createHash("sha256");
     hashSum.update(await files[i].text());
-    const hex = hashSum.digest('hex');
+    const hex = hashSum.digest("hex");
     instructions.push(
       new TransactionInstruction({
         keys: [],
         programId: memo,
         data: Buffer.from(hex),
-      }),
+      })
     );
   }
 

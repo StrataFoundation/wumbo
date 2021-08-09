@@ -31,26 +31,18 @@ export const TokenForm = ({
   tokenAmountFromFiatAmount,
 }: TokenFormProps) => {
   const location = useLocation();
-  const { wallet, awaitingApproval } = useWallet();
+  const { connected, awaitingApproval } = useWallet();
   const { register, handleSubmit, setValue, reset } = useForm<FormValues>();
 
   const inputClasses =
     "p-0 bg-transparent border-transparent focus:shadow-none focus:border-transparent";
 
-  const handleOnFiatChange = ({
-    target: { value },
-  }: {
-    target: { value: string };
-  }) => {
+  const handleOnFiatChange = ({ target: { value } }: { target: { value: string } }) => {
     setValue("fiatAmount", Number(value));
     setValue("tokenAmount", +tokenAmountFromFiatAmount(+value).toFixed(2));
   };
 
-  const handleOnTokenChange = ({
-    target: { value },
-  }: {
-    target: { value: string };
-  }) => {
+  const handleOnTokenChange = ({ target: { value } }: { target: { value: string } }) => {
     setValue("tokenAmount", Number(value));
     setValue("fiatAmount", +fiatAmountFromTokenAmount(+value).toFixed(2));
   };
@@ -97,7 +89,7 @@ export const TokenForm = ({
         </div>
       </div>
       <div className="flex mt-4">
-        {wallet && wallet.publicKey && (
+        {connected && (
           <Button block submit color="primary" size="lg" disabled={submitting}>
             {submitting && (
               <div className="mr-4">
@@ -107,7 +99,7 @@ export const TokenForm = ({
             {awaitingApproval && "Awaiting Approval"}
             {!awaitingApproval && (type === "sell" ? "Sell" : "Buy")}
           </Button>
-        ) }
+        )}
       </div>
     </form>
   );

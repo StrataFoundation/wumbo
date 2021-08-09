@@ -6,7 +6,7 @@ import {
   Transaction,
   TransactionInstruction,
 } from "@solana/web3.js";
-import { WalletAdapter } from "@solana/wallet-base";
+import { WalletAdapter } from "@solana/wallet-adapter-base";
 import { TokenBondingV0 } from "./state";
 import { buyV0Instruction, sellV0Instruction } from "./instruction";
 import { Token } from "@solana/spl-token";
@@ -74,7 +74,6 @@ async function createAssociatedTokenAccountInstruction(
     owner
   );
 }
-
 
 export type BuyBondingWithWalletParams = {
   splTokenBondingProgramId: PublicKey;
@@ -174,7 +173,6 @@ export async function buyBondingInstructions(
     )
   );
 
-
   console.log(
     `Bought ${params.amount} coins from ${purchaseAccount} to ${destinationAccount}`
   );
@@ -192,8 +190,8 @@ export async function buyBondingWithWallet(
 
   const instructions = await buyBondingInstructions(connection, {
     ...params,
-    purchaser: params.wallet.publicKey
-  })
+    purchaser: params.wallet.publicKey,
+  });
 
   await sendTransaction(connection, instructions, params.wallet);
 }
@@ -294,7 +292,6 @@ export async function sellBondingInstructions(
   return instructions;
 }
 
-
 export type SellBondingWithWalletParams = {
   splTokenBondingProgramId: PublicKey;
   splAssociatedTokenAccountProgramId: PublicKey;
@@ -304,18 +301,18 @@ export type SellBondingWithWalletParams = {
   amount: number;
   minPrice: number;
 };
-export async function sellBondingWithWallet(connection: Connection, params: SellBondingWithWalletParams) {
+export async function sellBondingWithWallet(
+  connection: Connection,
+  params: SellBondingWithWalletParams
+) {
   if (!params.wallet.publicKey) {
     throw new Error("Invalid seller wallet");
   }
 
   const instructions = await sellBondingInstructions(connection, {
     ...params,
-    seller: params.wallet.publicKey
-  })
+    seller: params.wallet.publicKey,
+  });
 
   await sendTransaction(connection, instructions, params.wallet);
 }
-
-
-

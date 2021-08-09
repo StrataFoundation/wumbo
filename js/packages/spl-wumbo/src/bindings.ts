@@ -12,8 +12,12 @@ import { initializeCreatorInstruction } from "./instruction";
 import { WumboInstance } from "./state";
 import { initializeTokenBondingV0Instruction } from "spl-token-bonding";
 import { TokenBondingV0 } from "spl-token-bonding";
-import { WalletAdapter } from "@solana/wallet-base";
-import { getHashedName, getNameAccountKey, NameRegistryState } from "@bonfida/spl-name-service";
+import { WalletAdapter } from "@solana/wallet-adapter-base";
+import {
+  getHashedName,
+  getNameAccountKey,
+  NameRegistryState,
+} from "@bonfida/spl-name-service";
 
 export const SOL_TOKEN = new PublicKey(
   "So11111111111111111111111111111111111111112"
@@ -27,7 +31,7 @@ interface IWumboConfig {
 export interface CreateSocialTokenResult {
   tokenRefKey: PublicKey;
   tokenBondingKey: PublicKey;
-  ownerKey: PublicKey
+  ownerKey: PublicKey;
 }
 
 export type CreateWumboCreatorParams = {
@@ -68,7 +72,7 @@ export class Wumbo {
     );
     return registry;
   }
-  
+
   getTwitterHandle = async (
     connection: Connection,
     twitterHandle: string
@@ -79,10 +83,8 @@ export class Wumbo {
       return null;
     }
   };
-  
-  async getTwitterUnclaimedTokenRefKey(
-    name: string
-  ): Promise<PublicKey> {
+
+  async getTwitterUnclaimedTokenRefKey(name: string): Promise<PublicKey> {
     const hashedName = await getHashedName(name);
     const twitterHandleRegistryKey = await getNameAccountKey(
       hashedName,
@@ -97,47 +99,58 @@ export class Wumbo {
       ],
       this.config.splWumboProgramId
     );
-  
+
     return key;
   }
-  
-  async getTokenRefKeyFromOwner(owner: PublicKey | undefined): Promise<PublicKey | undefined> {
+
+  async getTokenRefKeyFromOwner(
+    owner: PublicKey | undefined
+  ): Promise<PublicKey | undefined> {
     if (!owner) {
       return undefined;
     }
-  
-    return (await PublicKey.findProgramAddress(
-      [
-        Buffer.from("claimed-ref", "utf-8"),
-        this.config.wumboInstanceId.toBuffer(),
-        owner.toBuffer(),
-      ],
-      this.config.splWumboProgramId
-    ))[0];
+
+    return (
+      await PublicKey.findProgramAddress(
+        [
+          Buffer.from("claimed-ref", "utf-8"),
+          this.config.wumboInstanceId.toBuffer(),
+          owner.toBuffer(),
+        ],
+        this.config.splWumboProgramId
+      )
+    )[0];
   }
-  
-  async getTokenRefKeyFromBonding(tokenBonding: PublicKey | undefined): Promise<PublicKey | undefined> {
+
+  async getTokenRefKeyFromBonding(
+    tokenBonding: PublicKey | undefined
+  ): Promise<PublicKey | undefined> {
     if (!tokenBonding) {
       return undefined;
     }
-  
-    return (await PublicKey.findProgramAddress(
-      [
-        Buffer.from("reverse-token-ref", "utf-8"),
-        this.config.wumboInstanceId.toBuffer(),
-        tokenBonding.toBuffer(),
-      ],
-      this.config.splWumboProgramId
-    ))[0];
+
+    return (
+      await PublicKey.findProgramAddress(
+        [
+          Buffer.from("reverse-token-ref", "utf-8"),
+          this.config.wumboInstanceId.toBuffer(),
+          tokenBonding.toBuffer(),
+        ],
+        this.config.splWumboProgramId
+      )
+    )[0];
   }
-  
-  async getTwitterClaimedTokenRefKey(connection: Connection, name: string): Promise<PublicKey | undefined> {
-    const header = await this.getTwitterHandle(connection, name)
+
+  async getTwitterClaimedTokenRefKey(
+    connection: Connection,
+    name: string
+  ): Promise<PublicKey | undefined> {
+    const header = await this.getTwitterHandle(connection, name);
     if (header) {
-      return this.getTokenRefKeyFromOwner(header.owner)
+      return this.getTokenRefKeyFromOwner(header.owner);
     }
   }
-  
+
   static async createWumboSocialToken(
     connection: Connection,
     params: CreateWumboCreatorParams
@@ -145,23 +158,26 @@ export class Wumbo {
     if (!params.payer.publicKey) {
       throw new Error("Invalid payer");
     }
-  
+
     const hashedName = await getHashedName(params.name);
     const nameKey = await getNameAccountKey(
       hashedName,
       params.nameClass,
       params.nameParent
     );
-  
+
     const instructions = [];
-  
+
     // Create creator coin
     const targetMint = new Account();
     const [targetAuthority, targetNonce] = await PublicKey.findProgramAddress(
-      [Buffer.from("target-authority", "utf8"), targetMint.publicKey.toBuffer()],
+      [
+        Buffer.from("target-authority", "utf8"),
+        targetMint.publicKey.toBuffer(),
+      ],
       params.splTokenBondingProgramId
     );
-  
+
     instructions.push(
       SystemProgram.createAccount({
         fromPubkey: params.payer.publicKey,
@@ -171,7 +187,7 @@ export class Wumbo {
         programId: params.splTokenProgramId,
       })
     );
-  
+
     instructions.push(
       Token.createInitMintInstruction(
         params.splTokenProgramId,
@@ -181,9 +197,9 @@ export class Wumbo {
         targetAuthority
       )
     );
-  
+
     console.log(`Added creator mint ${targetMint.publicKey}`);
-  
+
     // Create founder rewards
     // If the person has already claimed their twitter handle, set the founder rewards account owner to
     // their wallet. Otherwise, set to the authority so wumbo can transfer the account to them later.
@@ -194,39 +210,50 @@ export class Wumbo {
         nameKey
       );
       // Only the owner of the account can create a claimed coin
-      if (nameRegistryState.owner.toBase58() !== params.payer.publicKey.toBase58()) {
-        throw new Error("Only the owner of this name can create a claimed coin")
+      if (
+        nameRegistryState.owner.toBase58() !== params.payer.publicKey.toBase58()
+      ) {
+        throw new Error(
+          "Only the owner of this name can create a claimed coin"
+        );
       }
-      
+
       founderRewardsOwner = nameRegistryState.owner;
-      tokenRef = (await PublicKey.findProgramAddress(
-        [
-          Buffer.from("claimed-ref", "utf-8"),
-          params.wumboInstance.toBuffer(),
-          nameRegistryState.owner.toBuffer(),
-        ],
-        params.splWumboProgramId
-      ))[0];
+      tokenRef = (
+        await PublicKey.findProgramAddress(
+          [
+            Buffer.from("claimed-ref", "utf-8"),
+            params.wumboInstance.toBuffer(),
+            nameRegistryState.owner.toBuffer(),
+          ],
+          params.splWumboProgramId
+        )
+      )[0];
       nameExists = true;
-    } catch(e) {
-      console.log("Creating an unclaimed coin, could not find name registry state", e);
-      tokenRef = (await PublicKey.findProgramAddress(
-        [
-          Buffer.from("unclaimed-ref", "utf-8"),
-          params.wumboInstance.toBuffer(),
-          nameKey.toBuffer(),
-        ],
-        params.splWumboProgramId
-      ))[0];
+    } catch (e) {
+      console.log(
+        "Creating an unclaimed coin, could not find name registry state",
+        e
+      );
+      tokenRef = (
+        await PublicKey.findProgramAddress(
+          [
+            Buffer.from("unclaimed-ref", "utf-8"),
+            params.wumboInstance.toBuffer(),
+            nameKey.toBuffer(),
+          ],
+          params.splWumboProgramId
+        )
+      )[0];
       [founderRewardsOwner] = await PublicKey.findProgramAddress(
         [Buffer.from("founder-rewards", "utf-8"), tokenRef.toBuffer()],
         params.splWumboProgramId
       );
       nameExists = false;
     }
-  
+
     console.log(`Set founder rewards account owner to ${founderRewardsOwner}`);
-  
+
     const associatedFounderRewardsAddress = await Token.getAssociatedTokenAddress(
       params.splAssociatedTokenAccountProgramId,
       params.splTokenProgramId,
@@ -235,7 +262,7 @@ export class Wumbo {
       // @ts-ignore
       true
     );
-  
+
     instructions.push(
       Token.createAssociatedTokenAccountInstruction(
         params.splAssociatedTokenAccountProgramId,
@@ -246,11 +273,11 @@ export class Wumbo {
         params.payer.publicKey
       )
     );
-  
+
     const [tokenBonding] = await PublicKey.findProgramAddress(
       [Buffer.from("token-bonding", "utf-8"), targetMint.publicKey.toBuffer()],
       params.splTokenBondingProgramId
-    )
+    );
     const [tokenBondingAuthority, _] = await PublicKey.findProgramAddress(
       [Buffer.from("bonding-authority", "utf-8"), tokenRef.toBuffer()],
       params.splWumboProgramId
@@ -259,28 +286,30 @@ export class Wumbo {
       connection,
       params.wumboInstance
     );
-    const reverseTokenRef = (await PublicKey.findProgramAddress(
-      [
-        Buffer.from("reverse-token-ref", "utf-8"),
-        params.wumboInstance.toBuffer(),
-        tokenBonding.toBuffer(),
-      ],
-      params.splWumboProgramId
-    ))[0];
-  
+    const reverseTokenRef = (
+      await PublicKey.findProgramAddress(
+        [
+          Buffer.from("reverse-token-ref", "utf-8"),
+          params.wumboInstance.toBuffer(),
+          tokenBonding.toBuffer(),
+        ],
+        params.splWumboProgramId
+      )
+    )[0];
+
     // Setup base storage
     const [baseStorageKey] = await PublicKey.findProgramAddress(
-      [
-        Buffer.from("base-storage-key", "utf8"),
-        tokenBonding.toBuffer(),
-      ],
+      [Buffer.from("base-storage-key", "utf8"), tokenBonding.toBuffer()],
       params.splTokenBondingProgramId
     );
     const [storageAuthority, storageNonce] = await PublicKey.findProgramAddress(
-      [Buffer.from("base-storage-authority", "utf8"), baseStorageKey.toBuffer()],
+      [
+        Buffer.from("base-storage-authority", "utf8"),
+        baseStorageKey.toBuffer(),
+      ],
       params.splTokenBondingProgramId
     );
-  
+
     instructions.push(
       initializeTokenBondingV0Instruction(
         params.splTokenBondingProgramId,
@@ -297,7 +326,7 @@ export class Wumbo {
         (params.founderRewardsPercentage / 100) * 10000
       )
     );
-  
+
     // Associate creator coin with name
     instructions.push(
       initializeCreatorInstruction(
@@ -312,24 +341,20 @@ export class Wumbo {
         nameExists ? founderRewardsOwner : undefined
       )
     );
-  
-    await sendTransaction(connection, instructions, params.payer, [
-      targetMint
-    ]);
-  
+
+    await sendTransaction(connection, instructions, params.payer, [targetMint]);
+
     console.log(
       `Created social token ref with key ${tokenRef}, founder rewards account ${associatedFounderRewardsAddress}, token bonding ${tokenBonding} and mint ${targetMint.publicKey}`
     );
-  
+
     return {
       tokenRefKey: tokenRef,
       tokenBondingKey: tokenBonding,
-      ownerKey: founderRewardsOwner
+      ownerKey: founderRewardsOwner,
     };
-  }  
+  }
 }
-
-
 
 async function sendTransaction(
   connection: Connection,

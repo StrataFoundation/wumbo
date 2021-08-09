@@ -9,7 +9,7 @@ import {
   NAME_PROGRAM_ID,
   ReverseTwitterRegistryState,
 } from "@bonfida/spl-name-service";
-import { WalletAdapter } from "@solana/wallet-base";
+import { WalletAdapter } from "@solana/wallet-adapter-base";
 import {
   Account,
   Connection,
@@ -27,10 +27,7 @@ import {
   DEV_TWITTER_TLD,
   DEV_TWITTER_VERIFIER,
 } from "../constants/globals";
-import {
-  createVerifiedTwitterRegistry,
-  getTwitterRegistry,
-} from "./testableNameServiceTwitter";
+import { createVerifiedTwitterRegistry, getTwitterRegistry } from "./testableNameServiceTwitter";
 
 async function sendTransaction(
   connection: Connection,
@@ -63,9 +60,7 @@ export async function createTestTld(connection: Connection, wallet: WalletAdapte
         wallet.publicKey!,
         getTwitterVerifier()
       );
-      console.log(
-        await sendTransaction(connection, [createInstruction], wallet)
-      );
+      console.log(await sendTransaction(connection, [createInstruction], wallet));
     }
   }
 }
@@ -77,7 +72,7 @@ export async function getTld(): Promise<PublicKey> {
 }
 
 export function getTwitterVerifier(): PublicKey {
-  return IS_DEV ? DEV_TWITTER_VERIFIER.publicKey : TWITTER_VERIFICATION_AUTHORITY
+  return IS_DEV ? DEV_TWITTER_VERIFIER.publicKey : TWITTER_VERIFICATION_AUTHORITY;
 }
 
 export const getTwitterHandle = async (
@@ -105,9 +100,7 @@ export async function apiPost(url: string, body: any, headers: any) {
           "Specified handle did not match the handle you logged in with, or the authorization expired. Please try again"
         );
       } else if (response.status == 500) {
-        throw new Error(
-          "Registration transaction failed, please report this error in our discord"
-        );
+        throw new Error("Registration transaction failed, please report this error in our discord");
       }
 
       throw new Error(
@@ -118,9 +111,7 @@ export async function apiPost(url: string, body: any, headers: any) {
     return json;
   } catch (err) {
     console.warn(err);
-    throw new Error(
-      `Error apiPost - err ${err}. Please report this error in our discord`
-    );
+    throw new Error(`Error apiPost - err ${err}. Please report this error in our discord`);
   }
 }
 
@@ -134,7 +125,9 @@ export const postTwitterRegistrarRequest = async (
 ) => {
   if (IS_DEV) {
     console.log("Sending dev mode claim twitter handle txn...");
-    await sendTransaction(connection, instructions, wallet, [new Account(DEV_TWITTER_VERIFIER.secretKey)]);
+    await sendTransaction(connection, instructions, wallet, [
+      new Account(DEV_TWITTER_VERIFIER.secretKey),
+    ]);
   } else {
     const transaction = new Transaction({
       feePayer: wallet.publicKey || undefined,
@@ -174,9 +167,7 @@ export async function claimTwitterTransactionInstructions(
   const nameRegistryItem = await getTwitterHandle(connection, twitterHandle);
   if (nameRegistryItem) {
     if (nameRegistryItem.owner.toBase58() != owner.toBase58()) {
-      throw new Error(
-        `Twitter handle is already registered to wallet ${nameRegistryItem.owner}`
-      );
+      throw new Error(`Twitter handle is already registered to wallet ${nameRegistryItem.owner}`);
     }
 
     // Exit. It's already been claimed
@@ -231,11 +222,7 @@ interface ReverseTwitterState {
 }
 export function useReverseTwitter(owner: PublicKey | undefined): ReverseTwitterState {
   const connection = useConnection();
-  const {
-    loading,
-    error,
-    result: handle,
-  } = useAsync(getTwitterName, [connection, owner]);
+  const { loading, error, result: handle } = useAsync(getTwitterName, [connection, owner]);
 
   return {
     loading,
