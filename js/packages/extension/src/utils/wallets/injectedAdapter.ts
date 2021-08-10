@@ -108,8 +108,10 @@ export class InjectedWalletAdapter
           };
 
           if (!(error.name in errorConstructor)) {
+            console.log("here2");
             reject(deserializeError(error));
           } else {
+            console.log("here3");
             reject(new errorConstructor[error.name](error.message, deserializeError(error)));
           }
         }
@@ -172,6 +174,7 @@ export class InjectedWalletAdapter
         });
         return Transaction.from(signedTransaction);
       } catch (error) {
+        console.log("here4");
         throw new WalletSignatureError(error?.message, error);
       }
     } catch (error) {

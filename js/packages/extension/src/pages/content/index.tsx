@@ -8,9 +8,16 @@ document.body.append(appMountElem);
 
 const scriptMountElem = document.createElement("script");
 scriptMountElem.src = chrome.runtime.getURL("wallet_proxy.js");
+
 scriptMountElem.onload = function () {
   (this as any).remove();
 };
+
 (document.head || document.documentElement).appendChild(scriptMountElem);
 
-ReactDOM.render(<App />, appMountElem);
+ReactDOM.render(
+  <React.StrictMode>
+    <App />
+  </React.StrictMode>,
+  appMountElem
+);

@@ -82,6 +82,7 @@ const resetWallet = () => window.postMessage({ type: MessageType.WALLET_RESET },
               }),
             });
           } catch (error) {
+            console.log("Here1");
             sendReply({ error });
           }
 

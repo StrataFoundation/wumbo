@@ -4,10 +4,11 @@ import {
   WalletNotConnectedError,
   WalletNotReadyError,
 } from "@solana/wallet-adapter-base";
-import { WalletContext, WALLET_PROVIDERS, useLocalStorage } from "wumbo-common";
+import { WalletContext, WALLET_PROVIDERS, useLocalStorage, Notification } from "wumbo-common";
 import { PublicKey, Transaction } from "@solana/web3.js";
 import { InjectedWalletAdapter } from "./wallets/injectedAdapter";
 import { Wallet, WalletName } from "@solana/wallet-adapter-wallets";
+import toast from "react-hot-toast";
 
 export interface IWalletProviderProps {
   children: ReactNode;
@@ -29,7 +30,25 @@ export const WalletProvider: FC<IWalletProviderProps> = ({ children }) => {
   const [awaitingApproval, setAwaitingApproval] = useState<boolean>(false);
   const [error, setError] = useState<WalletError>();
 
-  const onError = useCallback((error: WalletError) => console.error(error), []);
+  const onError = useCallback(
+    (error: WalletError) => {
+      console.log("error log!", error);
+      setError(error);
+      toast.custom(
+        (t) => (
+          <Notification
+            type="error"
+            show={t.visible}
+            heading={error.name}
+            message={error.message}
+            onDismiss={() => toast.dismiss(t.id)}
+          />
+        ),
+        { duration: 4000 }
+      );
+    },
+    [toast]
+  );
 
   const walletsByName = useMemo(
     () =>
@@ -121,8 +140,12 @@ export const WalletProvider: FC<IWalletProviderProps> = ({ children }) => {
       }
 
       setAwaitingApproval(true);
+
       try {
         return await adapter!.signTransaction(transaction);
+      } catch (error) {
+        onError(error);
+        throw error;
       } finally {
         setAwaitingApproval(false);
       }
@@ -141,6 +164,9 @@ export const WalletProvider: FC<IWalletProviderProps> = ({ children }) => {
       setAwaitingApproval(true);
       try {
         return await adapter!.signAllTransactions(transactions);
+      } catch (error) {
+        onError(error);
+        throw error;
       } finally {
         setAwaitingApproval(false);
       }

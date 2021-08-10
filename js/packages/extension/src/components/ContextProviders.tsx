@@ -1,4 +1,4 @@
-import React, { FC, useEffect } from "react";
+import React, { FC } from "react";
 import { ConnectionProvider, AccountsProvider } from "@oyster/common";
 import { UsdWumboPriceProvider, EndpointSetter } from "wumbo-common";
 import { WalletProvider } from "@/utils/wallet";
