@@ -6,32 +6,11 @@ import {
   Transaction,
   TransactionInstruction,
 } from "@solana/web3.js";
-import { WalletAdapter } from "@solana/wallet-adapter-base";
 import { TokenBondingV0 } from "./state";
 import { buyV0Instruction, sellV0Instruction } from "./instruction";
 import { Token } from "@solana/spl-token";
 
-async function sendTransaction(
-  connection: Connection,
-  instructions: TransactionInstruction[],
-  wallet: WalletAdapter,
-  extraSigners?: Account[]
-): Promise<void> {
-  const transaction = new Transaction({
-    feePayer: wallet.publicKey || undefined,
-    recentBlockhash: (await connection.getRecentBlockhash()).blockhash,
-  });
-  transaction.instructions = instructions;
-
-  extraSigners && transaction.partialSign(...extraSigners);
-  const signed = await wallet.signTransaction(transaction);
-
-  await sendAndConfirmRawTransaction(connection, signed.serialize());
-}
-
-export const SOL_TOKEN = new PublicKey(
-  "So11111111111111111111111111111111111111112"
-);
+export const SOL_TOKEN = new PublicKey("So11111111111111111111111111111111111111112");
 
 async function findAssociatedTokenAddress(
   walletAddress: PublicKey,
@@ -41,11 +20,7 @@ async function findAssociatedTokenAddress(
 ): Promise<PublicKey> {
   return (
     await PublicKey.findProgramAddress(
-      [
-        walletAddress.toBuffer(),
-        tokenProgramId.toBuffer(),
-        tokenMintAddress.toBuffer(),
-      ],
+      [walletAddress.toBuffer(), tokenProgramId.toBuffer(), tokenMintAddress.toBuffer()],
       splAssociatedTokenAccountProgramId
     )
   )[0];
@@ -75,15 +50,6 @@ async function createAssociatedTokenAccountInstruction(
   );
 }
 
-export type BuyBondingWithWalletParams = {
-  splTokenBondingProgramId: PublicKey;
-  splAssociatedTokenAccountProgramId: PublicKey;
-  splTokenProgramId: PublicKey;
-  tokenBonding: PublicKey;
-  wallet: WalletAdapter;
-  amount: number;
-  maxPrice: number;
-};
 export type BuyBondingParams = {
   splTokenBondingProgramId: PublicKey;
   splAssociatedTokenAccountProgramId: PublicKey;
@@ -101,10 +67,7 @@ export async function buyBondingInstructions(
     throw new Error("Amount must be positive");
   }
 
-  const tokenBonding = await TokenBondingV0.retrieve(
-    connection,
-    params.tokenBonding
-  );
+  const tokenBonding = await TokenBondingV0.retrieve(connection, params.tokenBonding);
 
   if (!tokenBonding) {
     throw new Error(`No token bonding at ${params.tokenBonding}`);
@@ -139,18 +102,11 @@ export async function buyBondingInstructions(
     return account;
   };
 
-  const purchaseAccount = await getAssociatedAccountOrCreate(
-    tokenBonding.baseMint
-  );
-  const destinationAccount = await getAssociatedAccountOrCreate(
-    tokenBonding.targetMint
-  );
+  const purchaseAccount = await getAssociatedAccountOrCreate(tokenBonding.baseMint);
+  const destinationAccount = await getAssociatedAccountOrCreate(tokenBonding.targetMint);
 
   const [targetMintAuthority] = await PublicKey.findProgramAddress(
-    [
-      Buffer.from("target-authority", "utf-8"),
-      tokenBonding.targetMint.toBuffer(),
-    ],
+    [Buffer.from("target-authority", "utf-8"), tokenBonding.targetMint.toBuffer()],
     params.splTokenBondingProgramId
   );
 
@@ -173,27 +129,9 @@ export async function buyBondingInstructions(
     )
   );
 
-  console.log(
-    `Bought ${params.amount} coins from ${purchaseAccount} to ${destinationAccount}`
-  );
+  console.log(`Bought ${params.amount} coins from ${purchaseAccount} to ${destinationAccount}`);
 
   return instructions;
-}
-
-export async function buyBondingWithWallet(
-  connection: Connection,
-  params: BuyBondingWithWalletParams
-): Promise<void> {
-  if (!params.wallet.publicKey) {
-    throw new Error("Invalid purchaser wallet");
-  }
-
-  const instructions = await buyBondingInstructions(connection, {
-    ...params,
-    purchaser: params.wallet.publicKey,
-  });
-
-  await sendTransaction(connection, instructions, params.wallet);
 }
 
 export type SellBondingParams = {
@@ -214,10 +152,7 @@ export async function sellBondingInstructions(
     throw new Error("Amount must be positive");
   }
 
-  const tokenBonding = await TokenBondingV0.retrieve(
-    connection,
-    params.tokenBonding
-  );
+  const tokenBonding = await TokenBondingV0.retrieve(connection, params.tokenBonding);
 
   if (!tokenBonding) {
     throw new Error(`No token bonding at ${params.tokenBonding}`);
@@ -256,18 +191,11 @@ export async function sellBondingInstructions(
     return account;
   };
 
-  const sellAccount = await getAssociatedAccountOrCreate(
-    tokenBonding.targetMint
-  );
-  const destinationAccount = await getAssociatedAccountOrCreate(
-    tokenBonding.baseMint
-  );
+  const sellAccount = await getAssociatedAccountOrCreate(tokenBonding.targetMint);
+  const destinationAccount = await getAssociatedAccountOrCreate(tokenBonding.baseMint);
 
   const [baseStorageAuthority, _] = await PublicKey.findProgramAddress(
-    [
-      Buffer.from("base-storage-authority", "utf-8"),
-      tokenBonding.baseStorage.toBuffer(),
-    ],
+    [Buffer.from("base-storage-authority", "utf-8"), tokenBonding.baseStorage.toBuffer()],
     params.splTokenBondingProgramId
   );
 
@@ -290,29 +218,4 @@ export async function sellBondingInstructions(
   );
 
   return instructions;
-}
-
-export type SellBondingWithWalletParams = {
-  splTokenBondingProgramId: PublicKey;
-  splAssociatedTokenAccountProgramId: PublicKey;
-  splTokenProgramId: PublicKey;
-  tokenBonding: PublicKey;
-  wallet: WalletAdapter;
-  amount: number;
-  minPrice: number;
-};
-export async function sellBondingWithWallet(
-  connection: Connection,
-  params: SellBondingWithWalletParams
-) {
-  if (!params.wallet.publicKey) {
-    throw new Error("Invalid seller wallet");
-  }
-
-  const instructions = await sellBondingInstructions(connection, {
-    ...params,
-    seller: params.wallet.publicKey,
-  });
-
-  await sendTransaction(connection, instructions, params.wallet);
 }

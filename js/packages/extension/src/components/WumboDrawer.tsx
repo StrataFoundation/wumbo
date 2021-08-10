@@ -1,6 +1,7 @@
 import React, { Fragment, ReactNode } from "react";
 import { NavLink } from "react-router-dom";
 import startCase from "lodash/startCase";
+import { Toaster } from "react-hot-toast";
 import { Dialog, Transition } from "@headlessui/react";
 import { XIcon } from "@heroicons/react/outline";
 import { useDrawer } from "@/contexts/drawerContext";
@@ -37,10 +38,7 @@ export const WumboDrawer = (props: { children: ReactNode }) => {
           </Transition.Child>
 
           {/* TODO: We can customize the 280px here based on where they drag the drawer */}
-          <div
-            style={{ top: "calc(50% - 280px)" }}
-            className="fixed right-0 pl-10 max-w-full flex"
-          >
+          <div style={{ top: "calc(50% - 280px)" }} className="fixed right-0 pl-10 max-w-full flex">
             <Transition.Child
               as={Fragment}
               enter="transform transition ease-in-out duration-300 sm:duration-500"
@@ -54,6 +52,10 @@ export const WumboDrawer = (props: { children: ReactNode }) => {
                 <div className="h-560px w-340px flex flex-col bg-white rounded-l-lg shadow-xl">
                   {props.children}
                 </div>
+                <Toaster
+                  containerClassName="!absolute !bottom-0 !top-auto !left-auto !right-auto !w-full !w-max-340px"
+                  position="bottom-center"
+                />
               </div>
             </Transition.Child>
           </div>
@@ -121,10 +123,8 @@ WumboDrawer.Nav = () => {
         let filledPath = path;
         if (path.endsWith(":tokenBondingKey") && creatorInfo) {
           filledPath =
-            path.replace(
-              ":tokenBondingKey",
-              creatorInfo.tokenBonding.publicKey.toBase58()
-            ) + `?name=${creatorInfo.name}`;
+            path.replace(":tokenBondingKey", creatorInfo.tokenBonding.publicKey.toBase58()) +
+            `?name=${creatorInfo.name}`;
         }
 
         if (isDrawerNav && Icon) {
