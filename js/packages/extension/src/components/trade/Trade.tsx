@@ -1,7 +1,7 @@
-import React, { Fragment, useState, ReactNode, useEffect, useMemo } from "react";
+import React, { Fragment, useState, ReactNode, useMemo } from "react";
 import { Link, useParams, useLocation } from "react-router-dom";
-import { useConnection, Wallet } from "@oyster/common";
-import { buy, sell } from "@/utils/action";
+import toast from "react-hot-toast";
+import { useBuy, useSell } from "@/utils/action";
 import {
   useClaimedTokenRef,
   BASE_SLIPPAGE,
@@ -19,18 +19,15 @@ import {
   Spinner,
   Avatar,
   TokenPill,
-  MetadataTokenPill,
+  Notification,
   useTokenMetadata,
   MetadataAvatar,
-  useTokenRefFromBonding,
   useFtxPayLink,
 } from "wumbo-common";
 import { routes, viewProfilePath } from "@/constants/routes";
 import { TokenForm, FormValues } from "./TokenForm";
 import { CashIcon } from "@heroicons/react/solid";
 import Logo from "../../../public/assets/img/logo.svg";
-import { useAsyncCallback } from "react-async-hook";
-import { SuccessfulTransaction } from "./SuccessfulTransaction";
 import { PublicKey } from "@solana/web3.js";
 import { TokenBondingV0 } from "spl-token-bonding";
 import SolLogo from "../../../public/assets/img/sol.svg";
@@ -179,16 +176,8 @@ export const Trade = ({
   buyBaseLink,
   tokenBonding,
 }: TradeParams) => {
-  // TODO: should move this to a context vvv
-  const [transactionSuccesful, setTransactionSuccesful] = useState<{
-    showing: boolean;
-    amount: number;
-    tokenSvg?: ReactNode;
-    tokenSrc?: string;
-    tokenName: string;
-  } | null>(null);
-  const { walletAdapter } = useWallet();
-  const connection = useConnection();
+  const [buy, { loading: buyIsSubmitting, error: buyError }] = useBuy();
+  const [sell, { loading: sellIsSubmitting, error: sellError }] = useSell();
   const {
     targetToBasePrice,
     baseToTargetPrice,
@@ -203,46 +192,41 @@ export const Trade = ({
   const ownedTarget = useOwnedAmount(tokenBonding.targetMint);
   const location = useLocation();
 
-  const { execute: onHandleBuy, error: buyError, loading: buyIsSubmitting } = useAsyncCallback(
-    async (values: FormValues) => {
-      try {
-        await buy(walletAdapter)(
-          connection,
-          tokenBonding.publicKey,
-          values.tokenAmount,
-          baseToTargetPrice(values.tokenAmount) +
-            BASE_SLIPPAGE * baseToTargetPrice(values.tokenAmount)
-        );
-        setTransactionSuccesful({
-          showing: true,
-          amount: Number(values.tokenAmount),
-          tokenName: ticker,
-        });
-      } catch (e) {
-        console.error(e);
-      }
-    }
-  );
+  const onHandleBuy = async (values: FormValues) => {
+    const maxAmount =
+      baseToTargetPrice(values.tokenAmount) + BASE_SLIPPAGE * baseToTargetPrice(values.tokenAmount);
+    await buy(tokenBonding.publicKey, values.tokenAmount, maxAmount);
+    toast.custom((t) => (
+      <Notification
+        className="rounded-b-lg"
+        show={t.visible}
+        type="success"
+        heading="Transaction Succesful"
+        message={`You now own ${Number(values.tokenAmount).toFixed(4)} of ${ticker}!`}
+        onDismiss={() => toast.dismiss(t.id)}
+      />
+    ));
+  };
 
-  const { execute: onHandleSell, error: sellError, loading: sellIsSubmitting } = useAsyncCallback(
-    async (values: FormValues) => {
-      try {
-        const minPrice =
-          sellTargetToBasePrice(values.tokenAmount) -
-          BASE_SLIPPAGE * sellTargetToBasePrice(values.tokenAmount);
-        console.log(`Selling ${values.tokenAmount} with min ${minPrice}`);
-        await sell(walletAdapter)(connection, tokenBonding.publicKey, values.tokenAmount, minPrice);
-        setTransactionSuccesful({
-          showing: true,
-          amount: sellTargetToBasePrice(values.tokenAmount),
-          tokenName: baseTicker,
-          tokenSvg: baseIcon,
-        });
-      } catch (e) {
-        console.log(e);
-      }
-    }
-  );
+  const onHandleSell = async (values: FormValues) => {
+    const minPrice =
+      sellTargetToBasePrice(values.tokenAmount) -
+      BASE_SLIPPAGE * sellTargetToBasePrice(values.tokenAmount);
+    await sell(tokenBonding.publicKey, values.tokenAmount, minPrice);
+
+    toast.custom((t) => (
+      <Notification
+        className="rounded-b-lg"
+        show={t.visible}
+        type="success"
+        heading="Transaction Succesful"
+        message={`You now own ${sellTargetToBasePrice(values.tokenAmount).toFixed(
+          4
+        )} of ${baseTicker}!`}
+        onDismiss={() => toast.dismiss(t.id)}
+      />
+    ));
+  };
 
   const Info = (
     <Fragment>
@@ -309,13 +293,6 @@ export const Trade = ({
           </Tab>
         </Tabs>
       </div>
-      <SuccessfulTransaction
-        isShowing={transactionSuccesful?.showing || false}
-        tokenName={transactionSuccesful?.tokenName}
-        tokenSvg={transactionSuccesful?.tokenSvg}
-        amount={transactionSuccesful?.amount}
-        toggleShowing={() => setTransactionSuccesful(null)}
-      />
     </Fragment>
   );
 };

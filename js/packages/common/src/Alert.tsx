@@ -6,7 +6,7 @@ import React, { ReactNode } from "react";
  ** https://tailwindui.com/components/application-ui/feedback/alerts
  */
 
-interface AlertProps {
+interface IAlertProps {
   type: "warning" | "info" | "success" | "error" | "primary";
   icon?: boolean;
   message: string;
@@ -36,7 +36,7 @@ const style = {
   },
 };
 
-export const Alert = ({ type, message, icon = false }: AlertProps) => (
+export const Alert = ({ type, message, icon = false }: IAlertProps) => (
   <div className={`${style.default} ${style[type].bg}`}>
     <p className={`text-sm ${style[type].text}`}>{message}</p>
   </div>
