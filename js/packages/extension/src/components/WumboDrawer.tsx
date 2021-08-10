@@ -9,14 +9,11 @@ import { useUserInfo } from "@/utils/userState";
 import { Spinner } from "wumbo-common";
 
 export const WumboDrawer = (props: { children: ReactNode }) => {
-  const { state, dispatch } = useDrawer();
-  const { isOpen } = state;
-
-  const toggleOpen = () => dispatch({ type: "toggle" });
+  const { isOpen, toggle } = useDrawer();
 
   chrome.runtime.onMessage.addListener((request, _, __) => {
     if (request.type === "TOGGLE_WUMBO") {
-      toggleOpen();
+      isOpen ? toggle({ toggleOverride: false }) : toggle({ toggleOverride: true });
     }
   });
 
@@ -27,7 +24,7 @@ export const WumboDrawer = (props: { children: ReactNode }) => {
         static
         className="fixed inset-0 overflow-hidden"
         open={isOpen}
-        onClose={toggleOpen}
+        onClose={() => toggle({ toggleOverride: false })}
       >
         <div className="absolute inset-0 overflow-hidden">
           <Transition.Child
@@ -77,9 +74,8 @@ interface HeaderWithChildren {
 type HeaderProps = HeaderNoChildren | HeaderWithChildren;
 
 WumboDrawer.Header = (props: HeaderProps) => {
+  const { toggle } = useDrawer();
   const hasTitle = !!(props as HeaderNoChildren).title;
-  const { dispatch } = useDrawer();
-  const toggleOpen = () => dispatch({ type: "toggle" });
 
   return (
     <div className="px-4 py-3 border-b-1 border-gray-200">
@@ -95,7 +91,7 @@ WumboDrawer.Header = (props: HeaderProps) => {
         <div className="ml-3 h-7 flex items-center">
           <button
             className="bg-white rounded-md text-gray-400 hover:text-gray-500 focus:outline-none"
-            onClick={toggleOpen}
+            onClick={() => toggle({ toggleOverride: false })}
           >
             <span className="sr-only">Close panel</span>
             <XIcon className="h-6 w-6" aria-hidden="true" />
@@ -111,8 +107,8 @@ WumboDrawer.Content = (props: { children: ReactNode }) => (
 );
 
 WumboDrawer.Nav = () => {
-  const { state } = useDrawer();
-  const creatorInfoState = useUserInfo(state.creator.name!);
+  const { creator } = useDrawer();
+  const creatorInfoState = useUserInfo(creator?.name!);
   const { userInfo: creatorInfo, loading } = creatorInfoState;
 
   return (
