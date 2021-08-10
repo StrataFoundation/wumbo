@@ -14,6 +14,12 @@ export const WumboDrawer = (props: { children: ReactNode }) => {
 
   const toggleOpen = () => dispatch({ type: "toggle" });
 
+  chrome.runtime.onMessage.addListener((request, _, __) => {
+    if (request.type === "TOGGLE_WUMBO") {
+      toggleOpen();
+    }
+  });
+
   return (
     <Transition.Root show={isOpen} as={Fragment}>
       <Dialog
@@ -37,10 +43,7 @@ export const WumboDrawer = (props: { children: ReactNode }) => {
           </Transition.Child>
 
           {/* TODO: We can customize the 280px here based on where they drag the drawer */}
-          <div
-            style={{ top: "calc(50% - 280px)" }}
-            className="fixed right-0 pl-10 max-w-full flex"
-          >
+          <div style={{ top: "calc(50% - 280px)" }} className="fixed right-0 pl-10 max-w-full flex">
             <Transition.Child
               as={Fragment}
               enter="transform transition ease-in-out duration-300 sm:duration-500"
@@ -121,10 +124,8 @@ WumboDrawer.Nav = () => {
         let filledPath = path;
         if (path.endsWith(":tokenBondingKey") && creatorInfo) {
           filledPath =
-            path.replace(
-              ":tokenBondingKey",
-              creatorInfo.tokenBonding.publicKey.toBase58()
-            ) + `?name=${creatorInfo.name}`;
+            path.replace(":tokenBondingKey", creatorInfo.tokenBonding.publicKey.toBase58()) +
+            `?name=${creatorInfo.name}`;
         }
 
         if (isDrawerNav && Icon) {
