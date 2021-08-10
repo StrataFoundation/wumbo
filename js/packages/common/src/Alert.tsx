@@ -13,31 +13,31 @@ interface AlertProps {
 }
 
 const style = {
-  default: "rounded-md p-3",
+  default: "wum-rounded-md wum-p-3",
   primary: {
-    bg: "bg-purple-50",
-    text: "bg-purple-700",
+    bg: "wum-bg-purple-50",
+    text: "wum-bg-purple-700",
   },
   warning: {
-    bg: "bg-yellow-50",
-    text: "text-yellow-400",
+    bg: "wum-bg-yellow-50",
+    text: "wum-text-yellow-400",
   },
   info: {
-    bg: "bg-blue-50",
-    text: "text-blue-700",
+    bg: "wum-bg-blue-50",
+    text: "wum-text-blue-700",
   },
   success: {
-    bg: "bg-green-50",
-    text: "text-green-700",
+    bg: "wum-bg-green-50",
+    text: "wum-text-green-700",
   },
   error: {
-    bg: "bg-red-200",
-    text: "text-red-600",
+    bg: "wum-bg-red-200",
+    text: "wum-text-red-600",
   },
 };
 
 export const Alert = ({ type, message, icon = false }: AlertProps) => (
   <div className={`${style.default} ${style[type].bg}`}>
-    <p className={`text-sm ${style[type].text}`}>{message}</p>
+    <p className={`wum-text-sm ${style[type].text}`}>{message}</p>
   </div>
 );

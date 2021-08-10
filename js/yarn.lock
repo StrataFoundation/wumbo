@@ -4346,6 +4346,11 @@
   dependencies:
     lodash "^4"
 
+"@windicss/animations@^1.0.8":
+  version "1.0.8"
+  resolved "https://registry.yarnpkg.com/@windicss/animations/-/animations-1.0.8.tgz#0e7c6199d9b3d33b9274d2144aa28f9fa34e95bd"
+  integrity sha512-2edYQdTVh3koQYmZQqXU2hPIvAJRjkqOP/FpzCQv3U0bbtEgmLk3UeHYHzo9jSL5obV12pEhJuAHIzKo6cdRyw==
+
 "@windicss/plugin-utils@0.10.4":
   version "0.10.4"
   resolved "https://registry.yarnpkg.com/@windicss/plugin-utils/-/plugin-utils-0.10.4.tgz#ed9163b09e030f7358cc4742b1f2b6c92d084d5d"

@@ -9,14 +9,7 @@ import { classNames } from "./utils/utils";
 
 interface BadgeProps {
   className?: string;
-  color?:
-    | "primary"
-    | "secondary"
-    | "warning"
-    | "info"
-    | "success"
-    | "error"
-    | "neutral";
+  color?: "primary" | "secondary" | "warning" | "info" | "success" | "error" | "neutral";
   size?: "sm" | "lg";
   children: ReactNode;
   onClick?: () => void;
@@ -25,41 +18,41 @@ interface BadgeProps {
 }
 
 const style = {
-  default: `inline-flex items-center px-1.5 py-1 font-medium rounded`,
-  hover: `cursor-pointer`,
-  rounded: `!rounded-full`,
+  default: `wum-inline-flex wum-items-center wum-px-1.5 wum-py-1 wum-font-medium wum-rounded`,
+  hover: `wum-cursor-pointer`,
+  rounded: `!wum-rounded-full`,
   sizes: {
-    sm: "text-xs",
-    lg: "text-sm",
+    sm: "wum-text-xs",
+    lg: "wum-text-sm",
   },
   color: {
     primary: {
-      default: `bg-indigo-200 text-indigo-600`,
-      hover: `hover:bg-indigo-300 hover:text-indigo-700`,
+      default: `wum-bg-indigo-200 wum-text-indigo-600`,
+      hover: `hover:wum-bg-indigo-300 hover:wum-text-indigo-700`,
     },
     secondary: {
-      default: `bg-green-400 text-green-600`,
-      hover: `hover:bg-green-500 hover:text-green-700`,
+      default: `wum-bg-green-400 wum-text-green-600`,
+      hover: `hover:wum-bg-green-500 hover:wum-text-green-700`,
     },
     warning: {
-      default: `bg-yellow-100 text-yellow-800`,
-      hover: `hover:bg-yellow-200 hover:text-hellow-900`,
+      default: `wum-bg-yellow-100 wum-text-yellow-800`,
+      hover: `hover:wum-bg-yellow-200 hover:wum-text-hellow-900`,
     },
     info: {
-      default: `bg-blue-100 text-blue-800`,
-      hover: `hover:bg-blue-200 hover:text-blue-900`,
+      default: `wum-bg-blue-100 wum-text-blue-800`,
+      hover: `hover:wum-bg-blue-200 hover:wum-text-blue-900`,
     },
     success: {
-      default: `bg-green-100 text-green-800`,
-      hover: `hover:bg-green-200 hover:text-green-900`,
+      default: `wum-bg-green-100 wum-text-green-800`,
+      hover: `hover:wum-bg-green-200 hover:wum-text-green-900`,
     },
     error: {
-      default: `bg-red-100 text-red-800`,
-      hover: `hover:bg-red-200 hover:text-red-900`,
+      default: `wum-bg-red-100 wum-text-red-800`,
+      hover: `hover:wum-bg-red-200 hover:wum-text-red-900`,
     },
     neutral: {
-      default: `bg-gray-100 text-gray-800`,
-      hover: `hover:bg-gray-200 hover:text-graya-900`,
+      default: `wum-bg-gray-100 wum-text-gray-800`,
+      hover: `hover:wum-bg-gray-200 hover:wum-text-graya-900`,
     },
   },
 };

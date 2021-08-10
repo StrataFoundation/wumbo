@@ -20,33 +20,33 @@ export interface IAvatarProps {
 }
 
 const style = {
-  default: `inline-flex items-center justify-center rounded-full bg-gray-500 rounded-md`,
-  rounded: "!rounded-full",
-  token: "!bg-gradient-to-r !from-yellow-400 !to-red-400",
+  default: `wum-inline-flex wum-items-center wum-justify-center wum-rounded-full wum-bg-gray-500 wum-rounded-md`,
+  rounded: "!wum-rounded-full",
+  token: "!wum-bg-gradient-to-r !wum-from-yellow-400 !wum-to-red-400",
   sizes: {
     xxs: {
-      default: "h-6 w-6",
-      text: "text-xxs font-medium leading-none text-white",
+      default: "wum-h-6 wum-w-6",
+      text: "wum-text-xxs wum-font-medium wum-leading-none wum-text-white",
     },
     xs: {
-      default: "h-8 w-8",
-      text: "text-xs font-medium leading-none text-white",
+      default: "wum-h-8 wum-w-8",
+      text: "wum-text-xs wum-font-medium wum-leading-none wum-text-white",
     },
     sm: {
-      default: "h-10 w-10",
-      text: "text-sm font-medium leading-none text-white",
+      default: "wum-h-10 wum-w-10",
+      text: "wum-text-sm wum-font-medium wum-leading-none wum-text-white",
     },
     md: {
-      default: "h-12 w-12",
-      text: "font-medium leading-none text-white",
+      default: "wum-h-12 wum-w-12",
+      text: "wum-font-medium wum-leading-none wum-text-white",
     },
     lg: {
-      default: "h-14 w-14",
-      text: "text-lg font-medium leading-none text-white",
+      default: "wum-h-14 wum-w-14",
+      text: "wum-text-lg wum-font-medium wum-leading-none wum-text-white",
     },
     xl: {
-      default: "h-16 w-16",
-      text: "text-xl font-medium leading-none text-white",
+      default: "wum-h-16 wum-w-16",
+      text: "wum-text-xl wum-font-medium wum-leading-none wum-text-white",
     },
   },
 };
@@ -60,15 +60,11 @@ export const Avatar = ({
   token = false,
   size = "md",
 }: IAvatarProps) => (
-  <div className="flex items-center">
+  <div className="wum-flex wum-items-center">
     {imgSrc && (
       <img
         src={imgSrc}
-        className={classNames(
-          style.default,
-          rounded && style.rounded,
-          style.sizes[size].default
-        )}
+        className={classNames(style.default, rounded && style.rounded, style.sizes[size].default)}
       />
     )}
     {!imgSrc && (
@@ -80,17 +76,13 @@ export const Avatar = ({
           style.sizes[size].default
         )}
       >
-        <span className={style.sizes[size].text}>
-          {name && name.substr(0, 2).toUpperCase()}
-        </span>
+        <span className={style.sizes[size].text}>{name && name.substr(0, 2).toUpperCase()}</span>
       </span>
     )}
     {showDetails && (
-      <div className="ml-3">
-        <p className="font-medium text-gray-700">{name}</p>
-        {subText && (
-          <p className="text-xs font-medium text-gray-700">{subText}</p>
-        )}
+      <div className="wum-ml-3">
+        <p className="wum-font-medium wum-text-gray-700">{name}</p>
+        {subText && <p className="wum-text-xs wum-font-medium wum-text-gray-700">{subText}</p>}
       </div>
     )}
   </div>
@@ -101,21 +93,13 @@ interface MetadataAvatarProps extends IAvatarProps {
 }
 export const MetadataAvatar = React.memo(
   ({ name, imgSrc, tokenBonding, ...props }: MetadataAvatarProps) => {
-    const {
-      image: metadataImage,
-      metadata,
-      loading,
-    } = useTokenMetadata(tokenBonding?.targetMint);
+    const { image: metadataImage, metadata, loading } = useTokenMetadata(tokenBonding?.targetMint);
     if (loading) {
       return <Spinner />;
     }
 
     return (
-      <Avatar
-        {...props}
-        name={metadata?.data.symbol || name}
-        imgSrc={metadataImage || imgSrc}
-      />
+      <Avatar {...props} name={metadata?.data.symbol || name} imgSrc={metadataImage || imgSrc} />
     );
   }
 );

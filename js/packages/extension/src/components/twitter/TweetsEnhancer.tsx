@@ -11,29 +11,21 @@ export const TweetsEnhancer = () => {
     const tweetEls = tweets
       .map((tweet, tweetIndex) => {
         const buttonEl = tweet.buttonTarget ? (
-          <MainButton
-            creatorName={tweet.name}
-            creatorImg={tweet.avatar || ""}
-          />
+          <MainButton creatorName={tweet.name} creatorImg={tweet.avatar || ""} />
         ) : null;
 
         const replyTokensEl = tweet.replyTokensTarget ? (
-          <ReplyTokens
-            creatorName={tweet.name}
-            mentions={tweet.mentions || []}
-          />
+          <ReplyTokens creatorName={tweet.name} mentions={tweet.mentions || []} />
         ) : null;
 
         if (buttonEl) {
           return (
             <Fragment key={tweet.name}>
               <AppendChildPortal container={tweet.buttonTarget as Element}>
-                <div className="flex justify-center mt-1.5">{buttonEl}</div>
+                <div className="wum-flex wum-justify-center wum-mt-1.5">{buttonEl}</div>
               </AppendChildPortal>
               {tweet.replyTokensTarget && (
-                <AppendChildPortal
-                  container={tweet.replyTokensTarget as Element}
-                >
+                <AppendChildPortal container={tweet.replyTokensTarget as Element}>
                   {replyTokensEl}
                 </AppendChildPortal>
               )}

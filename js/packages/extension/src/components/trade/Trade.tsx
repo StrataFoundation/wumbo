@@ -118,7 +118,7 @@ export const TradeRoute = () => {
       return (
         <Link to={routes.wallet.path + `?redirect=${location.pathname}${location.search}`}>
           <Badge rounded hoverable color="neutral">
-            <CashIcon width="20" height="20" className="mr-2" /> Connect Wallet
+            <CashIcon width="20" height="20" className="wum-mr-2" /> Connect Wallet
           </Badge>
         </Link>
       );
@@ -126,7 +126,7 @@ export const TradeRoute = () => {
       return (
         <Link target="_blank" to={{ pathname: ftxPayLink }}>
           <Badge rounded hoverable color="neutral">
-            <SolLogo width="20" height="20" className="mr-2" /> Buy SOL
+            <SolLogo width="20" height="20" className="wum-mr-2" /> Buy SOL
           </Badge>
         </Link>
       );
@@ -134,7 +134,7 @@ export const TradeRoute = () => {
       return (
         <Link to={routes.trade.path.replace(":tokenBondingKey", WUM_BONDING.toBase58())}>
           <Badge rounded hoverable color="primary">
-            <Logo width="20" height="20" className="mr-2" />
+            <Logo width="20" height="20" className="wum-mr-2" />
             {showFiat && "$"}
             {(showFiat && toFiat(ownedWUM || 0).toFixed(2)) || "Buy WUM"}
           </Badge>
@@ -146,8 +146,8 @@ export const TradeRoute = () => {
   return (
     <Fragment>
       <WumboDrawer.Header>
-        <div className="flex justify-between w-full">
-          <p className="text-lg font-medium text-indigo-600">Trade WUM</p>
+        <div className="wum-flex wum-justify-between wum-w-full">
+          <p className="wum-text-lg wum-font-medium wum-text-indigo-600">Trade WUM</p>
           {/* TODO: link to ftx pay */}
           {buyBaseLink()}
         </div>
@@ -246,10 +246,12 @@ export const Trade = ({
 
   const Info = (
     <Fragment>
-      <span className="text-xxs">
-        Amounts shown in <span className="text-indigo-600">USD</span>
+      <span className="wum-text-xxs">
+        Amounts shown in <span className="wum-text-indigo-600">USD</span>
       </span>
-      <div className="text-xxs w-full text-right">Own: {(ownedTarget || 0).toFixed(4)}</div>
+      <div className="wum-text-xxs wum-w-full wum-text-right">
+        Own: {(ownedTarget || 0).toFixed(4)}
+      </div>
     </Fragment>
   );
 
@@ -262,11 +264,11 @@ export const Trade = ({
         icon={icon}
         detailsPath={viewProfilePath(tokenBonding.publicKey) + location.search}
       />
-      <div className="flex justify-center mt-4">
+      <div className="wum-flex wum-justify-center wum-mt-4">
         {/* TODO: show owned amount in both tabs */}
         <Tabs>
           <Tab title="Buy">
-            <div className="mt-2">
+            <div className="wum-mt-2">
               {Info}
               <TokenForm
                 fiatAmountFromTokenAmount={(tokenAmount: number) =>
@@ -281,16 +283,16 @@ export const Trade = ({
                 onSubmit={onHandleBuy}
                 submitting={buyIsSubmitting}
               />
-              <div className="flex flex-col justify-center mt-4">
-                <span className="flex justify-center text-xxs">
+              <div className="wum-flex wum-flex-col wum-justify-center wum-mt-4">
+                <span className="wum-flex wum-justify-center wum-text-xxs">
                   You can buy up to {baseToTargetPrice(ownedBase || 0).toFixed(4)} {ticker} coins!
                 </span>
-                <div className="flex justify-center mt-4">{buyBaseLink(false)}</div>
+                <div className="wum-flex wum-justify-center wum-mt-4">{buyBaseLink(false)}</div>
               </div>
             </div>
           </Tab>
           <Tab title="Sell">
-            <div className="mt-2">
+            <div className="wum-mt-2">
               {Info}
               <TokenForm
                 fiatAmountFromTokenAmount={(fiatAmount: number) =>

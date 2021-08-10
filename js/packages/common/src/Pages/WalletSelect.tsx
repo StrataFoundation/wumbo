@@ -10,22 +10,22 @@ export const WalletSelect = () => {
   return (
     <Fragment>
       {connected ? (
-        <div className="flex flex-col space-y-4 px-4">
-          <span className="test-sm">Wallet Connected!</span>
+        <div className="wum-flex wum-flex-col wum-space-y-4 wum-px-4">
+          <span className="wum-test-sm">Wallet Connected!</span>
           <Button block size="lg" color="primary" onClick={disconnect}>
             Disconnect
           </Button>
         </div>
       ) : (
-        <div className="flex flex-col space-y-4 px-4">
-          <span className="test-sm">
+        <div className="wum-flex wum-flex-col wum-space-y-4 wum-px-4">
+          <span className="wum-test-sm">
             New to Crypto & dont have an existing wallet?
             <br />
-            <a href="https://www.sollet.io" className="text-purple-600">
+            <a href="https://www.sollet.io" className="wum-text-purple-600">
               Get one here.
             </a>
           </span>
-          <div className="grid grid-flow-row gap-4">
+          <div className="wum-grid wum-grid-flow-row wum-gap-4">
             {WALLET_PROVIDERS.map((provider: Wallet, idx: number) => (
               <Button
                 block
@@ -34,8 +34,12 @@ export const WalletSelect = () => {
                 color="primary"
                 onClick={() => select(provider.name)}
               >
-                <div className="flex flex-row w-full">
-                  <img alt={`${provider.name}`} src={provider.icon} className="w-6 h-6 mr-4" />
+                <div className="wum-flex wum-flex-row wum-w-full">
+                  <img
+                    alt={`${provider.name}`}
+                    src={provider.icon}
+                    className="wum-w-6 wum-h-6 wum-mr-4"
+                  />
                   {provider.name}
                 </div>
               </Button>
@@ -44,7 +48,7 @@ export const WalletSelect = () => {
         </div>
       )}
       {error && (
-        <div className="mt-4">
+        <div className="wum-mt-4">
           <Alert type="error" message={error.toString()} />
         </div>
       )}

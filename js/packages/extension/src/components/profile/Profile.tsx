@@ -45,11 +45,11 @@ export const Profile = () => {
   return (
     <Fragment>
       <WumboDrawer.Header>
-        <div className="flex justify-between w-full">
-          <p className="text-lg font-medium text-indigo-600">Profile</p>
+        <div className="wum-flex wum-justify-between wum-w-full">
+          <p className="wum-text-lg wum-font-medium wum-text-indigo-600">Profile</p>
           <Link to={routes.editProfile.path}>
             <Badge rounded hoverable color="neutral">
-              <PencilAltIcon width="20" height="20" className="mr-2" /> Edit
+              <PencilAltIcon width="20" height="20" className="wum-mr-2" /> Edit
             </Badge>
           </Link>
         </div>

@@ -31,7 +31,7 @@ const MentionToken = ({ owner, mention, size }: IMentionTokenProps) => {
   if (nullState) return null;
 
   return (
-    <div className="flex items-center inline-block rounded-full ring-2 ring-black">
+    <div className="wum-flex wum-items-center wum-inline-block wum-rounded-full wum-ring-2 wum-ring-black">
       <Avatar name={(isClaimed && mention) || "UNCLAIMED"} size={size} />
     </div>
   );
@@ -44,28 +44,22 @@ interface IPopoverTokenProps {
 
 const PopoverToken = ({ owner, mention }: IPopoverTokenProps) => {
   const { info: tokenRef, loading } = useTwitterTokenRef(mention);
-  const { amount, loading: loadingAmount } = useOwnedAmountForOwnerAndHandle(
-    owner,
-    mention
-  );
+  const { amount, loading: loadingAmount } = useOwnedAmountForOwnerAndHandle(owner, mention);
   const isClaimed = tokenRef?.is_claimed;
   const isLoading = loading || loadingAmount;
-  const nullState =
-    (!loading && !tokenRef) || (!loadingAmount && !amount) || isLoading;
+  const nullState = (!loading && !tokenRef) || (!loadingAmount && !amount) || isLoading;
 
   if (nullState) return null;
 
   return (
-    <div className="flex justify-between bg-gray-100 p-2 rounded-lg space-x-4">
+    <div className="wum-flex wum-justify-between wum-bg-gray-100 wum-p-2 wum-rounded-lg wum-space-x-4">
       <Avatar
         name={(isClaimed && mention) || "UNCLAIMED"}
         subText={`@${mention}`}
         size="xs"
         showDetails
       />
-      <span className="ml-8 font-medium text-gray-700">
-        {humanizeAmount(amount!)}
-      </span>
+      <span className="wum-ml-8 wum-font-medium wum-text-gray-700">{humanizeAmount(amount!)}</span>
     </div>
   );
 };
@@ -75,11 +69,7 @@ interface IReplyTokensProps extends Pick<IAvatarProps, "size"> {
   mentions: string[];
 }
 
-export const ReplyTokens = ({
-  creatorName,
-  mentions,
-  size = "xxs",
-}: IReplyTokensProps) => {
+export const ReplyTokens = ({ creatorName, mentions, size = "xxs" }: IReplyTokensProps) => {
   const { info: tokenRef, loading } = useTwitterTokenRef(creatorName);
   const [refEl, setRefEl] = useState<HTMLButtonElement | null>(null);
   const [popperEl, setPopperEl] = useState<HTMLDivElement | null>(null);
@@ -94,19 +84,16 @@ export const ReplyTokens = ({
     }
   }, [sizes.width, sizes.height, forceUpdate]);
 
-  const sanitizedMentions = mentions.map((mention) =>
-    mention.replace(/[@ ]/g, "")
-  );
+  const sanitizedMentions = mentions.map((mention) => mention.replace(/[@ ]/g, ""));
 
-  const nullState =
-    (!loading && !tokenRef) || loading || !tokenRef || !tokenRef.is_claimed;
+  const nullState = (!loading && !tokenRef) || loading || !tokenRef || !tokenRef.is_claimed;
 
   if (nullState) return null;
 
   return (
-    <Popover className="flex items-center text-white text-xs mt-2">
-      <Popover.Button className="flex items-center space-x-2" ref={setRefEl}>
-        <div className="flex -space-x-1 overflow-hidden">
+    <Popover className="wum-flex wum-items-center wum-text-white wum-text-xs wum-mt-2">
+      <Popover.Button className="wum-flex wum-items-center wum-space-x-2" ref={setRefEl}>
+        <div className="wum-flex wum--space-x-1 wum-overflow-hidden">
           {sanitizedMentions.map((mention) => (
             <MentionToken
               key={`mention${mention}`}
@@ -119,22 +106,14 @@ export const ReplyTokens = ({
       </Popover.Button>
 
       {createPortal(
-        <Popover.Panel
-          ref={setPopperEl}
-          style={styles.popper}
-          {...attributes.popper}
-        >
+        <Popover.Panel ref={setPopperEl} style={styles.popper} {...attributes.popper}>
           <div
-            className="flex flex-col justify-center gap-x-2 gap-y-2 bg-white rounded-lg mt-4 p-2"
+            className="wum-flex wum-flex-col wum-justify-center wum-gap-x-2 wum-gap-y-2 wum-bg-white wum-rounded-lg wum-mt-4 wum-p-2"
             style={{ minWidth: 200 }}
           >
             {resizeListener}
             {sanitizedMentions.map((mention) => (
-              <PopoverToken
-                key={`popover${mention}`}
-                owner={tokenRef?.owner}
-                mention={mention}
-              />
+              <PopoverToken key={`popover${mention}`} owner={tokenRef?.owner} mention={mention} />
             ))}
           </div>
         </Popover.Panel>,

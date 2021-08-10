@@ -35,18 +35,17 @@ export const SuccessfulTransaction = ({
       leaveFrom="opacity-100"
       leaveTo="opacity-0"
     >
-      <div className="flex flex-col justify-center items-center absolute inset-0 w-full h-full bg-white">
+      <div className="wum-flex wum-flex-col wum-justify-center wum-items-center wum-absolute wum-inset-0 wum-w-full wum-h-full wum-bg-white">
         {tokenSvg
           ? tokenSvg
-          : tokenSrc ||
-            (tokenName && <Avatar token name={tokenName} imgSrc={tokenSrc} />)}
-        <div className="flex flex-col jusfity-center text-center px-8 mt-4">
+          : tokenSrc || (tokenName && <Avatar token name={tokenName} imgSrc={tokenSrc} />)}
+        <div className="wum-flex wum-flex-col wum-jusfity-center wum-text-center wum-px-8 wum-mt-4">
           <span>
-            You're transaction is complete. You now own {amount?.toFixed(4)} of{" "}
-            {tokenName}! View your wallet to view further details.
+            You're transaction is complete. You now own {amount?.toFixed(4)} of {tokenName}! View
+            your wallet to view further details.
           </span>
           <span
-            className="cursor-pointer text-indigo-600 hover:text-indigo-800 mt-4 text-sm"
+            className="wum-cursor-pointer wum-text-indigo-600 hover:text-indigo-800 wum-mt-4 wum-text-sm"
             onClick={toggleShowing}
           >
             Dismiss

@@ -24,7 +24,7 @@ export const ProfileEnhancer = () => {
     if (buttonEl) {
       return (
         <AppendChildPortal container={profile.buttonTarget as Element}>
-          <div className="flex justify-center self-start ml-2 mb-3">
+          <div className="wum-flex wum-justify-center wum-self-start wum-ml-2 wum-mb-3">
             {buttonEl}
           </div>
         </AppendChildPortal>

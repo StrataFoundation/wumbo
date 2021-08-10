@@ -61,16 +61,18 @@ export default React.memo(() => {
   });
 
   return (
-    <div className="flex flex-grow flex-col">
+    <div className="wum-flex wum-flex-grow wum-flex-col">
       <Button block color="primary" size="lg" onClick={execute} disabled={creationLoading}>
         {creationLoading && (
-          <div className="mr-4">
+          <div className="wum-mr-4">
             <Spinner size="sm" />
           </div>
         )}
         Create Token
       </Button>
-      <div className="text-center text-bold text-lg mt-2 text-gray-500 mb-2">or</div>
+      <div className="wum-text-center wum-text-bold wum-text-lg wum-mt-2 wum-text-gray-500 wum-mb-2">
+        or
+      </div>
       <Button
         block
         color="twitterBlue"

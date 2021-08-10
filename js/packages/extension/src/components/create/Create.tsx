@@ -15,29 +15,29 @@ export const Create = () => {
     <Fragment>
       <WumboDrawer.Header title="Create Coin" />
       <WumboDrawer.Content>
-        <div className="flex bg-gray-100 p-4 rounded-lg space-x-4">
+        <div className="wum-flex wum-bg-gray-100 wum-p-4 wum-rounded-lg wum-space-x-4">
           <Avatar name={query.get("name")!} imgSrc={query.get("img")!} token />
-          <div className="flex flex-col flex-grow justify-center text-gray-700">
-            <div className="flex justify-between font-medium">
+          <div className="wum-flex wum-flex-col wum-flex-grow wum-justify-center wum-text-gray-700">
+            <div className="wum-flex wum-justify-between wum-font-medium">
               <span>{query.get("name")!}</span>
               <span>$0.00</span>
             </div>
           </div>
         </div>
-        <div className="flex justify-center mt-4 text-xs">
-          <div className="w-full">
-            <span className="font-bold">
+        <div className="wum-flex wum-justify-center wum-mt-4 wum-text-xs">
+          <div className="wum-w-full">
+            <span className="wum-font-bold">
               You will be the first to mint & own this person's token!
             </span>{" "}
             It will remain unverified until this person verifies it. Should the person opt out, no
             new tokens may be purchased and exisiting tokens may still be sold.
           </div>
         </div>
-        <div className="flex mt-4">
+        <div className="wum-flex wum-mt-4">
           {connected && publicKey ? (
             <ClaimOrCreate />
           ) : (
-            <Link to={routes.wallet.path + `?redirect=${currentPath}`} className="w-full">
+            <Link to={routes.wallet.path + `?redirect=${currentPath}`} className="wum-w-full">
               <Button block color="primary" size="lg">
                 Connect Wallet
               </Button>

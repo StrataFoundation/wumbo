@@ -1,4 +1,4 @@
-import React from 'react';
+import React from "react";
 
 interface IStatCardProps {
   label: string;
@@ -6,8 +6,10 @@ interface IStatCardProps {
 }
 
 export const StatCard = ({ label, value }: IStatCardProps) => {
-  return <div className="flex flex-col bg-gray-100 p-3 rounded-lg border-1 space-y-2">
-    <span className="text-xs">{ label }</span>
-    <span className="text-s">{ value }</span>
-  </div>
-}
+  return (
+    <div className="wum-flex wum-flex-col wum-bg-gray-100 wum-p-3 wum-rounded-lg wum-border-1 wum-space-y-2">
+      <span className="wum-text-xs">{label}</span>
+      <span className="wum-text-s">{value}</span>
+    </div>
+  );
+};

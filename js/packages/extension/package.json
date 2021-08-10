@@ -57,6 +57,7 @@
     "@types/react-dom": "^17.0.0",
     "@types/react-router-dom": "^5.1.8",
     "@types/url-template": "^2.0.28",
+    "@windicss/animations": "^1.0.8",
     "copy-webpack-plugin": "^9.0.0",
     "css-loader": "^5.2.6",
     "esbuild-loader": "^2.13.1",

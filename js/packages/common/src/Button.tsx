@@ -43,31 +43,31 @@ type ButtonRef = ForwardedRef<HTMLButtonElement>;
 type LinkButtonRef = ForwardedRef<HTMLAnchorElement>;
 
 const style = {
-  default: `text-white focus:outline-none shadow font-medium transition ease-in duration-200`,
-  block: `flex justify-center items-center w-full`,
-  rounded: `rounded-full`,
-  disabled: `opacity-60 cursor-not-allowed`,
+  default: `wum-text-white focus:wum-outline-none wum-shadow wum-font-medium wum-transition wum-ease-in wum-duration-200`,
+  block: `wum-flex wum-justify-center wum-items-center wum-w-full`,
+  rounded: `wum-rounded-full`,
+  disabled: `wum-opacity-60 wum-cursor-not-allowed`,
   sizes: {
-    xs: "px-2 py-1 text-xs",
-    sm: "px-6 py-1 text-sm",
-    md: "px-6 py-2",
-    lg: "px-6 py-2.5",
+    xs: "wum-px-2 wum-py-1 wum-text-xs",
+    sm: "wum-px-6 wum-py-1 wum-text-sm",
+    md: "wum-px-6 wum-py-2",
+    lg: "wum-px-6 wum-py-2.5",
   },
   color: {
     primary: {
-      bg: `bg-indigo-600 hover:bg-indigo-800`,
-      gradient: `bg-gradient-to-tr from-blue-600 via-indigo-600 to-purple-600 hover:from-indigo-800 hover:to-purple-800`,
-      outline: `border-indigo-600 border-1 text-indigo-600 active:bg-indigo-600 active:text-white hover:bg-indigo-600 hover:bg-opacity-10`,
+      bg: `wum-bg-indigo-600 hover:wum-bg-indigo-800`,
+      gradient: `wum-bg-gradient-to-tr wum-from-blue-600 wum-via-indigo-600 wum-to-purple-600 hover:wum-from-indigo-800 hover:wum-to-purple-800`,
+      outline: `wum-border-indigo-600 wum-border-1 wum-text-indigo-600 active:wum-bg-indigo-600 active:wum-text-white hover:wum-bg-indigo-600 hover:wum-bg-opacity-10`,
     },
     secondary: {
-      bg: `bg-green-400 hover:bg-green-600`,
-      gradient: `bg-gradient-to-tr from-green-400 to-green-600 hover:from-green-500 hover:to-green-700`,
-      outline: `border-green-400 border-1 text-green-400 active:bg-green-400 active:text-white hover:bg-green-400 hover:bg-opacity-10`,
+      bg: `wum-bg-green-400 hover:wum-bg-green-600`,
+      gradient: `wum-bg-gradient-to-tr wum-from-green-400 wum-to-green-600 hover:wum-from-green-500 hover:wum-to-green-700`,
+      outline: `wum-border-green-400 wum-border-1 wum-text-green-400 active:wum-bg-green-400 active:wum-text-white hover:wum-bg-green-400 hover:wum-bg-opacity-10`,
     },
     twitterBlue: {
-      bg: `bg-twitter`,
-      gradient: `bg-gradient-to-tr from-blue-500 via-indigo-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700`,
-      outline: `border-indigo-500 border-1 text-indigo-500 active:bg-indigo-500 active:text-white hover:bg-indigo-500 hover:bg-opacity-10`,
+      bg: `wum-bg-twitter`,
+      gradient: `wum-bg-gradient-to-tr wum-from-blue-500 wum-via-indigo-500 wum-to-indigo-600 hover:wum-from-blue-600 hover:wum-to-indigo-700`,
+      outline: `wum-border-indigo-500 wum-border-1 wum-text-indigo-500 active:wum-bg-indigo-500 active:wum-text-white hover:wum-bg-indigo-500 hover:wum-bg-opacity-10`,
     },
   },
 };
@@ -118,10 +118,8 @@ export const Button = forwardRef(
         disabled && style.disabled,
         style.sizes[size],
         style.default,
-        rounded ? style.rounded : "rounded-md",
-        color
-          ? colors(!!outline, !!gradient)[color]
-          : colors(false, false)["primary"]
+        rounded ? style.rounded : "wum-rounded-md",
+        color ? colors(!!outline, !!gradient)[color] : colors(false, false)["primary"]
       )}
     >
       {children}
@@ -156,11 +154,9 @@ export const LinkButton = forwardRef(
         disabled && style.disabled,
         style.sizes[size],
         style.default,
-        rounded ? style.rounded : "rounded-md",
-        color
-          ? colors(!!outline, !!gradient)[color]
-          : colors(false, false)["primary"],
-        "text-center"
+        rounded ? style.rounded : "wum-rounded-md",
+        color ? colors(!!outline, !!gradient)[color] : colors(false, false)["primary"],
+        "wum-text-center"
       )}
     >
       {children}

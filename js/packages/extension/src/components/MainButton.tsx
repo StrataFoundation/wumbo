@@ -54,7 +54,7 @@ export const MainButton: FC<Props> = ({
   return (
     <Link to={path}>
       <Button block size="xs" color="secondary" onClick={toggleDrawer} {...btnProps}>
-        <span className="!text-green-800">${creatorInfo?.coinPriceUsd.toFixed(2)}</span>
+        <span className="!wum-text-green-800">${creatorInfo?.coinPriceUsd.toFixed(2)}</span>
       </Button>
     </Link>
   );

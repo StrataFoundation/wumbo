@@ -22,11 +22,11 @@ export const WumboDrawer = (props: { children: ReactNode }) => {
       <Dialog
         as="div"
         static
-        className="fixed inset-0 overflow-hidden"
+        className="wum-fixed wum-inset-0 wum-overflow-hidden wum-z-infinity"
         open={isOpen}
         onClose={() => toggle({ toggleOverride: false })}
       >
-        <div className="absolute inset-0 overflow-hidden">
+        <div className="wum-absolute wum-inset-0 wum-overflow-hidden">
           <Transition.Child
             as={Fragment}
             enter="ease-in-out duration-300"
@@ -36,11 +36,14 @@ export const WumboDrawer = (props: { children: ReactNode }) => {
             leaveFrom="opacity-100"
             leaveTo="opacity-0"
           >
-            <Dialog.Overlay className="absolute inset-0 bg-gray-800 bg-opacity-75 transition-opacity" />
+            <Dialog.Overlay className="wum-absolute wum-inset-0 wum-bg-gray-800 wum-bg-opacity-75 wum-transition-opacity" />
           </Transition.Child>
 
           {/* TODO: We can customize the 280px here based on where they drag the drawer */}
-          <div style={{ top: "calc(50% - 280px)" }} className="fixed right-0 pl-10 max-w-full flex">
+          <div
+            style={{ top: "calc(50% - 280px)" }}
+            className="wum-fixed wum-right-0 wum-pl-10 wum-max-w-full wum-flex"
+          >
             <Transition.Child
               as={Fragment}
               enter="transform transition ease-in-out duration-300 sm:duration-500"
@@ -50,8 +53,8 @@ export const WumboDrawer = (props: { children: ReactNode }) => {
               leaveFrom="translate-x-0"
               leaveTo="translate-x-full"
             >
-              <div className="w-screen max-w-340px">
-                <div className="h-560px w-340px flex flex-col bg-white rounded-l-lg shadow-xl">
+              <div className="wum-w-screen wum-max-w-340px">
+                <div className="wum-h-560px wum-w-340px wum-flex wum-flex-col wum-bg-white wum-rounded-l-lg wum-shadow-xl">
                   {props.children}
                 </div>
               </div>
@@ -78,23 +81,23 @@ WumboDrawer.Header = (props: HeaderProps) => {
   const hasTitle = !!(props as HeaderNoChildren).title;
 
   return (
-    <div className="px-4 py-3 border-b-1 border-gray-200">
-      <div className="flex items-start justify-between">
-        <div className="w-full">
+    <div className="wum-px-4 wum-py-3 wum-border-b-1 wum-border-gray-200">
+      <div className="wum-flex wum-items-start wum-justify-between">
+        <div className="wum-w-full">
           {hasTitle && (
-            <p className="text-lg font-medium text-indigo-600">
+            <p className="wum-text-lg wum-font-medium wum-text-indigo-600">
               {(props as HeaderNoChildren).title}
             </p>
           )}
           {!hasTitle && (props as HeaderWithChildren).children}
         </div>
-        <div className="ml-3 h-7 flex items-center">
+        <div className="wum-ml-3 wum-h-7 wum-flex wum-items-center">
           <button
-            className="bg-white rounded-md text-gray-400 hover:text-gray-500 focus:outline-none"
+            className="wum-bg-white wum-rounded-md wum-text-gray-400 hover:wum-text-gray-500 focus:wum-outline-none"
             onClick={() => toggle({ toggleOverride: false })}
           >
-            <span className="sr-only">Close panel</span>
-            <XIcon className="h-6 w-6" aria-hidden="true" />
+            <span className="wum-sr-only">Close panel</span>
+            <XIcon className="wum-h-6 wum-w-6" aria-hidden="true" />
           </button>
         </div>
       </div>
@@ -103,7 +106,9 @@ WumboDrawer.Header = (props: HeaderProps) => {
 };
 
 WumboDrawer.Content = (props: { children: ReactNode }) => (
-  <div className="mt-4 overflow-y-auto relative flex-1 px-4">{props.children}</div>
+  <div className="wum-mt-4 wum-overflow-y-auto wum-relative wum-flex-1 wum-px-4">
+    {props.children}
+  </div>
 );
 
 WumboDrawer.Nav = () => {
@@ -112,7 +117,7 @@ WumboDrawer.Nav = () => {
   const { userInfo: creatorInfo, loading } = creatorInfoState;
 
   return (
-    <div className="flex flex-row justify-around pt-2 px-2 border-t-1 border-gray-200">
+    <div className="wum-flex wum-flex-row wum-justify-around wum-pt-2 wum-px-2 wum-border-t-1 wum-border-gray-200">
       {Object.keys(routes).map((route) => {
         const { path, Icon, isDrawerNav } = routes[route as keyof IRoutes];
 
@@ -129,11 +134,11 @@ WumboDrawer.Nav = () => {
             <NavLink
               to={filledPath}
               key={path}
-              className="flex flex-col justify-center items-center border-transparent text-gray-500 text-xs font-medium inline-flex items-center px-2 py-2 border-b-3 text-xs font-medium hover:border-gray-300 hover:text-gray-700"
-              activeClassName="!border-indigo-500 !text-indigo-500"
+              className="wum-flex wum-flex-col wum-justify-center wum-items-center wum-border-transparent wum-text-gray-500 wum-text-xs wum-font-medium wum-inline-flex wum-items-center wum-px-2 wum-py-2 wum-border-b-3 wum-text-xs wum-font-medium hover:wum-border-gray-300 hover:wum-text-gray-700"
+              activeClassName="!wum-border-indigo-500 !wum-text-indigo-500"
             >
               {/* @ts-ignore */}
-              <Icon className="h-5 w-5" />
+              <Icon className="wum-h-5 wum-w-5" />
               <span>{startCase(route)}</span>
             </NavLink>
           );
@@ -149,7 +154,7 @@ WumboDrawer.Loading = () => (
   <Fragment>
     <WumboDrawer.Header />
     <WumboDrawer.Content>
-      <div className="flex justify-center items-center h-full">
+      <div className="wum-flex wum-justify-center wum-items-center wum-h-full">
         <Spinner size="lg" color="primary" />
       </div>
     </WumboDrawer.Content>

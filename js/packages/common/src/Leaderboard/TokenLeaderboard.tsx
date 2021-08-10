@@ -10,7 +10,7 @@ import { useAsync } from "react-async-hook";
 import { TOKEN_PROGRAM_ID } from "../constants/globals";
 
 const WhiteCard = ({ children = null as any }) => (
-  <div className="bg-white rounded-md shadow-md border-1">{children}</div>
+  <div className="wum-bg-white wum-rounded-md wum-shadow-md wum-border-1">{children}</div>
 );
 
 const PageChevron = ({
@@ -20,10 +20,12 @@ const PageChevron = ({
   direction: "up" | "down";
   onClick?: () => void;
 }) => (
-  <div className="hover:bg-gray-100 hover:cursor-pointer w-full flex flex-col items-center">
-    {direction == "up" && <ChevronUpIcon onClick={onClick} className="h-4 w-4 text-indigo-600" />}
+  <div className="hover:wum-bg-gray-100 hover:wum-cursor-pointer wum-w-full wum-flex wum-flex-col wum-items-center">
+    {direction == "up" && (
+      <ChevronUpIcon onClick={onClick} className="wum-h-4 wum-w-4 wum-text-indigo-600" />
+    )}
     {direction == "down" && (
-      <ChevronDownIcon onClick={onClick} className="h-4 w-4 text-indigo-600" />
+      <ChevronDownIcon onClick={onClick} className="wum-h-4 wum-w-4 wum-text-indigo-600" />
     )}
   </div>
 );
@@ -160,7 +162,7 @@ export const TokenLeaderboard = React.memo(
 
     if (top.loading || local.loading) {
       return (
-        <div className="flex flex-col items-center flex-grow">
+        <div className="wum-flex wum-flex-col wum-items-center wum-flex-grow">
           <Spinner color="primary" size="lg" />
         </div>
       );
@@ -172,7 +174,9 @@ export const TokenLeaderboard = React.memo(
 
     const localLeaderboard = (
       <Fragment>
-        <div className="text-center text-bold text-2xl text-gray-500 mb-2">...</div>
+        <div className="wum-text-center wum-text-bold  wum-text-2xl  wum-text-gray-500  wum-mb-2">
+          ...
+        </div>
         <WhiteCard>
           <PageChevron direction="up" onClick={local.pageUp} />
           <Leaderboard
@@ -198,7 +202,7 @@ export const TokenLeaderboard = React.memo(
     );
 
     return (
-      <div className="pt-2 flex flex-col items-stretch">
+      <div className="wum-pt-2 wum-flex wum-flex-col wum-items-stretch">
         <WhiteCard>
           <Leaderboard
             numbers={top.accounts.map(({ rank, account }) => (

@@ -12,8 +12,8 @@ interface TabProps extends Props {
 }
 
 const style = {
-  selected: `block w-full text-indigo-600 text-center border-b-2 border-indigo-600 -mb-2 px-4 md:px-8 text-md  py-4 md:py-1 inline-block cursor-default`,
-  notSelected: `block w-full text-gray-300 -mb-2 px-4 md:px-8 text-md text-center py-4 md:py-1 inline-block border-b-2 border-gray-300 cursor-pointer`,
+  selected: `wum-block wum-w-full wum-text-indigo-600 wum-text-center wum-border-b-2 wum-border-indigo-600 wum--mb-2 wum-px-4 md:wum-px-8 wum-text-md wum- wum-py-4 md:wum-py-1 wum-inline-block wum-cursor-default`,
+  notSelected: `wum-block wum-w-full wum-text-gray-300 wum--mb-2 wum-px-4 md:wum-px-8 wum-text-md wum-text-center wum-py-4 md:wum-py-1 wum-inline-block wum-border-b-2 wum-border-gray-300 wum-cursor-pointer`,
 };
 
 export const Tabs = ({ children }: TabsProps) => {
@@ -30,15 +30,15 @@ export const Tabs = ({ children }: TabsProps) => {
   };
 
   return (
-    <nav className="w-full">
-      <div className="flex">
+    <nav className="wum-w-full">
+      <div className="wum-flex">
         {childrenArray.map((child) => (
           <div
             role="link"
             tabIndex={0}
             onClick={() => setCurrent(child.key)}
             key={child.key}
-            className={`${className(child, current)} focus:outline-none`}
+            className={`${className(child, current)} focus:wum-outline-none`}
           >
             {child.props.title}
           </div>
@@ -50,7 +50,7 @@ export const Tabs = ({ children }: TabsProps) => {
 };
 
 export const Tab = ({ children, selected }: TabProps) => (
-  <div hidden={!selected} className="mt-4">
+  <div hidden={!selected} className="wum-mt-4">
     {children}
   </div>
 );

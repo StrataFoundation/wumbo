@@ -14,7 +14,7 @@ export const UserCellEnhancer = () => {
             creatorName={cell.name}
             creatorImg={cell.avatar || ""}
             btnProps={{
-              className: "!px-4 !py-1.5",
+              className: "!wum-px-4 !wum-py-1.5",
               size: "md",
               rounded: true,
             }}
@@ -28,7 +28,7 @@ export const UserCellEnhancer = () => {
           return (
             <Fragment key={cell.name}>
               <AppendChildPortal container={cell.buttonTarget as Element}>
-                <div className="flex justify-center self-start ml-2">
+                <div className="wum-flex wum-justify-center wum-self-start wum-ml-2">
                   {buttonEl}
                 </div>
               </AppendChildPortal>

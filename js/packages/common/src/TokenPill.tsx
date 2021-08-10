@@ -52,15 +52,18 @@ export const TokenPill = React.memo(
     const history = useHistory();
 
     return (
-      <div onClick={() => detailsPath && history.push(detailsPath)} className="hover:cursor-pointer hover:bg-gray-200 flex bg-gray-100 p-4 rounded-lg space-x-4">
+      <div
+        onClick={() => detailsPath && history.push(detailsPath)}
+        className="hover:wum-cursor-pointer hover:wum-bg-gray-200 wum-flex wum-bg-gray-100 wum-p-4 wum-rounded-lg wum-space-x-4"
+      >
         {icon}
 
-        <div className="flex flex-col flex-grow justify-center text-gray-700">
-          <div className="flex justify-between font-medium">
+        <div className="wum-flex wum-flex-col wum-flex-grow wum-justify-center wum-text-gray-700">
+          <div className="wum-flex wum-justify-between wum-font-medium">
             <span>{name}</span>
             <span>${toFiat(current).toFixed(2) || 0.0}</span>
           </div>
-          <div className="flex justify-between text-xs">
+          <div className="wum-flex wum-justify-between wum-text-xs">
             <span>{ticker}</span>
           </div>
         </div>

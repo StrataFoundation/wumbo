@@ -35,7 +35,7 @@ export const TokenForm = ({
   const { register, handleSubmit, setValue, reset } = useForm<FormValues>();
 
   const inputClasses =
-    "p-0 bg-transparent border-transparent focus:shadow-none focus:border-transparent";
+    "wum-p-0 wum-bg-transparent wum-border-transparent focus:wum-shadow-none focus:wum-border-transparent";
 
   const handleOnFiatChange = ({ target: { value } }: { target: { value: string } }) => {
     setValue("fiatAmount", Number(value));
@@ -54,16 +54,16 @@ export const TokenForm = ({
 
   return (
     <form onSubmit={handleSubmit(handleOnSubmit)}>
-      <div className="flex justify-between px-2 py-1 mt-1 border-1 border-gray-300 rounded-lg hover:bg-gray-100">
-        <div className="flex items-center justify-center">
+      <div className="wum-flex wum-justify-between wum-px-2 wum-py-1 wum-mt-1 wum-border-1 wum-border-gray-300 wum-rounded-lg hover:wum-bg-gray-100">
+        <div className="wum-flex wum-items-center wum-justify-center">
           {icon}
-          <span className="flex items-center text-sm pl-2">{ticker}</span>
+          <span className="wum-flex items-center text-sm pl-2">{ticker}</span>
         </div>
-        <div className="flex flex-col items-end">
-          <div className="flex text-xl">
+        <div className="wum-flex wum-flex-col wum-items-end">
+          <div className="wum-flex wum-text-xl">
             <input
               required
-              className={`${inputClasses} text-xl w-full text-right leading-none`}
+              className={`${inputClasses} wum-text-xl wum-w-full wum-text-right wum-leading-none`}
               type="number"
               min={0}
               step={0.01}
@@ -71,12 +71,12 @@ export const TokenForm = ({
               {...register("fiatAmount")}
               onChange={handleOnFiatChange}
             />
-            <span className="mt-px">$</span>
+            <span className="wum-mt-px">$</span>
           </div>
-          <div className="flex text-xs">
+          <div className="wum-flex wum-text-xs">
             <input
               required
-              className={`${inputClasses} text-xs w-full text-right leading-none`}
+              className={`${inputClasses} wum-text-xs wum-w-full wum-text-right wum-leading-none`}
               type="number"
               min={0}
               step={0.01}
@@ -84,15 +84,15 @@ export const TokenForm = ({
               {...register("tokenAmount")}
               onChange={handleOnTokenChange}
             />
-            <span className="mt-px">{ticker}</span>
+            <span className="wum-mt-px">{ticker}</span>
           </div>
         </div>
       </div>
-      <div className="flex mt-4">
+      <div className="wum-flex wum-mt-4">
         {connected && (
           <Button block submit color="primary" size="lg" disabled={submitting}>
             {submitting && (
-              <div className="mr-4">
+              <div className="wum-mr-4">
                 <Spinner size="sm" />
               </div>
             )}
