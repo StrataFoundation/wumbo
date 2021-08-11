@@ -12,10 +12,13 @@ import { Spinner } from "wumbo-common";
 export const WumboDrawer = (props: { children: ReactNode }) => {
   const { isOpen, toggle } = useDrawer();
 
-  chrome.runtime.onMessage.addListener((request, _, __) => {
+  chrome.runtime.onMessage.addListener((request, _, sendResponse) => {
     if (request.type === "TOGGLE_WUMBO") {
       isOpen ? toggle({ toggleOverride: false }) : toggle({ toggleOverride: true });
     }
+
+    sendResponse();
+    return true;
   });
 
   return (

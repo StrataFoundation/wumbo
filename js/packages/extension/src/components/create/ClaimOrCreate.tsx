@@ -51,12 +51,13 @@ export default React.memo(() => {
   const claim = useClaimLink({ redirectUri });
   const [claimWindow, setClaimWindow] = useState<Window>();
 
-  chrome.runtime.onMessage.addListener(function (msg) {
+  chrome.runtime.onMessage.addListener((msg, _, sendResponse) => {
     if (msg.type == "CLAIM") {
       claimWindow?.close();
       history.push(claimPath({ ...msg.data, redirectUri }));
     }
 
+    sendResponse();
     return true;
   });
 
