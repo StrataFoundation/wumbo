@@ -43,31 +43,31 @@ type ButtonRef = ForwardedRef<HTMLButtonElement>;
 type LinkButtonRef = ForwardedRef<HTMLAnchorElement>;
 
 const style = {
-  default: `text-white focus:outline-none shadow font-medium transition ease-in duration-200`,
+  default: `text-white border-0 font-medium shadow transition ease-in duration-200 cursor-pointer focus:outline-none`,
   block: `flex justify-center items-center w-full`,
   rounded: `rounded-full`,
   disabled: `opacity-60 cursor-not-allowed`,
   sizes: {
     xs: "px-2 py-1 text-xs",
     sm: "px-6 py-1 text-sm",
-    md: "px-6 py-2",
-    lg: "px-6 py-2.5",
+    md: "px-6 py-2 text-md",
+    lg: "px-6 py-2.5 text-md",
   },
   color: {
     primary: {
       bg: `bg-indigo-600 hover:bg-indigo-800`,
       gradient: `bg-gradient-to-tr from-blue-600 via-indigo-600 to-purple-600 hover:from-indigo-800 hover:to-purple-800`,
-      outline: `border-indigo-600 border-1 text-indigo-600 active:bg-indigo-600 active:text-white hover:bg-indigo-600 hover:bg-opacity-10`,
+      outline: `bg-transparent border-indigo-600 !border-1 border-solid text-indigo-600 active:bg-indigo-600 active:text-white hover:bg-indigo-600 hover:bg-opacity-10`,
     },
     secondary: {
       bg: `bg-green-400 hover:bg-green-600`,
       gradient: `bg-gradient-to-tr from-green-400 to-green-600 hover:from-green-500 hover:to-green-700`,
-      outline: `border-green-400 border-1 text-green-400 active:bg-green-400 active:text-white hover:bg-green-400 hover:bg-opacity-10`,
+      outline: `bg-transparent border-green-400 !border-1 border-solid text-green-400 active:bg-green-400 active:text-white hover:bg-green-400 hover:bg-opacity-10`,
     },
     twitterBlue: {
       bg: `bg-twitter`,
       gradient: `bg-gradient-to-tr from-blue-500 via-indigo-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700`,
-      outline: `border-indigo-500 border-1 text-indigo-500 active:bg-indigo-500 active:text-white hover:bg-indigo-500 hover:bg-opacity-10`,
+      outline: `bg-transparent bg-border-indigo-500 !border-1 border-solid text-indigo-500 active:bg-indigo-500 active:text-white hover:bg-indigo-500 hover:bg-opacity-10`,
     },
   },
 };
@@ -119,9 +119,7 @@ export const Button = forwardRef(
         style.sizes[size],
         style.default,
         rounded ? style.rounded : "rounded-md",
-        color
-          ? colors(!!outline, !!gradient)[color]
-          : colors(false, false)["primary"]
+        color ? colors(!!outline, !!gradient)[color] : colors(false, false)["primary"]
       )}
     >
       {children}
@@ -157,9 +155,7 @@ export const LinkButton = forwardRef(
         style.sizes[size],
         style.default,
         rounded ? style.rounded : "rounded-md",
-        color
-          ? colors(!!outline, !!gradient)[color]
-          : colors(false, false)["primary"],
+        color ? colors(!!outline, !!gradient)[color] : colors(false, false)["primary"],
         "text-center"
       )}
     >

@@ -63,7 +63,7 @@ export const TokenForm = ({
           <div className="flex text-xl">
             <input
               required
-              className={`${inputClasses} text-xl w-full text-right leading-none`}
+              className={`${inputClasses} text-xl w-full text-right leading-none outline-none`}
               type="number"
               min={0}
               step={0.01}
@@ -76,7 +76,7 @@ export const TokenForm = ({
           <div className="flex text-xs">
             <input
               required
-              className={`${inputClasses} text-xs w-full text-right leading-none`}
+              className={`${inputClasses} text-xs w-full text-right leading-none outline-none`}
               type="number"
               min={0}
               step={0.01}

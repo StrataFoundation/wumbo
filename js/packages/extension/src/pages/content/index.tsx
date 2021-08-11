@@ -4,6 +4,7 @@ import App from "../../components/App";
 import "windi.css";
 
 const appMountElem = document.createElement("div");
+appMountElem.setAttribute("id", "WUM");
 document.body.append(appMountElem);
 
 const scriptMountElem = document.createElement("script");

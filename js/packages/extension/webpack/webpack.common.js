@@ -30,6 +30,7 @@ module.exports = {
     rules: [
       {
         test: /\.tsx?$/,
+        loader: "tsx",
         loader: "esbuild-loader",
         options: {
           loader: "tsx",
