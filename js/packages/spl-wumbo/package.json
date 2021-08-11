@@ -9,7 +9,7 @@
     "main": "dist/lib/index.js",
     "types": "dist/lib/index.d.ts",
     "exports": {
-        ".": "./dist/lib"
+        ".": "./dist/lib/index.js"
     },
     "scripts": {
         "build": "tsc --project tsconfig.json",
