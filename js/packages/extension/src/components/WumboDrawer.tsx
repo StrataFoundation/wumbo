@@ -10,19 +10,25 @@ import { useUserInfo } from "@/utils/userState";
 import { Spinner } from "wumbo-common";
 
 export const WumboDrawer = (props: { children: ReactNode }) => {
-  const { state, dispatch } = useDrawer();
-  const { isOpen } = state;
+  const { isOpen, toggle } = useDrawer();
 
-  const toggleOpen = () => dispatch({ type: "toggle" });
+  chrome.runtime.onMessage.addListener((request, _, sendResponse) => {
+    if (request.type === "TOGGLE_WUMBO") {
+      isOpen ? toggle({ toggleOverride: false }) : toggle({ toggleOverride: true });
+    }
+
+    sendResponse();
+    return true;
+  });
 
   return (
     <Transition.Root show={isOpen} as={Fragment}>
       <Dialog
         as="div"
         static
-        className="fixed inset-0 overflow-hidden"
+        className="fixed inset-0 overflow-hidden z-infinity"
         open={isOpen}
-        onClose={toggleOpen}
+        onClose={() => toggle({ toggleOverride: false })}
       >
         <div className="absolute inset-0 overflow-hidden">
           <Transition.Child
@@ -49,7 +55,7 @@ export const WumboDrawer = (props: { children: ReactNode }) => {
               leaveTo="translate-x-full"
             >
               <div className="w-screen max-w-340px">
-                <div className="h-560px w-340px flex flex-col bg-white rounded-l-lg shadow-xl">
+                <div className="h-560px w-340px flex flex-col bg-white rounded-l-lg shadow-xl text-black">
                   {props.children}
                 </div>
                 <Toaster
@@ -76,9 +82,8 @@ interface HeaderWithChildren {
 type HeaderProps = HeaderNoChildren | HeaderWithChildren;
 
 WumboDrawer.Header = (props: HeaderProps) => {
+  const { toggle } = useDrawer();
   const hasTitle = !!(props as HeaderNoChildren).title;
-  const { dispatch } = useDrawer();
-  const toggleOpen = () => dispatch({ type: "toggle" });
 
   return (
     <div className="px-4 py-3 border-b-1 border-gray-200">
@@ -94,7 +99,7 @@ WumboDrawer.Header = (props: HeaderProps) => {
         <div className="ml-3 h-7 flex items-center">
           <button
             className="bg-white rounded-md text-gray-400 hover:text-gray-500 focus:outline-none"
-            onClick={toggleOpen}
+            onClick={() => toggle()}
           >
             <span className="sr-only">Close panel</span>
             <XIcon className="h-6 w-6" aria-hidden="true" />
@@ -110,8 +115,8 @@ WumboDrawer.Content = (props: { children: ReactNode }) => (
 );
 
 WumboDrawer.Nav = () => {
-  const { state } = useDrawer();
-  const creatorInfoState = useUserInfo(state.creator.name!);
+  const { creator } = useDrawer();
+  const creatorInfoState = useUserInfo(creator?.name!);
   const { userInfo: creatorInfo, loading } = creatorInfoState;
 
   return (

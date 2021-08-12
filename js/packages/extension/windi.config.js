@@ -6,13 +6,10 @@ module.exports = defineConfig({
     include: ["src/**/*.{tsx,css}", "../common/src/**/*.{tsx,ts,css}", "public/**/*.html"],
   },
   darkMode: false,
-  plugins: [forms],
-  darkMode: false, // or 'media' or 'class'
   theme: {
     extend: {
       backgroundImage: (_theme) => ({
-        "beta-splash-hero-pattern":
-          "url('/src/assets/images/bg/beta-splash@2x.png')",
+        "beta-splash-hero-pattern": "url('/src/assets/images/bg/beta-splash@2x.png')",
       }),
       height: {
         "560px": "560px",
@@ -27,7 +24,10 @@ module.exports = defineConfig({
         xxs: ".675rem",
       },
       colors: {
-        twitter: "#1DA1F2"
+        twitter: "#1DA1F2",
+      },
+      zIndex: {
+        infinity: 9999999,
       },
     },
     fontFamily: {
@@ -50,4 +50,5 @@ module.exports = defineConfig({
       ],
     },
   },
+  plugins: [forms],
 });

@@ -1,62 +1,62 @@
-import * as React from "react";
+import React, { FC, ReactNode, createContext, useContext, useState, useCallback } from "react";
 
-type Action =
-  | { type: "toggle"; data?: { creatorName: string; creatorImg: string } }
-  | { type: "setBtnPos"; data: [number, number] };
-type Dispatch = (action: Action) => void;
-type State = {
-  btnPos: [number, number];
+export interface IDrawerProviderProps {
+  children: ReactNode;
+}
+
+export interface IDrawerContextState {
   isOpen: boolean;
-  lastLocation: string | null;
-  creator: { name: string | null; img: string | null };
-};
-type DrawerProviderProps = { children: React.ReactNode };
+  creator: { name: string | undefined; img: string | undefined };
 
-const defaultState: State = {
-  btnPos: [0, 0],
-  isOpen: false,
-  lastLocation: null,
-  creator: { name: null, img: null },
-};
+  toggle: ({
+    toggleOverride,
+    creator,
+  }?: {
+    toggleOverride?: boolean;
+    creator?: { name: string | undefined; img: string | undefined };
+  }) => void;
+}
 
-const DrawerStateContext = React.createContext<
-  { state: State; dispatch: Dispatch } | undefined
->(undefined);
+const DrawerContext = createContext<IDrawerContextState>({} as IDrawerContextState);
 
-const drawerReducer = (state: State, action: Action): State => {
-  switch (action.type) {
-    case "toggle": {
-      return {
-        ...state,
-        isOpen: !state.isOpen,
-        creator: {
-          name: action.data?.creatorName || state.creator.name || null,
-          img: action.data?.creatorImg || state.creator.img || null,
-        },
-      };
-    }
-    case "setBtnPos": {
-      return { ...state, btnPos: action.data };
-    }
-    default: {
-      throw new Error(`Unhandled action type: ${action!.type}`);
-    }
-  }
-};
+const DrawerProvider: FC<IDrawerProviderProps> = ({ children }) => {
+  const [isOpen, setIsOpen] = useState<boolean>(false);
+  const [creatorName, setCreatorName] = useState<string>();
+  const [creatorImg, setCreatorImg] = useState<string>();
 
-const DrawerProvider = ({ children }: DrawerProviderProps) => {
-  const [state, dispatch] = React.useReducer(drawerReducer, defaultState);
-  const value = { state, dispatch };
+  const toggle = useCallback(
+    async ({
+      toggleOverride,
+      creator,
+    }: {
+      toggleOverride?: boolean;
+      creator?: { name: string | undefined; img: string | undefined };
+    } = {}) => {
+      setIsOpen(toggleOverride || !isOpen);
+
+      if (creator) {
+        setCreatorName(creator.name);
+        setCreatorImg(creator.img);
+      }
+    },
+    [isOpen, setIsOpen]
+  );
 
   return (
-    <DrawerStateContext.Provider value={value}>
+    <DrawerContext.Provider
+      value={{
+        isOpen,
+        creator: { name: creatorName, img: creatorImg },
+        toggle,
+      }}
+    >
       {children}
-    </DrawerStateContext.Provider>
+    </DrawerContext.Provider>
   );
 };
 
 const useDrawer = () => {
-  const context = React.useContext(DrawerStateContext);
+  const context = React.useContext(DrawerContext);
   if (context === undefined) {
     throw new Error("useCount must be used within a DrawerProvider");
   }

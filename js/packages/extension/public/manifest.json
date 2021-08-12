@@ -5,7 +5,6 @@
   "version": "1.0",
   "browser_action": {
     "default_title": "Wum.bo",
-    "default_popup": "popup.html",
     "default_icon": {
       "16": "assets/img/icon16.png",
       "32": "assets/img/icon32.png",
@@ -40,5 +39,5 @@
     }
   ],
   "web_accessible_resources": ["wallet_proxy.js"],
-  "permissions": ["storage", "<all_urls>"]
+  "permissions": ["storage", "<all_urls>", "activeTab", "tabs"]
 }
