@@ -6,7 +6,7 @@ import { useAccount } from "wumbo-common";
 import { WUMBO_INSTANCE_KEY, Button, IButtonProps, Spinner, ISpinnerProps } from "wumbo-common";
 
 import { useDrawer } from "@/contexts/drawerContext";
-import { routes } from "@/constants/routes";
+import { routes, tradePath } from "@/constants/routes";
 
 type Props = {
   creatorName: string;
@@ -21,14 +21,10 @@ export const MainButton: FC<Props> = ({
   btnProps,
   spinnerProps,
 }: Props) => {
-  const { isOpen, toggle } = useDrawer();
+  const { toggleDrawer } = useDrawer();
   const creatorInfoState = useUserInfo(creatorName);
   const { userInfo: creatorInfo, loading } = creatorInfoState;
   const { info: wumboInstance } = useAccount(WUMBO_INSTANCE_KEY, WumboInstance.fromAccount);
-
-  const toggleDrawer = () => {
-    !isOpen && toggle({ creator: { name: creatorName, img: creatorImg } });
-  };
 
   if (!loading && !creatorInfo && wumboInstance) {
     return (
@@ -36,7 +32,19 @@ export const MainButton: FC<Props> = ({
         to={routes.create.path + `?name=${creatorName}&src=${creatorImg}`}
         className="no-underline"
       >
-        <Button block outline size="xs" color="primary" onClick={toggleDrawer} {...btnProps}>
+        <Button
+          block
+          outline
+          size="xs"
+          color="primary"
+          onClick={() =>
+            toggleDrawer({
+              creator: { name: creatorName, img: creatorImg },
+              isCreating: true,
+            })
+          }
+          {...btnProps}
+        >
           Mint
         </Button>
       </Link>
@@ -47,13 +55,23 @@ export const MainButton: FC<Props> = ({
     return <Spinner {...spinnerProps} />;
   }
 
-  const path =
-    routes.trade.path.replace(":tokenBondingKey", creatorInfo.tokenBonding.publicKey.toBase58()) +
-    `?name=${creatorName}`;
-
   return (
-    <Link to={path} className="no-underline">
-      <Button block size="xs" color="secondary" onClick={toggleDrawer} {...btnProps}>
+    <Link
+      to={`${tradePath(creatorInfo.tokenBonding.publicKey)}?name=${creatorInfo.name}`}
+      className="no-underline"
+    >
+      <Button
+        block
+        size="xs"
+        color="secondary"
+        onClick={() =>
+          toggleDrawer({
+            creator: { name: creatorName, img: creatorImg },
+            isCreating: false,
+          })
+        }
+        {...btnProps}
+      >
         <span className="!text-green-800">${creatorInfo?.coinPriceUsd.toFixed(2)}</span>
       </Button>
     </Link>

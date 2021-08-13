@@ -6,7 +6,7 @@ import {
   CashIcon,
   UserIcon,
 } from "@heroicons/react/outline";
-import { PublicKey } from '@solana/web3.js';
+import { PublicKey } from "@solana/web3.js";
 
 type Route = {
   path: string;
@@ -32,11 +32,19 @@ export function viewProfilePath(tokenBondingKey: PublicKey): string {
 }
 
 export function tradePath(tokenBondingKey: PublicKey): string {
-  return routes.trade.path.replace(":tokenBondingKey", tokenBondingKey.toBase58())
+  return routes.trade.path.replace(":tokenBondingKey", tokenBondingKey.toBase58());
 }
 
-export function claimPath({ code, name, redirectUri }: { code: string | undefined, name: string | undefined, redirectUri: string | undefined }): string {
-  return `${routes.claim.path}?name=${name}&code=${code}&redirectUri=${redirectUri}`
+export function claimPath({
+  code,
+  name,
+  redirectUri,
+}: {
+  code: string | undefined;
+  name: string | undefined;
+  redirectUri: string | undefined;
+}): string {
+  return `${routes.claim.path}?name=${name}&code=${code}&redirectUri=${redirectUri}`;
 }
 
 export const routes: IRoutes = {
