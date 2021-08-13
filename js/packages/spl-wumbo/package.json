@@ -1,6 +1,6 @@
 {
     "name": "@wum.bo/spl-wumbo",
-    "version": "1.0.2",
+    "version": "1.0.3",
     "description": "Interface to the wumbo smart contract",
     "repository": {
         "type": "git",
