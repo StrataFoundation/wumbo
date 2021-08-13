@@ -1,6 +1,6 @@
 {
     "name": "@wum.bo/spl-wumbo",
-    "version": "1.0.5",
+    "version": "1.0.6",
     "description": "Interface to the wumbo smart contract",
     "repository": {
         "type": "git",
@@ -9,8 +9,11 @@
     "main": "dist/lib/index.js",
     "types": "dist/lib/index.d.ts",
     "exports": {
-        ".": "./dist/lib"
+        ".": "./dist/lib/index.js"
     },
+    "files": [
+        "dist/lib/**/*"
+    ],
     "scripts": {
         "build": "tsc --project tsconfig.json",
         "watch": "tsc --watch --project tsconfig.json",
