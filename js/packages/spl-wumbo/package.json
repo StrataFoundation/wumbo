@@ -1,15 +1,15 @@
 {
     "name": "@wum.bo/spl-wumbo",
-    "version": "1.0.4",
+    "version": "1.0.5",
     "description": "Interface to the wumbo smart contract",
     "repository": {
         "type": "git",
         "url": "https://github.com/ChewingGlassFund/wumbo"
     },
     "main": "dist/lib/index.js",
-    "typings": "dist/lib/index.d.ts",
+    "types": "dist/lib/index.d.ts",
     "exports": {
-        ".": "./dist/lib/index.js"
+        ".": "./dist/lib"
     },
     "scripts": {
         "build": "tsc --project tsconfig.json",
