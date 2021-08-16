@@ -8,11 +8,11 @@ export interface IDrawerContextState {
   isOpen: boolean;
   creator: { name: string | undefined; img: string | undefined };
 
-  toggle: ({
-    toggleOverride,
+  toggleDrawer: ({
+    isOpen,
     creator,
   }?: {
-    toggleOverride?: boolean;
+    isOpen?: boolean;
     creator?: { name: string | undefined; img: string | undefined };
   }) => void;
 }
@@ -24,15 +24,15 @@ const DrawerProvider: FC<IDrawerProviderProps> = ({ children }) => {
   const [creatorName, setCreatorName] = useState<string>();
   const [creatorImg, setCreatorImg] = useState<string>();
 
-  const toggle = useCallback(
+  const toggleDrawer = useCallback(
     async ({
-      toggleOverride,
+      isOpen: isOpenOverride,
       creator,
     }: {
-      toggleOverride?: boolean;
+      isOpen?: boolean;
       creator?: { name: string | undefined; img: string | undefined };
     } = {}) => {
-      setIsOpen(toggleOverride || !isOpen);
+      setIsOpen(isOpenOverride || !isOpen);
 
       if (creator) {
         setCreatorName(creator.name);
@@ -47,7 +47,7 @@ const DrawerProvider: FC<IDrawerProviderProps> = ({ children }) => {
       value={{
         isOpen,
         creator: { name: creatorName, img: creatorImg },
-        toggle,
+        toggleDrawer,
       }}
     >
       {children}

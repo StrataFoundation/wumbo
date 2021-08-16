@@ -17,7 +17,10 @@ import Claim from "./claim/Claim";
 import { EditProfileRoute } from "./profile/EditProfile";
 
 const App: FC = () => (
-  <Router initialEntries={paths} initialIndex={0}>
+  <Router
+    initialEntries={paths}
+    initialIndex={Object.keys(routes).findIndex((x) => x === "wallet")}
+  >
     <ContextProviders>
       <Twitter />
 

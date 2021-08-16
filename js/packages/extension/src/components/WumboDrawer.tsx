@@ -7,14 +7,14 @@ import { XIcon } from "@heroicons/react/outline";
 import { useDrawer } from "@/contexts/drawerContext";
 import { routes, IRoutes } from "@/constants/routes";
 import { useUserInfo } from "@/utils/userState";
-import { Spinner } from "wumbo-common";
+import { Spinner, WUM_BONDING } from "wumbo-common";
 
 export const WumboDrawer = (props: { children: ReactNode }) => {
-  const { isOpen, toggle } = useDrawer();
+  const { isOpen, toggleDrawer } = useDrawer();
 
   chrome.runtime.onMessage.addListener((request, _, sendResponse) => {
     if (request.type === "TOGGLE_WUMBO") {
-      isOpen ? toggle({ toggleOverride: false }) : toggle({ toggleOverride: true });
+      isOpen ? toggleDrawer({ isOpen: false }) : toggleDrawer({ isOpen: true });
     }
 
     sendResponse();
@@ -28,7 +28,7 @@ export const WumboDrawer = (props: { children: ReactNode }) => {
         static
         className="fixed inset-0 overflow-hidden z-infinity"
         open={isOpen}
-        onClose={() => toggle({ toggleOverride: false })}
+        onClose={() => toggleDrawer({ isOpen: false })}
       >
         <div className="absolute inset-0 overflow-hidden">
           <Transition.Child
@@ -82,7 +82,7 @@ interface HeaderWithChildren {
 type HeaderProps = HeaderNoChildren | HeaderWithChildren;
 
 WumboDrawer.Header = (props: HeaderProps) => {
-  const { toggle } = useDrawer();
+  const { toggleDrawer } = useDrawer();
   const hasTitle = !!(props as HeaderNoChildren).title;
 
   return (
@@ -99,7 +99,7 @@ WumboDrawer.Header = (props: HeaderProps) => {
         <div className="ml-3 h-7 flex items-center">
           <button
             className="bg-white rounded-md text-gray-400 hover:text-gray-500 focus:outline-none"
-            onClick={() => toggle()}
+            onClick={() => toggleDrawer()}
           >
             <span className="sr-only">Close panel</span>
             <XIcon className="h-6 w-6" aria-hidden="true" />
@@ -115,7 +115,7 @@ WumboDrawer.Content = (props: { children: ReactNode }) => (
 );
 
 WumboDrawer.Nav = () => {
-  const { creator } = useDrawer();
+  const { creator, isCreating } = useDrawer();
   const creatorInfoState = useUserInfo(creator?.name!);
   const { userInfo: creatorInfo, loading } = creatorInfoState;
 
@@ -126,10 +126,11 @@ WumboDrawer.Nav = () => {
 
         // Fill paths with params in
         let filledPath = path;
-        if (path.endsWith(":tokenBondingKey") && creatorInfo) {
-          filledPath =
-            path.replace(":tokenBondingKey", creatorInfo.tokenBonding.publicKey.toBase58()) +
-            `?name=${creatorInfo.name}`;
+        if (path.endsWith(":tokenBondingKey")) {
+          filledPath = `${path.replace(
+            ":tokenBondingKey",
+            creatorInfo?.tokenBonding?.publicKey?.toBase58() || WUM_BONDING.toBase58()
+          )}${creatorInfo ? "?name=" + creatorInfo.name : ""}`;
         }
 
         if (isDrawerNav && Icon) {
