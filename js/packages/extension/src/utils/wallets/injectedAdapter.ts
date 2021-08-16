@@ -38,6 +38,7 @@ export class InjectedWalletAdapter
     this._autoApprove = false;
 
     const self = this;
+
     window.addEventListener("message", (e: MessageEvent<Message>) => {
       switch (e.data.type) {
         case MessageType.WALLET_RESET: {
@@ -54,7 +55,7 @@ export class InjectedWalletAdapter
 
   get ready(): boolean {
     // dont use this
-    // need to vallidate extending
+    // need to validate extending
     // use readyAsync
     return true;
   }

@@ -4,7 +4,13 @@ import {
   WalletNotConnectedError,
   WalletNotReadyError,
 } from "@solana/wallet-adapter-base";
-import { WalletContext, WALLET_PROVIDERS, useLocalStorage, Notification } from "wumbo-common";
+import {
+  WalletContext,
+  WALLET_PROVIDERS,
+  useLocalStorage,
+  Notification,
+  useInterval,
+} from "wumbo-common";
 import { PublicKey, Transaction } from "@solana/web3.js";
 import { InjectedWalletAdapter } from "./wallets/injectedAdapter";
 import { Wallet, WalletName } from "@solana/wallet-adapter-wallets";
@@ -18,7 +24,7 @@ export class WalletNotSelectedError extends WalletError {}
 
 export const WalletProvider: FC<IWalletProviderProps> = ({ children }) => {
   const [selectCount, setSelectCount] = useState<number>(0);
-  const [name, setName] = useState<WalletName | null>(null);
+  const [name, setName] = useLocalStorage<WalletName | null>("walletName", null);
   const [wallet, setWallet] = useState<Wallet>();
   const [adapter, setAdapter] = useState<InjectedWalletAdapter>();
   const [ready, setReady] = useState(false);
@@ -172,17 +178,19 @@ export const WalletProvider: FC<IWalletProviderProps> = ({ children }) => {
 
   // Reset state and set the wallet, adapter, and ready state when the name changes
   useEffect(() => {
-    reset();
-    const wallet = name ? walletsByName[name] : undefined;
-    const adapter = wallet ? new InjectedWalletAdapter({ name }) : undefined;
-    const asyncReady = async () => {
-      const ready = adapter ? await adapter.readyAsync : false;
-      setReady(ready);
-    };
+    (async () => {
+      reset();
+      const wallet = name ? walletsByName[name] : undefined;
+      const adapter = wallet ? new InjectedWalletAdapter({ name }) : undefined;
+      const asyncReady = async () => {
+        const ready = adapter ? await adapter.readyAsync : false;
+        setReady(ready);
+      };
 
-    setWallet(wallet);
-    setAdapter(adapter);
-    asyncReady();
+      setWallet(wallet);
+      setAdapter(adapter);
+      await asyncReady();
+    })();
   }, [reset, name, walletsByName, setWallet, setAdapter, setReady]);
 
   // Setup and teardown event listeners when the adapter changes
@@ -203,10 +211,9 @@ export const WalletProvider: FC<IWalletProviderProps> = ({ children }) => {
 
   // Try to connect when the adapter changes and is ready
   useEffect(() => {
-    (async function () {
+    (async () => {
       if (adapter) {
         const ready = await adapter?.readyAsync;
-
         if (!ready && wallet?.name === name) {
           window.open(wallet!.url, "_blank");
         }
@@ -224,6 +231,26 @@ export const WalletProvider: FC<IWalletProviderProps> = ({ children }) => {
       }
     })();
   }, [selectCount, adapter, ready, setConnecting]);
+
+  useEffect(() => {
+    document.onreadystatechange = async () => {
+      if (document.readyState === "complete") {
+        if (adapter && !connected) {
+          const ready = await adapter.readyAsync;
+          if (ready) {
+            setConnecting(true);
+            try {
+              await adapter.connect();
+            } catch (error) {
+              // Don't throw error, but onError will still be called
+            } finally {
+              setConnecting(false);
+            }
+          }
+        }
+      }
+    };
+  }, [name, adapter]);
 
   return (
     <WalletContext.Provider
