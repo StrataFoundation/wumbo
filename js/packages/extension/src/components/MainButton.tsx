@@ -40,7 +40,6 @@ export const MainButton: FC<Props> = ({
           onClick={() =>
             toggleDrawer({
               creator: { name: creatorName, img: creatorImg },
-              isCreating: true,
             })
           }
           {...btnProps}
@@ -67,7 +66,6 @@ export const MainButton: FC<Props> = ({
         onClick={() =>
           toggleDrawer({
             creator: { name: creatorName, img: creatorImg },
-            isCreating: false,
           })
         }
         {...btnProps}
