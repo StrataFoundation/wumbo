@@ -188,14 +188,14 @@ export const WalletProvider: FC<IWalletProviderProps> = ({ children }) => {
     const normalWallet = name ? walletsByName[name] : undefined;
     const adapter = injectedWallet ? new InjectedWalletAdapter({ name }) : normalWallet?.adapter();
     const asyncReady = async () => {
-      const ready = adapter && adapter instanceof InjectedWalletAdapter ? await adapter.readyAsync : true;
+      const ready = adapter && adapter instanceof InjectedWalletAdapter ? await adapter.readyAsync : !!adapter?.ready;
       setReady(ready);
     };
 
     setWallet(injectedWallet || normalWallet);
     setAdapter(adapter);
     asyncReady();
-  }, [reset, name, injectedWalletsByName, setWallet, setAdapter, setReady]);
+  }, [reset, name, walletsByName, setWallet, setAdapter, setReady]);
 
   // Setup and teardown event listeners when the adapter changes
   useEffect(() => {
@@ -217,7 +217,7 @@ export const WalletProvider: FC<IWalletProviderProps> = ({ children }) => {
   useEffect(() => {
     (async function () {
       if (adapter) {
-        const ready = adapter instanceof InjectedWalletAdapter ? await adapter?.readyAsync : true;
+        const ready = adapter instanceof InjectedWalletAdapter ? await adapter?.readyAsync : !!adapter?.ready;
 
         if (!ready && wallet?.name === name) {
           window.open(wallet!.url, "_blank");
