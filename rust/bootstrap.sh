@@ -7,9 +7,16 @@ echo $WUM_CURVE_LOG
 WUM_CURVE_ARR=( $WUM_CURVE_LOG )
 WUM_CURVE=${WUM_CURVE_ARR[2]}
 
-sleep 15 # No idea why, doesn't work without this.
+# No idea why, doesn't work without this.
+max_retry=20
+counter=0
+until WUM_BONDING_LOG=$(./spl-token-bonding/cli/target/debug/spl-token-bonding create-bonding $WUM_CURVE So11111111111111111111111111111111111111112 2> /dev/null) 
+do
+   sleep 1
+   [[ counter -eq $max_retry ]] && echo "Failed!" && exit 1
+   ((counter++))
+done
 
-WUM_BONDING_LOG=$(./spl-token-bonding/cli/target/debug/spl-token-bonding create-bonding $WUM_CURVE So11111111111111111111111111111111111111112)
 echo $WUM_BONDING_LOG
 WUM_BONDING_ARR=( $WUM_BONDING_LOG )
 WUM_TOKEN=${WUM_BONDING_ARR[3]}
@@ -20,4 +27,4 @@ echo $CREATOR_CURVE_LOG
 CREATOR_CURVE_ARR=( $WUM_CURVE_LOG )
 CREATOR_CURVE=${CREATOR_CURVE_ARR[2]}
 
-./spl-wumbo/cli/target/debug/spl-wumbo create-wumbo-instance $WUM_TOKEN $CREATOR_CURVE
+./wumbo/cli/target/debug/spl-wumbo create-wumbo-instance $WUM_TOKEN $CREATOR_CURVE

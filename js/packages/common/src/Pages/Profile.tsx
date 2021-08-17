@@ -2,7 +2,7 @@ import React from 'react';
 import { useTokenRefFromBonding } from '../utils/tokenRef';
 import { Spinner } from '../Spinner';
 import { useAccount } from '../utils/account';
-import { TokenBondingV0 } from "spl-token-bonding";
+import { TokenBondingV0 } from "@wum.bo/spl-token-bonding";
 import { PublicKey } from '@solana/web3.js';
 import { supplyAsNum, useAssociatedAccount, useBondingPricing, useFiatPrice, useMint, useOwnedAmount, useQuery, useReverseTwitter, useTokenMetadata } from '../utils';
 import { StatCard } from "../StatCard";

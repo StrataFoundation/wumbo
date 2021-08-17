@@ -10,8 +10,7 @@ import {
 import { Token, MintLayout } from "@solana/spl-token";
 import { initializeCreatorInstruction } from "./instruction";
 import { WumboInstance } from "./state";
-import { initializeTokenBondingV0Instruction } from "spl-token-bonding";
-import { TokenBondingV0 } from "spl-token-bonding";
+import { initializeTokenBondingV0Instruction } from "@wum.bo/spl-token-bonding";
 import { WalletAdapter } from "@solana/wallet-adapter-base";
 import {
   getHashedName,

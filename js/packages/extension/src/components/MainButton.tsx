@@ -1,6 +1,6 @@
 import React, { FC } from "react";
 import { Link } from "react-router-dom";
-import { WumboInstance } from "spl-wumbo";
+import { WumboInstance } from "@wum.bo/spl-wumbo";
 import { useUserInfo } from "@/utils/userState";
 import { useAccount } from "wumbo-common";
 import {

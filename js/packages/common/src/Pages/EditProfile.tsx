@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { PublicKey } from "@solana/web3.js";
 import { useParams } from "react-router-dom";
 import { SubmitHandler, useForm } from "react-hook-form";
-import { TokenBondingV0 } from "spl-token-bonding";
+import { TokenBondingV0 } from "@wum.bo/spl-token-bonding";
 import { useReverseTwitter } from "../utils/twitter";
 import { useClaimedTokenRef } from "../utils/tokenRef";
 import { SetMetadataArgs, useSetMetadata, useTokenMetadata } from "../utils/metaplex";

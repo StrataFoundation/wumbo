@@ -29,7 +29,7 @@ import { TokenForm, FormValues } from "./TokenForm";
 import { CashIcon } from "@heroicons/react/solid";
 import Logo from "../../../public/assets/img/logo.svg";
 import { PublicKey } from "@solana/web3.js";
-import { TokenBondingV0 } from "spl-token-bonding";
+import { TokenBondingV0 } from "@wum.bo/spl-token-bonding";
 import SolLogo from "../../../public/assets/img/sol.svg";
 import { WumboDrawer } from "../WumboDrawer";
 

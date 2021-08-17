@@ -110,6 +110,6 @@ export function initializeCreatorInstruction(
   return new TransactionInstruction({
     programId,
     keys,
-    data: Buffer.from(serialize(WUMBO_INSTRUCTION_SCHEMA, new InitializeSocialTokenV0Args()));
+    data: Buffer.from(serialize(WUMBO_INSTRUCTION_SCHEMA, new InitializeSocialTokenV0Args()))
   });
 }

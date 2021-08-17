@@ -1,6 +1,6 @@
 import React, { useState, useCallback } from "react";
 import { useConnection } from "@oyster/common";
-import { buyBondingInstructions, sellBondingInstructions } from "spl-token-bonding";
+import { buyBondingInstructions, sellBondingInstructions } from "@wum.bo/spl-token-bonding";
 import { PublicKey, Transaction, sendAndConfirmRawTransaction } from "@solana/web3.js";
 import { WalletNotConnectedError } from "@solana/wallet-adapter-base";
 import {

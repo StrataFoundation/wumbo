@@ -1,4 +1,4 @@
-import { Wumbo } from "spl-wumbo";
+import { Wumbo } from "@wum.bo/spl-wumbo";
 import { getTld } from "../utils";
 import { WUMBO_PROGRAM_ID, WUMBO_INSTANCE_KEY } from "./globals"
 

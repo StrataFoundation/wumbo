@@ -1,6 +1,6 @@
 import React from "react";
 import { Spinner, useTokenMetadata } from ".";
-import { TokenBondingV0 } from "../../spl-token-bonding/dist/lib";
+import { TokenBondingV0 } from "@wum.bo/spl-token-bonding/dist/lib";
 import { classNames } from "./utils/utils";
 
 /*

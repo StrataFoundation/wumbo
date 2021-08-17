@@ -18,9 +18,9 @@ import {
 } from "@solana/web3.js";
 import { getFilesWithMetadata, getImage, getMetadataKey } from "./utils";
 import { useWallet } from "../wallet";
-import { TokenRef } from "spl-wumbo";
+import { TokenRef } from "@wum.bo/spl-wumbo";
 import { useMint } from "../mintState";
-import { TokenBondingV0 } from "spl-token-bonding";
+import { TokenBondingV0 } from "@wum.bo/spl-token-bonding";
 import { useState } from "react";
 import {
   createMetadataWithArweave,

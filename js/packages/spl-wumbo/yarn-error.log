@@ -18,7 +18,7 @@ Trace:
 
 npm manifest: 
   {
-      "name": "spl-wumbo",
+      "name": "@wum.bo/spl-wumbo",
       "version": "1.0.0",
       "description": "Interface to the wumbo smart contract",
       "repository": {
@@ -40,7 +40,7 @@ npm manifest:
           "@solana/wallet-base": "0.0.1",
           "@solana/web3.js": "1.18.0",
           "borsh": "^0.4.0",
-          "spl-token-bonding": "^1.0.0"
+          "@wum.bo/spl-token-bonding": "^1.0.0"
       },
       "devDependencies": {
           "prettier": "2.3.1",

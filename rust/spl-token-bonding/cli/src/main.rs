@@ -9,6 +9,7 @@ use solana_clap_utils::fee_payer::fee_payer_arg;
 use solana_clap_utils::input_validators::{
     is_parsable, is_url_or_moniker, is_valid_pubkey, normalize_to_url_if_moniker,
 };
+use solana_sdk::commitment_config::CommitmentConfig;
 use spl_associated_token_account::create_associated_token_account;
 use solana_clap_utils::keypair::signer_from_path;
 use solana_client::rpc_client::RpcClient;
@@ -232,7 +233,8 @@ fn main() {
                 Transaction::new_with_payer(&instructions, Some(&fee_payer.pubkey()));
             let recent_blockhash = client.get_recent_blockhash().unwrap().0;
             transaction.sign(&vec![fee_payer.as_ref(), &curve], recent_blockhash);
-            client.send_transaction(&transaction).unwrap();
+            let sig = client.send_transaction(&transaction).unwrap();
+            client.confirm_transaction_with_commitment(&sig, CommitmentConfig::finalized());
             println!("Log curve {} created!", curve_key);
         }
         ("create-bonding", Some(arg_matches)) => {
@@ -288,7 +290,8 @@ fn main() {
                 &vec![fee_payer.as_ref(), &target],
                 recent_blockhash,
             );
-            client.send_transaction(&transaction).unwrap();
+            let sig = client.send_transaction(&transaction).unwrap();
+            client.confirm_transaction_with_commitment(&sig, CommitmentConfig::finalized());
             println!("Token defined at {}", target_key.to_string());
             println!("Bonding defined at {}", token_bonding_key)
         }

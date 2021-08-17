@@ -1,6 +1,6 @@
 import React, { Fragment, useState } from "react";
 import { ChevronRightIcon } from "@heroicons/react/solid";
-import { TokenBondingV0 } from "spl-token-bonding";
+import { TokenBondingV0 } from "@wum.bo/spl-token-bonding";
 import { useBondingPricing, useFiatPrice, useOwnedAmount } from "./utils/pricing";
 import { useTokenMetadata } from "./utils/metaplex/hooks";
 import { MetadataAvatar } from "./Avatar";
