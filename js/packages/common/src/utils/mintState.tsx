@@ -2,7 +2,7 @@ import { AccountInfo, PublicKey } from "@solana/web3.js";
 import { useEffect, useState } from "react";
 import { MintInfo } from "@solana/spl-token";
 import { useConnection } from "@oyster/common";
-import { Mint } from "spl-wumbo";
+import { Mint } from "@wum.bo/spl-wumbo";
 import { SOL_TOKEN } from "../constants/globals";
 import { Numberu64 } from "@bonfida/spl-name-service";
 

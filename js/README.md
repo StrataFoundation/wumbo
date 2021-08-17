@@ -3,7 +3,7 @@
 ```bash
 cp -r /path/to/metaplex/common packages/oyster-common
 npx lerna bootstrap
-npx lerna exec --parallel yarn run watch --scope wumbo-common --scope spl-token-bonding --scope @oyster/common --scope spl-wumbo --scope wumbo-extension
+npx lerna exec --parallel yarn run watch --scope wumbo-common --scope @wum.bo/spl-token-bonding --scope @oyster/common --scope @wum.bo/spl-wumbo --scope wumbo-extension
 ```
 
 ### Starting the site

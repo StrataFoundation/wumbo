@@ -51,7 +51,7 @@ async function getAllTokenAccounts(
         ],
       })
     )
-      .map(({ account, pubkey }) => TokenAccountParser(pubkey, account).info)
+      .map(({ account, pubkey }) => TokenAccountParser(pubkey, account)!.info)
       .sort((a, b) => b.amount.toNumber() - a.amount.toNumber())
       .map((account, index) => ({
         rank: index + 1,

@@ -2,9 +2,9 @@ import { useEffect, useMemo, useState } from "react";
 import { Connection, PublicKey } from "@solana/web3.js";
 import { useConnection } from "@oyster/common";
 import { useAccount, UseAccountState } from "./account";
-import { TokenRef, Wumbo } from "spl-wumbo";
+import { TokenRef, Wumbo } from "@wum.bo/spl-wumbo";
 import { useAsync, useAsyncCallback } from "react-async-hook";
-import { TokenBondingV0 } from "spl-token-bonding";
+import { TokenBondingV0 } from "@wum.bo/spl-token-bonding";
 import { TokenMetadata, useTokenMetadata } from "./metaplex/hooks";
 import { getWumbo } from "../constants/wumbo";
 

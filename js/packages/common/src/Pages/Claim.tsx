@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { useHistory } from "react-router-dom";
-import { CreateSocialTokenResult, TokenRef } from "spl-wumbo";
-import { TokenBondingV0 } from "spl-token-bonding";
+import { CreateSocialTokenResult, TokenRef } from "@wum.bo/spl-wumbo";
+import { TokenBondingV0 } from "@wum.bo/spl-token-bonding";
 import { useWallet } from "../utils/wallet";
 import { useClaim, useCreateCoin } from "../utils/claim";
 import { useSolOwnedAmount, useRentExemptAmount } from "../utils/pricing";

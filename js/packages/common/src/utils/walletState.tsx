@@ -54,7 +54,7 @@ export function useAssociatedAccount(
   const { info: associatedAccount, loading } = useAccount(
     associatedTokenAddress,
     (pubkey: PublicKey, acct: AccountInfo<Buffer>) => {
-      return TokenAccountParser(pubkey, acct).info;
+      return TokenAccountParser(pubkey, acct)!.info;
     }
   );
 

@@ -1,6 +1,6 @@
 import { useState } from "react";
-import { CreateSocialTokenResult, TokenRef, Wumbo, WumboInstance } from "spl-wumbo";
-import { TokenBondingV0 } from "spl-token-bonding";
+import { CreateSocialTokenResult, TokenRef, Wumbo, WumboInstance } from "@wum.bo/spl-wumbo";
+import { TokenBondingV0 } from "@wum.bo/spl-token-bonding";
 import { useAsyncCallback } from "react-async-hook";
 import {
   SPL_ASSOCIATED_TOKEN_ACCOUNT_PROGRAM_ID,

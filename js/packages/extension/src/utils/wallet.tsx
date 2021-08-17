@@ -1,10 +1,11 @@
 import React, { FC, ReactNode, useCallback, useEffect, useMemo, useState } from "react";
 import {
+  WalletAdapter,
   WalletError,
   WalletNotConnectedError,
   WalletNotReadyError,
 } from "@solana/wallet-adapter-base";
-import { WalletContext, WALLET_PROVIDERS, useLocalStorage, Notification } from "wumbo-common";
+import { WalletContext, WALLET_PROVIDERS, useLocalStorage, Notification, INJECTED_PROVIDERS } from "wumbo-common";
 import { PublicKey, Transaction } from "@solana/web3.js";
 import { InjectedWalletAdapter } from "./wallets/injectedAdapter";
 import { Wallet, WalletName } from "@solana/wallet-adapter-wallets";
@@ -20,7 +21,7 @@ export const WalletProvider: FC<IWalletProviderProps> = ({ children }) => {
   const [selectCount, setSelectCount] = useState<number>(0);
   const [name, setName] = useState<WalletName | null>(null);
   const [wallet, setWallet] = useState<Wallet>();
-  const [adapter, setAdapter] = useState<InjectedWalletAdapter>();
+  const [adapter, setAdapter] = useState<WalletAdapter>();
   const [ready, setReady] = useState(false);
   const [connecting, setConnecting] = useState(false);
   const [disconnecting, setDisconnecting] = useState(false);
@@ -47,6 +48,14 @@ export const WalletProvider: FC<IWalletProviderProps> = ({ children }) => {
     [toast]
   );
 
+  const injectedWalletsByName = useMemo(
+    () =>
+      INJECTED_PROVIDERS.reduce((walletsByName, wallet) => {
+        walletsByName[wallet.name] = wallet;
+        return walletsByName;
+      }, {} as { [name in WalletName]: Wallet }),
+    [INJECTED_PROVIDERS]
+  );
   const walletsByName = useMemo(
     () =>
       WALLET_PROVIDERS.reduce((walletsByName, wallet) => {
@@ -81,7 +90,9 @@ export const WalletProvider: FC<IWalletProviderProps> = ({ children }) => {
 
     setConnected(true);
     setAutoApprove(adapter.autoApprove);
-    setPublicKey(adapter.publicKey?.toBase58() || null);
+    const newPublicKey = adapter.publicKey?.toBase58()
+    console.log(`Connected to wallet ${newPublicKey}`);
+    setPublicKey(newPublicKey || null);
   }, [adapter, setConnected, setAutoApprove, setPublicKey]);
 
   const onDisconnect = useCallback(() => reset(), [reset]);
@@ -173,14 +184,15 @@ export const WalletProvider: FC<IWalletProviderProps> = ({ children }) => {
   // Reset state and set the wallet, adapter, and ready state when the name changes
   useEffect(() => {
     reset();
-    const wallet = name ? walletsByName[name] : undefined;
-    const adapter = wallet ? new InjectedWalletAdapter({ name }) : undefined;
+    const injectedWallet = name ? injectedWalletsByName[name] : undefined;
+    const normalWallet = name ? walletsByName[name] : undefined;
+    const adapter = injectedWallet ? new InjectedWalletAdapter({ name }) : normalWallet?.adapter();
     const asyncReady = async () => {
-      const ready = adapter ? await adapter.readyAsync : false;
+      const ready = adapter && adapter instanceof InjectedWalletAdapter ? await adapter.readyAsync : !!adapter?.ready;
       setReady(ready);
     };
 
-    setWallet(wallet);
+    setWallet(injectedWallet || normalWallet);
     setAdapter(adapter);
     asyncReady();
   }, [reset, name, walletsByName, setWallet, setAdapter, setReady]);
@@ -205,7 +217,7 @@ export const WalletProvider: FC<IWalletProviderProps> = ({ children }) => {
   useEffect(() => {
     (async function () {
       if (adapter) {
-        const ready = await adapter?.readyAsync;
+        const ready = adapter instanceof InjectedWalletAdapter ? await adapter?.readyAsync : !!adapter?.ready;
 
         if (!ready && wallet?.name === name) {
           window.open(wallet!.url, "_blank");

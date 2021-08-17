@@ -1,7 +1,7 @@
 {
-    "name": "spl-token-bonding",
-    "version": "1.0.0",
-    "description": "Interface to the spl-token-bonding smart contract",
+    "name": "@wum.bo/spl-token-bonding",
+    "version": "1.0.1",
+    "description": "Interface to the @wum.bo/spl-token-bonding smart contract",
     "repository": {
         "type": "git",
         "url": "https://github.com/ChewingGlassFund/wumbo"
@@ -9,8 +9,11 @@
     "main": "dist/lib/index.js",
     "types": "dist/lib/index.d.ts",
     "exports": {
-        ".": "./dist/lib"
+        ".": "./dist/lib/index.js"
     },
+    "files": [
+        "dist/lib/**/*"
+    ],
     "scripts": {
         "build": "tsc --project tsconfig.json",
         "watch": "tsc --watch --project tsconfig.json",

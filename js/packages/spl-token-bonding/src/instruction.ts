@@ -7,6 +7,108 @@ import {
 } from "@solana/web3.js";
 import { Numberu16 } from "./utils";
 import { Numberu64 } from "@bonfida/spl-name-service";
+import BN from "bn.js";
+import { serialize } from "borsh";
+
+export class CreateLogCurveV0Args {
+  instruction: number = 0;
+  g: BN;
+  c: BN;
+  taylorIterations: number;
+  isBaseRelative: boolean;
+
+  constructor(args: { g: BN, c: BN, taylorIterations: number, isBaseRelative: boolean }) {
+    this.g = args.g;
+    this.c = args.c;
+    this.taylorIterations = args.taylorIterations;
+    this.isBaseRelative = args.isBaseRelative;
+  }
+}
+
+export class InitializeTokenBondingV0Args {
+  instruction: number = 1;
+  founderRewardPercentage: number;
+  mintCap: BN | undefined;
+  tokenBondingAuthority: PublicKey | undefined
+
+  constructor(args: { founderRewardPercentage: number, mintCap: BN | undefined, tokenBondingAuthority: PublicKey | undefined }) {
+    this.founderRewardPercentage = args.founderRewardPercentage;
+    this.mintCap = args.mintCap;
+    this.tokenBondingAuthority = args.tokenBondingAuthority;
+  }
+}
+
+export class BuyV0Args {
+  instruction: number = 2;
+  amount: BN;
+  maxPrice: BN;
+
+  constructor(args: { amount: BN, maxPrice: BN }) {
+    this.amount = args.amount;
+    this.maxPrice = args.maxPrice;
+  }
+}
+
+export class SellV0Args {
+  instruction: number = 2;
+  amount: BN;
+  minPrice: BN;
+
+  constructor(args: { amount: BN, minPrice: BN }) {
+    this.amount = args.amount;
+    this.minPrice = args.minPrice
+  }
+}
+
+export const TOKEN_BONDING_INSTRUCTION_SCHEMA = new Map<any, any>([
+  [
+    CreateLogCurveV0Args,
+    {
+      kind: 'struct',
+      fields: [
+        ['instruction', 'u8'],
+        ['g', 'u128'],
+        ['c', 'u128'],
+        ['taylorIterations', 'u16'],
+        ['isBaseRelative', 'u8'], // boolean
+      ],
+    },
+  ],
+  [
+    InitializeTokenBondingV0Args,
+    {
+      kind: 'struct',
+      fields: [
+        ['instruction', 'u8'],
+        ['founderRewardPercentage', 'u16'],
+        ['mintCap', { kind: 'option', type: 'u64' }],
+        ['tokenBondingAuthority', { kind: 'option', type: 'pubkey' }],
+      ],
+    },
+  ],
+  [
+    BuyV0Args,
+    {
+      kind: 'struct',
+      fields: [
+        ['instruction', 'u8'],
+        ['amount', 'u64'],
+        ['maxPrice', 'u64'],
+      ],
+    },
+  ],
+  [
+    SellV0Args,
+    {
+      kind: 'struct',
+      fields: [
+        ['instruction', 'u8'],
+        ['amount', 'u64'],
+        ['minPrice', 'u64'],
+      ],
+    },
+  ],
+]);
 
 export function initializeTokenBondingV0Instruction(
   programId: PublicKey,
@@ -82,22 +184,11 @@ export function initializeTokenBondingV0Instruction(
         isWritable: false,
       },
     ],
-    data: Buffer.concat([
-      Buffer.from(Int8Array.from([1])),
-      new Numberu16(founderRewardsPercentage).toBuffer(),
-      mintCap
-        ? Buffer.concat([
-            Buffer.from(Int8Array.from([1])),
-            new Numberu16(mintCap).toBuffer(),
-          ])
-        : Buffer.from(Int8Array.from([0])),
-      tokenBondingAuthority
-        ? Buffer.concat([
-            Buffer.from(Int8Array.from([1])),
-            tokenBondingAuthority.toBuffer(),
-          ])
-        : Buffer.from(Int8Array.from([0])),
-    ]),
+    data: Buffer.from(serialize(TOKEN_BONDING_INSTRUCTION_SCHEMA, new InitializeTokenBondingV0Args({
+      founderRewardPercentage: founderRewardsPercentage,
+      mintCap: mintCap ? new Numberu64(mintCap) : undefined,
+      tokenBondingAuthority: tokenBondingAuthority || undefined
+    })))
   });
 }
 
@@ -181,11 +272,10 @@ export function buyV0Instruction(
         isWritable: false,
       },
     ],
-    data: Buffer.concat([
-      Buffer.from(Int8Array.from([2])),
-      new Numberu64(amount).toBuffer(),
-      new Numberu64(maxPrice).toBuffer(),
-    ]),
+    data: Buffer.from(serialize(TOKEN_BONDING_INSTRUCTION_SCHEMA, new BuyV0Args({
+      amount: new Numberu64(amount),
+      maxPrice: new Numberu64(maxPrice)
+    })))
   });
 }
 
@@ -263,10 +353,9 @@ export function sellV0Instruction(
         isWritable: false,
       },
     ],
-    data: Buffer.concat([
-      Buffer.from(Int8Array.from([3])),
-      new Numberu64(amount).toBuffer(),
-      new Numberu64(minPrice).toBuffer(),
-    ]),
+    data: Buffer.from(serialize(TOKEN_BONDING_INSTRUCTION_SCHEMA, new SellV0Args({
+      amount: new Numberu64(amount),
+      minPrice: new Numberu64(minPrice)
+    })))
   });
 }

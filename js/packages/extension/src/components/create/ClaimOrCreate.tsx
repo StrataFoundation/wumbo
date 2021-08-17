@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { useHistory } from "react-router-dom";
 import { useConnection } from "@oyster/common";
-import { WumboInstance, Wumbo } from "spl-wumbo";
+import { WumboInstance, Wumbo } from "@wum.bo/spl-wumbo";
 import { claimPath, routes } from "@/constants/routes";
 import {
   WUMBO_INSTANCE_KEY,

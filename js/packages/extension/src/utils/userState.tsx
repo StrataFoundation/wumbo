@@ -12,9 +12,9 @@ import {
   useTwitterTokenRef,
 } from "wumbo-common";
 import { AccountInfo, PublicKey } from "@solana/web3.js";
-import { TokenRef } from "spl-wumbo";
+import { TokenRef } from "@wum.bo/spl-wumbo";
 import { MintInfo } from "@solana/spl-token";
-import { LogCurveV0, TokenBondingV0 } from "spl-token-bonding";
+import { LogCurveV0, TokenBondingV0 } from "@wum.bo/spl-token-bonding";
 
 interface UserState {
   tokenRef?: TokenRef;

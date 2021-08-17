@@ -5,6 +5,42 @@ import {
   SYSVAR_RENT_PUBKEY,
   TransactionInstruction,
 } from "@solana/web3.js";
+import { serialize } from "borsh";
+
+export class InitializeWumboV0Args {
+  instruction: number = 0;
+  nameProgramId: PublicKey;
+
+  constructor(args: { nameProgramId: PublicKey }) {
+    this.nameProgramId = args.nameProgramId;
+  }
+}
+export class InitializeSocialTokenV0Args {
+  instruction: number = 1;
+}
+
+export const WUMBO_INSTRUCTION_SCHEMA = new Map<any, any>([
+  [
+    InitializeWumboV0Args,
+    {
+      kind: 'struct',
+      fields: [
+        ['instruction', 'u8'],
+        ['nameProgramId', 'pubkey'],
+      ],
+    },
+  ],
+  [
+    InitializeSocialTokenV0Args,
+    {
+      kind: 'struct',
+      fields: [
+        ['instruction', 'u8'],
+      ],
+    },
+  ],
+]);
+
 
 export function initializeCreatorInstruction(
   programId: PublicKey,
@@ -74,6 +110,6 @@ export function initializeCreatorInstruction(
   return new TransactionInstruction({
     programId,
     keys,
-    data: Buffer.concat([Buffer.from(Int8Array.from([1]))]),
+    data: Buffer.from(serialize(WUMBO_INSTRUCTION_SCHEMA, new InitializeSocialTokenV0Args()))
   });
 }

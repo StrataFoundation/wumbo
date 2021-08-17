@@ -24,7 +24,7 @@
   "include": [
     "src",
     "../common/src/utils/wallet.tsx",
-    "../spl-wumbo/src/bindings.ts"
+    "../@wum.bo/spl-wumbo/src/bindings.ts"
   ],
   "exclude": ["dist", "node_modules"]
 }
