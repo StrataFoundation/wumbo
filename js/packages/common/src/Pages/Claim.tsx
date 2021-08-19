@@ -1,8 +1,6 @@
 import React, { useState } from "react";
-import { useHistory } from "react-router-dom";
 import { CreateSocialTokenResult, TokenRef } from "@wum.bo/spl-wumbo";
 import { TokenBondingV0 } from "@wum.bo/spl-token-bonding";
-import { useWallet } from "../utils/wallet";
 import { useClaim, useCreateCoin } from "../utils/claim";
 import { useSolOwnedAmount, useRentExemptAmount } from "../utils/pricing";
 import { TWITTER_REGISTRY_SIZE } from "../utils/twitter";
@@ -34,7 +32,9 @@ export const Claim = React.memo(({ handle, redirectUri, code, onComplete }: ICla
   } = useCreateCoin();
 
   const { amount: sol, loading: solLoading } = useSolOwnedAmount();
-  const { amount: amountNeeded, loading: amountNeededLoading } = useRentExemptAmount(TWITTER_REGISTRY_SIZE + TokenRef.LEN + TokenBondingV0.LEN)
+  const { amount: amountNeeded, loading: amountNeededLoading } = useRentExemptAmount(
+    TWITTER_REGISTRY_SIZE + TokenRef.LEN + TokenBondingV0.LEN
+  );
 
   if (error) {
     console.error(error);
@@ -56,24 +56,17 @@ export const Claim = React.memo(({ handle, redirectUri, code, onComplete }: ICla
     return (
       <div className="flex flex-col">
         <span>
-          It looks like you don't have any SOL. It costs around{" "}
-          {amountNeeded!.toFixed(4)} SOL to claim your twitter handle and coin.
-          Get some with FTX Pay:
+          It looks like you don't have any SOL. It costs around {amountNeeded!.toFixed(4)} SOL to
+          claim your twitter handle and coin. Get some with FTX Pay:
         </span>
-        <LinkButton
-          target="_blank"
-          className="mt-2"
-          href={ftxPayLink}
-          color="primary"
-        >
+        <LinkButton target="_blank" className="mt-2" href={ftxPayLink} color="primary">
           Get SOL
         </LinkButton>
       </div>
     );
   }
 
-  const loading =
-    claiming || creating || claimAwaitingApproval || createAwaitingApproval;
+  const loading = claiming || creating || claimAwaitingApproval || createAwaitingApproval;
   const awaitingApproval = claimAwaitingApproval || createAwaitingApproval;
 
   return (

@@ -17,7 +17,7 @@ import { gsl_sf_lambert_W0 } from "./lambertw";
 import { useAccount } from "./account";
 import { useMint } from "./mintState";
 import { useAssociatedAccount } from "./walletState";
-import { useWallet } from "./wallet";
+import { useWallet } from "../contexts/walletContext";
 import { useConnection } from "@oyster/common";
 import { useAsync } from "react-async-hook";
 import { useTwitterTokenRef } from "./tokenRef";
@@ -46,9 +46,7 @@ export function amountAsNum(amount: u64, mint: MintInfo): number {
   return amount.div(decimals).toNumber() + decimal;
 }
 
-export function useRentExemptAmount(
-  size: number
-): {
+export function useRentExemptAmount(size: number): {
   loading: boolean;
   amount: number | undefined;
   error: Error | undefined;
@@ -66,9 +64,9 @@ export function useRentExemptAmount(
 }
 
 export function useSolOwnedAmount(): { amount: number; loading: boolean } {
-  const { walletAdapter } = useWallet();
+  const { adapter } = useWallet();
   const { info: lamports, loading } = useAccount<number>(
-    walletAdapter?.publicKey || undefined,
+    adapter?.publicKey || undefined,
     (_, account) => account.lamports
   );
   const result = React.useMemo(() => (lamports || 0) / Math.pow(10, 9), [lamports]);
@@ -127,8 +125,8 @@ export function useOwnedAmountForOwnerAndHandle(
 }
 
 export function useOwnedAmount(token: PublicKey | undefined): number | undefined {
-  const { walletAdapter } = useWallet();
-  const { associatedAccount } = useAssociatedAccount(walletAdapter?.publicKey, token);
+  const { adapter } = useWallet();
+  const { associatedAccount } = useAssociatedAccount(adapter?.publicKey, token);
   const mint = useMint(token);
   const [amount, setAmount] = useState<number>();
 
@@ -149,46 +147,38 @@ export function useOwnedAmount(token: PublicKey | undefined): number | undefined
   This might help if you can't
   https://www.wolframalpha.com/input/?i=solve%5Bc*%281%2Fg+%2B+%28s+%2B+x%29%29+*+log%28g+*+%28s+%2B+x%29+%2B+1%29+-+c+*+%28s+%2B+x%29+%3D+k%2C+x%5D
 */
-export const inverseLogCurve = (
-  curve: LogCurveV0,
-  base: MintInfo,
-  target: MintInfo,
-  founderRewardsPercentage: number
-) => (baseAmount: number): number => {
-  const c = curve.c;
-  const gNonBaseRel = curve.g;
-  const g = curve.isBaseRelative ? gNonBaseRel / (1.0 + supplyAsNum(base)) : gNonBaseRel;
-  const s = supplyAsNum(target);
-  const rewardsDecimal = founderRewardsPercentage / 10000;
-  const k = baseAmount + generalLogCurve(c, g, s);
-  const exp = gsl_sf_lambert_W0((g * k - c) / (c * Math.E)) + 1;
+export const inverseLogCurve =
+  (curve: LogCurveV0, base: MintInfo, target: MintInfo, founderRewardsPercentage: number) =>
+  (baseAmount: number): number => {
+    const c = curve.c;
+    const gNonBaseRel = curve.g;
+    const g = curve.isBaseRelative ? gNonBaseRel / (1.0 + supplyAsNum(base)) : gNonBaseRel;
+    const s = supplyAsNum(target);
+    const rewardsDecimal = founderRewardsPercentage / 10000;
+    const k = baseAmount + generalLogCurve(c, g, s);
+    const exp = gsl_sf_lambert_W0((g * k - c) / (c * Math.E)) + 1;
 
-  return Math.abs((Math.pow(Math.E, exp) - g * s - 1) / ((1 + rewardsDecimal) * g));
-};
+    return Math.abs((Math.pow(Math.E, exp) - g * s - 1) / ((1 + rewardsDecimal) * g));
+  };
 
-const startFinishLogCurve = (curve: LogCurveV0, base: MintInfo) => (
-  start: number,
-  finish: number
-) => {
-  const c = curve.c;
-  const gNonBaseRel = curve.g;
-  const g = curve.isBaseRelative ? gNonBaseRel / (1.0 + supplyAsNum(base)) : gNonBaseRel;
+const startFinishLogCurve =
+  (curve: LogCurveV0, base: MintInfo) => (start: number, finish: number) => {
+    const c = curve.c;
+    const gNonBaseRel = curve.g;
+    const g = curve.isBaseRelative ? gNonBaseRel / (1.0 + supplyAsNum(base)) : gNonBaseRel;
 
-  return logCurveRange(c, g, start, finish);
-};
+    return logCurveRange(c, g, start, finish);
+  };
 
-export const logCurve = (
-  curve: LogCurveV0,
-  base: MintInfo,
-  target: MintInfo,
-  founderRewardsPercentage: number
-) => (targetAmount: number): number => {
-  const rewardsDecimal = founderRewardsPercentage / 10000;
-  return startFinishLogCurve(curve, base)(
-    supplyAsNum(target),
-    supplyAsNum(target) + targetAmount * (1 + rewardsDecimal)
-  );
-};
+export const logCurve =
+  (curve: LogCurveV0, base: MintInfo, target: MintInfo, founderRewardsPercentage: number) =>
+  (targetAmount: number): number => {
+    const rewardsDecimal = founderRewardsPercentage / 10000;
+    return startFinishLogCurve(curve, base)(
+      supplyAsNum(target),
+      supplyAsNum(target) + targetAmount * (1 + rewardsDecimal)
+    );
+  };
 
 export interface PricingState {
   loading: boolean;

@@ -22,7 +22,7 @@ import { useAsyncCallback } from "react-async-hook";
 
 export default React.memo(() => {
   const history = useHistory();
-  const { walletAdapter } = useWallet();
+  const { adapter } = useWallet();
   const connection = useConnection();
   const { info: wumboInstance } = useAccount(WUMBO_INSTANCE_KEY, WumboInstance.fromAccount);
   const query = useQuery();
@@ -35,7 +35,7 @@ export default React.memo(() => {
       splWumboProgramId: WUMBO_PROGRAM_ID,
       splNameServicePogramId: SPL_NAME_SERVICE_PROGRAM_ID,
       wumboInstance: WUMBO_INSTANCE_KEY,
-      payer: walletAdapter!,
+      payer: adapter!,
       baseMint: wumboInstance!.wumboMint,
       name: query.get("name")!,
       founderRewardsPercentage: 5.5,

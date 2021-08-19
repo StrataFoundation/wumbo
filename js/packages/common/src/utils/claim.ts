@@ -1,13 +1,12 @@
 import { useState } from "react";
 import { CreateSocialTokenResult, TokenRef, Wumbo, WumboInstance } from "@wum.bo/spl-wumbo";
-import { TokenBondingV0 } from "@wum.bo/spl-token-bonding";
 import { useAsyncCallback } from "react-async-hook";
 import {
   SPL_ASSOCIATED_TOKEN_ACCOUNT_PROGRAM_ID,
   TOKEN_PROGRAM_ID,
   useConnection,
 } from "@oyster/common";
-import { useWallet } from "./wallet";
+import { useWallet } from "../contexts/walletContext";
 import {
   createTestTld,
   claimTwitterTransactionInstructions,
@@ -37,15 +36,15 @@ export function useClaim({
   code: string;
 }): ClaimTransactionState {
   const connection = useConnection();
-  const { walletAdapter } = useWallet();
+  const { adapter } = useWallet();
   const [claiming, setClaiming] = useState<boolean>(false);
 
   async function exec(twitterHandle: string) {
-    if (walletAdapter) {
+    if (adapter) {
       try {
-        await createTestTld(connection, walletAdapter);
+        await createTestTld(connection, adapter);
         const instructions = await claimTwitterTransactionInstructions(connection, {
-          owner: walletAdapter.publicKey!,
+          owner: adapter.publicKey!,
           twitterHandle,
         });
         if (instructions) {
@@ -53,7 +52,7 @@ export function useClaim({
           await postTwitterRegistrarRequest(
             connection,
             instructions,
-            walletAdapter,
+            adapter,
             code!,
             redirectUri!,
             twitterHandle
@@ -82,7 +81,7 @@ interface CreateState {
 }
 export function useCreateCoin(): CreateState {
   const connection = useConnection();
-  const { walletAdapter } = useWallet();
+  const { adapter } = useWallet();
   const [creating, setCreating] = useState<boolean>(false);
   const { info: wumboInstance } = useAccount(WUMBO_INSTANCE_KEY, WumboInstance.fromAccount);
 
@@ -104,7 +103,7 @@ export function useCreateCoin(): CreateState {
           splWumboProgramId: WUMBO_PROGRAM_ID,
           splNameServicePogramId: SPL_NAME_SERVICE_PROGRAM_ID,
           wumboInstance: WUMBO_INSTANCE_KEY,
-          payer: walletAdapter!,
+          payer: adapter!,
           baseMint: wumboInstance!.wumboMint,
           name: twitterHandle,
           founderRewardsPercentage: 5.5,
@@ -115,7 +114,7 @@ export function useCreateCoin(): CreateState {
         result = {
           tokenRefKey: creator.publicKey,
           tokenBondingKey: creator.tokenBonding,
-          ownerKey: walletAdapter?.publicKey!,
+          ownerKey: adapter?.publicKey!,
         };
       }
     } finally {

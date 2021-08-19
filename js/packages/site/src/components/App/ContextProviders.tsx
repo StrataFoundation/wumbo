@@ -1,19 +1,21 @@
-import React, { useEffect } from "react";
-import { EndpointSetter, UsdWumboPriceProvider } from "wumbo-common";
+import React, { useMemo } from "react";
 import {
-  ConnectionProvider,
-  AccountsProvider,
-  useLocalStorageState,
-} from "@oyster/common";
-import { WalletProvider } from "../../utils/wallet";
+  WalletProvider,
+  WALLET_PROVIDERS,
+  EndpointSetter,
+  UsdWumboPriceProvider,
+} from "wumbo-common";
+import { ConnectionProvider, AccountsProvider } from "@oyster/common";
 
 export const ContextProviders: React.FC = ({ children }) => {
+  const wallets = useMemo(() => WALLET_PROVIDERS, []);
+
   return (
     <ConnectionProvider>
       <EndpointSetter>
         <AccountsProvider>
           <UsdWumboPriceProvider>
-            <WalletProvider>{children}</WalletProvider>
+            <WalletProvider wallets={wallets}>{children}</WalletProvider>
           </UsdWumboPriceProvider>
         </AccountsProvider>
       </EndpointSetter>

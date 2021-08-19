@@ -1,26 +1,64 @@
-import React, { FC, ReactNode, useCallback, useEffect, useMemo, useState } from "react";
+// credit https://github.com/solana-labs/wallet-adapter/blob/master/packages/react/src/WalletProvider.tsx
+import React, {
+  FC,
+  ReactNode,
+  createContext,
+  useContext,
+  useState,
+  useEffect,
+  useCallback,
+  useMemo,
+} from "react";
 import {
   WalletAdapter,
   WalletError,
   WalletNotConnectedError,
   WalletNotReadyError,
 } from "@solana/wallet-adapter-base";
-import { WalletContext, WALLET_PROVIDERS, useLocalStorage, Notification, INJECTED_PROVIDERS } from "wumbo-common";
-import { PublicKey, Transaction } from "@solana/web3.js";
-import { InjectedWalletAdapter } from "./wallets/injectedAdapter";
 import { Wallet, WalletName } from "@solana/wallet-adapter-wallets";
-import toast from "react-hot-toast";
+import { PublicKey, Transaction } from "@solana/web3.js";
+import { useLocalStorage } from "../utils";
 
 export interface IWalletProviderProps {
   children: ReactNode;
+  wallets: Wallet[];
+  autoConnect?: boolean;
+  onError?: (error: WalletError) => void;
 }
+
+export interface IWalletContextState {
+  wallet: Wallet | undefined;
+  adapter: WalletAdapter | undefined;
+  select: (walletName: WalletName) => void;
+
+  publicKey: PublicKey | null;
+  ready: boolean;
+  connecting: boolean;
+  disconnecting: boolean;
+  connected: boolean;
+  autoApprove: boolean;
+  awaitingApproval: boolean;
+
+  connect: () => Promise<void>;
+  disconnect: () => Promise<void>;
+  signTransaction: (transaction: Transaction) => Promise<Transaction>;
+  signAllTransactions: (transaction: Transaction[]) => Promise<Transaction[]>;
+}
+
+const WalletContext = createContext<IWalletContextState>({} as IWalletContextState);
 
 export class WalletNotSelectedError extends WalletError {}
 
-export const WalletProvider: FC<IWalletProviderProps> = ({ children }) => {
+const WalletProvider: FC<IWalletProviderProps> = ({
+  children,
+  wallets,
+  onError = (error: WalletError) => console.log(error),
+  autoConnect = false,
+}) => {
   const [selectCount, setSelectCount] = useState<number>(0);
   const [name, setName] = useState<WalletName | null>(null);
   const [wallet, setWallet] = useState<Wallet>();
+
   const [adapter, setAdapter] = useState<WalletAdapter>();
   const [ready, setReady] = useState(false);
   const [connecting, setConnecting] = useState(false);
@@ -29,44 +67,19 @@ export const WalletProvider: FC<IWalletProviderProps> = ({ children }) => {
   const [autoApprove, setAutoApprove] = useState(false);
   const [publicKey, setPublicKey] = useLocalStorage<string | null>("walletPublicKey", null);
   const [awaitingApproval, setAwaitingApproval] = useState<boolean>(false);
-  const [error, setError] = useState<WalletError>();
 
-  const onError = useCallback(
-    (error: WalletError) => {
-      console.log("error log!", error);
-      setError(error);
-      toast.custom((t) => (
-        <Notification
-          type="error"
-          show={t.visible}
-          heading={error.name}
-          message={error.message}
-          onDismiss={() => toast.dismiss(t.id)}
-        />
-      ));
-    },
-    [toast]
-  );
-
-  const injectedWalletsByName = useMemo(
-    () =>
-      INJECTED_PROVIDERS.reduce((walletsByName, wallet) => {
-        walletsByName[wallet.name] = wallet;
-        return walletsByName;
-      }, {} as { [name in WalletName]: Wallet }),
-    [INJECTED_PROVIDERS]
-  );
   const walletsByName = useMemo(
     () =>
-      WALLET_PROVIDERS.reduce((walletsByName, wallet) => {
+      wallets.reduce((walletsByName, wallet) => {
         walletsByName[wallet.name] = wallet;
         return walletsByName;
       }, {} as { [name in WalletName]: Wallet }),
-    [WALLET_PROVIDERS]
+    [wallets]
   );
 
   const select = useCallback(
     async (selected: WalletName | null) => {
+      console.log("SELECTED", selected);
       setSelectCount(selectCount + 1);
       if (name === selected) return;
       setName(selected);
@@ -80,8 +93,7 @@ export const WalletProvider: FC<IWalletProviderProps> = ({ children }) => {
     setDisconnecting(false);
     setConnected(false);
     setAutoApprove(false);
-    setError(undefined);
-  }, [setReady, setConnecting, setDisconnecting, setConnected, setAutoApprove, setError]);
+  }, [setReady, setConnecting, setDisconnecting, setConnected, setAutoApprove]);
 
   const onReady = useCallback(() => setReady(true), [setReady]);
 
@@ -90,8 +102,7 @@ export const WalletProvider: FC<IWalletProviderProps> = ({ children }) => {
 
     setConnected(true);
     setAutoApprove(adapter.autoApprove);
-    const newPublicKey = adapter.publicKey?.toBase58()
-    console.log(`Connected to wallet ${newPublicKey}`);
+    const newPublicKey = adapter.publicKey?.toBase58();
     setPublicKey(newPublicKey || null);
   }, [adapter, setConnected, setAutoApprove, setPublicKey]);
 
@@ -108,7 +119,6 @@ export const WalletProvider: FC<IWalletProviderProps> = ({ children }) => {
 
     if (!ready) {
       window.open(wallet!.url, "_blank");
-
       const error = new WalletNotReadyError();
       onError(error);
       throw error;
@@ -184,15 +194,17 @@ export const WalletProvider: FC<IWalletProviderProps> = ({ children }) => {
   // Reset state and set the wallet, adapter, and ready state when the name changes
   useEffect(() => {
     reset();
-    const injectedWallet = name ? injectedWalletsByName[name] : undefined;
-    const normalWallet = name ? walletsByName[name] : undefined;
-    const adapter = injectedWallet ? new InjectedWalletAdapter({ name }) : normalWallet?.adapter();
+    const wallet = name ? walletsByName[name] : undefined;
+    const adapter = wallet ? wallet.adapter() : undefined;
     const asyncReady = async () => {
-      const ready = adapter && adapter instanceof InjectedWalletAdapter ? await adapter.readyAsync : !!adapter?.ready;
+      const ready =
+        adapter && Object.getOwnPropertyDescriptor(Object.getPrototypeOf(adapter), "readyAsync")
+          ? await (adapter as any)?.readyAsync
+          : !!adapter?.ready;
       setReady(ready);
     };
 
-    setWallet(injectedWallet || normalWallet);
+    setWallet(wallet);
     setAdapter(adapter);
     asyncReady();
   }, [reset, name, walletsByName, setWallet, setAdapter, setReady]);
@@ -217,7 +229,9 @@ export const WalletProvider: FC<IWalletProviderProps> = ({ children }) => {
   useEffect(() => {
     (async function () {
       if (adapter) {
-        const ready = adapter instanceof InjectedWalletAdapter ? await adapter?.readyAsync : !!adapter?.ready;
+        const ready = Object.getOwnPropertyDescriptor(Object.getPrototypeOf(adapter), "readyAsync")
+          ? await (adapter as any)?.readyAsync
+          : !!adapter?.ready;
 
         if (!ready && wallet?.name === name) {
           window.open(wallet!.url, "_blank");
@@ -241,7 +255,7 @@ export const WalletProvider: FC<IWalletProviderProps> = ({ children }) => {
     <WalletContext.Provider
       value={{
         wallet,
-        walletAdapter: adapter,
+        adapter,
         select,
         publicKey: publicKey ? new PublicKey(publicKey) : null,
         ready,
@@ -254,10 +268,19 @@ export const WalletProvider: FC<IWalletProviderProps> = ({ children }) => {
         signTransaction,
         signAllTransactions,
         awaitingApproval,
-        error,
       }}
     >
       {children}
     </WalletContext.Provider>
   );
 };
+
+const useWallet = () => {
+  const context = useContext(WalletContext);
+  if (context === undefined) {
+    throw new Error("useWallet must be used within a WalletProvider");
+  }
+  return context;
+};
+
+export { WalletProvider, useWallet };
