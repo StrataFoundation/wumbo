@@ -1,11 +1,11 @@
-import React, { Fragment, useEffect, useState } from "react";
-import { Wallet, WalletName } from "@solana/wallet-adapter-wallets";
-import { useWallet } from "../utils";
+import React, { Fragment } from "react";
+import { Wallet } from "@solana/wallet-adapter-wallets";
+import { useWallet } from "../contexts/walletContext";
 import { WALLET_PROVIDERS } from "../constants/walletProviders";
-import { Button, Alert } from "../";
+import { Button } from "../";
 
 export const WalletSelect = () => {
-  const { connected, disconnect, select, error } = useWallet();
+  const { connected, disconnect, select } = useWallet();
 
   return (
     <Fragment>
@@ -41,11 +41,6 @@ export const WalletSelect = () => {
               </Button>
             ))}
           </div>
-        </div>
-      )}
-      {error && (
-        <div className="mt-4">
-          <Alert type="error" message={error.toString()} />
         </div>
       )}
     </Fragment>

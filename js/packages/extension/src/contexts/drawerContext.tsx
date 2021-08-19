@@ -56,7 +56,7 @@ const DrawerProvider: FC<IDrawerProviderProps> = ({ children }) => {
 };
 
 const useDrawer = () => {
-  const context = React.useContext(DrawerContext);
+  const context = useContext(DrawerContext);
   if (context === undefined) {
     throw new Error("useCount must be used within a DrawerProvider");
   }

@@ -1,4 +1,4 @@
-import { useWallet } from "./wallet";
+import { useWallet } from "../contexts/walletContext";
 
 export function useFtxPayLink(): string {
   const { publicKey } = useWallet();

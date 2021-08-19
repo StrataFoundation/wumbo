@@ -3,7 +3,8 @@ import { Spinner } from "../Spinner";
 import { AccountInfo as TokenAccountInfo } from "@solana/spl-token";
 import { PublicKey, Connection } from "@solana/web3.js";
 import { Leaderboard, LeaderboardNumber, MetadataLeaderboardElement } from "../Leaderboard";
-import { amountAsNum, useMint, useOwnedAmount, useWallet } from "../utils";
+import { amountAsNum, useMint, useOwnedAmount } from "../utils";
+import { useWallet } from "../contexts/walletContext";
 import { ChevronUpIcon, ChevronDownIcon } from "@heroicons/react/solid";
 import { TokenAccountParser, useConnection } from "@oyster/common";
 import { useAsync } from "react-async-hook";
@@ -127,11 +128,10 @@ function useAccountsPagination(
       setStartIndex(index);
     }
   }, [findAmount, accountsIn]);
-  const accounts = React.useMemo(() => accountsIn.slice(startIndex, stopIndex), [
-    accountsIn,
-    startIndex,
-    stopIndex,
-  ]);
+  const accounts = React.useMemo(
+    () => accountsIn.slice(startIndex, stopIndex),
+    [accountsIn, startIndex, stopIndex]
+  );
 
   return {
     accounts,

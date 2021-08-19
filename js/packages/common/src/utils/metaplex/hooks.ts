@@ -17,7 +17,7 @@ import {
   TransactionInstruction,
 } from "@solana/web3.js";
 import { getFilesWithMetadata, getImage, getMetadataKey } from "./utils";
-import { useWallet } from "../wallet";
+import { useWallet } from "../../contexts/walletContext";
 import { TokenRef } from "@wum.bo/spl-wumbo";
 import { useMint } from "../mintState";
 import { TokenBondingV0 } from "@wum.bo/spl-token-bonding";
@@ -62,9 +62,11 @@ export function useTokenMetadata(token: PublicKey | undefined): TokenMetadata {
   const { info: metadata, loading: accountLoading } = useAccount(metadataAccountKey, (_, acct) =>
     decodeMetadata(acct.data)
   );
-  const { result: image, loading: imageLoading, error: imageError } = useAsync(getImage, [
-    metadata?.data.uri,
-  ]);
+  const {
+    result: image,
+    loading: imageLoading,
+    error: imageError,
+  } = useAsync(getImage, [metadata?.data.uri]);
 
   return {
     loading: Boolean(token && (loading || accountLoading || imageLoading)),
@@ -99,9 +101,7 @@ type MetadataFiniteState =
 type SetMetadataState = {
   state: MetadataFiniteState;
   error: Error | undefined;
-  setMetadata: (
-    args: SetMetadataArgs
-  ) => Promise<{
+  setMetadata: (args: SetMetadataArgs) => Promise<{
     metadataAccount: PublicKey;
   } | void>;
 };
@@ -109,9 +109,11 @@ export function useSetMetadata(tokenRefKey: PublicKey | undefined): SetMetadataS
   const connection = useConnection();
   const { info: tokenRef } = useAccount(tokenRefKey, TokenRef.fromAccount);
   const { info: tokenBonding } = useAccount(tokenRef?.tokenBonding, TokenBondingV0.fromAccount);
-  const { key: metadataAccountKey, image, metadata: inflated } = useTokenMetadata(
-    tokenBonding?.targetMint
-  );
+  const {
+    key: metadataAccountKey,
+    image,
+    metadata: inflated,
+  } = useTokenMetadata(tokenBonding?.targetMint);
   const { publicKey } = useWallet();
   const [state, setState] = useState<MetadataFiniteState>("idle");
   const mint = useMint(tokenBonding?.targetMint);

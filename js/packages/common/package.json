@@ -28,7 +28,7 @@
     "@solana/spl-token": "0.1.6",
     "@solana/spl-token-swap": "0.1.0",
     "@solana/wallet-adapter-base": "0.4.1",
-    "@solana/wallet-adapter-wallets": "0.5.0",
+    "@solana/wallet-adapter-wallets": "0.6.1",
     "@solana/web3.js": "1.22.0",
     "@toruslabs/openlogin": "0.9.0",
     "@toruslabs/openlogin-ed25519": "0.9.0",
