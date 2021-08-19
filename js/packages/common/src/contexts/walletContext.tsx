@@ -79,7 +79,6 @@ const WalletProvider: FC<IWalletProviderProps> = ({
 
   const select = useCallback(
     async (selected: WalletName | null) => {
-      console.log("SELECTED", selected);
       setSelectCount(selectCount + 1);
       if (name === selected) return;
       setName(selected);
