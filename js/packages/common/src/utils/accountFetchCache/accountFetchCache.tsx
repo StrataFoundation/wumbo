@@ -6,31 +6,27 @@ import { Commitment } from '@solana/web3.js';
 export const DEFAULT_CHUNK_SIZE = 99;
 export const DEFAULT_DELAY = 50;
 
-export interface ParsedAccountBase {
+export interface ParsedAccountBase<T> {
   pubkey: PublicKey;
   account: AccountInfo<Buffer>;
-  info: unknown;
-}
-
-export type AccountParser = (
-  pubkey: PublicKey,
-  data: AccountInfo<Buffer>,
-) => ParsedAccountBase | undefined;
-
-export interface ParsedAccount<T> extends ParsedAccountBase {
   info: T;
 }
+
+export type AccountParser<T> = (
+  pubkey: PublicKey,
+  data: AccountInfo<Buffer>,
+) => ParsedAccountBase<T> | undefined;
 
 export class Cache {
   chunkSize: number;
   delay: number;
   commitment: Commitment;
-  genericCache = new Map<string, ParsedAccountBase>();
-  keyToAccountParser = new Map<string, AccountParser>();
+  genericCache = new Map<string, ParsedAccountBase<unknown>>();
+  keyToAccountParser = new Map<string, AccountParser<unknown>>();
   timeout: NodeJS.Timeout | null = null
   currentBatch = new Set<string>();
   pendingCallbacks = new Map<string, ((info: AccountInfo<Buffer> | null, err: Error | null) => void)>();
-  pendingCalls = new Map<string, Promise<ParsedAccountBase>>();;
+  pendingCalls = new Map<string, Promise<ParsedAccountBase<unknown>>>();;
   emitter = new EventEmitter();
 
   constructor({ chunkSize = DEFAULT_CHUNK_SIZE, delay = DEFAULT_DELAY, commitment }: { chunkSize?: number, delay?: number, commitment: Commitment }) {
@@ -85,11 +81,11 @@ export class Cache {
     await this.fetchBatch(connection);
   }
 
-  async query(
+  async query<T>(
     connection: Connection,
     pubKey: string | PublicKey,
-    parser?: AccountParser,
-  ) {
+    parser?: AccountParser<T>,
+  ): Promise<ParsedAccountBase<T | undefined>> {
     let id: PublicKey;
     if (typeof pubKey === 'string') {
       id = new PublicKey(pubKey);
@@ -99,38 +95,40 @@ export class Cache {
 
     const address = id.toBase58();
 
-    let account = this.genericCache.get(address);
+    let account = this.genericCache.get(address) as ParsedAccountBase<T>;
     if (account) {
       return account;
     }
 
-    const existingQuery = this.pendingCalls.get(address);
+    const existingQuery = this.pendingCalls.get(address) as Promise<ParsedAccountBase<T>>;
     if (existingQuery) {
       return existingQuery;
     }
 
-
-    // TODO: refactor to use multiple accounts query with flush like behavior
     const query = this.addToBatch(connection, id).then(data => {
       if (!data) {
         throw new Error('Account not found');
       }
-
-      return this.add(id, data, parser);
+      
+      return this.add(id, data, parser) || {
+        pubkey: id,
+        account: data,
+        info: undefined
+      };
     });
     this.pendingCalls.set(address, query as any);
 
     return query;
   }
 
-  add(
+  add<T>(
     id: PublicKey | string,
     obj: AccountInfo<Buffer>,
-    parser?: AccountParser,
+    parser?: AccountParser<T>,
     isActive?: boolean | undefined | ((parsed: any) => boolean),
-  ) {
+  ): ParsedAccountBase<T> | undefined {
     const address = typeof id === 'string' ? id : id?.toBase58();
-    const deserialize = parser ? parser : this.keyToAccountParser.get(address);
+    const deserialize = parser ? parser : this.keyToAccountParser.get(address) as AccountParser<T> | undefined;
     if (!deserialize) {
       throw new Error(
         'Deserializer needs to be registered or passed as a parameter',
@@ -181,7 +179,7 @@ export class Cache {
     return false;
   }
 
-  byParser(parser: AccountParser) {
+  byParser<T>(parser: AccountParser<T>) {
     const result: string[] = [];
     for (const id of this.keyToAccountParser.keys()) {
       if (this.keyToAccountParser.get(id) === parser) {
@@ -192,7 +190,7 @@ export class Cache {
     return result;
   }
 
-  registerParser(pubkey: PublicKey | string, parser: AccountParser) {
+  registerParser<T>(pubkey: PublicKey | string, parser: AccountParser<T>) {
     if (pubkey) {
       const address = typeof pubkey === 'string' ? pubkey : pubkey?.toBase58();
       this.keyToAccountParser.set(address, parser);
