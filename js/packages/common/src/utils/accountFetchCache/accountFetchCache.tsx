@@ -12,6 +12,17 @@ export interface ParsedAccountBase<T> {
   info: T;
 }
 
+function sanitize(pubKey: PublicKey | string): string {
+  let key: string;
+  if (typeof pubKey !== 'string') {
+    key = pubKey.toBase58();
+  } else {
+    key = pubKey;
+  }
+
+  return key;
+}
+
 export type AccountParser<T> = (
   pubkey: PublicKey,
   data: AccountInfo<Buffer>,
@@ -153,12 +164,7 @@ export class Cache {
   }
 
   get(pubKey: string | PublicKey) {
-    let key: string;
-    if (typeof pubKey !== 'string') {
-      key = pubKey.toBase58();
-    } else {
-      key = pubKey;
-    }
+    let key = sanitize(pubKey);
 
     return this.genericCache.get(key);
   }
