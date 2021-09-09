@@ -1,0 +1,134 @@
+import { useUserAccounts, Metadata, Edition, MasterEditionV2, MasterEditionV1, useConnection, getMetadata, getEdition, getEditionMarkPda, decodeEdition, decodeMasterEdition, decodeMetadata, TokenAccount, MetadataKey } from "@oyster/common";
+import { AccountInfo, TOKEN_PROGRAM_ID } from "@solana/spl-token";
+import { Connection, PublicKey } from "@solana/web3.js";
+import { useAsync, UseAsyncReturn } from "react-async-hook";
+import { useAssociatedAccount } from "../../utils";
+import { useWallet } from "../../contexts"
+import { useAccount, useAccountFetchCache, useUserTokenAccounts } from "../account";
+import { AccountFetchCache, AccountParser } from "../accountFetchCache/accountFetchCache";
+import { getDescription, getImage, getMetadataKey } from "./utils";
+import { TokenBondingV0 } from "../../../../spl-token-bonding/dist/lib";
+
+export interface ITokenWithMeta {
+  metadataKey?: PublicKey;
+  metadata?: Metadata;
+  edition?: Edition;
+  masterEdition?: MasterEditionV1 | MasterEditionV2;
+  image?: string;
+  description?: string;
+}
+
+export interface ITokenWithMetaAndAccount extends ITokenWithMeta {
+  publicKey?: PublicKey;
+  account?: AccountInfo;
+}
+
+export function getUserTokensWithMeta(cache: AccountFetchCache, connection: Connection, tokenAccounts?: TokenAccount[]): Promise<ITokenWithMetaAndAccount[]> {
+  return Promise.all(
+    (tokenAccounts || []).map(async ({ pubkey, info }) => {
+      const metadataKey = await getMetadata(info.mint);
+      return {
+        ...(await getTokenMetadata(cache, metadataKey)),
+        publicKey: pubkey,
+        account: info
+      }
+    })
+  )
+}
+
+export const MetadataParser: AccountParser<Metadata> = (pubkey, account) => ({ pubkey, account, info: decodeMetadata(account.data) })
+
+export async function getEditionInfo(cache: AccountFetchCache, metadata: Metadata | undefined): Promise<{ edition?: Edition, masterEdition?: MasterEditionV1 | MasterEditionV2 }> {
+  if (!metadata) {
+    return {}
+  }
+
+  const editionKey = await getEdition(metadata.mint);
+
+  let edition;
+  let masterEdition;
+  const { info: editionOrMasterEdition } = await cache.search(editionKey, (pubkey, account) => ({
+    pubkey,
+    account,
+    info: account.data[0] == MetadataKey.EditionV1 ? decodeEdition(account.data) : decodeMasterEdition(account.data)
+  })) || {};
+
+  if (editionOrMasterEdition instanceof Edition) {
+    edition = editionOrMasterEdition;
+      const { info: masterEditionInfo } = await cache.search(editionOrMasterEdition.parent, (pubkey, account) => ({
+        pubkey,
+        account,
+        info: decodeMasterEdition(account.data)
+      })) || {};
+      masterEdition = masterEditionInfo
+  } else {
+    masterEdition = editionOrMasterEdition;
+  }
+
+  return {
+    edition,
+    masterEdition
+  }
+}
+
+export async function getTokenMetadata(cache: AccountFetchCache, metadataKey: PublicKey): Promise<ITokenWithMeta> {
+  const { info: metadata } = await cache.search(metadataKey, MetadataParser) || {};
+  const image = await getImage(metadata?.data.uri)
+  const description = await getDescription(metadata?.data.uri)
+
+  return {
+    metadata,
+    metadataKey,
+    image,
+    description,
+    ...(metadata ? await getEditionInfo(cache, metadata) : {})
+  }
+}
+
+export function useUserTokensWithMeta(owner?: PublicKey): UseAsyncReturn<ITokenWithMetaAndAccount[]> {
+  const connection = useConnection();
+  const { result: tokenAccounts } = useUserTokenAccounts(owner);
+  const cache = useAccountFetchCache();
+
+  return useAsync(getUserTokensWithMeta, [cache, connection, tokenAccounts]);
+}
+
+export interface IUseTokenMetadataResult extends ITokenWithMetaAndAccount {
+  loading: boolean;
+  error: Error | undefined;
+};
+
+export function useTokenMetadata(token: PublicKey | undefined): IUseTokenMetadataResult {
+  const { result: metadataAccountKey, loading, error } = useAsync(getMetadataKey, [token]);
+  const { info: metadata, loading: accountLoading } = useAccount(metadataAccountKey, (_, acct) =>
+    decodeMetadata(acct.data)
+  );
+
+  const cache = useAccountFetchCache();
+  const { result: editionInfo } = useAsync(getEditionInfo, [cache, metadata]);
+
+  const wallet = useWallet()
+  const { associatedAccount } = useAssociatedAccount(wallet.publicKey, token);
+  const {
+    result: image,
+    loading: imageLoading,
+    error: imageError,
+  } = useAsync(getImage, [metadata?.data.uri]);
+  const {
+    result: description,
+    loading: descriptionLoading,
+    error: descriptionError,
+  } = useAsync(getDescription, [metadata?.data.uri]);
+
+  return {
+    loading: Boolean(token && (loading || accountLoading || imageLoading || descriptionLoading)),
+    error: error || imageError || descriptionError,
+    metadata,
+    metadataKey: metadataAccountKey,
+    image,
+    account: associatedAccount,
+    description,
+    publicKey: metadataAccountKey,
+    ...editionInfo
+  };
+}

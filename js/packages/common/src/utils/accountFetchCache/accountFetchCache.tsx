@@ -9,7 +9,7 @@ export const DEFAULT_DELAY = 50;
 export interface ParsedAccountBase<T> {
   pubkey: PublicKey;
   account: AccountInfo<Buffer>;
-  info: T;
+  info?: T;
 }
 
 export type AccountParser<T> = (
@@ -17,11 +17,13 @@ export type AccountParser<T> = (
   data: AccountInfo<Buffer>,
 ) => ParsedAccountBase<T> | undefined;
 
-export class Cache {
+export class AccountFetchCache {
+  connection: Connection;
   chunkSize: number;
   delay: number;
   commitment: Commitment;
-  genericCache = new Map<string, ParsedAccountBase<unknown>>();
+  accountChangeListeners = new Map<string, number>();
+  genericCache = new Map<string, ParsedAccountBase<unknown> | null>();
   keyToAccountParser = new Map<string, AccountParser<unknown>>();
   timeout: NodeJS.Timeout | null = null
   currentBatch = new Set<string>();
@@ -29,17 +31,19 @@ export class Cache {
   pendingCalls = new Map<string, Promise<ParsedAccountBase<unknown>>>();;
   emitter = new EventEmitter();
 
-  constructor({ chunkSize = DEFAULT_CHUNK_SIZE, delay = DEFAULT_DELAY, commitment }: { chunkSize?: number, delay?: number, commitment: Commitment }) {
+  constructor({ connection, chunkSize = DEFAULT_CHUNK_SIZE, delay = DEFAULT_DELAY, commitment }: { connection: Connection, chunkSize?: number, delay?: number, commitment: Commitment }) {
+    this.connection = connection;
     this.chunkSize = chunkSize;
     this.delay = delay;
     this.commitment = commitment;
   }
 
-  async fetchBatch(connection: Connection) {
+  async fetchBatch() {
     const currentBatch = this.currentBatch;
     this.currentBatch = new Set(); // Erase current batch from state, so we can fetch multiple at a time
     try {
-      const { keys, array } = await getMultipleAccounts(connection, [...currentBatch], this.commitment)
+      console.log(`Batching account fetch of ${currentBatch.size}`);
+      const { keys, array } = await getMultipleAccounts(this.connection, [...currentBatch], this.commitment)
       keys.forEach((key, index) => {
         this.pendingCallbacks.get(key)!(array[index], null)
         this.pendingCallbacks.delete(key);
@@ -52,11 +56,19 @@ export class Cache {
     }
   }
 
-  async addToBatch (connection: Connection, id: PublicKey): Promise<AccountInfo<Buffer>> {
+  async addToBatch (id: PublicKey): Promise<AccountInfo<Buffer>> {
     const idStr = id.toBase58();
-    
+
+    this.currentBatch.add(idStr);
+
+    this.timeout != null && clearTimeout(this.timeout);
+    if (this.currentBatch.size > DEFAULT_CHUNK_SIZE) {
+      this.fetchBatch()
+    } else {
+      this.timeout = setTimeout(() => this.fetchBatch(), this.delay)
+    }
+
     const promise = new Promise<AccountInfo<Buffer>>((resolve, reject) => {
-      this.timeout && clearTimeout(this.timeout);
       this.pendingCallbacks.set(idStr, (info, err) => {
         if (err) {
           return reject(err)
@@ -64,28 +76,23 @@ export class Cache {
 
         resolve(info!)
       });
-      this.currentBatch.add(idStr);
-      
-      if (this.currentBatch.size > DEFAULT_CHUNK_SIZE) {
-        this.fetchBatch(connection)
-      } else {
-        this.timeout = setTimeout(() => this.fetchBatch(connection), this.delay)
-      }
     });
 
     return promise;
   }
 
-  async flush(connection: Connection) {
+  async flush() {
     this.timeout && clearTimeout(this.timeout);
-    await this.fetchBatch(connection);
+    await this.fetchBatch();
   }
 
-  async query<T>(
-    connection: Connection,
+  // The same as query, except swallows errors and returns undefined.
+  async search<T>(
     pubKey: string | PublicKey,
-    parser?: AccountParser<T>,
-  ): Promise<ParsedAccountBase<T | undefined>> {
+    parser: AccountParser<T> = (pubkey, account) => ({
+      pubkey, account
+    })
+  ): Promise<ParsedAccountBase<T> | undefined> {
     let id: PublicKey;
     if (typeof pubKey === 'string') {
       id = new PublicKey(pubKey);
@@ -105,11 +112,14 @@ export class Cache {
       return existingQuery;
     }
 
-    const query = this.addToBatch(connection, id).then(data => {
+    this.watch(id, parser);
+
+    const query = this.addToBatch(id).then(data => {
       if (!data) {
-        throw new Error('Account not found');
+        this.genericCache.set(id.toBase58(), null)
+        return undefined;
       }
-      
+
       return this.add(id, data, parser) || {
         pubkey: id,
         account: data,
@@ -119,6 +129,29 @@ export class Cache {
     this.pendingCalls.set(address, query as any);
 
     return query;
+  }
+
+  onAccountChange<T>(key: PublicKey, parser: AccountParser<T> | undefined, account: AccountInfo<Buffer>) {
+    this.add(key, account, parser)
+  }
+
+  watch<T>(id: PublicKey, parser?: AccountParser<T>): void {
+    this.accountChangeListeners.set(
+      id.toBase58(),
+      this.connection.onAccountChange(id, this.onAccountChange.bind(this, id, parser), this.commitment)
+    );
+  }
+
+  async query<T>(
+    pubKey: string | PublicKey,
+    parser?: AccountParser<T>
+  ): Promise<ParsedAccountBase<T>> {
+    const ret = await this.search(pubKey, parser);
+    if (!ret) {
+      throw new Error('Account not found');
+    }
+
+    return ret;
   }
 
   add<T>(
@@ -169,6 +202,12 @@ export class Cache {
       key = pubKey.toBase58();
     } else {
       key = pubKey;
+    }
+
+    const subId = this.accountChangeListeners.get(key);
+    if (subId) {
+      this.connection.removeAccountChangeListener(subId);
+      this.accountChangeListeners.delete(key);
     }
 
     if (this.genericCache.get(key)) {

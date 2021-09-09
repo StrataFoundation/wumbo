@@ -34,8 +34,10 @@
     "@toruslabs/openlogin-ed25519": "0.9.0",
     "@toruslabs/openlogin-utils": "0.9.0",
     "@toruslabs/torus-direct-web-sdk": "4.14.0",
+    "@types/axios": "^0.14.0",
     "@types/react-dom": "^17.0.0",
     "auth0-js": "^9.16.2",
+    "axios": "^0.21.4",
     "bip39": "^3.0.4",
     "borsh": "^0.4.0",
     "lambert-w-function": "^2.0.0",
@@ -45,6 +47,7 @@
     "react-dom": "^17.0.2",
     "react-hook-form": "^7.9.0",
     "react-router-dom": "^5.2.0",
+    "resemblejs": "^4.0.0",
     "url-template": "^2.0.8"
   },
   "devDependencies": {

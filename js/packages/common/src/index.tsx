@@ -15,3 +15,4 @@ export * from "./Portals";
 export * from "./Leaderboard";
 export * from "./StatCard";
 export * from "./Notification";
+export * from "./Nft"

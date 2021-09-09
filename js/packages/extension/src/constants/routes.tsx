@@ -25,10 +25,15 @@ export interface IRoutes {
   profile: Route;
   editProfile: Route;
   viewProfile: Route;
+  viewNft: Route;
 }
 
 export function viewProfilePath(tokenBondingKey: PublicKey): string {
   return routes.viewProfile.path.replace(":tokenBondingKey", tokenBondingKey.toBase58());
+}
+
+export function nftPath(mint: PublicKey): string {
+  return routes.viewNft.path.replace(":mint", mint.toBase58());
 }
 
 export function tradePath(tokenBondingKey: PublicKey): string {
@@ -62,6 +67,7 @@ export const routes: IRoutes = {
   profile: { path: "/profile", Icon: UserIcon, isDrawerNav: true },
   editProfile: { path: "/profile/edit", Icon: UserIcon, isDrawerNav: false },
   viewProfile: { path: "/profile/view/:tokenBondingKey", Icon: UserIcon, isDrawerNav: false },
+  viewNft: { path: "/nft/view/:mint", Icon: UserIcon, isDrawerNav: false },
 };
 
 export const paths: string[] = Object.keys(routes).map(

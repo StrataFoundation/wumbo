@@ -40,7 +40,7 @@ export const WumboDrawer = (props: { children: ReactNode }) => {
             leaveFrom="opacity-100"
             leaveTo="opacity-0"
           >
-            <Dialog.Overlay className="absolute inset-0 bg-gray-800 bg-opacity-75 transition-opacity" />
+            <Dialog.Overlay className="absolute inset-0 transition-opacity" />
           </Transition.Child>
 
           {/* TODO: We can customize the 280px here based on where they drag the drawer */}

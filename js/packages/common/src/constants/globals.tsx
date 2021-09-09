@@ -5,11 +5,17 @@ import {
 } from "@solana/spl-token";
 
 export const IS_DEV = true;
-export const DEV_TWITTER_TLD = "WumboDevTwitter";
+export const DEV_TWITTER_TLD = "WumboDevTwitter1";
 const key = [243,99,226,76,228,180,49,28,35,61,133,124,225,80,78,147,2,107,58,142,6,245,23,211,113,62,255,181,222,50,4,23,51,146,66,205,166,190,240,181,45,146,254,237,136,217,114,62,55,249,200,102,79,120,51,44,187,84,64,129,102,120,70,131]
 export const DEV_TWITTER_VERIFIER: Keypair = Keypair.fromSecretKey(
   Uint8Array.of(...key)
 )
+
+export const NFT_VERIFIER_URL = "http://localhost:8080";
+
+export const NFT_VERIFIER_TLD = new PublicKey("12UFqXT52JUuArrHy8FPqVtzBVF2pkB8H4C9HVMAJRU6");
+
+export const NFT_VERIFIER = new PublicKey("3ADxhmXXXxWz6jT949DDw9r7E6uz6Vk1bssUHSNBcrbE");
 
 export const TWITTER_REGISTRAR_SERVER_URL =
   "http://localhost:3000/registrar/twitter-oauth";
@@ -17,13 +23,13 @@ export const TWITTER_REGISTRAR_SERVER_URL =
 // export const SOLANA_API_URL = "https://api.mainnet-beta.solana.com"
 export const WUM_REWARDS_PERCENTAGE = 1000;
 export const WUM_BONDING = new PublicKey(
-  "BZN5FKwDAJ354iwfa89ecxxFFkufs8UtEpiNMmz9kE8g"
+  "DTSmXtY9dY9VcqgMaipKRBuYBzTkz2BAko4cwrsNxxs2"
 );
 export const WUM_TOKEN = new PublicKey(
-  "EN75YBRFCoSezbkvRfbEqvsRU4mgXaDQjG7fkAtYjN9z"
+  "4vA9GhFbh7pfZ6HmcQVdrGK4VQchDYtRZyzA9WNHTLzX"
 );
 export const WUMBO_INSTANCE_KEY: PublicKey = new PublicKey(
-  "JCQksCaGsRuQiog2sYddYb2xwogsnk64eDbZHCNFKsxP"
+  "4Lh3ds8ZEhNjn8e6J8By4Csx4KWf7gAHQCZTMiUP2P1T"
 );
 export const WUMBO_PROGRAM_ID: PublicKey = new PublicKey(
   "AiYPQudWgXerJ1BdKfH5HkEamnPXSHAfPK2ThhKFkkDw"

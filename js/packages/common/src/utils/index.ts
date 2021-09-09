@@ -9,3 +9,5 @@ export * from "./utils";
 export * from "./walletState";
 export * from "./claim";
 export * from "./ftxPay";
+export * from "./nftVerifier";
+export * from "./truthy";

@@ -4,19 +4,21 @@ import { Spinner } from '../Spinner';
 import { useAccount } from '../utils/account';
 import { TokenBondingV0 } from "@wum.bo/spl-token-bonding";
 import { PublicKey } from '@solana/web3.js';
-import { supplyAsNum, useAssociatedAccount, useBondingPricing, useFiatPrice, useMint, useOwnedAmount, useQuery, useReverseTwitter, useTokenMetadata } from '../utils';
+import { ITokenWithMeta, supplyAsNum, useAssociatedAccount, useBondingPricing, useFiatPrice, useMint, useOwnedAmount, useQuery, useReverseTwitter, useTokenMetadata } from '../utils';
 import { StatCard } from "../StatCard";
 import { Button, MetadataAvatar, Tab, Tabs } from '..';
 import { TokenAccountsContextProvider, TokenLeaderboard } from '../Leaderboard/TokenLeaderboard';
 import { AccountInfo as TokenAccountInfo } from '@solana/spl-token';
+import { NftList } from '../Nft';
 
 interface IProfileProps { 
   tokenBondingKey: PublicKey;
   onAccountClick?: (tokenBondingKey: PublicKey) => void;
   onTradeClick?: () => void;
+  getNftLink: (t: ITokenWithMeta) => string
 }
 
-export const Profile = React.memo(({ tokenBondingKey, onAccountClick, onTradeClick }: IProfileProps) => {
+export const Profile = React.memo(({ tokenBondingKey, onAccountClick, onTradeClick, getNftLink }: IProfileProps) => {
   const { info: tokenRef, loading } = useTokenRefFromBonding(tokenBondingKey);
   const ownerWalletKey = tokenRef?.owner;
   const { info: tokenBonding, loading: tokenBondingLoading } = useAccount(tokenRef?.tokenBonding, TokenBondingV0.fromAccount);
@@ -76,6 +78,9 @@ export const Profile = React.memo(({ tokenBondingKey, onAccountClick, onTradeCli
         <TokenAccountsContextProvider mint={tokenBonding.targetMint}>
           <TokenLeaderboard onAccountClick={onAccountClick} mint={tokenBonding.targetMint} />
         </TokenAccountsContextProvider>
+      </Tab>
+      <Tab title="Collectibles">
+        <NftList getLink={getNftLink} owner={ownerWalletKey} />
       </Tab>
     </Tabs>
   </div>

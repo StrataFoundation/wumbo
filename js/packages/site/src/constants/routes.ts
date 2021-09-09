@@ -8,6 +8,7 @@ interface IRoutes {
   betaSplash: Route;
   claim: Route;
   viewProfile: Route;
+  viewNft: Route;
   profile: Route;
   editProfile: Route;
   wallet: Route;
@@ -15,6 +16,10 @@ interface IRoutes {
 
 export function profilePath(tokenBondingKey: PublicKey): string {
   return routes.viewProfile.path.replace(":tokenBondingKey", tokenBondingKey.toBase58());
+}
+
+export function nftPath(mint: PublicKey): string {
+  return routes.viewNft.path.replace(":mint", mint.toBase58());
 }
 
 export function editProfile(ownerWalletKey: PublicKey): string {
@@ -25,6 +30,7 @@ const routes: IRoutes = {
   claim: { path: "/claim" },
   wallet: { path: "/wallet" },
   viewProfile: { path: "/profile/view/:tokenBondingKey" },
+  viewNft: { path: "/nft/view/:mint" },
   profile: { path: "/profile" },
   editProfile: { path: "/profile/edit/:ownerWalletKey" },
   betaSplash: { path: "/" },

@@ -6,6 +6,7 @@ import {
   WALLET_PROVIDERS,
   WalletProvider,
   Notification,
+  AccountCacheContextProvider,
 } from "wumbo-common";
 import { DrawerProvider } from "@/contexts/drawerContext";
 import { WalletName } from "@solana/wallet-adapter-wallets";
@@ -51,15 +52,17 @@ export const ContextProviders: FC = ({ children }) => {
 
   return (
     <ConnectionProvider>
-      <EndpointSetter>
-        <AccountsProvider>
-          <WalletProvider wallets={alteredWallets} onError={onError}>
-            <UsdWumboPriceProvider>
-              <DrawerProvider>{children}</DrawerProvider>
-            </UsdWumboPriceProvider>
-          </WalletProvider>
-        </AccountsProvider>
-      </EndpointSetter>
+      <AccountCacheContextProvider>
+        <EndpointSetter>
+          <AccountsProvider>
+            <WalletProvider wallets={alteredWallets} onError={onError}>
+              <UsdWumboPriceProvider>
+                <DrawerProvider>{children}</DrawerProvider>
+              </UsdWumboPriceProvider>
+            </WalletProvider>
+          </AccountsProvider>
+        </EndpointSetter>
+      </AccountCacheContextProvider>
     </ConnectionProvider>
   );
 };

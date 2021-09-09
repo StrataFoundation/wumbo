@@ -1,9 +1,10 @@
-import { AccountInfo, Connection, PublicKey } from "@solana/web3.js";
+import { AccountInfo, Commitment, Connection, PublicKey } from "@solana/web3.js";
 import { TokenAccount, useConnection, ParsedAccountBase, TokenAccountParser } from "@oyster/common";
-import React, { useState, useEffect, useContext } from "react";
+import React, { useState, useEffect, useContext, useMemo } from "react";
 import { useAsync } from "react-async-hook";
 import { TOKEN_PROGRAM_ID } from "@solana/spl-token";
-import { Cache, AccountParser } from "./accountFetchCache/accountFetchCache";
+import { AccountFetchCache, AccountParser } from "./accountFetchCache/accountFetchCache";
+import { truthy } from "./truthy";
 
 export interface UseAccountState<T> {
   loading: boolean;
@@ -16,21 +17,45 @@ export type TypedAccountParser<T> = (
   data: AccountInfo<Buffer>
 ) => T;
 
-export const AccountCacheContext = React.createContext(new Cache({
-  commitment: "confirmed"
-}));
+export const AccountCacheContext = React.createContext<AccountFetchCache | null>(null);
 
-export function useAccountFetchCache(): Cache {
-  return useContext(AccountCacheContext);
+export function useAccountFetchCache(): AccountFetchCache {
+  return useContext(AccountCacheContext)!;
 }
 
 export const AccountCacheContextProvider: React.FC = ({ children }) => {
-  return <AccountCacheContext.Provider
-    value={new Cache({
+  const connection = useConnection();
+  const cache = useMemo(() => {
+    const ret = new AccountFetchCache({
+      connection,
+      delay: 150,
       commitment: "confirmed"
-    })}
+    })
+    // Make sure everything in our app is using the cache
+    connection.getAccountInfo = function(
+      publicKey: PublicKey,
+      commitment?: Commitment,
+    ): Promise<AccountInfo<Buffer> | null> {
+      if (commitment) {
+        return connection.getAccountInfo(publicKey, commitment);
+      }
+
+      return ret.search(publicKey).then(i => {
+        if (i) {
+          return i.account;
+        }
+
+        return null;
+      })
+    }
+
+    return ret;
+  }, [connection]);
+
+  return <AccountCacheContext.Provider
+    value={cache}
   >
-    { children }
+    {children}
   </AccountCacheContext.Provider>
 }
 
@@ -38,7 +63,6 @@ export function useAccount<T>(
   key: undefined | PublicKey,
   parser?: TypedAccountParser<T>
 ): UseAccountState<T> {
-  const connection = useConnection();
   const cache = useAccountFetchCache();
   const [state, setState] = useState<UseAccountState<T>>({
     loading: true,
@@ -64,35 +88,27 @@ export function useAccount<T>(
     }
 
     cache
-      .query(connection, id, parsedAccountBaseParser)
+      .search(id, parsedAccountBaseParser)
       .then((acc) => {
-        setState({
-          loading: false,
-          info: acc!.info as any,
-          account: acc!.account,
-        });
-      })
-      .catch((err) => {
-        console.log(err);
-        // Oyster's cache, while great, explodes and doesn't watch accounts that don't exist. Shim it in
-        if (key) {
-          let subId: number;
-          function addToCache(acc: AccountInfo<Buffer>) {
-            if (key) {
-              cache.add(key, acc, parsedAccountBaseParser);
-            }
-            connection.removeAccountChangeListener(subId);
-          }
-          subId = connection.onAccountChange(key, addToCache);
+        if (acc) {
+          setState({
+            loading: false,
+            info: acc.info as any,
+            account: acc.account,
+          });
+        } else {
+          setState({ loading: false });
         }
-
+      })
+      .catch((e) => {
+        console.error(e);
         setState({ loading: false });
       });
 
     const dispose = cache.emitter.onCache((e) => {
       const event = e;
       if (event.id === id) {
-        cache.query(connection, id, parsedAccountBaseParser).then((acc) => {
+        cache.query(id, parsedAccountBaseParser).then((acc) => {
           setState({
             loading: false,
             info: acc!.info as any,
@@ -104,15 +120,9 @@ export function useAccount<T>(
     return () => {
       dispose();
     };
-  }, [connection, id]);
+  }, [cache, id]);
 
   return state;
-}
-
-type Truthy<T> = T extends false | '' | 0 | null | undefined ? never : T; // from lodash
-
-function truthy<T>(value: T): value is Truthy<T> {
-    return !!value;
 }
 
 const PRECACHED_OWNERS = new Map<string, TokenAccount[]>();
@@ -123,8 +133,6 @@ export const getUserTokenAccounts = async (
   if (!owner) {
     return [];
   }
-
-  debugger;
 
   if (PRECACHED_OWNERS.has(owner.toBase58())) {
     return PRECACHED_OWNERS.get(owner.toBase58())!

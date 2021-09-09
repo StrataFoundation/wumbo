@@ -13,7 +13,7 @@ import {
   postTwitterRegistrarRequest,
   getTld,
 } from "./twitter";
-import { useAccount } from "./account";
+import { useAccount, useAccountFetchCache } from "./account";
 import {
   SPL_NAME_SERVICE_PROGRAM_ID,
   TOKEN_BONDING_PROGRAM_ID,
@@ -80,6 +80,7 @@ interface CreateState {
   create: (twitterHandle: string) => Promise<CreateSocialTokenResult>;
 }
 export function useCreateCoin(): CreateState {
+  const cache = useAccountFetchCache();
   const connection = useConnection();
   const { adapter } = useWallet();
   const [creating, setCreating] = useState<boolean>(false);
@@ -93,7 +94,7 @@ export function useCreateCoin(): CreateState {
       const key =
         (await wumbo.getTwitterClaimedTokenRefKey(connection, twitterHandle)) ||
         (await wumbo.getTwitterUnclaimedTokenRefKey(twitterHandle));
-      const account = await connection.getAccountInfo(key);
+      const account = (await cache.search(key))?.account;
       if (!account) {
         console.log("Creator does not exist, creating");
         result = await Wumbo.createWumboSocialToken(connection, {

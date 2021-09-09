@@ -1,14 +1,10 @@
 import { useEffect, useState } from "react";
 import isEqual from "lodash/isEqual";
 import { useInterval } from "wumbo-common";
+import { getElementsBySelector } from "./elements";
 
 const twitterMentionRegex = /(?:^|[^a-zA-Z0-9_@＠])(@|＠)(?!\.)([a-zA-Z0-9_\.]{1,15})(?:\b(?!@)|$)/g;
 
-function getElementsBySelector(selector: string): Element[] {
-  return Array.from(document.querySelectorAll(selector).entries()).map(
-    ([_, ref]) => ref
-  );
-}
 
 interface IParsedProfile {
   name: string;

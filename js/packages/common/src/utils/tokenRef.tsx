@@ -5,7 +5,7 @@ import { useAccount, UseAccountState } from "./account";
 import { TokenRef, Wumbo } from "@wum.bo/spl-wumbo";
 import { useAsync, useAsyncCallback } from "react-async-hook";
 import { TokenBondingV0 } from "@wum.bo/spl-token-bonding";
-import { TokenMetadata, useTokenMetadata } from "./metaplex/hooks";
+import { IUseTokenMetadataResult, useTokenMetadata } from "./metaplex";
 import { getWumbo } from "../constants/wumbo";
 
 export function useWumbo(): Wumbo | undefined {
@@ -77,9 +77,16 @@ export const useTwitterTokenRef = (name: string | undefined): UseAccountState<To
   return result
 };
 
-export function useSocialTokenMetadata(owner: PublicKey | undefined): TokenMetadata {
+export interface IUseSocialTokenMetadataResult extends IUseTokenMetadataResult {
+  tokenBonding?: TokenBondingV0;
+}
+
+export function useSocialTokenMetadata(owner: PublicKey | undefined): IUseSocialTokenMetadataResult {
   const { info: tokenRef, loading } = useClaimedTokenRef(owner)
   const { info: tokenBonding } = useAccount(tokenRef?.tokenBonding, TokenBondingV0.fromAccount)
 
-  return useTokenMetadata(tokenBonding?.targetMint);
+  return {
+    ...useTokenMetadata(tokenBonding?.targetMint),
+    tokenBonding
+  }
 }

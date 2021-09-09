@@ -4,6 +4,20 @@ import { useTweets } from "../../utils/twitterSpotter";
 import { MainButton } from "../MainButton";
 import { ReplyTokens } from "../ReplyTokens";
 
+let incrementingId = 0;
+function getElementId(element: HTMLElement | null): string {
+  if (!element) {
+    return ""
+  }
+  
+  if (!element.id) {
+    incrementingId++;
+    element.id = "tweet_id_" + incrementingId;
+  }
+
+  return element.id
+}
+
 export const TweetsEnhancer = () => {
   const tweets = useTweets();
 
@@ -26,7 +40,7 @@ export const TweetsEnhancer = () => {
 
         if (buttonEl) {
           return (
-            <Fragment key={tweet.name}>
+            <Fragment key={getElementId(tweet.buttonTarget)}>
               <AppendChildPortal container={tweet.buttonTarget as Element}>
                 <div className="flex justify-center mt-1.5">{buttonEl}</div>
               </AppendChildPortal>

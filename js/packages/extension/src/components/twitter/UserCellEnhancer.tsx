@@ -3,6 +3,20 @@ import { AppendChildPortal } from "wumbo-common";
 import { useUserCells } from "../../utils/twitterSpotter";
 import { MainButton } from "../MainButton";
 
+let incrementingId = 0;
+function getElementId(element: HTMLElement | null): string {
+  if (!element) {
+    return ""
+  }
+  
+  if (!element.id) {
+    incrementingId++;
+    element.id = "user_cell_id_" + incrementingId;
+  }
+
+  return element.id
+}
+
 export const UserCellEnhancer = () => {
   const cells = useUserCells();
 
@@ -26,7 +40,7 @@ export const UserCellEnhancer = () => {
             "display:flex;flex-direction:row;align-items:center;";
 
           return (
-            <Fragment key={cell.name}>
+            <Fragment key={cell.name + getElementId(cell.buttonTarget)}>
               <AppendChildPortal container={cell.buttonTarget as Element}>
                 <div className="flex justify-center self-start ml-2">
                   {buttonEl}
