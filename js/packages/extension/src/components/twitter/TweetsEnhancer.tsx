@@ -35,7 +35,7 @@ export const TweetsEnhancer = () => {
           return (
             <Fragment key={getElementId(tweet.buttonTarget)}>
               <AppendChildPortal container={tweet.buttonTarget as Element}>
-                <div className="flex justify-center mt-1.5">{buttonEl}</div>
+                <div className="flex justify-center mt-1.5 pointer-events-auto">{buttonEl}</div>
               </AppendChildPortal>
               {tweet.replyTokensTarget && (
                 <AppendChildPortal container={tweet.replyTokensTarget as Element}>

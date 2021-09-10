@@ -22,16 +22,14 @@ export const NftEnhancer: React.FC = () => {
             30
           );
           return (
-            <FloatPortal
-              key={nft.img.id}
-              container={nft.img}
-              clearance={{ top: 1, right: 1 }}
-            >
-              <div style={{ position: "absolute", top: "-1px", right: "-1px" }}>
+            <FloatPortal key={nft.img.id} container={nft.img} clearance={{ top: 1, right: 1 }}>
+              <div className="absolute -top-0.5 -right-0.5 pointer-evnets-auto">
                 <InformationCircleIcon
                   style={{ height: dimension, width: dimension }}
                   className="opacity-80 hover:opacity-100 hover:cursor-pointer text-yellow-400 shadow-lg "
-                  onClick={() => {
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
                     toggleDrawer({ isOpen: true });
                     history.push(nftPath(new PublicKey(nft.mintKey)));
                   }}

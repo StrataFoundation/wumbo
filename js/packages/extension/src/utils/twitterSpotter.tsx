@@ -87,6 +87,19 @@ enum Elements {
   TweetMintButton,
 }
 
+const findButtonTarget = (nameEl: HTMLElement) => {
+  const traverseUp = (el: HTMLElement | null): HTMLElement | null => {
+    if (!el) return null;
+    // traverase upwards until the parent has a sibling.
+    // we found the two columns that make up a tweet
+    // the first holding the profile img
+    if (el.parentElement!.nextSibling) return el.parentElement;
+    return traverseUp(el.parentElement);
+  };
+
+  return traverseUp(nameEl);
+};
+
 export const useTweets = (): IParsedTweet[] | null => {
   const [tweets, setTweets] = useState<IParsedTweet[]>([]);
 
@@ -107,7 +120,7 @@ export const useTweets = (): IParsedTweet[] | null => {
           if (nameEl) {
             const name = nameEl.href.split("/").slice(-1)[0];
             const imgEl = nameEl.querySelector("img");
-            const buttonTarget = nameEl.parentNode;
+            const buttonTarget = findButtonTarget(nameEl);
             let mentions: string[] | null = null;
             let replyTokensTarget: Element | null = null;
 
