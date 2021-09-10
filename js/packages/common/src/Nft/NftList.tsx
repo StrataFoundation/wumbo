@@ -2,20 +2,18 @@ import { PublicKey } from "@solana/web3.js";
 import { NftCard } from "./NftCard";
 import React from "react";
 import { Spinner } from "../Spinner";
-import { ITokenWithMeta, useUserTokensWithMeta } from "../utils";
+import { ITokenWithMeta, ITokenWithMetaAndAccount, useUserTokensWithMeta } from "../utils";
 
-export const NftList = React.memo(
+export const NftListRaw = React.memo(
   ({
-    owner,
+    tokens,
     getLink,
-    filter = () => true
+    loading = !!tokens
   }: {
-    owner?: PublicKey;
+    tokens?: ITokenWithMetaAndAccount[],
     getLink: (t: ITokenWithMeta) => string;
-    filter?: (t: ITokenWithMeta) => boolean;
+    loading?: boolean;
   }) => {
-    const { result: tokens, loading, error } = useUserTokensWithMeta(owner);
-
     if (!tokens || loading) {
       return <Spinner />;
     }
@@ -23,7 +21,7 @@ export const NftList = React.memo(
     return (
       <div className="flex flex-row flex-wrap gap-4">
         {tokens
-          .filter((t) => t.masterEdition && filter(t))
+          .filter((t) => t.masterEdition)
           .map((token) => (
             <NftCard
               key={token.publicKey?.toBase58()}
@@ -33,5 +31,18 @@ export const NftList = React.memo(
           ))}
       </div>
     );
+  }
+);
+
+export const NftList = React.memo(
+  ({
+    owner,
+    getLink
+  }: {
+    owner?: PublicKey;
+    getLink: (t: ITokenWithMeta) => string;
+  }) => {
+    const { result: tokens, loading, error } = useUserTokensWithMeta(owner);
+    return <NftListRaw getLink={getLink} loading={loading} tokens={tokens} />
   }
 );

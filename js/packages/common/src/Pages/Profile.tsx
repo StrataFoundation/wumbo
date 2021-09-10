@@ -4,12 +4,12 @@ import { Spinner } from '../Spinner';
 import { useAccount } from '../utils/account';
 import { TokenBondingV0 } from "@wum.bo/spl-token-bonding";
 import { PublicKey } from '@solana/web3.js';
-import { ITokenWithMeta, supplyAsNum, useAssociatedAccount, useBondingPricing, useFiatPrice, useMint, useOwnedAmount, useQuery, useReverseTwitter, useTokenMetadata } from '../utils';
+import { ITokenWithMeta, supplyAsNum, useAssociatedAccount, useBondingPricing, useFiatPrice, useMint, useOwnedAmount, useQuery, useReverseTwitter, useTokenMetadata, useUserTokensWithMeta } from '../utils';
 import { StatCard } from "../StatCard";
 import { Button, MetadataAvatar, Tab, Tabs } from '..';
 import { TokenAccountsContextProvider, TokenLeaderboard } from '../Leaderboard/TokenLeaderboard';
 import { AccountInfo as TokenAccountInfo } from '@solana/spl-token';
-import { NftList } from '../Nft';
+import { NftList, NftListRaw } from '../Nft';
 import { TROPHY_CREATOR } from '../constants/globals';
 
 interface IProfileProps { 
@@ -36,6 +36,8 @@ export const Profile = React.memo(({ tokenBondingKey, onAccountClick, onTradeCli
   const fiatLocked = mint && toFiat(general(0, supply)).toFixed(2)
   const marketCap = (supply * coinPriceUsd).toFixed(2)
   
+  const { result: tokens, loading: loadingCollectibles, error } = useUserTokensWithMeta(ownerWalletKey);
+
   const query = useQuery();
   let { handle } = useReverseTwitter(ownerWalletKey);
   if (!handle) {
@@ -85,10 +87,10 @@ export const Profile = React.memo(({ tokenBondingKey, onAccountClick, onTradeCli
         </TokenAccountsContextProvider>
       </Tab>
       <Tab title="Collectibles">
-        <NftList filter={t => !isTrophy(t)} getLink={getNftLink} owner={ownerWalletKey} />
+        <NftListRaw loading={loadingCollectibles} tokens={tokens?.filter(t => !isTrophy(t))} getLink={getNftLink} />
       </Tab>
       <Tab title="Trophies">
-        <NftList filter={t => isTrophy(t)} getLink={getNftLink} owner={ownerWalletKey} />
+        <NftListRaw loading={loadingCollectibles} tokens={tokens?.filter(t => isTrophy(t))} getLink={getNftLink} />
       </Tab>
     </Tabs>
   </div>
