@@ -3,17 +3,18 @@ import { ITokenWithMeta } from '../utils/metaplex/useUserTokensWithMeta';
 import { Badge } from '../Badge';
 import { Edition, MasterEditionV1, MasterEditionV2 } from '@oyster/common';
 import { Link } from 'react-router-dom';
+import { Nft } from './Nft';
 
 export const NftCard = React.memo(({ token, getLink }: { token: ITokenWithMeta, getLink: (t: ITokenWithMeta) => string }) => {
   return <Link to={getLink(token)}>
-    <div className="hover:shadow-lg min-w-30 flex flex-col bg-white shadow rounded-lg border-1">
-      <div className="bg-gray-100">
-        <img className="min-h-30 object-cover w-full" src={token.image} alt="" />
+    <div className="hover:shadow-lg h-40 w-24 flex flex-col bg-white shadow-sm rounded-lg border-1 overflow-hidden">
+      <div className="bg-gray-100 h-24 overflow-hidden">
+        { token.data && <Nft meshEnabled={false} className="h-24 object-cover" data={token.data} /> }
       </div>
-      <div className="p-4 flex flex-col overflow-ellipsis overflow-hidden">
-        <span className="title mb-2 font-bold block">{token.metadata?.data.name}</span>
+      <div className="p-2 flex flex-col space-y-1">
+        <span className="truncate text-sm font-extrabold">{token.metadata?.data.name}</span>
         {token.masterEdition && <div className="flex flex-row">
-          <Badge>
+          <Badge size="sm">
             {token.masterEdition && !token.edition && "NFT 0"}
             {token.edition && `${token.edition.edition.toNumber()} of ${token.masterEdition?.supply.toNumber()}`}
           </Badge>

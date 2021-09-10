@@ -24,7 +24,7 @@ export const ViewNftRoute = () => {
       <CommonViewNft
         token={token}
         getCreatorLink={(c, t, tokenBonding) => {
-          return tokenBonding ? profilePath(tokenBonding.publicKey) : `https://explorer.solana.com/address/${c.address.toBase58()}`
+          return tokenBonding ? profilePath(tokenBonding.publicKey) : `https://explorer.solana.com/address/${c.toBase58()}`
         }}
       />
     </AppContainer>

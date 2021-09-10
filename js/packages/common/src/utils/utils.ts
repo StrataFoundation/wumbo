@@ -5,6 +5,11 @@ export function classNames(...classes: (false | null | undefined | string)[]) {
   return classes.filter(Boolean).join(" ");
 }
 
+export function useIsExtension(): boolean {
+  // @ts-ignore
+  return window.isExtension;
+}
+
 export function usePrevious<T extends unknown>(value: T): T | undefined {
   const ref = useRef<T>();
   useEffect(() => {

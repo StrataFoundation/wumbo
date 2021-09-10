@@ -1,4 +1,4 @@
-import { useUserAccounts, Metadata, Edition, MasterEditionV2, MasterEditionV1, useConnection, getMetadata, getEdition, getEditionMarkPda, decodeEdition, decodeMasterEdition, decodeMetadata, TokenAccount, MetadataKey } from "@oyster/common";
+import { useUserAccounts, Metadata, Edition, MasterEditionV2, MasterEditionV1, useConnection, getMetadata, getEdition, getEditionMarkPda, decodeEdition, decodeMasterEdition, decodeMetadata, TokenAccount, MetadataKey, IMetadataExtension } from "@oyster/common";
 import { AccountInfo, TOKEN_PROGRAM_ID } from "@solana/spl-token";
 import { Connection, PublicKey } from "@solana/web3.js";
 import { useAsync, UseAsyncReturn } from "react-async-hook";
@@ -6,7 +6,7 @@ import { useAssociatedAccount } from "../../utils";
 import { useWallet } from "../../contexts"
 import { useAccount, useAccountFetchCache, useUserTokenAccounts } from "../account";
 import { AccountFetchCache, AccountParser } from "../accountFetchCache/accountFetchCache";
-import { getDescription, getImage, getMetadataKey } from "./utils";
+import { getArweaveMetadata, getDescription, getImage, getMetadataKey } from "./utils";
 import { TokenBondingV0 } from "../../../../spl-token-bonding/dist/lib";
 
 export interface ITokenWithMeta {
@@ -14,6 +14,7 @@ export interface ITokenWithMeta {
   metadata?: Metadata;
   edition?: Edition;
   masterEdition?: MasterEditionV1 | MasterEditionV2;
+  data?: IMetadataExtension,
   image?: string;
   description?: string;
 }
@@ -73,13 +74,15 @@ export async function getEditionInfo(cache: AccountFetchCache, metadata: Metadat
 
 export async function getTokenMetadata(cache: AccountFetchCache, metadataKey: PublicKey): Promise<ITokenWithMeta> {
   const { info: metadata } = await cache.search(metadataKey, MetadataParser) || {};
-  const image = await getImage(metadata?.data.uri)
-  const description = await getDescription(metadata?.data.uri)
+  const data = await getArweaveMetadata(metadata?.data.uri);
+  const image = data?.image;
+  const description = data?.description
 
   return {
     metadata,
     metadataKey,
     image,
+    data,
     description,
     ...(metadata ? await getEditionInfo(cache, metadata) : {})
   }
@@ -110,24 +113,20 @@ export function useTokenMetadata(token: PublicKey | undefined): IUseTokenMetadat
   const wallet = useWallet()
   const { associatedAccount } = useAssociatedAccount(wallet.publicKey, token);
   const {
-    result: image,
-    loading: imageLoading,
-    error: imageError,
-  } = useAsync(getImage, [metadata?.data.uri]);
-  const {
-    result: description,
-    loading: descriptionLoading,
-    error: descriptionError,
-  } = useAsync(getDescription, [metadata?.data.uri]);
+    result: data,
+    loading: dataLoading,
+    error: dataError,
+  } = useAsync(getArweaveMetadata, [metadata?.data.uri]);
 
   return {
-    loading: Boolean(token && (loading || accountLoading || imageLoading || descriptionLoading)),
-    error: error || imageError || descriptionError,
+    loading: Boolean(token && (loading || accountLoading || dataLoading)),
+    error: error || dataError,
     metadata,
     metadataKey: metadataAccountKey,
-    image,
+    data,
+    image: data?.image,
     account: associatedAccount,
-    description,
+    description: data?.description,
     publicKey: metadataAccountKey,
     ...editionInfo
   };

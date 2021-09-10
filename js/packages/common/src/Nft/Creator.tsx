@@ -4,21 +4,17 @@ import { Badge } from "../Badge";
 import { useReverseTwitter, useSocialTokenMetadata } from '../utils';
 import { Link } from 'react-router-dom';
 import { TokenBondingV0 } from '../../../spl-token-bonding/dist/lib';
+import { PublicKey } from '@solana/web3.js';
 
-export type GetCreatorLink = (c: MetaplexCreator, t: MetaplexMetadata | undefined, b: TokenBondingV0 | undefined) => string;
+export type GetCreatorLink = (c: PublicKey, t: MetaplexMetadata | undefined, b: TokenBondingV0 | undefined) => string;
 
-export const Creator = React.memo(({ creator, getCreatorLink }: { creator: MetaplexCreator, getCreatorLink: GetCreatorLink }) => {
-  const { metadata, tokenBonding } = useSocialTokenMetadata(creator.address);
+export const Creator = React.memo(({ creator, getCreatorLink }: { creator: PublicKey, getCreatorLink: GetCreatorLink }) => {
+  const { metadata, tokenBonding } = useSocialTokenMetadata(creator);
 
   return <Link
+    className="truncate max-w-18 text-blue-500"
     to={getCreatorLink(creator, metadata, tokenBonding)}
   >
-    <Badge
-      color={metadata ? "primary" : "neutral"}
-    >
-      <div className="truncate max-w-18">
-        {metadata?.data.name || creator.address.toBase58()}
-      </div>
-    </Badge>
+    {metadata?.data.name || creator.toBase58()}
   </Link>
 });

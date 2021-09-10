@@ -12,7 +12,7 @@ export const NftList = React.memo(({ owner, getLink }: { owner?: PublicKey, getL
     return <Spinner />;
   }
   
-  return <div className="grid grid-cols-2 sm:grid-cols-2 xl:grid-cols-3 xxl:grid-cols-4 gap-4">
+  return <div className="flex flex-row flex-wrap gap-4">
     { tokens.filter(t => t.masterEdition).map(token => 
       <NftCard key={token.publicKey?.toBase58()} getLink={getLink} token={token} />
     )}

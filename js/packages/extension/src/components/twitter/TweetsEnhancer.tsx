@@ -37,7 +37,6 @@ export const TweetsEnhancer = () => {
             mentions={tweet.mentions || []}
           />
         ) : null;
-
         if (buttonEl) {
           return (
             <Fragment key={getElementId(tweet.buttonTarget)}>

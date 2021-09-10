@@ -95,7 +95,7 @@ export const useTweets = (): IParsedTweet[] | null => {
     };
 
     const getTwets = () => {
-      const tweets = getElementsBySelector('div[data-testid="tweet"]').filter(
+      const tweets = getElementsBySelector('[data-testid="tweet"]').filter(
         notCached
       );
 
@@ -120,7 +120,7 @@ export const useTweets = (): IParsedTweet[] | null => {
 
                 if (mentions?.length) {
                   replyTokensTarget =
-                    tweet.children[1].children[1]?.lastChild?.previousSibling ||
+                    tweet.children[1]?.children[1]?.lastChild?.previousSibling ||
                     tweet.parentNode.lastElementChild.children[
                       tweet.parentNode.lastElementChild.childNodes.length - 4
                     ];

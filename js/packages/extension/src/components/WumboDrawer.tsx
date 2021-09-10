@@ -115,7 +115,7 @@ WumboDrawer.Content = (props: { children: ReactNode }) => (
 );
 
 WumboDrawer.Nav = () => {
-  const { creator, isCreating } = useDrawer();
+  const { creator } = useDrawer();
   const creatorInfoState = useUserInfo(creator?.name!);
   const { userInfo: creatorInfo, loading } = creatorInfoState;
 

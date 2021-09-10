@@ -41,7 +41,7 @@ export const ViewProfileRoute = () => {
         onAccountClick={(tokenBondingKey: PublicKey) => {
           history.push(profilePath(tokenBondingKey));
         }}
-        getNftLink={(token) => token?.account ? nftPath(token?.account?.mint) : ""}
+        getNftLink={(token) => token?.metadata ? nftPath(token?.metadata?.mint) : ""}
       />
     </AppContainer>
   );

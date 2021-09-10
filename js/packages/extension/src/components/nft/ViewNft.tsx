@@ -24,7 +24,7 @@ export const ViewNft = () => {
         <CommonViewNft
           token={token}
           getCreatorLink={(c, t, tokenBonding) => {
-            return tokenBonding ? viewProfilePath(tokenBonding.publicKey) : `https://explorer.solana.com/address/${c.address.toBase58()}`
+            return tokenBonding ? viewProfilePath(tokenBonding.publicKey) : `https://explorer.solana.com/address/${c.toBase58()}`
           }}
         />
       </WumboDrawer.Content>

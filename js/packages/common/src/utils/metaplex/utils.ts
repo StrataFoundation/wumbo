@@ -1,6 +1,7 @@
 import {
   Creator,
   findProgramAddress,
+  IMetadataExtension,
   METADATA_PREFIX,
   programIds,
 } from "@oyster/common";
@@ -32,7 +33,7 @@ const imageFromJson = (newUri: string, extended: any) => {
   }
 };
 
-export async function getArweaveMetadata(uri: string | undefined) {
+export async function getArweaveMetadata(uri: string | undefined): Promise<IMetadataExtension | undefined> {
   if (uri) {
     const newUri = routeCDN(uri);
 
