@@ -2,7 +2,7 @@ import React, { Fragment, ReactNode } from "react";
 import { NavLink } from "react-router-dom";
 import startCase from "lodash/startCase";
 import { Toaster } from "react-hot-toast";
-import { Dialog, Transition } from "@headlessui/react";
+import { Transition } from "@headlessui/react";
 import { XIcon } from "@heroicons/react/outline";
 import { useDrawer } from "@/contexts/drawerContext";
 import { routes, IRoutes } from "@/constants/routes";
@@ -10,64 +10,45 @@ import { useUserInfo } from "@/utils/userState";
 import { Spinner, WUM_BONDING } from "wumbo-common";
 
 export const WumboDrawer = (props: { children: ReactNode }) => {
-  const { isOpen, toggleDrawer } = useDrawer();
-
-  chrome.runtime.onMessage.addListener((request, _, sendResponse) => {
-    if (request.type === "TOGGLE_WUMBO") {
-      isOpen ? toggleDrawer({ isOpen: false }) : toggleDrawer({ isOpen: true });
-    }
-
-    sendResponse();
-    return true;
-  });
+  const { isOpen } = useDrawer();
 
   return (
-    <Transition.Root show={isOpen} as={Fragment}>
-      <Dialog
-        as="div"
-        static
-        className="fixed inset-0 overflow-hidden z-infinity"
-        open={isOpen}
-        onClose={() => toggleDrawer({ isOpen: false })}
-      >
-        <div className="absolute inset-0 overflow-hidden">
-          <Transition.Child
-            as={Fragment}
-            enter="ease-in-out duration-300"
-            enterFrom="opacity-0"
-            enterTo="opacity-100"
-            leave="ease-in-out duration-300"
-            leaveFrom="opacity-100"
-            leaveTo="opacity-0"
-          >
-            <Dialog.Overlay className="absolute inset-0 transition-opacity" />
-          </Transition.Child>
-
-          {/* TODO: We can customize the 280px here based on where they drag the drawer */}
-          <div style={{ top: "calc(50% - 280px)" }} className="fixed right-0 pl-10 max-w-full flex">
-            <Transition.Child
-              as={Fragment}
-              enter="transform transition ease-in-out duration-300 sm:duration-500"
-              enterFrom="translate-x-full"
-              enterTo="translate-x-0"
-              leave="transform transition ease-in-out duration-300 sm:duration-500"
-              leaveFrom="translate-x-0"
-              leaveTo="translate-x-full"
+    <div
+      aria-live="assertive"
+      className="fixed inset-0 flex items-end px-4 py-6 pointer-events-none sm:p-6 sm:items-start"
+    >
+      <div className="w-full flex flex-col items-center space-y-4 sm:items-end">
+        <Transition.Root show={isOpen} as={Fragment}>
+          <div className="fixed inset-0 overflow-hidden">
+            {/* TODO: We can customize the 280px here based on where they drag the drawer */}
+            <div
+              style={{ top: "calc(50% - 280px)" }}
+              className="fixed right-0 pl-10 max-w-full flex"
             >
-              <div className="w-screen max-w-340px">
-                <div className="h-560px w-340px flex flex-col bg-white rounded-l-lg shadow-xl text-black">
-                  {props.children}
+              <Transition.Child
+                as={Fragment}
+                enter="transform transition ease-in-out duration-300 sm:duration-500"
+                enterFrom="translate-x-full"
+                enterTo="translate-x-0"
+                leave="transform transition ease-in-out duration-300 sm:duration-500"
+                leaveFrom="translate-x-0"
+                leaveTo="translate-x-full"
+              >
+                <div className="w-screen max-w-340px pointer-events-auto shadow-2xl">
+                  <div className="h-560px w-340px flex flex-col bg-white rounded-l-lg text-black">
+                    {props.children}
+                  </div>
+                  <Toaster
+                    containerClassName="!absolute !bottom-0 !top-auto !left-auto !right-auto !w-full !w-max-340px"
+                    position="bottom-center"
+                  />
                 </div>
-                <Toaster
-                  containerClassName="!absolute !bottom-0 !top-auto !left-auto !right-auto !w-full !w-max-340px"
-                  position="bottom-center"
-                />
-              </div>
-            </Transition.Child>
+              </Transition.Child>
+            </div>
           </div>
-        </div>
-      </Dialog>
-    </Transition.Root>
+        </Transition.Root>
+      </div>
+    </div>
   );
 };
 
