@@ -1,7 +1,5 @@
 import React from "react";
-import {
-  Metadata as MetaplexMetadata,
-} from "@oyster/common";
+import { Metadata as MetaplexMetadata } from "@oyster/common";
 import { useSocialTokenMetadata } from "../utils";
 import { Link } from "react-router-dom";
 import { TokenBondingV0 } from "../../../spl-token-bonding/dist/lib";
@@ -14,20 +12,11 @@ export type GetCreatorLink = (
 ) => string;
 
 export const Creator = React.memo(
-  ({
-    creator,
-    getCreatorLink,
-  }: {
-    creator: PublicKey;
-    getCreatorLink: GetCreatorLink;
-  }) => {
+  ({ creator, getCreatorLink }: { creator: PublicKey; getCreatorLink: GetCreatorLink }) => {
     const { metadata, tokenBonding } = useSocialTokenMetadata(creator);
 
     return (
-      <Link
-        className="truncate max-w-18 text-blue-500"
-        to={getCreatorLink(creator, metadata, tokenBonding)}
-      >
+      <Link to={getCreatorLink(creator, metadata, tokenBonding)}>
         {metadata?.data.name || creator.toBase58()}
       </Link>
     );

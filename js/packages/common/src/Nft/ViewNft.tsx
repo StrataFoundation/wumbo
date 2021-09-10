@@ -1,8 +1,5 @@
-import React, { useState } from "react";
-import {
-  ITokenWithMeta,
-  useTokenMetadata,
-} from "../utils/metaplex/nftMetadataHooks";
+import React, { Fragment, useState } from "react";
+import { ITokenWithMeta, useTokenMetadata } from "../utils/metaplex/nftMetadataHooks";
 import { Nft } from "./Nft";
 import { MetadataCategory, useWallet } from "@oyster/common";
 import { Button } from "../Button";
@@ -18,9 +15,7 @@ const displayNames = {
   image: "Image",
   audio: "Audio",
 };
-function displayName(
-  category: MetadataCategory | undefined
-): string | undefined {
+function displayName(category: MetadataCategory | undefined): string | undefined {
   return category && displayNames[category];
 }
 
@@ -31,13 +26,7 @@ type Attribute = {
 };
 
 export const ViewNftRaw = React.memo(
-  ({
-    token,
-    getCreatorLink,
-  }: {
-    token: ITokenWithMeta;
-    getCreatorLink: GetCreatorLink;
-  }) => {
+  ({ token, getCreatorLink }: { token: ITokenWithMeta; getCreatorLink: GetCreatorLink }) => {
     const [taggingMode, setTaggingMode] = useState(false);
     const { connected } = useWallet();
 
@@ -46,70 +35,73 @@ export const ViewNftRaw = React.memo(
     }
 
     return (
-      <div className="grid grid-cols-2 sm:grid-cols-1">
-        {token.data && <Nft className="w-full" data={token.data} />}
-        <div className="p-2 flex flex-col space-y-2">
-          <span className="text-2xl font-extrabold block">
-            {token.metadata?.data.name}
-          </span>
-
-          {taggingMode && (
-            <TaggableImages src={token.image!} metadata={token.metadataKey!} />
-          )}
-
-          {!taggingMode && (
-            <div className="grid grid-cols divide-y">
-              <div className="pb-4">
-                <div className="space-y-2 pb-4">
-                  <span className="font-medium">
-                    {displayName(token.data?.properties.category)} •{" "}
-                    {token.edition
-                      ? `Edition no. ${token.edition.edition.toNumber()} of ${token.masterEdition?.supply.toNumber()}`
-                      : "Master Edition"}
-                  </span>
-                  {token.metadata && (
-                    <div className="font-medium flex flex-row">
-                      <span>Creators:&nbsp;</span>
-                      {token.metadata?.data.creators
-                        ?.filter((c) => c.verified)
-                        .map((creator) => (
-                          <Creator
-                            key={creator.address.toBase58()}
-                            creator={creator.address}
-                            getCreatorLink={getCreatorLink}
-                          />
-                        ))}
-                      <span>•</span>
-                      <span>Authority:&nbsp;</span>
-                      {
+      <div className="grid grid-cols-2 sm:grid-cols-1 text-">
+        <div className="col-span-1 flex flex-col divide-y divide-gray-200">
+          <div className="flex-1 flex flex-col">
+            {token.data && (
+              <div className="flex-shrink-0 mx-auto">
+                <Nft className="w-full" data={token.data} />
+              </div>
+            )}
+            <h3 className="pt-4 text-gray-900 text-3xl font-bold">{token.metadata?.data.name}</h3>
+            {taggingMode && <TaggableImages src={token.image!} metadata={token.metadataKey!} />}
+            {!taggingMode && (
+              <dl className="pt-1 flex-grow flex flex-col justify-between">
+                <dd className="text-gray-500 text-sm">
+                  {displayName(token.data?.properties.category)} •{" "}
+                  {token.edition
+                    ? `Edition no. ${token.edition.edition.toNumber()} of ${token.masterEdition?.supply.toNumber()}`
+                    : "Master Edition"}
+                </dd>
+                {token.metadata && (
+                  <Fragment>
+                    <dd className="pt-3">
+                      <p className="text-sm text-gray-900 font-bold">Authority:</p>
+                      <span className="text-sm text-gray-500 font-medium break-words hover:text-indigo-600">
                         <Creator
                           creator={token.metadata.updateAuthority}
                           getCreatorLink={getCreatorLink}
                         />
-                      }
-                    </div>
-                  )}
-                </div>
-                {token.image && token.metadataKey && (
-                  <Button onClick={() => setTaggingMode(true)}>Tag</Button>
+                      </span>
+                    </dd>
+                    <dd className="pt-3">
+                      <p className="text-sm text-gray-900 font-bold">Created by:</p>
+                      <span className="text-sm text-gray-500 font-medium break-words hover:text-indigo-600">
+                        {token.metadata?.data.creators
+                          ?.filter((c) => c.verified)
+                          .map((creator) => (
+                            <Creator
+                              key={creator.address.toBase58()}
+                              creator={creator.address}
+                              getCreatorLink={getCreatorLink}
+                            />
+                          ))}
+                      </span>
+                    </dd>
+                  </Fragment>
                 )}
+              </dl>
+            )}
+            {token.image && token.metadataKey && (
+              <div className="py-6 divide-y divide-gray-200">
+                <div className="flex">
+                  <div className="w-0 flex-1 flex">
+                    <Button onClick={() => setTaggingMode(true)}>Tag NFT</Button>
+                  </div>
+                </div>
               </div>
-
-              <p className="py-4">{token.description}</p>
-
-              {
-                // @ts-ignore
-                (token.data?.attributes || []).map(
-                  ({ trait_type, display_type, value }: Attribute) => (
-                    <div className="py-6 flex flex-row">
-                      <div className="text-gray-500 w-32">{trait_type}</div>
-                      <span>{value}</span>
-                    </div>
-                  )
-                )
-              }
-            </div>
-          )}
+            )}
+          </div>
+          <div className="text-sm py-6">{token.description}</div>
+          {
+            // @ts-ignore
+            (token.data?.attributes || []).map(({ trait_type, display_type, value }: Attribute) => (
+              <div className="py-6 flex flex-row">
+                <div className="text-sm text-gray-500 w-32">{trait_type}</div>
+                <span className="text-sm">{value}</span>
+              </div>
+            ))
+          }
         </div>
       </div>
     );
@@ -117,13 +109,7 @@ export const ViewNftRaw = React.memo(
 );
 
 export const ViewNft = React.memo(
-  ({
-    token,
-    getCreatorLink,
-  }: {
-    token?: PublicKey;
-    getCreatorLink: GetCreatorLink;
-  }) => {
+  ({ token, getCreatorLink }: { token?: PublicKey; getCreatorLink: GetCreatorLink }) => {
     const tokenWithMeta = useTokenMetadata(token);
     if (tokenWithMeta.error) {
       console.error(tokenWithMeta.error);
