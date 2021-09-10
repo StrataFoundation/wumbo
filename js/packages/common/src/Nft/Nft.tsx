@@ -1,8 +1,7 @@
-import React, { useCallback, useEffect, useState } from 'react';
-import { ITokenWithMeta } from "../utils/metaplex";
+import React, { useCallback, useEffect, useState } from "react";
 import { MeshViewer } from "./MeshViewer";
-import { IMetadataExtension, MetadataFile } from "@oyster/common"
-import { Stream, StreamPlayerApi } from '@cloudflare/stream-react';
+import { IMetadataExtension, MetadataFile } from "@oyster/common";
+import { Stream, StreamPlayerApi } from "@cloudflare/stream-react";
 
 const MeshArtContent = ({
   uri,
@@ -20,11 +19,18 @@ const MeshArtContent = ({
   files?: (MetadataFile | string)[];
 }) => {
   const renderURL =
-    files && files.length > 0 && typeof files[0] === 'string'
+    files && files.length > 0 && typeof files[0] === "string"
       ? files[0]
       : animationUrl;
 
-  return <MeshViewer image={image} url={renderURL} className={className} style={style} />;
+  return (
+    <MeshViewer
+      image={image}
+      url={renderURL}
+      className={className}
+      style={style}
+    />
+  );
 };
 
 const VideoArtContent = ({
@@ -45,10 +51,10 @@ const VideoArtContent = ({
   const [playerApi, setPlayerApi] = useState<StreamPlayerApi>();
 
   const playerRef = useCallback(
-    ref => {
+    (ref) => {
       setPlayerApi(ref);
     },
-    [setPlayerApi],
+    [setPlayerApi]
   );
 
   useEffect(() => {
@@ -58,7 +64,7 @@ const VideoArtContent = ({
   }, [active, playerApi]);
 
   const likelyVideo = (files || []).filter((f, index, arr) => {
-    if (typeof f !== 'string') {
+    if (typeof f !== "string") {
       return false;
     }
 
@@ -68,11 +74,11 @@ const VideoArtContent = ({
 
   const content =
     likelyVideo &&
-    likelyVideo.startsWith('https://watch.videodelivery.net/') ? (
+    likelyVideo.startsWith("https://watch.videodelivery.net/") ? (
       <div className={`${className} square`}>
         <Stream
           streamRef={(e: any) => playerRef(e)}
-          src={likelyVideo.replace('https://watch.videodelivery.net/', '')}
+          src={likelyVideo.replace("https://watch.videodelivery.net/", "")}
           loop={true}
           height={600}
           width={600}
@@ -104,7 +110,7 @@ const VideoArtContent = ({
           <source src={animationURL} type="video/mp4" style={style} />
         )}
         {files
-          ?.filter(f => typeof f !== 'string')
+          ?.filter((f) => typeof f !== "string")
           .map((f: any) => (
             <source key={f.uri} src={f.uri} type={f.type} style={style} />
           ))}
@@ -114,34 +120,33 @@ const VideoArtContent = ({
   return content;
 };
 
-
 function getLast<T>(arr: T[]) {
   if (arr.length <= 0) {
     return undefined;
   }
 
   return arr[arr.length - 1];
-};
+}
 
-export const Nft: React.FC<{ data: IMetadataExtension, className?: string, meshEnabled?: boolean, style?: React.CSSProperties }> = ({
-  data,
-  className,
-  style,
-  meshEnabled = true
-}) => {
-  const animationURL = data?.animation_url || '';
+export const Nft: React.FC<{
+  data: IMetadataExtension;
+  className?: string;
+  meshEnabled?: boolean;
+  style?: React.CSSProperties;
+}> = ({ data, className, style, meshEnabled = true }) => {
+  const animationURL = data?.animation_url || "";
   const animationUrlExt = new URLSearchParams(
-    getLast(animationURL.split('?')),
-  ).get('ext');
+    getLast(animationURL.split("?"))
+  ).get("ext");
 
   const category = data?.properties.category;
-  const uri = data?.image
+  const uri = data?.image;
 
   if (
     meshEnabled &&
-    (category === 'vr' ||
-      animationUrlExt === 'glb' ||
-      animationUrlExt === 'gltf')
+    (category === "vr" ||
+      animationUrlExt === "glb" ||
+      animationUrlExt === "gltf")
   ) {
     return (
       <MeshArtContent
@@ -156,14 +161,16 @@ export const Nft: React.FC<{ data: IMetadataExtension, className?: string, meshE
   }
 
   if (category === "video") {
-    return <VideoArtContent
-      className={className}
-      files={data?.properties.files}
-      uri={uri}
-      animationURL={animationURL}
-      active={true}
-    />
+    return (
+      <VideoArtContent
+        className={className}
+        files={data?.properties.files}
+        uri={uri}
+        animationURL={animationURL}
+        active={true}
+      />
+    );
   }
 
-  return <img className={`${className}`} src={data?.image} alt={data?.name} />
-}
+  return <img className={`${className}`} src={data?.image} alt={data?.name} />;
+};

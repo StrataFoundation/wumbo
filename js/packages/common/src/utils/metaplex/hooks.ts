@@ -29,7 +29,7 @@ import {
   uploadToArweave,
 } from "./arweave";
 import { WUMBO_PROGRAM_ID } from "../../constants/globals";
-import { useTokenMetadata } from "./useUserTokensWithMeta";
+import { useTokenMetadata } from "./nftMetadataHooks";
 
 const RESERVED_TXN_MANIFEST = "manifest.json";
 
