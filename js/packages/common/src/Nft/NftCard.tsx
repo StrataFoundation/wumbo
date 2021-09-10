@@ -31,7 +31,7 @@ export const NftCard = React.memo(
             {token.masterEdition && (
               <div className="flex flex-row">
                 <Badge size="sm">
-                  {token.masterEdition && !token.edition && "NFT 0"}
+                  {token.masterEdition && !token.edition && "Master Edition"}
                   {token.edition &&
                     `${token.edition.edition.toNumber()} of ${token.masterEdition?.supply.toNumber()}`}
                 </Badge>
