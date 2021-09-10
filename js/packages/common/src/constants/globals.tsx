@@ -17,6 +17,8 @@ export const NFT_VERIFIER_TLD = new PublicKey("12UFqXT52JUuArrHy8FPqVtzBVF2pkB8H
 
 export const NFT_VERIFIER = new PublicKey("3ADxhmXXXxWz6jT949DDw9r7E6uz6Vk1bssUHSNBcrbE");
 
+export const TROPHY_CREATOR = new PublicKey("3ADxhmXXXxWz6jT949DDw9r7E6uz6Vk1bssUHSNBcrbE")
+
 export const TWITTER_REGISTRAR_SERVER_URL =
   "http://localhost:3000/registrar/twitter-oauth";
 

@@ -10,6 +10,7 @@ import { Button, MetadataAvatar, Tab, Tabs } from '..';
 import { TokenAccountsContextProvider, TokenLeaderboard } from '../Leaderboard/TokenLeaderboard';
 import { AccountInfo as TokenAccountInfo } from '@solana/spl-token';
 import { NftList } from '../Nft';
+import { TROPHY_CREATOR } from '../constants/globals';
 
 interface IProfileProps { 
   tokenBondingKey: PublicKey;
@@ -45,6 +46,10 @@ export const Profile = React.memo(({ tokenBondingKey, onAccountClick, onTradeCli
     return <Spinner />
   }
 
+  function isTrophy(t: ITokenWithMeta): boolean {
+    return Boolean(t.data?.properties?.creators?.some(c => c.address == TROPHY_CREATOR.toBase58()))
+  }
+
   return <div className="flex flex-col items-stretch space-y-4">
     <div className="flex flex-col items-center text-gray-700">
       <MetadataAvatar size="xl" tokenBonding={tokenBonding} name="UNCLAIMED" />
@@ -74,13 +79,16 @@ export const Profile = React.memo(({ tokenBondingKey, onAccountClick, onTradeCli
       </div>
     </div>
     <Tabs>
-      <Tab title="Largest Backers">
+      <Tab title="Backers">
         <TokenAccountsContextProvider mint={tokenBonding.targetMint}>
           <TokenLeaderboard onAccountClick={onAccountClick} mint={tokenBonding.targetMint} />
         </TokenAccountsContextProvider>
       </Tab>
       <Tab title="Collectibles">
-        <NftList getLink={getNftLink} owner={ownerWalletKey} />
+        <NftList filter={t => !isTrophy(t)} getLink={getNftLink} owner={ownerWalletKey} />
+      </Tab>
+      <Tab title="Trophies">
+        <NftList filter={t => isTrophy(t)} getLink={getNftLink} owner={ownerWalletKey} />
       </Tab>
     </Tabs>
   </div>

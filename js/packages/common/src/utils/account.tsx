@@ -125,7 +125,8 @@ export function useAccount<T>(
   return state;
 }
 
-const PRECACHED_OWNERS = new Map<string, TokenAccount[]>();
+let currentFetch: Map<string, Promise<TokenAccount[]>> = new Map();
+const precachedOwners = new Map<string, TokenAccount[]>();
 export const getUserTokenAccounts = async (
   connection: Connection,
   owner?: PublicKey,
@@ -134,23 +135,33 @@ export const getUserTokenAccounts = async (
     return [];
   }
 
-  if (PRECACHED_OWNERS.has(owner.toBase58())) {
-    return PRECACHED_OWNERS.get(owner.toBase58())!
+  const ownerStr = owner.toBase58();
+  if (precachedOwners.has(ownerStr)) {
+    return precachedOwners.get(ownerStr)!;
   }
 
-  // user accounts are updated via ws subscription
-  const accounts = await connection.getTokenAccountsByOwner(owner, {
-    programId: TOKEN_PROGRAM_ID,
-  });
+  if (currentFetch.has(ownerStr)) {
+    return currentFetch.get(ownerStr)!;
+  }
 
-  const tokenAccounts = accounts.value.map(info =>
-    TokenAccountParser(info.pubkey, info.account)
-  ).filter(truthy);
+  currentFetch.set(ownerStr, (async () => {
+    // user accounts are updated via ws subscription
+    const accounts = await connection.getTokenAccountsByOwner(owner, {
+      programId: TOKEN_PROGRAM_ID,
+    });
+  
+    const tokenAccounts = accounts.value.map(info =>
+      TokenAccountParser(info.pubkey, info.account)
+    ).filter(truthy);
+  
+    currentFetch.delete(ownerStr);
+    // used for filtering account updates over websocket
+    precachedOwners.set(owner.toBase58(), tokenAccounts);
+  
+    return tokenAccounts;
+  })());
 
-  // used for filtering account updates over websocket
-  PRECACHED_OWNERS.set(owner.toBase58(), tokenAccounts);
-
-  return tokenAccounts;
+  return currentFetch.get(ownerStr)!;
 };
 
 export function useUserTokenAccounts(owner?: PublicKey) {
