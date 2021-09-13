@@ -100,6 +100,15 @@ const findButtonTarget = (nameEl: HTMLElement) => {
   return traverseUp(nameEl);
 };
 
+// TODO: (Bry) Figure out better way
+const findTweetChildren = (tweet: Element): HTMLCollection | null => {
+  // go down until we find multiple children
+  // this is usualy the main content of the tweet
+  if (!tweet.children.length) return null;
+  if (tweet.children.length > 1) return tweet.children;
+  return findTweetChildren(tweet.children[0]);
+};
+
 export const useTweets = (): IParsedTweet[] | null => {
   const [tweets, setTweets] = useState<IParsedTweet[]>([]);
 
@@ -111,48 +120,58 @@ export const useTweets = (): IParsedTweet[] | null => {
 
     const getTwets = () => {
       const tweets = getElementsBySelector('[data-testid="tweet"]').filter(notCached);
-
       if (tweets.length > 0) {
         tweets.forEach((t) => cache.add(t));
 
-        const parsedTweets = tweets.reduce((acc: any, tweet: any): IParsedTweet[] => {
-          const nameEl = tweet.querySelector("a");
-          if (nameEl) {
-            const name = nameEl.href.split("/").slice(-1)[0];
-            const imgEl = nameEl.querySelector("img");
-            const buttonTarget = findButtonTarget(nameEl);
-            let mentions: string[] | null = null;
-            let replyTokensTarget: Element | null = null;
+        const parsedTweets = tweets.reduce(
+          (acc: any, tweet: any, index: number): IParsedTweet[] => {
+            const tweetChildren = findTweetChildren(tweet);
+            let nameEl;
 
-            if (buttonTarget) {
-              mentions = tweet.parentNode.innerText
-                .split("\n")
-                .join(" ")
-                .match(twitterMentionRegex);
-
-              if (mentions?.length) {
-                replyTokensTarget =
-                  tweet.children[1]?.children[1]?.lastChild?.previousSibling ||
-                  tweet.parentNode.lastElementChild.children[
-                    tweet.parentNode.lastElementChild.childNodes.length - 4
-                  ];
-              }
+            if (!tweetChildren) {
+              nameEl = tweet.querySelector("a");
+            } else {
+              nameEl = tweetChildren[1].querySelector("a");
             }
 
-            return [
-              ...acc,
-              {
-                name,
-                avatar: imgEl?.src,
-                buttonTarget,
-                mentions,
-                replyTokensTarget,
-              },
-            ];
-          }
+            if (nameEl) {
+              const name = nameEl.href.split("/").slice(-1)[0];
+              const imgEl = nameEl.querySelector("img");
+              const buttonTarget = findButtonTarget(nameEl);
+              let mentions: string[] | null = null;
+              let replyTokensTarget: Element | null = null;
 
-          return acc;
-        }, []);
+              if (buttonTarget) {
+                mentions = tweet.parentNode.innerText
+                  .split("\n")
+                  .join(" ")
+                  .match(twitterMentionRegex);
+
+                if (mentions?.length) {
+                  replyTokensTarget =
+                    tweet.children[1]?.children[1]?.lastChild?.previousSibling ||
+                    tweet.parentNode.lastElementChild.children[
+                      tweet.parentNode.lastElementChild.childNodes.length - 4
+                    ];
+                }
+              }
+
+              return [
+                ...acc,
+                {
+                  name,
+                  avatar: imgEl?.src,
+                  buttonTarget,
+                  mentions,
+                  replyTokensTarget,
+                },
+              ];
+            }
+
+            return acc;
+          },
+          []
+        );
 
         setTweets((oldTweets) => [...(oldTweets || []), ...parsedTweets]);
       }
