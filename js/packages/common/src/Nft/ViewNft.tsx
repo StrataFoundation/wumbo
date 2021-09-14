@@ -15,6 +15,7 @@ const displayNames = {
   image: "Image",
   audio: "Audio",
 };
+
 function displayName(category: MetadataCategory | undefined): string | undefined {
   return category && displayNames[category];
 }
@@ -26,7 +27,15 @@ type Attribute = {
 };
 
 export const ViewNftRaw = React.memo(
-  ({ token, getCreatorLink }: { token: ITokenWithMeta; getCreatorLink: GetCreatorLink }) => {
+  ({
+    token,
+    owner,
+    getCreatorLink,
+  }: {
+    token: ITokenWithMeta;
+    owner: PublicKey | undefined;
+    getCreatorLink: GetCreatorLink;
+  }) => {
     const [taggingMode, setTaggingMode] = useState(false);
     const { connected } = useWallet();
 
@@ -55,6 +64,16 @@ export const ViewNftRaw = React.memo(
                 </dd>
                 {token.metadata && (
                   <Fragment>
+                    <dd className="pt-3">
+                      <p className="text-sm text-gray-900 font-bold">Owner:</p>
+                      <span className="text-sm text-gray-500 font-medium break-words hover:text-indigo-600">
+                        {owner ? (
+                          <Creator creator={owner} getCreatorLink={getCreatorLink} />
+                        ) : (
+                          <span>Unknown</span>
+                        )}
+                      </span>
+                    </dd>
                     <dd className="pt-3">
                       <p className="text-sm text-gray-900 font-bold">Authority:</p>
                       <span className="text-sm text-gray-500 font-medium break-words hover:text-indigo-600">
@@ -109,12 +128,20 @@ export const ViewNftRaw = React.memo(
 );
 
 export const ViewNft = React.memo(
-  ({ token, getCreatorLink }: { token?: PublicKey; getCreatorLink: GetCreatorLink }) => {
+  ({
+    token,
+    owner,
+    getCreatorLink,
+  }: {
+    token?: PublicKey;
+    owner: PublicKey | undefined;
+    getCreatorLink: GetCreatorLink;
+  }) => {
     const tokenWithMeta = useTokenMetadata(token);
     if (tokenWithMeta.error) {
       console.error(tokenWithMeta.error);
     }
 
-    return <ViewNftRaw token={tokenWithMeta} getCreatorLink={getCreatorLink} />;
+    return <ViewNftRaw token={tokenWithMeta} owner={owner} getCreatorLink={getCreatorLink} />;
   }
 );
