@@ -1,13 +1,12 @@
 import React, { Fragment, useState } from "react";
-import { ITokenWithMeta, useTokenMetadata } from "../utils/metaplex/nftMetadataHooks";
-import { Nft } from "./Nft";
 import { MetadataCategory, useWallet } from "@oyster/common";
-import { Button } from "../Button";
-import { Creator, GetCreatorLink } from "./Creator";
 import { PublicKey } from "@solana/web3.js";
+import { ITokenWithMeta, useTokenMetadata } from "../utils";
+import { Nft, Creator, GetCreatorLink, TaggableImages } from "./";
 // @ts-ignore
 import { WalletSelect } from "../Pages/WalletSelect";
-import { TaggableImages } from "./Tagging";
+import { Button } from "../";
+import { RefreshIcon, ArrowsExpandIcon } from "@heroicons/react/outline";
 
 const displayNames = {
   vr: "VR",
@@ -36,26 +35,55 @@ export const ViewNftRaw = React.memo(
     owner: PublicKey | undefined;
     getCreatorLink: GetCreatorLink;
   }) => {
-    const [taggingMode, setTaggingMode] = useState(false);
-    const { connected } = useWallet();
+    const [taggingMode, setTaggingMode] = useState<boolean>(false);
+    const [refreshCounter, setRefreshCounter] = useState<number>(0);
+    const incRefreshCounter = () => taggingMode && setRefreshCounter(refreshCounter + 1);
+    const expandNft = () => console.log("expandNftHere");
 
-    if (!connected && taggingMode) {
-      return <WalletSelect />;
-    }
+    // TODO expand logic
+
+    // TODO add redirect logic to site wallet
+    /* const { connected } = useWallet(); */
+
+    /* if (!connected && taggingMode) {
+     *   return <WalletSelect />;
+     * } */
 
     return (
-      <div className="grid grid-cols-2 sm:grid-cols-1 text-">
-        <div className="col-span-1 flex flex-col divide-y divide-gray-200">
-          <div className="flex-1 flex flex-col">
-            {token.data && (
-              <div className="flex-shrink-0 mx-auto">
-                <Nft className="w-full" data={token.data} />
-              </div>
-            )}
-            <h3 className="pt-4 text-gray-900 text-3xl font-bold">{token.metadata?.data.name}</h3>
-            {taggingMode && <TaggableImages src={token.image!} metadata={token.metadataKey!} />}
-            {!taggingMode && (
-              <dl className="pt-1 flex-grow flex flex-col justify-between">
+      <div>
+        <div className="flex flex-col relative py-6 bg-gradient-to-tr from-blue-600 via-indigo-600 to-purple-600">
+          {taggingMode && (
+            <div
+              onClick={incRefreshCounter}
+              className="text-white absolute right-4 top-4 bg-gray-900 bg-opacity-30 rounded-full p-1.5 hover:bg-opacity-40 hover:cursor-pointer"
+            >
+              <RefreshIcon width={26} />
+            </div>
+          )}
+          {!taggingMode && (
+            <div
+              onClick={expandNft}
+              className="text-white absolute right-4 top-4 bg-gray-900 bg-opacity-30 rounded-full p-1.5 hover:bg-opacity-40 hover:cursor-pointer"
+            >
+              <ArrowsExpandIcon width={26} />
+            </div>
+          )}
+          {token.data && <Nft className="w-44 m-auto" data={token.data} />}
+          <span className="pt-2 text-white text-center text-2xl font-medium">
+            {token.metadata?.data.name}
+          </span>
+        </div>
+        <div className="px-4 py-4">
+          {taggingMode && (
+            <TaggableImages
+              src={token.image!}
+              metadata={token.metadataKey!}
+              refreshCounter={refreshCounter}
+            />
+          )}
+          {!taggingMode && (
+            <div className="grid grid-cols-1 divide-y divide-gray-200">
+              <dl className="pb-6 flex-grow flex flex-col justify-between">
                 <dd className="text-gray-500 text-sm">
                   {displayName(token.data?.properties.category)} •{" "}
                   {token.edition
@@ -100,27 +128,29 @@ export const ViewNftRaw = React.memo(
                   </Fragment>
                 )}
               </dl>
-            )}
-            {token.image && token.metadataKey && (
-              <div className="py-6 divide-y divide-gray-200">
-                <div className="flex">
-                  <div className="w-0 flex-1 flex">
-                    <Button onClick={() => setTaggingMode(true)}>Tag NFT</Button>
+              {token.image && token.metadataKey && (
+                <div className="py-6 divide-y divide-gray-200">
+                  <div className="flex">
+                    <div className="w-0 flex-1 flex">
+                      <Button onClick={() => setTaggingMode(true)}>Tag</Button>
+                    </div>
                   </div>
                 </div>
-              </div>
-            )}
-          </div>
-          <div className="text-sm py-6">{token.description}</div>
-          {
-            // @ts-ignore
-            (token.data?.attributes || []).map(({ trait_type, display_type, value }: Attribute) => (
-              <div className="py-6 flex flex-row">
-                <div className="text-sm text-gray-500 w-32">{trait_type}</div>
-                <span className="text-sm">{value}</span>
-              </div>
-            ))
-          }
+              )}
+              <div className="text-sm py-6">{token.description}</div>
+              {
+                // @ts-ignore
+                (token.data?.attributes || []).map(
+                  ({ trait_type, display_type, value }: Attribute) => (
+                    <div className="py-6 flex flex-row">
+                      <div className="text-sm text-gray-500 w-32">{trait_type}</div>
+                      <span className="text-sm">{value}</span>
+                    </div>
+                  )
+                )
+              }
+            </div>
+          )}
         </div>
       </div>
     );

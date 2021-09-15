@@ -54,7 +54,7 @@ export const Claim = React.memo(({ handle, redirectUri, code, onComplete }: ICla
 
   if (sol < amountNeeded!) {
     return (
-      <div className="flex flex-col">
+      <div className="p-4 flex flex-col">
         <span>
           It looks like you don't have any SOL. It costs around {amountNeeded!.toFixed(4)} SOL to
           claim your twitter handle and coin. Get some with FTX Pay:

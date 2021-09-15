@@ -8,9 +8,9 @@ export const NftListRaw = React.memo(
   ({
     tokens,
     getLink,
-    loading = !!tokens
+    loading = !!tokens,
   }: {
-    tokens?: ITokenWithMetaAndAccount[],
+    tokens?: ITokenWithMetaAndAccount[];
     getLink: (t: ITokenWithMeta) => string;
     loading?: boolean;
   }) => {
@@ -19,30 +19,28 @@ export const NftListRaw = React.memo(
     }
 
     return (
-      <div className="flex flex-row flex-wrap gap-4">
+      <ul
+        role="list"
+        className="grid grid-cols-3 gap-6 sm:grid-cols-3 md:grid-cols-3 lg:grid-cols-3"
+      >
         {tokens
           .filter((t) => t.masterEdition)
           .map((token) => (
-            <NftCard
+            <li
               key={token.publicKey?.toBase58()}
-              getLink={getLink}
-              token={token}
-            />
+              className="col-span-1 flex flex-col text-center rounded-lg"
+            >
+              <NftCard getLink={getLink} token={token} />
+            </li>
           ))}
-      </div>
+      </ul>
     );
   }
 );
 
 export const NftList = React.memo(
-  ({
-    owner,
-    getLink
-  }: {
-    owner?: PublicKey;
-    getLink: (t: ITokenWithMeta) => string;
-  }) => {
+  ({ owner, getLink }: { owner?: PublicKey; getLink: (t: ITokenWithMeta) => string }) => {
     const { result: tokens, loading, error } = useUserTokensWithMeta(owner);
-    return <NftListRaw getLink={getLink} loading={loading} tokens={tokens} />
+    return <NftListRaw getLink={getLink} loading={loading} tokens={tokens} />;
   }
 );
