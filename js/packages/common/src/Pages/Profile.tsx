@@ -2,9 +2,9 @@ import React from 'react';
 import { useTokenRefFromBonding } from '../utils/tokenRef';
 import { Spinner } from '../Spinner';
 import { useAccount } from '../utils/account';
-import { TokenBondingV0 } from "@wum.bo/spl-token-bonding";
+import { TokenBonding } from "../utils/deserializers/spl-token-bonding";
 import { PublicKey } from '@solana/web3.js';
-import { ITokenWithMeta, supplyAsNum, useAssociatedAccount, useBondingPricing, useFiatPrice, useMint, useOwnedAmount, useQuery, useReverseTwitter, useTokenMetadata, useUserTokensWithMeta } from '../utils';
+import { TokenRef, ITokenWithMeta, supplyAsNum, useBondingPricing, useFiatPrice, useMint, useOwnedAmount, useQuery, useReverseTwitter, useTokenMetadata, useUserTokensWithMeta } from '../utils';
 import { StatCard } from "../StatCard";
 import { Button, MetadataAvatar, Tab, Tabs } from '..';
 import { TokenAccountsContextProvider, TokenLeaderboard } from '../Leaderboard/TokenLeaderboard';
@@ -13,27 +13,27 @@ import { NftList, NftListRaw } from '../Nft';
 import { TROPHY_CREATOR } from '../constants/globals';
 
 interface IProfileProps { 
-  tokenBondingKey: PublicKey;
+  tokenRefKey: PublicKey;
   onAccountClick?: (tokenBondingKey: PublicKey) => void;
   onTradeClick?: () => void;
   getNftLink: (t: ITokenWithMeta) => string
 }
 
-export const Profile = React.memo(({ tokenBondingKey, onAccountClick, onTradeClick, getNftLink }: IProfileProps) => {
-  const { info: tokenRef, loading } = useTokenRefFromBonding(tokenBondingKey);
-  const ownerWalletKey = tokenRef?.owner;
-  const { info: tokenBonding, loading: tokenBondingLoading } = useAccount(tokenRef?.tokenBonding, TokenBondingV0.fromAccount);
+export const Profile = React.memo(({ tokenRefKey, onAccountClick, onTradeClick, getNftLink }: IProfileProps) => {
+  const { info: tokenRef, loading } = useAccount(tokenRefKey, TokenRef)
+  const ownerWalletKey = tokenRef?.owner as PublicKey | undefined;
+  const { info: tokenBonding, loading: tokenBondingLoading } = useAccount(tokenRef?.tokenBonding, TokenBonding);
   const { image, metadata, loading: loadingMetadata } = useTokenMetadata(tokenBonding?.targetMint);
 
   const mint = useMint(tokenBonding?.targetMint);
   const supply = mint ? supplyAsNum(mint) : 0;
-  const { targetRangeToBasePrice: general, current } = useBondingPricing(
+  const { curve } = useBondingPricing(
     tokenBonding?.publicKey
   );
   const fiatPrice = useFiatPrice(tokenBonding?.baseMint);
   const toFiat = (a: number) => (fiatPrice || 0) * a;
-  const coinPriceUsd = toFiat(current);
-  const fiatLocked = mint && toFiat(general(0, supply)).toFixed(2)
+  const coinPriceUsd = toFiat(curve?.current() || 0);
+  const fiatLocked = mint && toFiat(curve?.locked() || 0).toFixed(2)
   const marketCap = (supply * coinPriceUsd).toFixed(2)
   
   const { result: tokens, loading: loadingCollectibles, error } = useUserTokensWithMeta(ownerWalletKey);

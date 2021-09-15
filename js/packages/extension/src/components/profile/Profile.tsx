@@ -1,4 +1,4 @@
-import { useWallet, useClaimedTokenRef, Profile as CommonProfile, Badge } from "wumbo-common";
+import { useAccount, TokenRef, useWallet, Profile as CommonProfile, Badge, useClaimedTokenRefKey } from "wumbo-common";
 import React, { Fragment, useMemo } from "react";
 import { WumboDrawer } from "../WumboDrawer";
 import { Link, useHistory, useParams } from "react-router-dom";
@@ -8,31 +8,26 @@ import { PublicKey } from "@solana/web3.js";
 import { PencilAltIcon } from "@heroicons/react/solid";
 
 export const Profile = () => {
-  const params = useParams<{ tokenBondingKey: string | undefined }>();
-  const { publicKey } = useWallet();
-  const { info: tokenRef, loading } = useClaimedTokenRef(publicKey || undefined);
+  const params = useParams<{ tokenRefKey: string | undefined }>();
+  const { connected, publicKey } = useWallet();
+  const walletTokenRefKey = useClaimedTokenRefKey(publicKey || undefined);
+  const { info: walletTokenRef } = useAccount(walletTokenRefKey, TokenRef);
+  const { info: passedTokenRef } = useAccount(walletTokenRefKey, TokenRef);
+  const passedTokenRefKey = params.tokenRefKey ? new PublicKey(params.tokenRefKey) : undefined;
+  const tokenRefKey = passedTokenRefKey || walletTokenRefKey;
+  const tokenRef = passedTokenRef || walletTokenRef;
 
   const history = useHistory();
 
-  const tokenBondingKey = useMemo(() => {
-    if (params.tokenBondingKey) {
-      return new PublicKey(params.tokenBondingKey);
-    } else if (tokenRef) {
-      return tokenRef.tokenBonding;
-    }
-  }, [params.tokenBondingKey, tokenRef]);
-
-  if (!params.tokenBondingKey) {
-    if (!publicKey) {
+  if (!tokenRefKey) {
+    if (!connected) {
       return <WalletRedirect />;
     }
 
-    if (loading) {
-      return <WumboDrawer.Loading />;
-    }
+    return <WumboDrawer.Loading />;
   }
 
-  if (!tokenBondingKey) {
+  if (!passedTokenRefKey && !walletTokenRef) {
     return (
       <Fragment>
         <WumboDrawer.Header title="Profile" />
@@ -56,10 +51,10 @@ export const Profile = () => {
       </WumboDrawer.Header>
       <WumboDrawer.Content>
         <CommonProfile
-          tokenBondingKey={tokenBondingKey}
-          onAccountClick={(tokenBonding) => history.push(viewProfilePath(tokenBonding))}
-          onTradeClick={() => history.push(tradePath(tokenBondingKey))}
-          getNftLink={(token) => token?.account ? nftPath(token?.account?.mint) : ""}
+          tokenRefKey={tokenRefKey}
+          onAccountClick={(tokenRefKey) => history.push(viewProfilePath(tokenRefKey))}
+          onTradeClick={() => tokenRef && history.push(tradePath(tokenRef.tokenBonding))}
+          getNftLink={(token) => token?.metadata ? nftPath(token?.metadata?.mint) : ""}
         />
       </WumboDrawer.Content>
       <WumboDrawer.Nav />

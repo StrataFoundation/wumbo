@@ -23,6 +23,9 @@ import {
   useTokenMetadata,
   MetadataAvatar,
   useFtxPayLink,
+  TokenBonding,
+  ITokenBonding,
+  useTokenRefFromBonding
 } from "wumbo-common";
 import { routes, viewProfilePath } from "@/constants/routes";
 import { TokenForm, FormValues } from "./TokenForm";
@@ -83,7 +86,7 @@ function useTokenInfo(tokenBonding: TokenBondingV0 | undefined): TokenInfo {
 }
 
 interface TradeParams {
-  tokenBonding: TokenBondingV0;
+  tokenBonding: ITokenBonding;
   name: string;
   ticker: string;
   icon: React.ReactElement;
@@ -96,7 +99,7 @@ export const TradeRoute = () => {
   const { connected } = useWallet();
   const params = useParams<{ tokenBondingKey: string }>();
   const tokenBondingKey = new PublicKey(params.tokenBondingKey);
-  const { info: tokenBonding } = useAccount(tokenBondingKey, TokenBondingV0.fromAccount);
+  const { info: tokenBonding } = useAccount(tokenBondingKey, TokenBonding);
   const info = useTokenInfo(tokenBonding);
   const { name, ticker, icon, loading } = info;
   const ownedWUM = useOwnedAmount(WUM_TOKEN);
@@ -179,10 +182,7 @@ export const Trade = ({
   const [buy, { loading: buyIsSubmitting, error: buyError }] = useBuy();
   const [sell, { loading: sellIsSubmitting, error: sellError }] = useSell();
   const {
-    targetToBasePrice,
-    baseToTargetPrice,
-    sellTargetToBasePrice,
-    sellBaseToTargetPrice,
+    curve
   } = useBondingPricing(tokenBonding.publicKey);
   const fiatPrice = useFiatPrice(tokenBonding.baseMint);
   const toFiat = (a: number) => (fiatPrice || 0) * a;
@@ -191,11 +191,10 @@ export const Trade = ({
   const ownedBase = useOwnedAmount(tokenBonding.baseMint);
   const ownedTarget = useOwnedAmount(tokenBonding.targetMint);
   const location = useLocation();
+  const { info: tokenRef } = useTokenRefFromBonding(tokenBonding.publicKey)
 
   const onHandleBuy = async (values: FormValues) => {
-    const maxAmount =
-      baseToTargetPrice(values.tokenAmount) + BASE_SLIPPAGE * baseToTargetPrice(values.tokenAmount);
-    await buy(tokenBonding.publicKey, values.tokenAmount, maxAmount);
+    await buy(tokenBonding.publicKey, +values.tokenAmount, BASE_SLIPPAGE);
     toast.custom((t) => (
       <Notification
         className="rounded-b-lg"
@@ -209,10 +208,7 @@ export const Trade = ({
   };
 
   const onHandleSell = async (values: FormValues) => {
-    const minPrice =
-      sellTargetToBasePrice(values.tokenAmount) -
-      BASE_SLIPPAGE * sellTargetToBasePrice(values.tokenAmount);
-    await sell(tokenBonding.publicKey, values.tokenAmount, minPrice);
+    await sell(tokenBonding.publicKey, +values.tokenAmount, BASE_SLIPPAGE);
 
     toast.custom((t) => (
       <Notification
@@ -220,7 +216,7 @@ export const Trade = ({
         show={t.visible}
         type="success"
         heading="Transaction Succesful"
-        message={`You now own ${sellTargetToBasePrice(values.tokenAmount).toFixed(
+        message={`You now own ${curve?.sellTargetAmount(+values.tokenAmount).toFixed(
           4
         )} of ${baseTicker}!`}
         onDismiss={() => toast.dismiss(t.id)}
@@ -244,7 +240,7 @@ export const Trade = ({
         name={name}
         ticker={ticker}
         icon={icon}
-        detailsPath={viewProfilePath(tokenBonding.publicKey) + location.search}
+        detailsPath={tokenRef && (viewProfilePath(tokenRef.publicKey) + location.search)}
       />
       <div className="flex justify-center mt-4">
         {/* TODO: show owned amount in both tabs */}
@@ -254,10 +250,10 @@ export const Trade = ({
               {Info}
               <TokenForm
                 fiatAmountFromTokenAmount={(tokenAmount: number) =>
-                  toFiat(targetToBasePrice(tokenAmount))
+                  toFiat(curve?.buyTargetAmount(tokenAmount, tokenBonding.baseRoyaltyPercentage, tokenBonding.targetRoyaltyPercentage) || 0)
                 }
                 tokenAmountFromFiatAmount={(fiatAmount: number) =>
-                  baseToTargetPrice(fromFiat(fiatAmount))
+                  curve?.buyWithBaseAmount(fromFiat(fiatAmount), tokenBonding.baseRoyaltyPercentage, tokenBonding.targetRoyaltyPercentage) || 0
                 }
                 icon={icon}
                 ticker={ticker}
@@ -267,7 +263,7 @@ export const Trade = ({
               />
               <div className="flex flex-col justify-center mt-4">
                 <span className="flex justify-center text-xxs">
-                  You can buy up to {baseToTargetPrice(ownedBase || 0).toFixed(4)} {ticker} coins!
+                  You can buy up to {(curve?.buyTargetAmount(ownedBase || 0, tokenBonding.baseRoyaltyPercentage, tokenBonding.targetRoyaltyPercentage) || 0).toFixed(4)} {ticker} coins!
                 </span>
                 <div className="flex justify-center mt-4">{buyBaseLink(false)}</div>
               </div>
@@ -277,11 +273,11 @@ export const Trade = ({
             <div className="mt-2">
               {Info}
               <TokenForm
-                fiatAmountFromTokenAmount={(fiatAmount: number) =>
-                  toFiat(sellTargetToBasePrice(fiatAmount))
+                fiatAmountFromTokenAmount={(tokenAmount: number) =>
+                  toFiat(curve?.sellTargetAmount(tokenAmount) || 0)
                 }
-                tokenAmountFromFiatAmount={(tokenAmount: number) =>
-                  sellBaseToTargetPrice(fromFiat(tokenAmount))
+                tokenAmountFromFiatAmount={(fiatAmount: number) =>
+                  -(curve?.buyWithBaseAmount(-fromFiat(fiatAmount), 0, 0) || 0)
                 }
                 icon={icon}
                 ticker={ticker}

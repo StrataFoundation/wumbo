@@ -1,4 +1,5 @@
 import React from "react";
+import "../../bufferFill";
 import ReactDOM from "react-dom";
 import App from "../../components/App";
 import "windi.css";

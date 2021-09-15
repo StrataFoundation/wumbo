@@ -56,7 +56,7 @@ export async function createTestTld(connection: Connection, wallet: WalletAdapte
       const createInstruction = await createNameRegistry(
         connection,
         DEV_TWITTER_TLD,
-        1000,
+        256,
         wallet.publicKey!,
         getTwitterVerifier()
       );
@@ -81,7 +81,8 @@ export const getTwitterHandle = async (
 ): Promise<NameRegistryState | null> => {
   try {
     return await getTwitterRegistry(connection, twitterHandle, await getTld());
-  } catch {
+  } catch (e) {
+    console.error(e);
     return null;
   }
 };
@@ -165,6 +166,7 @@ export async function claimTwitterTransactionInstructions(
   { owner, twitterHandle }: ClaimArgs
 ) {
   const nameRegistryItem = await getTwitterHandle(connection, twitterHandle);
+  console.log()
   if (nameRegistryItem) {
     if (nameRegistryItem.owner.toBase58() != owner.toBase58()) {
       throw new Error(`Twitter handle is already registered to wallet ${nameRegistryItem.owner}`);

@@ -2,7 +2,12 @@ import { useEffect, useState } from "react";
 import { getHashedName, getNameAccountKey } from "@bonfida/spl-name-service";
 import {
   WUMBO_INSTANCE_KEY,
-  WUMBO_PROGRAM_ID,
+  Curve,
+  ICurve,
+  TokenBonding,
+  ITokenBonding,
+  ITokenRef,
+  TokenRef,
   TWITTER_ROOT_PARENT_REGISTRY_KEY,
   useBondingPricing,
   useWumboUsdPrice,
@@ -12,12 +17,11 @@ import {
   useTwitterTokenRef,
 } from "wumbo-common";
 import { AccountInfo, PublicKey } from "@solana/web3.js";
-import { TokenRef } from "@wum.bo/spl-wumbo";
 import { MintInfo } from "@solana/spl-token";
-import { LogCurveV0, TokenBondingV0 } from "@wum.bo/spl-token-bonding";
+import { TokenBondingV0 } from "@wum.bo/spl-token-bonding";
 
 interface UserState {
-  tokenRef?: TokenRef;
+  tokenRef?: ITokenRef;
   loading: boolean;
 }
 
@@ -25,9 +29,9 @@ export interface UserInfo {
   name: string;
   coinPriceUsd: number;
   coinPrice: number;
-  tokenRef: TokenRef;
+  tokenRef: ITokenRef;
   tokenBonding: TokenBondingV0;
-  curve: LogCurveV0;
+  curve: ICurve;
   mint: MintInfo;
 }
 export interface UserInfoState {
@@ -38,19 +42,20 @@ export const useUserInfo = (name: string): UserInfoState => {
   const { info: creator, loading } = useTwitterTokenRef(name);
   const { info: tokenBonding } = useAccount(
     creator?.tokenBonding,
-    TokenBondingV0.fromAccount
+    TokenBonding
   );
   const { info: curve } = useAccount(
     tokenBonding?.curve,
-    LogCurveV0.fromAccount
+    Curve
   );
   const mint = useMint(creator && tokenBonding?.targetMint);
   const wumboUsdPrice = useWumboUsdPrice();
   const [userInfo, setUserInfo] = useState<UserInfoState>({
     loading: true,
   });
-  const { current } = useBondingPricing(creator?.tokenBonding);
-
+  const { curve: bondingCurve } = useBondingPricing(creator?.tokenBonding);
+  const current = bondingCurve?.current() || 0;
+  
   useEffect(() => {
     if (curve && tokenBonding && mint && creator) {
       setUserInfo({

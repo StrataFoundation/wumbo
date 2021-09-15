@@ -23,21 +23,25 @@ export function useAccountFetchCache(): AccountFetchCache {
   return useContext(AccountCacheContext)!;
 }
 
+const DEFAULT_COMMITMENT = "processed";
+
 export const AccountCacheContextProvider: React.FC = ({ children }) => {
   const connection = useConnection();
   const cache = useMemo(() => {
     const ret = new AccountFetchCache({
       connection,
-      delay: 150,
-      commitment: "confirmed"
+      delay: 250,
+      commitment: DEFAULT_COMMITMENT
     })
+    const oldGetAccountInfo = connection.getAccountInfo.bind(connection);
     // Make sure everything in our app is using the cache
     connection.getAccountInfo = function(
       publicKey: PublicKey,
       commitment?: Commitment,
     ): Promise<AccountInfo<Buffer> | null> {
-      if (commitment) {
-        return connection.getAccountInfo(publicKey, commitment);
+      if (commitment && commitment != DEFAULT_COMMITMENT) {
+        debugger;
+        return oldGetAccountInfo(publicKey, commitment);
       }
 
       return ret.search(publicKey).then(i => {

@@ -2,42 +2,40 @@ import React from "react";
 import { PublicKey } from "@solana/web3.js";
 import { useParams } from "react-router";
 import AppContainer from "../../common/AppContainer";
-import { Profile, Spinner, useClaimedTokenRef, useWallet } from "wumbo-common";
+import { Profile, Spinner, useClaimedTokenRefKey, useAccount, TokenRef, useWallet } from "wumbo-common";
 import { useHistory } from "react-router-dom";
 import { profilePath, nftPath } from "../../../constants/routes";
 import WalletRedirect from "../../Wallet/WalletRedirect";
 
 export const ViewProfileRoute = () => {
-  const params = useParams<{ tokenBondingKey: string | undefined }>();
-  const { publicKey } = useWallet();
-  const { info: tokenRef, loading } = useClaimedTokenRef(
-    publicKey || undefined
-  );
+  const params = useParams<{ tokenRefKey: string | undefined }>();
+  const { connected, publicKey } = useWallet();
+  const walletTokenRefKey = useClaimedTokenRefKey(publicKey || undefined);
+  const { info: walletTokenRef } = useAccount(walletTokenRefKey, TokenRef);
+  const { info: passedTokenRef } = useAccount(walletTokenRefKey, TokenRef);
+  const passedTokenRefKey = params.tokenRefKey ? new PublicKey(params.tokenRefKey) : undefined;
+  const tokenRefKey = passedTokenRefKey || walletTokenRefKey;
+  const tokenRef = passedTokenRef || walletTokenRef;
+
   const history = useHistory();
 
-  let tokenBondingKey: PublicKey;
-  if (params.tokenBondingKey) {
-    tokenBondingKey = new PublicKey(params.tokenBondingKey);
-  } else {
-    if (!publicKey) {
+  if (!tokenRefKey) {
+    if (!connected) {
       return <WalletRedirect />;
     }
 
-    if (loading) {
-      return (
-        <AppContainer>
-          <Spinner />
-        </AppContainer>
-      );
-    }
-
-    tokenBondingKey = tokenRef!.tokenBonding;
+    return (
+      <AppContainer>
+        <Spinner />
+      </AppContainer>
+    );
   }
+
 
   return (
     <AppContainer>
       <Profile
-        tokenBondingKey={tokenBondingKey}
+        tokenRefKey={tokenRefKey}
         onAccountClick={(tokenBondingKey: PublicKey) => {
           history.push(profilePath(tokenBondingKey));
         }}

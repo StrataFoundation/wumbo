@@ -39,5 +39,5 @@
     }
   ],
   "web_accessible_resources": ["wallet_proxy.js", "https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js"],
-  "permissions": ["storage", "<all_urls>", "activeTab", "tabs"]
+  "permissions": ["<all_urls>", "tabs"]
 }

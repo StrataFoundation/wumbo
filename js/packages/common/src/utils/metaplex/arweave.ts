@@ -5,11 +5,8 @@ import {
   SystemProgram,
   TransactionInstruction,
 } from "@solana/web3.js";
-import {
-  createTokenBondingMetadata,
-  updateMetadata,
-} from "./tokenMetadataContract";
 import crypto from "crypto";
+import { SplWumbo } from "@wum.bo/spl-wumbo";
 
 type ArweaveFile = {
   filename: string;
@@ -113,66 +110,10 @@ export async function uploadToArweave(
   return result;
 }
 
-export async function createMetadataWithArweave(
-  updateAuthority: PublicKey,
-  payer: PublicKey,
-  metadataFile: ArweaveFile,
-  mintKey: PublicKey,
-  tokenRef: PublicKey,
-  tokenRefOwner: PublicKey,
-  tokenBonding: PublicKey,
-  tokenBondingAuthority: PublicKey,
-  mintAuthorityKey: PublicKey,
-  metadata: {
-    name: string;
-    symbol: string;
-    description: string;
-    image: string | undefined;
-    animation_url: string | undefined;
-    external_url: string;
-    properties: any;
-    creators: Creator[] | null;
-    sellerFeeBasisPoints: number;
-  }
-): Promise<{
-  metadataAccount: PublicKey;
-  instructions: TransactionInstruction[];
-}> {
-  const instructions: TransactionInstruction[] = [];
-  // TODO: connect to testnet arweave
-  const arweaveLink = `https://arweave.net/${metadataFile.transactionId}`;
-  const metadataAccount = await createTokenBondingMetadata(
-    new Data({
-      symbol: metadata.symbol,
-      name: metadata.name,
-      uri: arweaveLink, // size of url for arweave
-      sellerFeeBasisPoints: metadata.sellerFeeBasisPoints,
-      creators: metadata.creators,
-    }),
-    updateAuthority,
-    mintKey,
-    tokenRef,
-    tokenRefOwner,
-    tokenBonding,
-    tokenBondingAuthority,
-    mintAuthorityKey,
-    instructions,
-    payer
-  );
-
-  return {
-    metadataAccount,
-    instructions,
-  };
-}
-
 export async function updateMetadataWithArweave(
+  splWumboProgram: SplWumbo,
   tokenRef: PublicKey,
-  tokenRefOwner: PublicKey,
-  updateAuthority: PublicKey,
   metadataFile: ArweaveFile,
-  mintKey: PublicKey,
-  metadataAccount: PublicKey,
   metadata: {
     name: string;
     symbol: string;
@@ -185,27 +126,16 @@ export async function updateMetadataWithArweave(
     sellerFeeBasisPoints: number;
   }
 ): Promise<TransactionInstruction[]> {
-  const instructions: TransactionInstruction[] = [];
   // TODO: connect to testnet arweave
   const arweaveLink = `https://arweave.net/${metadataFile.transactionId}`;
-  await updateMetadata(
-    new Data({
-      symbol: metadata.symbol,
-      name: metadata.name,
-      uri: arweaveLink, // size of url for arweave
-      sellerFeeBasisPoints: metadata.sellerFeeBasisPoints,
-      creators: metadata.creators,
-    }),
+  const args = {
     tokenRef,
-    tokenRefOwner,
-    undefined,
-    undefined,
-    mintKey,
-    updateAuthority,
-    instructions,
-    metadataAccount
-  );
-
+    symbol: metadata.symbol,
+    name: metadata.name,
+    uri: arweaveLink, // size of url for arweave
+  };
+  console.log(args)
+  const { instructions } = await splWumboProgram.updateMetadataInstructions(args)
   return instructions;
 }
 

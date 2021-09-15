@@ -7,8 +7,8 @@ import { routes } from "@/constants/routes";
 import Logo from "../../../public/assets/img/logo.svg";
 
 export type FormValues = {
-  fiatAmount: number;
-  tokenAmount: number;
+  fiatAmount: string;
+  tokenAmount: string;
 };
 
 interface TokenFormProps {
@@ -32,19 +32,19 @@ export const TokenForm = ({
 }: TokenFormProps) => {
   const location = useLocation();
   const { connected, awaitingApproval } = useWallet();
-  const { register, handleSubmit, setValue, reset } = useForm<FormValues>();
+  const { register, handleSubmit, setValue, reset, watch } = useForm<FormValues>();
 
   const inputClasses =
     "p-0 bg-transparent border-transparent focus:shadow-none focus:border-transparent";
 
   const handleOnFiatChange = ({ target: { value } }: { target: { value: string } }) => {
-    setValue("fiatAmount", Number(value));
-    setValue("tokenAmount", +tokenAmountFromFiatAmount(+value).toFixed(2));
+    setValue("fiatAmount", value);
+    setValue("tokenAmount", tokenAmountFromFiatAmount(+value).toFixed(2));
   };
 
   const handleOnTokenChange = ({ target: { value } }: { target: { value: string } }) => {
-    setValue("tokenAmount", Number(value));
-    setValue("fiatAmount", +fiatAmountFromTokenAmount(+value).toFixed(2));
+    setValue("tokenAmount", value);
+    setValue("fiatAmount", fiatAmountFromTokenAmount(+value).toFixed(2));
   };
 
   const handleOnSubmit = (values: FormValues) => {

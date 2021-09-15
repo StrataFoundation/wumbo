@@ -60,7 +60,7 @@ export const Avatar = ({
   token = false,
   size = "md",
 }: IAvatarProps) => (
-  <div className="flex items-center">
+  <div className={classNames("flex items-center", style.sizes[size].default)}>
     {imgSrc && (
       <img
         src={imgSrc}
