@@ -14,10 +14,15 @@ export type GetCreatorLink = (
 export const Creator = React.memo(
   ({ creator, getCreatorLink }: { creator: PublicKey; getCreatorLink: GetCreatorLink }) => {
     const { metadata, tokenBonding } = useSocialTokenMetadata(creator);
+    const truncatePubkey = (pkey: PublicKey): string => {
+      const pkeyStr = pkey.toString();
+
+      return `${pkeyStr.substr(0, 4)}...${pkeyStr.substr(pkeyStr.length - 4)}`;
+    };
 
     return (
       <Link to={getCreatorLink(creator, metadata, tokenBonding)}>
-        {metadata?.data.name || creator.toBase58()}
+        {metadata?.data.name || truncatePubkey(creator)}
       </Link>
     );
   }
