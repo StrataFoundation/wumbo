@@ -9,21 +9,17 @@ export const NftCard = React.memo(
     return (
       <Link
         to={getLink(token)}
-        className="flex-1 flex flex-col rounded-lg items-center overflow-hidden hover:opacity-25"
+        className="flex-1 flex flex-col rounded-lg overflow-hidden hover:opacity-25"
       >
-        <div className="flex justify-center w-full">
+        <div className="flex py-2 px-2 justify-center w-full bg-gray-100">
           {token.data && (
-            <Nft
-              meshEnabled={false}
-              className="w-24 h-24 object-cover rounded-lg"
-              data={token.data}
-            />
+            <Nft meshEnabled={false} className="w-24 h-24 object-cover" data={token.data} />
           )}
         </div>
-        <div className="pt-2 flex flex-col w-full space-y-1 text-center">
-          <span className="truncate text-sm font-bold">{token.metadata?.data.name}</span>
+        <div className="flex flex-col w-full p-2 text-left items-start space-y-1 overflow-hidden">
+          <span className="w-full truncate text-sm font-bold">{token.metadata?.data.name}</span>
           {token.masterEdition && (
-            <div className="flex flex-row justify-center">
+            <div className="flex flex-row">
               <Badge size="sm">
                 {token.masterEdition && !token.edition && "Master"}
                 {token.edition &&

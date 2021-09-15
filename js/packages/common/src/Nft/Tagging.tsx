@@ -1,4 +1,4 @@
-import React, { Dispatch, useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { Connection, PublicKey, Transaction, sendAndConfirmRawTransaction } from "@solana/web3.js";
 import { useConnection } from "@oyster/common";
 // @ts-ignore

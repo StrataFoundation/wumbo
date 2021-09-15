@@ -21,14 +21,14 @@ export const NftListRaw = React.memo(
     return (
       <ul
         role="list"
-        className="grid grid-cols-3 gap-6 sm:grid-cols-3 md:grid-cols-3 lg:grid-cols-3"
+        className="grid grid-cols-3 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3"
       >
         {tokens
           .filter((t) => t.masterEdition)
           .map((token) => (
             <li
               key={token.publicKey?.toBase58()}
-              className="col-span-1 flex flex-col text-center rounded-lg"
+              className="col-span-1 flex flex-col text-center rounded-lg border-2 border-gray-100"
             >
               <NftCard getLink={getLink} token={token} />
             </li>
