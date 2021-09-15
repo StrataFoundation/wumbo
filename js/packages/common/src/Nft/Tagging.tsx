@@ -55,7 +55,7 @@ export const TaggableImage = React.memo(
 
     useEffect(() => {
       removeAll();
-      const addHovers = (color: string, lines: boolean) => {
+      const addHovers = (color: string, lines?: boolean) => {
         setToRemove(
           images.map((img) => {
             const div = window.document.createElement("div");
@@ -80,7 +80,7 @@ export const TaggableImage = React.memo(
       if (selected) {
         addHovers("#00CE90", true);
       } else if (hovering) {
-        addHovers("#4239B1", false);
+        addHovers("#4239B1");
       }
 
       return () => {
@@ -108,9 +108,6 @@ export const TaggableImage = React.memo(
           name={src}
           type="checkbox"
           className="appearance-none checked:ring-indigo-500 h-5 w-5 text-indigo-600 border-gray-300 rounded"
-          onChange={(e) => {
-            // Do nothing, handled by div
-          }}
           value={src}
           checked={selected}
         />
@@ -160,18 +157,40 @@ export const TaggableImages = ({
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<Error>();
   const [selected, setSelected] = useState<Record<string, boolean>>({});
+  const [allSelected, setAllSelected] = useState<boolean>(false);
   const { awaitingApproval, publicKey, signTransaction } = useWallet();
   const cache = useAccountFetchCache();
+
+  const handleSetSelected = (src: string) => {
+    const wasSelected = selected[src];
+
+    if (wasSelected) {
+      setAllSelected(false);
+    }
+
+    if (!wasSelected) {
+      // check if all other matches are selected
+      // if so mark all selected
+      const refObj = Object.entries(matches).reduce((acc, [src]) => ({ ...acc, [src]: true }), {});
+      if (JSON.stringify(refObj) === JSON.stringify({ ...selected, [src]: !wasSelected })) {
+        setAllSelected(true);
+      }
+    }
+
+    setSelected((s) => ({ ...s, [src]: !wasSelected }));
+  };
 
   const tagAll = async () => {
     const imgUrls = Object.entries(selected)
       .filter(([_, isSelected]) => isSelected)
       .map(([key]) => key);
+
     await tag(connection, signTransaction, {
       imgUrls,
       tokenMetadata: metadata.toBase58(),
       feePayer: publicKey!.toBase58(),
     });
+
     setSelected({});
     setMatches((matches) => {
       imgUrls.forEach((url) => {
@@ -188,6 +207,23 @@ export const TaggableImages = ({
     // TODO add to global error
     console.error(error);
   }
+
+  useEffect(() => {
+    if (allSelected) {
+      setSelected(
+        Object.entries(matches).reduce(
+          (acc, [src]) => ({
+            ...acc,
+            [src]: true,
+          }),
+          {}
+        )
+      );
+    }
+    if (!allSelected) {
+      setSelected({});
+    }
+  }, [allSelected, matches, setSelected]);
 
   useEffect(() => {
     (async () => {
@@ -252,20 +288,17 @@ export const TaggableImages = ({
         <label
           htmlFor="selectAll"
           className="flex gap-2 items-center bg-gray-100 px-2 py-4 rounded-md w-full"
-          onClick={() => console.log("implSelectAll")}
+          onClick={() => setAllSelected(!allSelected)}
         >
           <input
             name="selectAll"
             type="checkbox"
             className="appearance-none checked:ring-indigo-500 h-5 w-5 text-indigo-600 border-gray-300 rounded"
-            onChange={(e) => {
-              // Do nothing, handled by div
-            }}
             value="selectAll"
-            checked={false}
+            checked={allSelected}
           />
           <div className="flex flex-col w-full overflow-hidden hover:cursor-pointer">
-            <div className="truncate">Select All</div>
+            <div className="truncate">{`${allSelected ? "De" : ""}Select All`}</div>
           </div>
         </label>
       )}
@@ -278,7 +311,7 @@ export const TaggableImages = ({
               src={src}
               percent={percent}
               images={els}
-              onSelect={() => setSelected((s) => ({ ...s, [src]: !s[src] }))}
+              onSelect={() => handleSetSelected(src)}
               selected={!!selected[src]}
             />
           ))}

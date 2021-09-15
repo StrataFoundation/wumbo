@@ -66,7 +66,7 @@ export const ViewNftRaw = React.memo(
               {taggingMode && <RefreshIcon width={26} />}
               {!taggingMode && <ArrowsExpandIcon width={26} />}
             </div>
-            {token.data && <Nft className="w-44 m-auto" data={token.data} />}
+            {token.data && <Nft className="w-44 m-auto rounded-lg" data={token.data} />}
             <span className="pt-2 text-white text-center text-2xl font-medium">
               {token.metadata?.data.name}
             </span>

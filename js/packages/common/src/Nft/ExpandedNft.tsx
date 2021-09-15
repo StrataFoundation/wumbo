@@ -37,7 +37,7 @@ export const ExpandedNft = ({
           &#8203;
         </span>
         <button
-          className="absolute top-4 right-4 text-gray-200 hover:text-gray-300 focus:outline-none"
+          className="absolute top-4 right-4 text-gray-200 hover:text-gray-400 focus:outline-none"
           onClick={() => setIsExpanded(false)}
         >
           <XIcon className="h-6 w-6" aria-hidden="true" />
