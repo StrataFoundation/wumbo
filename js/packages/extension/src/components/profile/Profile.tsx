@@ -2,7 +2,7 @@ import { useWallet, useClaimedTokenRef, Profile as CommonProfile, Badge } from "
 import React, { Fragment, useMemo } from "react";
 import { WumboDrawer } from "../WumboDrawer";
 import { Link, useHistory, useParams } from "react-router-dom";
-import { routes, tradePath, viewProfilePath } from "@/constants/routes";
+import { nftPath, routes, tradePath, viewProfilePath } from "@/constants/routes";
 import WalletRedirect from "../wallet/WalletRedirect";
 import { PublicKey } from "@solana/web3.js";
 import { PencilAltIcon } from "@heroicons/react/solid";
@@ -59,6 +59,7 @@ export const Profile = () => {
           tokenBondingKey={tokenBondingKey}
           onAccountClick={(tokenBonding) => history.push(viewProfilePath(tokenBonding))}
           onTradeClick={() => history.push(tradePath(tokenBondingKey))}
+          getNftLink={(token) => token?.account ? nftPath(token?.account?.mint) : ""}
         />
       </WumboDrawer.Content>
       <WumboDrawer.Nav />

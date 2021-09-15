@@ -5,6 +5,7 @@ import { ContextProviders } from "./ContextProviders";
 import { WumboDrawer } from "./WumboDrawer";
 
 import { Twitter } from "./twitter/Twitter";
+import { NftEnhancer } from "./nft/NftEnhancer";
 
 import { Create } from "./create/Create";
 import { Customize } from "./customize/Customize";
@@ -12,6 +13,7 @@ import { TradeRoute } from "./trade/Trade";
 import { MyCoins } from "./my-coins/MyCoins";
 import { Wallet } from "./wallet/Wallet";
 import { Search } from "./search/Search";
+import { ViewNft } from "./nft/ViewNft"
 import { Profile } from "./profile/Profile";
 import Claim from "./claim/Claim";
 import { EditProfileRoute } from "./profile/EditProfile";
@@ -22,6 +24,7 @@ const App: FC = () => (
     initialIndex={Object.keys(routes).findIndex((x) => x === "wallet")}
   >
     <ContextProviders>
+      <NftEnhancer />
       <Twitter />
 
       <WumboDrawer>
@@ -34,6 +37,7 @@ const App: FC = () => (
           <Route path={routes.wallet.path} component={Wallet} />
           <Route path={routes.search.path} component={Search} />
           <Route path={routes.viewProfile.path} component={Profile} />
+          <Route path={routes.viewNft.path} component={ViewNft} />
           <Route path={routes.editProfile.path} component={EditProfileRoute} />
           <Route path={routes.profile.path} exact component={Profile} />
         </Switch>

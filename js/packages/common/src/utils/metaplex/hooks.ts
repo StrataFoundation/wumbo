@@ -16,7 +16,7 @@ import {
   Transaction,
   TransactionInstruction,
 } from "@solana/web3.js";
-import { getFilesWithMetadata, getImage, getMetadataKey } from "./utils";
+import { getDescription, getFilesWithMetadata, getImage, getMetadataKey } from "./utils";
 import { useWallet } from "../../contexts/walletContext";
 import { TokenRef } from "@wum.bo/spl-wumbo";
 import { useMint } from "../mintState";
@@ -29,6 +29,7 @@ import {
   uploadToArweave,
 } from "./arweave";
 import { WUMBO_PROGRAM_ID } from "../../constants/globals";
+import { useTokenMetadata } from "./nftMetadataHooks";
 
 const RESERVED_TXN_MANIFEST = "manifest.json";
 
@@ -47,34 +48,6 @@ async function getSignedTransaction(
 
   extraSigners && transaction.partialSign(...extraSigners);
   return signTransaction(transaction);
-}
-
-export type TokenMetadata = {
-  key: PublicKey | undefined;
-  image: string | undefined;
-  metadata: Metadata | undefined;
-  loading: boolean;
-  error: Error | undefined;
-};
-
-export function useTokenMetadata(token: PublicKey | undefined): TokenMetadata {
-  const { result: metadataAccountKey, loading, error } = useAsync(getMetadataKey, [token]);
-  const { info: metadata, loading: accountLoading } = useAccount(metadataAccountKey, (_, acct) =>
-    decodeMetadata(acct.data)
-  );
-  const {
-    result: image,
-    loading: imageLoading,
-    error: imageError,
-  } = useAsync(getImage, [metadata?.data.uri]);
-
-  return {
-    loading: Boolean(token && (loading || accountLoading || imageLoading)),
-    error: error || imageError,
-    metadata,
-    image,
-    key: metadataAccountKey,
-  };
 }
 
 async function getFileFromUrl(url: string, name: string, defaultType = "image/jpeg") {
@@ -110,7 +83,7 @@ export function useSetMetadata(tokenRefKey: PublicKey | undefined): SetMetadataS
   const { info: tokenRef } = useAccount(tokenRefKey, TokenRef.fromAccount);
   const { info: tokenBonding } = useAccount(tokenRef?.tokenBonding, TokenBondingV0.fromAccount);
   const {
-    key: metadataAccountKey,
+    publicKey: metadataAccountKey,
     image,
     metadata: inflated,
   } = useTokenMetadata(tokenBonding?.targetMint);

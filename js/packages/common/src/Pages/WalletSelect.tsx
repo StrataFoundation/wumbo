@@ -8,7 +8,7 @@ export const WalletSelect = () => {
   const { connected, disconnect, select } = useWallet();
 
   return (
-    <Fragment>
+    <div className="p-4">
       {connected ? (
         <div className="flex flex-col space-y-4 px-4">
           <span className="test-sm">Wallet Connected!</span>
@@ -43,6 +43,6 @@ export const WalletSelect = () => {
           </div>
         </div>
       )}
-    </Fragment>
+    </div>
   );
 };
