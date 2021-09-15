@@ -43,7 +43,7 @@ type ButtonRef = ForwardedRef<HTMLButtonElement>;
 type LinkButtonRef = ForwardedRef<HTMLAnchorElement>;
 
 const style = {
-  default: `text-white border-0 font-medium shadow transition ease-in duration-200 cursor-pointer focus:outline-none`,
+  default: `text-white border-0 font-medium rounded shadow transition ease-in duration-200 cursor-pointer focus:outline-none`,
   block: `flex justify-center items-center w-full`,
   rounded: `rounded-full`,
   disabled: `opacity-60 cursor-not-allowed`,
@@ -118,8 +118,10 @@ export const Button = forwardRef(
         disabled && style.disabled,
         style.sizes[size],
         style.default,
-        rounded ? style.rounded : "rounded-md",
-        color ? colors(!!outline, !!gradient)[color] : colors(false, false)["primary"]
+        rounded && style.rounded,
+        color
+          ? colors(!!outline, !!gradient)[color]
+          : colors(false, false)["primary"]
       )}
     >
       {children}
@@ -154,8 +156,10 @@ export const LinkButton = forwardRef(
         disabled && style.disabled,
         style.sizes[size],
         style.default,
-        rounded ? style.rounded : "rounded-md",
-        color ? colors(!!outline, !!gradient)[color] : colors(false, false)["primary"],
+        rounded && style.rounded,
+        color
+          ? colors(!!outline, !!gradient)[color]
+          : colors(false, false)["primary"],
         "text-center"
       )}
     >

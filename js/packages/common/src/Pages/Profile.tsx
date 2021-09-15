@@ -1,7 +1,5 @@
 import React from "react";
-import { useTokenRefFromBonding } from "../utils/tokenRef";
-import { Spinner } from "../Spinner";
-import { useAccount } from "../utils/account";
+import { AccountInfo as TokenAccountInfo } from "@solana/spl-token";
 import { TokenBondingV0 } from "@wum.bo/spl-token-bonding";
 import { PublicKey } from "@solana/web3.js";
 import {
@@ -16,11 +14,15 @@ import {
   useReverseTwitter,
   useTokenMetadata,
   useUserTokensWithMeta,
+  useAccount,
+  useTokenRefFromBonding,
 } from "../utils";
-import { StatCard } from "../StatCard";
-import { Button, MetadataAvatar, Tab, Tabs } from "..";
-import { TokenAccountsContextProvider, TokenLeaderboard } from "../Leaderboard/TokenLeaderboard";
-import { AccountInfo as TokenAccountInfo } from "@solana/spl-token";
+import { StatCard, StatCardWithIcon } from "../StatCard";
+import { Badge, Spinner, Button, MetadataAvatar, Tab, Tabs } from "..";
+import {
+  TokenAccountsContextProvider,
+  TokenLeaderboard,
+} from "../Leaderboard/TokenLeaderboard";
 import { NftList, NftListRaw } from "../Nft";
 import { TROPHY_CREATOR } from "../constants/globals";
 
@@ -32,7 +34,12 @@ interface IProfileProps {
 }
 
 export const Profile = React.memo(
-  ({ tokenBondingKey, onAccountClick, onTradeClick, getNftLink }: IProfileProps) => {
+  ({
+    tokenBondingKey,
+    onAccountClick,
+    onTradeClick,
+    getNftLink,
+  }: IProfileProps) => {
     const { info: tokenRef, loading } = useTokenRefFromBonding(tokenBondingKey);
     const ownerWalletKey = tokenRef?.owner;
     const { info: tokenBonding, loading: tokenBondingLoading } = useAccount(
@@ -47,7 +54,9 @@ export const Profile = React.memo(
 
     const mint = useMint(tokenBonding?.targetMint);
     const supply = mint ? supplyAsNum(mint) : 0;
-    const { targetRangeToBasePrice: general, current } = useBondingPricing(tokenBonding?.publicKey);
+    const { targetRangeToBasePrice: general, current } = useBondingPricing(
+      tokenBonding?.publicKey
+    );
     const fiatPrice = useFiatPrice(tokenBonding?.baseMint);
     const toFiat = (a: number) => (fiatPrice || 0) * a;
     const coinPriceUsd = toFiat(current);
@@ -72,25 +81,55 @@ export const Profile = React.memo(
 
     function isTrophy(t: ITokenWithMeta): boolean {
       return Boolean(
-        t.data?.properties?.creators?.some((c) => c.address == TROPHY_CREATOR.toBase58())
+        t.data?.properties?.creators?.some(
+          (c) => c.address == TROPHY_CREATOR.toBase58()
+        )
       );
     }
 
     return (
-      <div className="p-4 flex flex-col items-stretch space-y-4">
-        <div className="flex flex-col items-center text-gray-700">
-          <MetadataAvatar size="xl" tokenBonding={tokenBonding} name="UNCLAIMED" />
-          <div className="mt-2 text-lg leading-none">{metadata?.data.name || "@" + handle}</div>
-          <div className="text-sm text-gray-500">
-            {metadata ? `${metadata.data.symbol} | @${handle}` : `UNCLAIMED | @${handle}`}
+      <div className="p-4 flex flex-col gap-6">
+        <div className="flex flex-col gap-2.5">
+          <div className="flex w-full">
+            <MetadataAvatar
+              size="xl"
+              tokenBonding={tokenBonding}
+              name="UNCLAIMED"
+            />
+            <div>
+              here
+              <StatCardWithIcon
+                icon="coin"
+                label="coin rank"
+                value={"#2,312"}
+              />
+              <StatCardWithIcon icon="wumbo" label="WUM locked" value={"#15"} />
+            </div>
           </div>
-          <div className="mt-1">
-            <Button onClick={onTradeClick} block size="xs" color="secondary">
-              <span className="!text-green-800">${coinPriceUsd.toFixed(2)}</span>
+          <p className="text-xl leading-none">
+            {metadata?.data.name || "@" + handle}
+          </p>
+          <p className="text-sm">
+            {" "}
+            {metadata
+              ? `${metadata.data.symbol} | @${handle}`
+              : `UNCLAIMED | @${handle}`}
+          </p>
+          <div className="flex gap-2">
+            <Button size="xs" onClick={onTradeClick}>
+              Trade
             </Button>
+            <Badge
+              size="sm"
+              color="secondary"
+              className="!text-white"
+              onClick={onTradeClick}
+            >
+              ${coinPriceUsd.toFixed(2)}
+            </Badge>
           </div>
         </div>
-        <div className="flex flex-row space-x-4">
+        <div className="flex space-x-4">
           <div className="flex-1">
             <StatCard label="Supply" value={supply.toFixed(2)} />
           </div>
@@ -101,27 +140,32 @@ export const Profile = React.memo(
             <StatCard label="Market Cap" value={"$" + marketCap} />
           </div>
         </div>
-        <Tabs>
-          <Tab title="Backers">
-            <TokenAccountsContextProvider mint={tokenBonding.targetMint}>
-              <TokenLeaderboard onAccountClick={onAccountClick} mint={tokenBonding.targetMint} />
-            </TokenAccountsContextProvider>
-          </Tab>
-          <Tab title="Collectibles">
-            <NftListRaw
-              loading={loadingCollectibles}
-              tokens={tokens?.filter((t) => !isTrophy(t))}
-              getLink={getNftLink}
-            />
-          </Tab>
-          <Tab title="Trophies">
-            <NftListRaw
-              loading={loadingCollectibles}
-              tokens={tokens?.filter((t) => isTrophy(t))}
-              getLink={getNftLink}
-            />
-          </Tab>
-        </Tabs>
+        <div>
+          <Tabs>
+            <Tab title="Backers">
+              <TokenAccountsContextProvider mint={tokenBonding.targetMint}>
+                <TokenLeaderboard
+                  onAccountClick={onAccountClick}
+                  mint={tokenBonding.targetMint}
+                />
+              </TokenAccountsContextProvider>
+            </Tab>
+            <Tab title="Collectibles">
+              <NftListRaw
+                loading={loadingCollectibles}
+                tokens={tokens?.filter((t) => !isTrophy(t))}
+                getLink={getNftLink}
+              />
+            </Tab>
+            <Tab title="Trophies">
+              <NftListRaw
+                loading={loadingCollectibles}
+                tokens={tokens?.filter((t) => isTrophy(t))}
+                getLink={getNftLink}
+              />
+            </Tab>
+          </Tabs>
+        </div>
       </div>
     );
   }

@@ -1,25 +1,23 @@
 {
   "compilerOptions": {
+    "target": "es6",
+    "useDefineForClassFields": true,
+    "lib": ["DOM", "DOM.Iterable", "ESNext"],
+    "allowJs": false,
+    "skipLibCheck": true,
     "esModuleInterop": true,
     "allowSyntheticDefaultImports": true,
-    "baseUrl": "src",
+    "strict": true,
     "forceConsistentCasingInFileNames": true,
-    "isolatedModules": false,
-    "jsx": "react",
-    "lib": ["DOM", "DOM.Iterable", "ESNext"],
     "module": "commonjs",
     "moduleResolution": "Node",
     "resolveJsonModule": true,
-    "skipLibCheck": true,
+    "isolatedModules": true,
+    "noEmit": false,
+    "jsx": "react",
     "declaration": true,
     "declarationMap": true,
-    "outDir": "./dist/lib",
-    "rootDir": "./src",
-    "sourceMap": true,
-    "strict": true,
-    "target": "es6",
-    "typeRoots": ["node_modules/@types"]
+    "outDir": "./dist/lib"
   },
-  "include": ["src"],
-  "exclude": ["dist", "node_modules"]
+  "include": ["./src"]
 }
