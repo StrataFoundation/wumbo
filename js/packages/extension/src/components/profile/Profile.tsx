@@ -11,23 +11,21 @@ export const Profile = () => {
   const params = useParams<{ tokenRefKey: string | undefined }>();
   const { connected, publicKey } = useWallet();
   const walletTokenRefKey = useClaimedTokenRefKey(publicKey || undefined);
-  const { info: walletTokenRef } = useAccount(walletTokenRefKey, TokenRef);
-  const { info: passedTokenRef } = useAccount(walletTokenRefKey, TokenRef);
   const passedTokenRefKey = params.tokenRefKey ? new PublicKey(params.tokenRefKey) : undefined;
   const tokenRefKey = passedTokenRefKey || walletTokenRefKey;
-  const tokenRef = passedTokenRef || walletTokenRef;
+  const { info: tokenRef, loading } = useAccount(tokenRefKey, TokenRef);
 
   const history = useHistory();
 
-  if (!tokenRefKey) {
-    if (!connected) {
-      return <WalletRedirect />;
-    }
+  if (!tokenRefKey && !connected) {
+    return <WalletRedirect />;
+  }
 
+  if (loading) {
     return <WumboDrawer.Loading />;
   }
 
-  if (!passedTokenRefKey && !walletTokenRef) {
+  if (!passedTokenRefKey && !tokenRef) {
     return (
       <Fragment>
         <WumboDrawer.Header title="Profile" />
