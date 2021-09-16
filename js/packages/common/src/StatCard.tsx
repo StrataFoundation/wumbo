@@ -1,5 +1,5 @@
 import React from "react";
-import coinIcon from "./svgs/stat_coin.svg";
+import { RiCoinLine } from "react-icons/ri";
 import wumboIcon from "./svgs/stat_wumbo.svg";
 
 interface IStatCardProps {
@@ -24,8 +24,8 @@ export const StatCardWithIcon = ({
   icon,
 }: IStatCardWithIconProps) => (
   <div className="flex gap-2 px-2.5 py-2.5 rounded-lg border-2 border-gray-100 items-center justify-center">
-    <div className="w-6">
-      {icon === "coin" && <img className="w-full" src={coinIcon} />}
+    <div className="flex w-5 justify-center">
+      {icon === "coin" && <RiCoinLine className="text-yellow-500" size="26" />}
       {icon === "wumbo" && <img className="w-full" src={wumboIcon} />}
     </div>
     <div className="flex-1 flex flex-col leading-none">

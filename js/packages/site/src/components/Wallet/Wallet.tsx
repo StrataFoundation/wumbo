@@ -1,12 +1,12 @@
 import React, { useEffect } from "react";
 import AppContainer from "../common/AppContainer";
 import { useHistory } from "react-router-dom";
-import { usePrevious, useQuery, useWallet, WalletSelect } from "wumbo-common";
+import { useQuery, useWallet, WalletSelect, WalletCoins } from "wumbo-common";
 
 export default React.memo(() => {
   const history = useHistory();
   const query = useQuery();
-  const { connected } = useWallet();
+  const { connected, publicKey } = useWallet();
 
   useEffect(() => {
     const redirect = query.get("redirect");
@@ -18,7 +18,7 @@ export default React.memo(() => {
 
   return (
     <AppContainer>
-      <WalletSelect />
+      {publicKey ? <WalletCoins publicKey={publicKey} /> : <WalletSelect />}
     </AppContainer>
   );
 });

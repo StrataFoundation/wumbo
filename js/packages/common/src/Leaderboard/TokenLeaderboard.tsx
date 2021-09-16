@@ -2,10 +2,14 @@ import React, { Fragment, useContext, useEffect, useState } from "react";
 import { Spinner } from "../Spinner";
 import { AccountInfo as TokenAccountInfo } from "@solana/spl-token";
 import { PublicKey, Connection } from "@solana/web3.js";
-import { Leaderboard, LeaderboardNumber, MetadataLeaderboardElement } from "../Leaderboard";
+import {
+  Leaderboard,
+  LeaderboardNumber,
+  MetadataLeaderboardElement,
+} from "../Leaderboard";
 import { amountAsNum, useMint, useOwnedAmount } from "../utils";
 import { useWallet } from "../contexts/walletContext";
-import { ChevronUpIcon, ChevronDownIcon } from "@heroicons/react/solid";
+import { HiChevronUp, HiChevronDown } from "react-icons/hi";
 import { TokenAccountParser, useConnection } from "@oyster/common";
 import { useAsync } from "react-async-hook";
 import { TOKEN_PROGRAM_ID } from "../constants/globals";
@@ -22,14 +26,19 @@ const PageChevron = ({
   onClick?: () => void;
 }) => (
   <div className="hover:bg-gray-100 hover:cursor-pointer w-full flex flex-col items-center">
-    {direction == "up" && <ChevronUpIcon onClick={onClick} className="h-4 w-4 text-indigo-600" />}
+    {direction == "up" && (
+      <HiChevronUp onClick={onClick} className="h-4 w-4 text-indigo-600" />
+    )}
     {direction == "down" && (
-      <ChevronDownIcon onClick={onClick} className="h-4 w-4 text-indigo-600" />
+      <HiChevronDown onClick={onClick} className="h-4 w-4 text-indigo-600" />
     )}
   </div>
 );
 
-const TokenAccountsContext = React.createContext<{ accounts: AccountAndRank[]; loading: boolean }>({
+const TokenAccountsContext = React.createContext<{
+  accounts: AccountAndRank[];
+  loading: boolean;
+}>({
   accounts: [],
   loading: true,
 });
@@ -73,7 +82,11 @@ export function TokenAccountsContextProvider({
   mint: PublicKey | undefined;
 }): React.ReactElement {
   const connection = useConnection();
-  const { result: accounts, loading, error } = useAsync(getAllTokenAccounts, [connection, mint]);
+  const {
+    result: accounts,
+    loading,
+    error,
+  } = useAsync(getAllTokenAccounts, [connection, mint]);
 
   if (error) {
     console.error(error);
@@ -91,7 +104,10 @@ export function TokenAccountsContextProvider({
   );
 }
 
-export function useTokenAccounts(): { loading: boolean; accounts: AccountAndRank[] } {
+export function useTokenAccounts(): {
+  loading: boolean;
+  accounts: AccountAndRank[];
+} {
   return useContext(TokenAccountsContext);
 }
 
@@ -124,7 +140,9 @@ function useAccountsPagination(
     if (findAmount) {
       setStartIndex(0);
     } else {
-      const index = accountsIn.findIndex((v) => mint && amountAsNum(v.account.amount, mint));
+      const index = accountsIn.findIndex(
+        (v) => mint && amountAsNum(v.account.amount, mint)
+      );
       setStartIndex(index);
     }
   }, [findAmount, accountsIn]);
@@ -137,7 +155,8 @@ function useAccountsPagination(
     accounts,
     loading,
     pageUp: () => setStartIndex((startIndex) => zeroMin(startIndex - 5)),
-    pageDown: () => setStopIndex((stopIndex) => idxMax(stopIndex + 5, accountsIn.length)),
+    pageDown: () =>
+      setStopIndex((stopIndex) => idxMax(stopIndex + 5, accountsIn.length)),
   };
 }
 
@@ -172,7 +191,9 @@ export const TokenLeaderboard = React.memo(
 
     const localLeaderboard = (
       <Fragment>
-        <div className="text-center text-bold text-2xl text-gray-500 mb-2">...</div>
+        <div className="text-center text-bold text-2xl text-gray-500 mb-2">
+          ...
+        </div>
         <WhiteCard>
           <PageChevron direction="up" onClick={local.pageUp} />
           <Leaderboard

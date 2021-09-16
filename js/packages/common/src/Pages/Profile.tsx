@@ -25,7 +25,7 @@ import {
 } from "../Leaderboard/TokenLeaderboard";
 import { NftList, NftListRaw } from "../Nft";
 import { TROPHY_CREATOR } from "../constants/globals";
-import { PencilAltIcon } from "@heroicons/react/outline";
+import { HiOutlinePencilAlt } from "react-icons/hi";
 
 interface IProfileProps {
   tokenBondingKey: PublicKey;
@@ -102,7 +102,7 @@ export const Profile = React.memo(
                 <p className="text-xl leading-none">
                   {metadata?.data.name || "@" + handle}
                 </p>
-                <PencilAltIcon className="h-5 text-indigo-500 hover:cursor-pointer hover:text-indigo-700" />
+                <HiOutlinePencilAlt className="h-5 text-indigo-500 hover:cursor-pointer hover:text-indigo-700" />
               </div>
               <p className="text-sm">
                 {" "}

@@ -1,11 +1,11 @@
 import React, { ReactNode } from "react";
 import {
-  CheckCircleIcon,
-  XCircleIcon,
-  ExclamationCircleIcon,
-  InformationCircleIcon,
-} from "@heroicons/react/outline";
-import { XIcon } from "@heroicons/react/solid";
+  HiOutlineCheckCircle,
+  HiOutlineXCircle,
+  HiOutlineExclamationCircle,
+  HiOutlineInformationCircle,
+  HiX,
+} from "react-icons/hi";
 import { classNames } from "./utils/utils";
 
 export interface INotificationsProps {
@@ -57,15 +57,23 @@ export const Notification = ({
             {(() => {
               switch (type) {
                 case "success":
-                  return <CheckCircleIcon className="h-6 w-6 text-green-400" />;
+                  return (
+                    <HiOutlineCheckCircle className="h-6 w-6 text-green-400" />
+                  );
                 case "error":
-                  return <XCircleIcon className="h-6 w-6 text-red-400" />;
+                  return <HiOutlineXCircle className="h-6 w-6 text-red-400" />;
                 case "warning":
-                  return <ExclamationCircleIcon className="h-6 w-6 text-yellow-400" />;
+                  return (
+                    <HiOutlineExclamationCircle className="h-6 w-6 text-yellow-400" />
+                  );
                 case "info":
-                  return <InformationCircleIcon className="h-6 w-6 text-blue-400" />;
+                  return (
+                    <HiOutlineInformationCircle className="h-6 w-6 text-blue-400" />
+                  );
                 default:
-                  return <InformationCircleIcon className="h-6 w-6 text-blue-400" />;
+                  return (
+                    <HiOutlineInformationCircle className="h-6 w-6 text-blue-400" />
+                  );
               }
             })()}
           </div>
@@ -80,7 +88,7 @@ export const Notification = ({
                 onClick={onDismiss}
               >
                 <span className="sr-only">Close</span>
-                <XIcon className="h-5 w-5" aria-hidden="true" />
+                <HiX className="h-5 w-5" aria-hidden="true" />
               </button>
             </div>
           )}

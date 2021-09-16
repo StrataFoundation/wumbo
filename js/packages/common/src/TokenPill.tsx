@@ -1,11 +1,10 @@
-import React, { Fragment, useState } from "react";
-import { ChevronRightIcon } from "@heroicons/react/solid";
+import React from "react";
 import { TokenBondingV0 } from "@wum.bo/spl-token-bonding";
-import { useBondingPricing, useFiatPrice, useOwnedAmount } from "./utils/pricing";
+import { useBondingPricing, useFiatPrice } from "./utils/pricing";
 import { useTokenMetadata } from "./utils/metaplex";
 import { MetadataAvatar } from "./Avatar";
 import { Spinner } from "./Spinner";
-import { Link, useHistory } from "react-router-dom";
+import { useHistory } from "react-router-dom";
 
 interface TokenPillProps {
   name?: String;
@@ -52,7 +51,10 @@ export const TokenPill = React.memo(
     const history = useHistory();
 
     return (
-      <div onClick={() => detailsPath && history.push(detailsPath)} className="hover:cursor-pointer hover:bg-gray-200 flex bg-gray-100 p-4 rounded-lg space-x-4">
+      <div
+        onClick={() => detailsPath && history.push(detailsPath)}
+        className="hover:cursor-pointer hover:bg-gray-200 flex bg-gray-100 p-4 rounded-lg space-x-4"
+      >
         {icon}
 
         <div className="flex flex-col flex-grow justify-center text-gray-700">

@@ -1,7 +1,7 @@
 import React, { Fragment, Dispatch, SetStateAction } from "react";
 import { Dialog, Transition } from "@headlessui/react";
+import { HiX } from "react-icons/hi";
 import { ITokenWithMeta } from "../utils";
-import { XIcon } from "@heroicons/react/solid";
 import { Nft } from "./Nft";
 
 export const ExpandedNft = ({
@@ -33,14 +33,17 @@ export const ExpandedNft = ({
         </Transition.Child>
 
         {/* This element is to trick the browser into centering the modal contents. */}
-        <span className="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">
+        <span
+          className="hidden sm:inline-block sm:align-middle sm:h-screen"
+          aria-hidden="true"
+        >
           &#8203;
         </span>
         <button
           className="absolute top-4 right-4 text-gray-200 hover:text-gray-400 focus:outline-none"
           onClick={() => setIsExpanded(false)}
         >
-          <XIcon className="h-6 w-6" aria-hidden="true" />
+          <HiX className="h-6 w-6" aria-hidden="true" />
         </button>
         <Transition.Child
           as={Fragment}
