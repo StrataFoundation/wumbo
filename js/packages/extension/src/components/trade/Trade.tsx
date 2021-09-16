@@ -274,10 +274,10 @@ export const Trade = ({
               {Info}
               <TokenForm
                 fiatAmountFromTokenAmount={(tokenAmount: number) =>
-                  toFiat(curve?.sellTargetAmount(tokenAmount) || 0)
+                  toFiat(Math.abs(curve?.sellTargetAmount(tokenAmount) || 0))
                 }
                 tokenAmountFromFiatAmount={(fiatAmount: number) =>
-                  -(curve?.buyWithBaseAmount(-fromFiat(fiatAmount), 0, 0) || 0)
+                  Math.abs(curve?.buyWithBaseAmount(-fromFiat(fiatAmount), 0, 0) || 0)
                 }
                 icon={icon}
                 ticker={ticker}

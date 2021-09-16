@@ -30,7 +30,6 @@ export const TokenForm = ({
   fiatAmountFromTokenAmount,
   tokenAmountFromFiatAmount,
 }: TokenFormProps) => {
-  const location = useLocation();
   const { connected, awaitingApproval } = useWallet();
   const { register, handleSubmit, setValue, reset, watch } = useForm<FormValues>();
 
