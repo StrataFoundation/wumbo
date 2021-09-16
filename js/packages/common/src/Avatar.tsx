@@ -99,6 +99,7 @@ export const Avatar = ({
 interface MetadataAvatarProps extends IAvatarProps {
   tokenBonding: TokenBondingV0 | undefined;
 }
+
 export const MetadataAvatar = React.memo(
   ({ name, imgSrc, tokenBonding, ...props }: MetadataAvatarProps) => {
     const {
@@ -106,6 +107,7 @@ export const MetadataAvatar = React.memo(
       metadata,
       loading,
     } = useTokenMetadata(tokenBonding?.targetMint);
+
     if (loading) {
       return <Spinner />;
     }

@@ -37,12 +37,20 @@ export const TokenForm = ({
   const inputClasses =
     "p-0 bg-transparent border-transparent focus:shadow-none focus:border-transparent";
 
-  const handleOnFiatChange = ({ target: { value } }: { target: { value: string } }) => {
+  const handleOnFiatChange = ({
+    target: { value },
+  }: {
+    target: { value: string };
+  }) => {
     setValue("fiatAmount", Number(value));
     setValue("tokenAmount", +tokenAmountFromFiatAmount(+value).toFixed(2));
   };
 
-  const handleOnTokenChange = ({ target: { value } }: { target: { value: string } }) => {
+  const handleOnTokenChange = ({
+    target: { value },
+  }: {
+    target: { value: string };
+  }) => {
     setValue("tokenAmount", Number(value));
     setValue("fiatAmount", +fiatAmountFromTokenAmount(+value).toFixed(2));
   };

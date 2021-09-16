@@ -75,13 +75,13 @@ export const Badge = ({
 }: BadgeProps) => (
   <span
     className={classNames(
+      className,
       style.default,
       rounded && style.rounded,
       style.sizes[size],
       style.color[color].default,
       (hoverable || onClick) && style.hover,
-      (hoverable || onClick) && style.color[color].hover,
-      className && className
+      (hoverable || onClick) && style.color[color].hover
     )}
     {...(onClick && { onClick: onClick })}
   >
