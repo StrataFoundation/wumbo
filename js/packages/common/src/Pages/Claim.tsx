@@ -1,16 +1,15 @@
 import React, { useState } from "react";
-import { CreateSocialTokenResult, TokenRef } from "@wum.bo/spl-wumbo";
-import { TokenBondingV0 } from "@wum.bo/spl-token-bonding";
-import { useClaim, useCreateCoin } from "../utils/claim";
+import { useClaimTwitterHandle, useCreateOrClaimCoin } from "../utils/claim";
 import { useSolOwnedAmount, useRentExemptAmount } from "../utils/pricing";
 import { TWITTER_REGISTRY_SIZE } from "../utils/twitter";
 import { Spinner } from "../Spinner";
 import { Button, LinkButton } from "../Button";
 import { Alert } from "../Alert";
 import { useFtxPayLink } from "../utils/ftxPay";
+import { PublicKey } from "@solana/web3.js";
 
 export interface IClaimProps {
-  onComplete(result: CreateSocialTokenResult): void;
+  onComplete(result: { tokenRef: PublicKey, owner: PublicKey }): void;
   redirectUri: string;
   code: string;
   handle?: string;
@@ -22,18 +21,18 @@ export const Claim = React.memo(({ handle, redirectUri, code, onComplete }: ICla
     claim,
     error,
     awaitingApproval: claimAwaitingApproval,
-    claiming,
-  } = useClaim({ redirectUri, code });
+    claiming
+  } = useClaimTwitterHandle({ redirectUri, code });
   const {
     create,
     error: createCoinError,
     creating,
     awaitingApproval: createAwaitingApproval,
-  } = useCreateCoin();
+  } = useCreateOrClaimCoin();
 
   const { amount: sol, loading: solLoading } = useSolOwnedAmount();
   const { amount: amountNeeded, loading: amountNeededLoading } = useRentExemptAmount(
-    TWITTER_REGISTRY_SIZE + TokenRef.LEN + TokenBondingV0.LEN
+    TWITTER_REGISTRY_SIZE + 512 + 2*512 // bonding, token refx2
   );
 
   if (error) {

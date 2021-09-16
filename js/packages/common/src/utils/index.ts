@@ -11,3 +11,6 @@ export * from "./claim";
 export * from "./ftxPay";
 export * from "./nftVerifier";
 export * from "./truthy";
+export * from "./deserializers";
+export * from "./programs";
+export * from "./testableNameServiceTwitter";

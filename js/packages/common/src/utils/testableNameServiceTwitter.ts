@@ -19,20 +19,29 @@ import {
 } from "@solana/web3.js";
 import { serialize } from "borsh";
 
-export async function getTwitterRegistry(
-  connection: Connection,
-  twitter_handle: string,
-  twitterRootParentRegistryKey: PublicKey = TWITTER_ROOT_PARENT_REGISTRY_KEY
-): Promise<NameRegistryState> {
-  const hashedTwitterHandle = await getHashedName(twitter_handle);
+export async function getTwitterRegistryKey(
+  handle: string,
+  twitterRootParentRegistryKey?: PublicKey
+): Promise<PublicKey> {
+  const hashedTwitterHandle = await getHashedName(handle);
   const twitterHandleRegistryKey = await getNameAccountKey(
     hashedTwitterHandle,
     undefined,
     twitterRootParentRegistryKey
   );
+
+  return twitterHandleRegistryKey
+}
+
+export async function getTwitterRegistry(
+  connection: Connection,
+  twitter_handle: string,
+  twitterRootParentRegistryKey: PublicKey = TWITTER_ROOT_PARENT_REGISTRY_KEY
+): Promise<NameRegistryState> {
+  const key = await getTwitterRegistryKey(twitter_handle, twitterRootParentRegistryKey)
   const registry = NameRegistryState.retrieve(
     connection,
-    twitterHandleRegistryKey
+    key
   );
   return registry;
 }
@@ -54,6 +63,7 @@ export async function createVerifiedTwitterRegistry(
     undefined,
     twitterRootParentRegistryKey
   );
+
 
   let instructions = [
     createInstruction(

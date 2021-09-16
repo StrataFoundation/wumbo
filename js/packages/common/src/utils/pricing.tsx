@@ -10,7 +10,6 @@ import {
   WUM_TOKEN,
 } from "../constants/globals";
 import { Order } from "@project-serum/serum/lib/market";
-import { LogCurveV0, TokenBondingV0 } from "@wum.bo/spl-token-bonding";
 import { MintInfo, u64 } from "@solana/spl-token";
 // @ts-ignore
 import { gsl_sf_lambert_W0 } from "./lambertw";
@@ -21,20 +20,13 @@ import { useWallet } from "../contexts/walletContext";
 import { useConnection } from "@oyster/common";
 import { useAsync } from "react-async-hook";
 import { useTwitterTokenRef } from "./tokenRef";
+import { Curve as DeserializeCurve, TokenBonding } from "./deserializers/spl-token-bonding";
+import { Curve, fromCurve } from "@wum.bo/spl-token-bonding";
 
 // TODO: Use actual connection. But this can't happen in dev
 let connection = new Connection("https://api.mainnet-beta.solana.com");
 
 const UsdWumboPriceContext = React.createContext<number | undefined>(undefined);
-
-function generalLogCurve(c: number, g: number, x: number): number {
-  return c * ((1 / g + x) * Math.log(1 + g * x) - x);
-}
-/// Integral of c * log(1 + g * x) dx from a to b
-/// https://www.wolframalpha.com/input/?i=c+*+log%281+%2B+g+*+x%29+dx
-function logCurveRange(c: number, g: number, a: number, b: number): number {
-  return generalLogCurve(c, g, b) - generalLogCurve(c, g, a);
-}
 
 export function supplyAsNum(mint: MintInfo): number {
   return amountAsNum(mint.supply, mint);
@@ -91,7 +83,7 @@ export function useOwnedAmountForOwnerAndHandle(
   const { info: tokenRef, loading: loadingRef } = useTwitterTokenRef(handle);
   const { info: token, loading: loadingAmount } = useAccount(
     tokenRef?.tokenBonding,
-    TokenBondingV0.fromAccount
+    TokenBonding
   );
   const { associatedAccount, loading: loadingAssociatedAccount } = useAssociatedAccount(
     owner,
@@ -139,92 +131,24 @@ export function useOwnedAmount(token: PublicKey | undefined): number | undefined
   return amount && Number(amount);
 }
 
-// baseAmount = curve(supply + ret) * founder_rewards_percent
-// baseAmount / founder_rewards_percent = curve(supply + ret)
-/*
-  Just accept the magic...
-
-  This might help if you can't
-  https://www.wolframalpha.com/input/?i=solve%5Bc*%281%2Fg+%2B+%28s+%2B+x%29%29+*+log%28g+*+%28s+%2B+x%29+%2B+1%29+-+c+*+%28s+%2B+x%29+%3D+k%2C+x%5D
-*/
-export const inverseLogCurve =
-  (curve: LogCurveV0, base: MintInfo, target: MintInfo, founderRewardsPercentage: number) =>
-  (baseAmount: number): number => {
-    const c = curve.c;
-    const gNonBaseRel = curve.g;
-    const g = curve.isBaseRelative ? gNonBaseRel / (1.0 + supplyAsNum(base)) : gNonBaseRel;
-    const s = supplyAsNum(target);
-    const rewardsDecimal = founderRewardsPercentage / 10000;
-    const k = baseAmount + generalLogCurve(c, g, s);
-    const exp = gsl_sf_lambert_W0((g * k - c) / (c * Math.E)) + 1;
-
-    return Math.abs((Math.pow(Math.E, exp) - g * s - 1) / ((1 + rewardsDecimal) * g));
-  };
-
-const startFinishLogCurve =
-  (curve: LogCurveV0, base: MintInfo) => (start: number, finish: number) => {
-    const c = curve.c;
-    const gNonBaseRel = curve.g;
-    const g = curve.isBaseRelative ? gNonBaseRel / (1.0 + supplyAsNum(base)) : gNonBaseRel;
-
-    return logCurveRange(c, g, start, finish);
-  };
-
-export const logCurve =
-  (curve: LogCurveV0, base: MintInfo, target: MintInfo, founderRewardsPercentage: number) =>
-  (targetAmount: number): number => {
-    const rewardsDecimal = founderRewardsPercentage / 10000;
-    return startFinishLogCurve(curve, base)(
-      supplyAsNum(target),
-      supplyAsNum(target) + targetAmount * (1 + rewardsDecimal)
-    );
-  };
-
 export interface PricingState {
   loading: boolean;
-  // How much to buy this much of the target coin in terms of base
-  targetToBasePrice(targetAmount: number): number;
-  // What is the target price in terms of base if there are no founder rewards collected (sell)
-  sellTargetToBasePrice(targetAmount: number): number;
-  // How many target coins we'll get for this base amount
-  baseToTargetPrice(baseAmount: number): number;
-  sellBaseToTargetPrice(baseAmount: number): number;
-  // General from some start supply to finish supply
-  targetRangeToBasePrice(start: number, finish: number): number;
-  // The current price of target in terms of base
-  current: number;
+  curve?: Curve
 }
 export function useBondingPricing(tokenBonding: PublicKey | undefined): PricingState {
   const [state, setState] = useState<PricingState>({
-    loading: true,
-    targetToBasePrice: () => 0,
-    sellTargetToBasePrice: () => 0,
-    baseToTargetPrice: () => 0,
-    sellBaseToTargetPrice: () => 0,
-    targetRangeToBasePrice: () => 0,
-    current: 0,
+    loading: true
   });
-  const { info: bonding } = useAccount(tokenBonding, TokenBondingV0.fromAccount);
-  const { info: curve } = useAccount(bonding?.curve, LogCurveV0.fromAccount);
+  const { info: bonding } = useAccount(tokenBonding, TokenBonding);
+  const { info: curve } = useAccount(bonding?.curve, DeserializeCurve);
 
   const base = useMint(bonding?.baseMint);
   const target = useMint(bonding?.targetMint);
   useEffect(() => {
     if (curve && base && target && bonding) {
-      const targetRangeToBasePrice = startFinishLogCurve(curve, base);
       setState({
         loading: false,
-        targetToBasePrice: logCurve(curve, base, target, bonding.founderRewardPercentage),
-        sellTargetToBasePrice: (amount: number) =>
-          targetRangeToBasePrice(supplyAsNum(target) - amount, supplyAsNum(target)),
-        baseToTargetPrice: inverseLogCurve(curve, base, target, bonding.founderRewardPercentage),
-        sellBaseToTargetPrice: (amount: number) => inverseLogCurve(curve, base, target, 0)(-amount),
-        targetRangeToBasePrice,
-        current:
-          curve.c *
-          Math.log(
-            1 + (curve.g * supplyAsNum(target)) / (curve.isBaseRelative ? supplyAsNum(base) : 1)
-          ),
+        curve: fromCurve(curve, base, target)
       });
     }
   }, [curve, base, target, bonding]);
@@ -234,10 +158,10 @@ export function useBondingPricing(tokenBonding: PublicKey | undefined): PricingS
 
 export const UsdWumboPriceProvider = ({ children = undefined as any }) => {
   const price = useMarketPrice(SOL_TO_USD_MARKET);
-  const { current } = useBondingPricing(WUM_BONDING);
+  const { curve } = useBondingPricing(WUM_BONDING);
 
   return (
-    <UsdWumboPriceContext.Provider value={(price || 0) * current}>
+    <UsdWumboPriceContext.Provider value={(price || 0) * (curve ? curve.current() : 0)}>
       {children}
     </UsdWumboPriceContext.Provider>
   );

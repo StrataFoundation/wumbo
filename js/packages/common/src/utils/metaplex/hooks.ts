@@ -17,41 +17,29 @@ import {
   TransactionInstruction,
 } from "@solana/web3.js";
 import { getDescription, getFilesWithMetadata, getImage, getMetadataKey } from "./utils";
-import { useWallet } from "../../contexts/walletContext";
-import { TokenRef } from "@wum.bo/spl-wumbo";
+import { useProvider, useWallet } from "../../contexts/walletContext";
+import { TokenRefV0 } from "@wum.bo/spl-wumbo";
+import { TokenRef } from "../deserializers/spl-wumbo";
 import { useMint } from "../mintState";
 import { TokenBondingV0 } from "@wum.bo/spl-token-bonding";
 import { useState } from "react";
 import {
-  createMetadataWithArweave,
   prepPayForFilesInstructions,
   updateMetadataWithArweave,
   uploadToArweave,
 } from "./arweave";
-import { WUMBO_PROGRAM_ID } from "../../constants/globals";
 import { useTokenMetadata } from "./nftMetadataHooks";
+import { TokenBonding } from "../../utils/deserializers/spl-token-bonding";
+import { usePrograms } from "../../utils/programs";
+import { splWumboProgramId } from "../../constants/programs";
 
 const RESERVED_TXN_MANIFEST = "manifest.json";
 
-async function getSignedTransaction(
-  connection: Connection,
-  instructions: TransactionInstruction[],
-  extraSigners?: Account[]
-): Promise<Transaction> {
-  const { signTransaction, publicKey } = useWallet();
-  const transaction = new Transaction({
-    feePayer: publicKey || undefined,
-    recentBlockhash: (await connection.getRecentBlockhash()).blockhash,
-  });
-
-  transaction.instructions = instructions;
-
-  extraSigners && transaction.partialSign(...extraSigners);
-  return signTransaction(transaction);
-}
-
 async function getFileFromUrl(url: string, name: string, defaultType = "image/jpeg") {
-  const response = await fetch(url);
+  console.log('uri', url);
+  const response = await fetch(url, {
+    cache: 'no-cache',
+  });
   const data = await response.blob();
   return new File([data], name, {
     type: response.headers.get("content-type") || defaultType,
@@ -68,7 +56,6 @@ export type SetMetadataArgs = {
 type MetadataFiniteState =
   | "idle"
   | "gathering-files"
-  | "awaiting-approval"
   | "submit-solana"
   | "submit-arweave";
 type SetMetadataState = {
@@ -80,16 +67,34 @@ type SetMetadataState = {
 };
 export function useSetMetadata(tokenRefKey: PublicKey | undefined): SetMetadataState {
   const connection = useConnection();
-  const { info: tokenRef } = useAccount(tokenRefKey, TokenRef.fromAccount);
-  const { info: tokenBonding } = useAccount(tokenRef?.tokenBonding, TokenBondingV0.fromAccount);
+  const { info: tokenRef } = useAccount(tokenRefKey, TokenRef);
+  const { info: tokenBonding } = useAccount(tokenRef?.tokenBonding, TokenBonding);
   const {
     publicKey: metadataAccountKey,
     image,
     metadata: inflated,
   } = useTokenMetadata(tokenBonding?.targetMint);
-  const { publicKey } = useWallet();
+
+  const { publicKey, signTransaction } = useWallet();
   const [state, setState] = useState<MetadataFiniteState>("idle");
-  const mint = useMint(tokenBonding?.targetMint);
+  const { splWumboProgram } = usePrograms();
+
+  async function getSignedTransaction(
+    connection: Connection,
+    instructions: TransactionInstruction[],
+    extraSigners?: Account[]
+  ): Promise<Transaction> {
+    const transaction = new Transaction({
+      feePayer: publicKey || undefined,
+      recentBlockhash: (await connection.getRecentBlockhash()).blockhash,
+    });
+  
+    transaction.instructions = instructions;
+  
+    extraSigners && transaction.partialSign(...extraSigners);
+    return signTransaction(transaction);
+  }
+  
 
   async function exec(args: SetMetadataArgs) {
     if (publicKey && tokenRefKey) {
@@ -97,7 +102,7 @@ export function useSetMetadata(tokenRefKey: PublicKey | undefined): SetMetadataS
       const updateAuthority = (
         await PublicKey.findProgramAddress(
           [Buffer.from("metadata-update-authority"), tokenRefKey.toBuffer()],
-          WUMBO_PROGRAM_ID
+          splWumboProgramId
         )
       )[0];
       let files: File[];
@@ -126,7 +131,7 @@ export function useSetMetadata(tokenRefKey: PublicKey | undefined): SetMetadataS
         },
         creators: [
           new Creator({
-            address: tokenRef!.owner!,
+            address: tokenRef!.owner! as PublicKey,
             verified: false,
             share: 99,
           }),
@@ -143,7 +148,6 @@ export function useSetMetadata(tokenRefKey: PublicKey | undefined): SetMetadataS
       try {
         // Prepay for the arweave upload we're about to do
         const prepayTxnInstructions = await prepPayForFilesInstructions(publicKey, realFiles);
-        setState("awaiting-approval");
         const prepayTxn = await getSignedTransaction(connection, prepayTxnInstructions);
         setState("submit-solana");
         const txid = await sendAndConfirmRawTransaction(connection, prepayTxn.serialize());
@@ -171,37 +175,13 @@ export function useSetMetadata(tokenRefKey: PublicKey | undefined): SetMetadataS
 
         // Use the uploaded arweave files in token metadata
         setState("submit-solana");
-        let metadataInstructions;
-        const metadataAccount =
-          metadataAccountKey && (await connection.getAccountInfo(metadataAccountKey));
-        if (metadataAccount && metadataAccountKey) {
-          metadataInstructions = await updateMetadataWithArweave(
-            tokenRef!.publicKey,
-            tokenRef!.owner!,
-            updateAuthority,
-            metadataFile,
-            tokenBonding!.targetMint,
-            metadataAccountKey,
-            metadata
-          );
-        } else {
-          metadataInstructions = (
-            await createMetadataWithArweave(
-              updateAuthority,
-              publicKey,
-              metadataFile,
-              tokenBonding!.targetMint,
-              tokenRef!.publicKey,
-              tokenRef!.owner!,
-              tokenBonding!.publicKey,
-              tokenBonding!.authority!,
-              mint!.mintAuthority!,
-              metadata
-            )
-          ).instructions;
-        }
+        const metadataInstructions = await updateMetadataWithArweave(
+          splWumboProgram!,
+          tokenRef!.publicKey,
+          metadataFile,
+          metadata
+        );
 
-        setState("awaiting-approval");
         const createMetadataTxn = await getSignedTransaction(connection, metadataInstructions);
         setState("submit-solana");
         await sendAndConfirmRawTransaction(connection, createMetadataTxn.serialize());

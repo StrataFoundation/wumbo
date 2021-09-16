@@ -55,6 +55,9 @@ module.exports = {
     ],
   },
   resolve: {
+    fallback: {
+      "fs": false
+    },
     plugins: [new TsconfigPathsPlugin()],
     extensions: [".ts", ".tsx", ".js"],
     alias: {

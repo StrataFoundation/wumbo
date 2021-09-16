@@ -18,6 +18,8 @@ import {
 import { Wallet, WalletName } from "@solana/wallet-adapter-wallets";
 import { PublicKey, Transaction } from "@solana/web3.js";
 import { useLocalStorage } from "../utils";
+import { Provider } from "@wum.bo/anchor";
+import { useConnection } from "@oyster/common";
 
 export interface IWalletProviderProps {
   children: ReactNode;
@@ -282,4 +284,16 @@ const useWallet = () => {
   return context;
 };
 
-export { WalletProvider, useWallet };
+function useProvider(): Provider | undefined {
+  const connection = useConnection();
+  const { adapter } = useWallet();
+  const provider = React.useMemo(() => {
+    // Let adapter be null, it'll fail if anyone issues transaction commands but will let fetch go through
+    // @ts-ignore
+    return new Provider(connection, adapter, {})
+  }, [connection, adapter]);
+
+  return provider;
+}
+
+export { WalletProvider, useWallet, useProvider };

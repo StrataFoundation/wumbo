@@ -166,7 +166,7 @@ export const TokenLeaderboard = React.memo(
     onAccountClick,
   }: {
     mint: PublicKey;
-    onAccountClick?: (tokenBondingKey: PublicKey) => void;
+    onAccountClick?: (tokenRefKey: PublicKey) => void;
   }) => {
     const ownedAmount = useOwnedAmount(mint);
     const top = useAccountsPagination(mint);

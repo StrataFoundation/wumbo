@@ -1,12 +1,11 @@
 import React, { FC } from "react";
 import { Link } from "react-router-dom";
-import { WumboInstance } from "@wum.bo/spl-wumbo";
 import { useUserInfo } from "@/utils/userState";
 import { useAccount } from "wumbo-common";
-import { WUMBO_INSTANCE_KEY, Button, IButtonProps, Spinner, ISpinnerProps } from "wumbo-common";
+import { WUMBO_INSTANCE_KEY, Button, IButtonProps, Spinner, ISpinnerProps, WumboInstance } from "wumbo-common";
 
 import { useDrawer } from "@/contexts/drawerContext";
-import { routes, tradePath } from "@/constants/routes";
+import { routes, tradePath, viewProfilePath } from "@/constants/routes";
 
 type Props = {
   creatorName: string;
@@ -24,7 +23,7 @@ export const MainButton: FC<Props> = ({
   const { toggleDrawer } = useDrawer();
   const creatorInfoState = useUserInfo(creatorName);
   const { userInfo: creatorInfo, loading } = creatorInfoState;
-  const { info: wumboInstance } = useAccount(WUMBO_INSTANCE_KEY, WumboInstance.fromAccount);
+  const { info: wumboInstance } = useAccount(WUMBO_INSTANCE_KEY, WumboInstance);
 
   if (!loading && !creatorInfo && wumboInstance) {
     return (
@@ -57,7 +56,7 @@ export const MainButton: FC<Props> = ({
 
   return (
     <Link
-      to={`${tradePath(creatorInfo.tokenBonding.publicKey)}?name=${creatorInfo.name}`}
+      to={`${viewProfilePath(creatorInfo.tokenRef.publicKey)}?name=${creatorInfo.name}`}
       className="no-underline"
     >
       <Button

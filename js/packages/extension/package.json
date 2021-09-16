@@ -29,8 +29,6 @@
     "@toruslabs/openlogin-ed25519": "0.9.0",
     "@toruslabs/openlogin-utils": "0.9.0",
     "@toruslabs/torus-direct-web-sdk": "4.14.0",
-    "@wum.bo/spl-token-bonding": "^1.0.0",
-    "@wum.bo/spl-wumbo": "^1.0.0",
     "auth0-js": "^9.16.2",
     "bip39": "^3.0.4",
     "borsh": "^0.4.0",

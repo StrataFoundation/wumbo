@@ -28,8 +28,8 @@ export interface IRoutes {
   viewNft: Route;
 }
 
-export function viewProfilePath(tokenBondingKey: PublicKey): string {
-  return routes.viewProfile.path.replace(":tokenBondingKey", tokenBondingKey.toBase58());
+export function viewProfilePath(tokenRefKey: PublicKey): string {
+  return routes.viewProfile.path.replace(":tokenRefKey", tokenRefKey.toBase58());
 }
 
 export function nftPath(mint: PublicKey): string {
@@ -66,7 +66,7 @@ export const routes: IRoutes = {
   search: { path: "/search", Icon: SearchIcon, isDrawerNav: true },
   profile: { path: "/profile", Icon: UserIcon, isDrawerNav: true },
   editProfile: { path: "/profile/edit", Icon: UserIcon, isDrawerNav: false },
-  viewProfile: { path: "/profile/view/:tokenBondingKey", Icon: UserIcon, isDrawerNav: false },
+  viewProfile: { path: "/profile/view/:tokenRefKey", Icon: UserIcon, isDrawerNav: false },
   viewNft: { path: "/nft/view/:mint", Icon: UserIcon, isDrawerNav: false },
 };
 

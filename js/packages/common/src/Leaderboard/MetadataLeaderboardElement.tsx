@@ -1,4 +1,4 @@
-import { amountAsNum, useAccount, useClaimedTokenRef, useMint, useSocialTokenMetadata, useTokenMetadata, useTwitterTokenRef } from '../utils';
+import { amountAsNum, useAccount, useClaimedTokenRef, useClaimedTokenRefKey, useMint, useSocialTokenMetadata, useTokenMetadata, useTwitterTokenRef } from '../utils';
 import React from 'react';
 import { AccountInfo as TokenAccountInfo, Token } from "@solana/spl-token";
 import { Spinner } from '../Spinner';
@@ -6,13 +6,13 @@ import { Avatar } from '..';
 import { useReverseTwitter } from '../utils/twitter';
 import { PublicKey } from '@solana/web3.js';
 
-export const MetadataLeaderboardElement = React.memo(({ account, onClick }: { onClick?: (tokenBondingKey: PublicKey) => void, account: TokenAccountInfo }) => {
+export const MetadataLeaderboardElement = React.memo(({ account, onClick }: { onClick?: (tokenRefKey: PublicKey) => void, account: TokenAccountInfo }) => {
   const { loading, image, metadata, error } = useSocialTokenMetadata(account.owner);
   if (error) {
     console.error(error);
   }
 
-  const { info: tokenRef } = useClaimedTokenRef(account.owner)
+  const tokenRefKey = useClaimedTokenRefKey(account.owner)
   
   const mint = useMint(account.mint);
   const { handle } = useReverseTwitter(account.owner);
@@ -23,7 +23,7 @@ export const MetadataLeaderboardElement = React.memo(({ account, onClick }: { on
 
   const { name, symbol } = (metadata || {}).data || {};
 
-  return <div onClick={() => onClick && onClick(tokenRef!.tokenBonding)} className="hover:cursor-pointer flex flex-row flex-grow items-center pr-4">
+  return <div onClick={() => onClick && tokenRefKey && onClick(tokenRefKey)} className="hover:cursor-pointer flex flex-row flex-grow items-center pr-4">
     <div className="py-2 pr-4 pl-1">
       { image && <Avatar size="xs" token imgSrc={image} name={name} /> }
     </div>
