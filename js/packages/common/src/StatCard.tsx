@@ -23,14 +23,14 @@ export const StatCardWithIcon = ({
   value,
   icon,
 }: IStatCardWithIconProps) => (
-  <div className="flex gap-2 p-2 rounded-lg border-2 border-gray-100 items-center">
-    <div>
-      {icon === "coin" && <img src={coinIcon} />}
-      {icon === "wumbo" && <img src={wumboIcon} />}
+  <div className="flex gap-2 px-2.5 py-2.5 rounded-lg border-2 border-gray-100 items-center justify-center">
+    <div className="w-6">
+      {icon === "coin" && <img className="w-full" src={coinIcon} />}
+      {icon === "wumbo" && <img className="w-full" src={wumboIcon} />}
     </div>
-    <div className="flex-1 flex flex-col">
-      <span className="text-md leading-sm">{value}</span>
-      <span className="text-sm text-gray-500 leading-sm">{label}</span>
+    <div className="flex-1 flex flex-col leading-none">
+      <span className="text-md">{value}</span>
+      <span className="text-sm text-gray-500">{label}</span>
     </div>
   </div>
 );
