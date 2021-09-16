@@ -78,7 +78,7 @@ interface CreateState {
   create: (twitterHandle: string) => Promise<{ tokenRef: PublicKey, owner: PublicKey }>;
 }
 
-export function useCreateCoin(): CreateState {
+export function useCreateOrClaimCoin(): CreateState {
   const cache = useAccountFetchCache();
   const connection = useConnection();
   const { adapter, publicKey } = useWallet();
@@ -118,6 +118,12 @@ export function useCreateCoin(): CreateState {
           tokenRef: creator!.publicKey,
           owner
         };
+        if (!creator.isClaimed) {
+          await splWumboProgram!.claimSocialToken({
+            owner,
+            tokenRef: key
+          })
+        }
       }
     } finally {
       setCreating(false);

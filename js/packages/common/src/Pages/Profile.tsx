@@ -1,31 +1,43 @@
 import React from 'react';
-import { useTokenRefFromBonding } from '../utils/tokenRef';
+import { useClaimedTokenRef, useTokenRefFromBonding } from '../utils/tokenRef';
 import { Spinner } from '../Spinner';
 import { useAccount } from '../utils/account';
 import { TokenBonding } from "../utils/deserializers/spl-token-bonding";
 import { PublicKey } from '@solana/web3.js';
-import { TokenRef, ITokenWithMeta, supplyAsNum, useBondingPricing, useFiatPrice, useMint, useOwnedAmount, useQuery, useReverseTwitter, useTokenMetadata, useUserTokensWithMeta } from '../utils';
+import { TokenRef, ITokenWithMeta, supplyAsNum, useBondingPricing, useFiatPrice, useMint, useOwnedAmount, useQuery, useReverseTwitter, useTokenMetadata, useUserTokensWithMeta, useClaimLink } from '../utils';
 import { StatCard, StatCardWithIcon } from "../StatCard";
-import { Badge, Button, MetadataAvatar, Tab, Tabs } from '..';
+import { Badge, Button, MetadataAvatar, Tab, Tabs, useWallet } from '..';
 import { PencilAltIcon } from '@heroicons/react/outline';
 import { TokenAccountsContextProvider, TokenLeaderboard } from '../Leaderboard/TokenLeaderboard';
 import { AccountInfo as TokenAccountInfo } from '@solana/spl-token';
 import { NftList, NftListRaw } from '../Nft';
 import { TROPHY_CREATOR } from '../constants/globals';
+import { Link } from 'react-router-dom';
 
 interface IProfileProps {
   tokenRefKey: PublicKey;
+  editPath: string;
   onAccountClick?: (tokenRefKey: PublicKey) => void;
   onTradeClick?: () => void;
   getNftLink: (t: ITokenWithMeta) => string
+  useClaimFlow: (handle: string | undefined | null) => IClaimFlowOutput
 }
 
-export const Profile = React.memo(({ tokenRefKey, onAccountClick, onTradeClick, getNftLink }: IProfileProps) => {
+export interface IClaimFlowOutput {
+  error: Error | undefined;
+  loading: boolean;
+  claim: () => void
+}
+
+export const Profile = React.memo(({ useClaimFlow, tokenRefKey, onAccountClick, onTradeClick, getNftLink, editPath }: IProfileProps) => {
   const { info: tokenRef, loading } = useAccount(tokenRefKey, TokenRef)
   const ownerWalletKey = tokenRef?.owner as PublicKey | undefined;
+  const { info: walletTokenRef } = useClaimedTokenRef(ownerWalletKey);
   const { info: tokenBonding, loading: tokenBondingLoading } = useAccount(tokenRef?.tokenBonding, TokenBonding);
   const { metadata, loading: loadingMetadata } = useTokenMetadata(tokenBonding?.targetMint);
-
+  const { publicKey } = useWallet();
+  const { handle: walletTwitterHandle } = useReverseTwitter(publicKey || undefined);
+  
   const mint = useMint(tokenBonding?.targetMint);
   const supply = mint ? supplyAsNum(mint) : 0;
   const { curve } = useBondingPricing(
@@ -44,6 +56,7 @@ export const Profile = React.memo(({ tokenRefKey, onAccountClick, onTradeClick, 
   if (!handle) {
     handle = query.get("name") || undefined
   }
+  const { claim, loading: claiming } = useClaimFlow(handle);
 
   if (loading || tokenBondingLoading || !tokenBonding || loadingMetadata) {
     return <Spinner />;
@@ -71,7 +84,10 @@ export const Profile = React.memo(({ tokenRefKey, onAccountClick, onTradeClick, 
               <p className="text-xl leading-none">
                 {metadata?.data.name || "@" + handle}
               </p>
-              <PencilAltIcon className="h-5 text-indigo-500 hover:cursor-pointer hover:text-indigo-700" />
+              {walletTokenRef &&
+                <Link to={editPath}>
+                  <PencilAltIcon className="h-5 text-indigo-500 hover:cursor-pointer hover:text-indigo-700" />
+                </Link>}
             </div>
             <p className="text-sm">
               {" "}
@@ -91,6 +107,15 @@ export const Profile = React.memo(({ tokenRefKey, onAccountClick, onTradeClick, 
               >
                 ${coinPriceUsd.toFixed(2)}
               </Badge>
+              { tokenRef && !tokenRef.isClaimed && !walletTokenRef && (!walletTwitterHandle || walletTwitterHandle == handle) && <Button
+                onClick={claim}
+                size="xs" 
+                color="twitterBlue"
+                disabled={claiming}
+              >
+                { claiming && "Claiming" }
+                { !claiming && "Claim" }
+              </Button>}
             </div>
           </div>
           <div className="flex flex-col gap-2.5">
@@ -139,3 +164,4 @@ export const Profile = React.memo(({ tokenRefKey, onAccountClick, onTradeClick, 
     </div>
   );
 });
+

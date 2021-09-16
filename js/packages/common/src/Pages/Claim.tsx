@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { useClaimTwitterHandle, useCreateCoin } from "../utils/claim";
+import { useClaimTwitterHandle, useCreateOrClaimCoin } from "../utils/claim";
 import { useSolOwnedAmount, useRentExemptAmount } from "../utils/pricing";
 import { TWITTER_REGISTRY_SIZE } from "../utils/twitter";
 import { Spinner } from "../Spinner";
@@ -28,7 +28,7 @@ export const Claim = React.memo(({ handle, redirectUri, code, onComplete }: ICla
     error: createCoinError,
     creating,
     awaitingApproval: createAwaitingApproval,
-  } = useCreateCoin();
+  } = useCreateOrClaimCoin();
 
   const { amount: sol, loading: solLoading } = useSolOwnedAmount();
   const { amount: amountNeeded, loading: amountNeededLoading } = useRentExemptAmount(

@@ -1,7 +1,6 @@
 import React, { useState } from "react";
 import { useHistory } from "react-router-dom";
 import { useConnection } from "@oyster/common";
-import { Wumbo } from "@wum.bo/spl-wumbo";
 import { claimPath, routes } from "@/constants/routes";
 import {
   WUMBO_INSTANCE_KEY,
@@ -14,23 +13,23 @@ import {
   useClaimLink,
   usePrograms,
   useAccountFetchCache,
-  TokenRef
+  TokenRef,
+  useReverseTwitter
 } from "wumbo-common";
 import { useAsyncCallback } from "react-async-hook";
+import { useClaimFlow } from "@/utils/claim";
 
 export default React.memo(() => {
   const history = useHistory();
-  const { adapter } = useWallet();
-  const connection = useConnection();
   const { splWumboProgram } = usePrograms();
   const query = useQuery();
-  const cache = useAccountFetchCache()
-
+  const { publicKey } = useWallet();
+  const { handle: ownerTwitterHandle } = useReverseTwitter(publicKey || undefined);
 
   const createCreator = async () => {
     const handle = query.get("name")!;
 
-    const { tokenRef, tokenBonding } = await splWumboProgram!.createSocialToken({
+    const { tokenBonding } = await splWumboProgram!.createSocialToken({
       wumbo: WUMBO_INSTANCE_KEY,
       tokenName: handle,
       name: await getTwitterRegistryKey(handle, await getTld()),
@@ -45,20 +44,8 @@ export default React.memo(() => {
   if (error) { // TODO: Actual error handling
     console.error(error);
   }
-  const redirectUri = `http://localhost:3000/claim?name=${query.get("name")}`;
-  const claim = useClaimLink({ redirectUri });
-  const [claimWindow, setClaimWindow] = useState<Window>();
-
-  chrome.runtime.onMessage.addListener((msg, _, sendResponse) => {
-    if (msg.type == "CLAIM") {
-      claimWindow?.close();
-      history.push(claimPath({ ...msg.data, redirectUri }));
-    }
-
-    sendResponse();
-    return true;
-  });
-
+  const { claim, loading } = useClaimFlow(query.get("name"));
+  
   return (
     <div className="flex flex-grow flex-col">
       <Button block color="primary" size="lg" onClick={execute} disabled={creationLoading}>
@@ -69,15 +56,26 @@ export default React.memo(() => {
         )}
         Create Token
       </Button>
-      <div className="text-center text-bold text-lg mt-2 text-gray-500 mb-2">or</div>
-      <Button
-        block
-        color="twitterBlue"
-        size="lg"
-        onClick={() => setClaimWindow(claim() || undefined)}
-      >
-        This is me, Claim!
-      </Button>
+      {(!ownerTwitterHandle || ownerTwitterHandle == query.get("name")) &&
+        <>
+          <div className="text-center text-bold text-lg mt-2 text-gray-500 mb-2">or</div>
+          <Button
+            disabled={loading}
+            block
+            color="twitterBlue"
+            size="lg"
+            onClick={claim}
+          >
+            {loading && (
+              <div className="mr-4">
+                <Spinner size="sm" />
+              </div>
+            )}
+            {!loading && "This is me, Claim!"}
+            {loading && "Claiming"}
+          </Button>
+        </>
+      }
     </div>
   );
 });

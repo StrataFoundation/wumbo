@@ -26,7 +26,6 @@ export const ViewNft: React.FC = () => {
   if (loading) {
     return <WumboDrawer.Loading />;
   }
-
   if (err2) {
     // TODO: tie this into global error handling
     console.log(err2);
@@ -38,7 +37,7 @@ export const ViewNft: React.FC = () => {
       <WumboDrawer.Content>
         <CommonViewNft
           token={token}
-          owner={info?.info.owner}
+          owner={info?.info?.owner}
           getCreatorLink={(c, t, tokenBonding) => {
             return tokenBonding
               ? viewProfilePath(tokenBonding.publicKey)

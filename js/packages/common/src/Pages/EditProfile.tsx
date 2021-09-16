@@ -78,12 +78,13 @@ export const EditProfile = React.memo(({ ownerWalletKey, onComplete }: IEditProf
     if (metadataImage) {
       setImgUrl(metadataImage);
     }
+    console.log(metadata);
     reset({
-      name: metadata?.data.name || handle,
-      symbol: metadata?.data.symbol || handle?.substr(0, 4).toUpperCase(),
-      founderRewardsPercent: 5,
+      name: metadata?.data.name,
+      symbol: metadata?.data.symbol,
+      founderRewardsPercent: ((tokenBonding?.targetRoyaltyPercentage || 0) / 4294967295),
     });
-  }, [handle, metadata?.data.name, metadata?.data.symbol, metadataImage]);
+  }, [metadata?.data.name, metadata?.data.symbol, metadataImage]);
 
 
   const avatar = <Avatar imgSrc={imgUrl} token name={symbol} />;

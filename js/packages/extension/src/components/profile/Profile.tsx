@@ -6,6 +6,7 @@ import { nftPath, routes, tradePath, viewProfilePath } from "@/constants/routes"
 import WalletRedirect from "../wallet/WalletRedirect";
 import { PublicKey } from "@solana/web3.js";
 import { PencilAltIcon } from "@heroicons/react/solid";
+import { useClaimFlow } from "@/utils/claim";
 
 export const Profile = () => {
   const params = useParams<{ tokenRefKey: string | undefined }>();
@@ -17,7 +18,7 @@ export const Profile = () => {
 
   const history = useHistory();
 
-  if (!tokenRefKey && !connected) {
+  if (!tokenRefKey || !connected) {
     return <WalletRedirect />;
   }
 
@@ -49,6 +50,8 @@ export const Profile = () => {
       </WumboDrawer.Header>
       <WumboDrawer.Content>
         <CommonProfile
+          editPath={routes.editProfile.path}
+          useClaimFlow={useClaimFlow}
           tokenRefKey={tokenRefKey}
           onAccountClick={(tokenRefKey) => history.push(viewProfilePath(tokenRefKey))}
           onTradeClick={() => tokenRef && history.push(tradePath(tokenRef.tokenBonding))}

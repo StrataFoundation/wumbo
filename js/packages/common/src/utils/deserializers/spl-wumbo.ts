@@ -1,6 +1,6 @@
 import { PublicKey } from "@solana/web3.js";
 import { Coder } from "@wum.bo/anchor";
-import { Wumbo, TokenRefV0, SplWumboIDLJson } from "@wum.bo/spl-wumbo";
+import { WumboV0, TokenRefV0, SplWumboIDLJson } from "@wum.bo/spl-wumbo";
 import { TypedAccountParser } from "../account";
 
 const wumboCoder = new Coder(SplWumboIDLJson);
@@ -16,8 +16,8 @@ export const TokenRef: TypedAccountParser<ITokenRef> = (pubkey, account) => {
   };
 }
 
-export const WumboInstance: TypedAccountParser<Wumbo & { publicKey: PublicKey }> = (pubkey, account) => {
-  const coded = wumboCoder.accounts.decode<Wumbo>("Wumbo", account.data);
+export const WumboInstance: TypedAccountParser<WumboV0 & { publicKey: PublicKey }> = (pubkey, account) => {
+  const coded = wumboCoder.accounts.decode<WumboV0>("WumboV0", account.data);
   return {
     ...coded,
     publicKey: pubkey

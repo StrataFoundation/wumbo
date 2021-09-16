@@ -20,10 +20,10 @@ function makeId(length: number): string {
   }
   return result;
 }
-export function useClaimLink({ redirectUri, newTab = false}: { redirectUri: string, newTab?: boolean }): () => Window | null {
+export function useClaimLink({ handle, newTab = false}: { handle: string, newTab?: boolean }): { redirectUri: string,  claim: () => Window | null } {
   const setAuth0State = useLocalStorageState("auth0-state")[1];
-
-  return () => {
+  const redirectUri = `http://localhost:3000/claim?name=${handle}`;
+  const claim = () => {
     const state = makeId(6);
   
     const auth0Url = auth0.client.buildAuthorizeUrl({
@@ -36,5 +36,10 @@ export function useClaimLink({ redirectUri, newTab = false}: { redirectUri: stri
     setAuth0State(state);
 
     return window.open(auth0Url, newTab ? '_blank' : undefined)
+  }
+
+  return {
+    redirectUri,
+    claim
   }
 }

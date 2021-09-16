@@ -4,7 +4,7 @@ import { useParams } from "react-router";
 import AppContainer from "../../common/AppContainer";
 import { Profile, Spinner, useClaimedTokenRefKey, useAccount, TokenRef, useWallet } from "wumbo-common";
 import { useHistory } from "react-router-dom";
-import { profilePath, nftPath } from "../../../constants/routes";
+import routes, { profilePath, nftPath } from "../../../constants/routes";
 import WalletRedirect from "../../Wallet/WalletRedirect";
 
 export const ViewProfileRoute = () => {
@@ -35,6 +35,13 @@ export const ViewProfileRoute = () => {
   return (
     <AppContainer>
       <Profile
+        // TODO: Web claim flow
+        useClaimFlow={() => ({
+          claim: () => {},
+          loading: false,
+          error: undefined
+        })}
+        editPath={routes.editProfile.path}
         tokenRefKey={tokenRefKey}
         onAccountClick={(tokenBondingKey: PublicKey) => {
           history.push(profilePath(tokenBondingKey));
