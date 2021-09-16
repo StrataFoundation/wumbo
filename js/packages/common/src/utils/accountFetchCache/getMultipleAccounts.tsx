@@ -12,29 +12,20 @@ export const getMultipleAccounts = async (
   keys: string[],
   commitment: string,
 ): Promise<{ keys: string[], array: AccountInfo<Buffer>[] }> => {
-  const result = await Promise.all(
-    chunks(keys, 99).map(chunk =>
-      getMultipleAccountsCore(connection, chunk, commitment),
-    ),
-  );
+  const result = await getMultipleAccountsCore(connection, keys, commitment)
 
-  const array = result
-    .map(
-      a =>
-        a.array.map(acc => {
-          if (!acc) {
-            return undefined;
-          }
+  const array = result.array.map(acc => {
+    if (!acc) {
+      return undefined;
+    }
 
-          const { data, ...rest } = acc;
-          const obj = {
-            ...rest,
-            data: Buffer.from(data[0], 'base64'),
-          } as AccountInfo<Buffer>;
-          return obj;
-        }) as AccountInfo<Buffer>[],
-    )
-    .flat();
+    const { data, ...rest } = acc;
+    const obj = {
+      ...rest,
+      data: Buffer.from(data[0], 'base64'),
+    } as AccountInfo<Buffer>;
+    return obj;
+  }) as AccountInfo<Buffer>[]
   return { keys, array };
 };
 

@@ -12,6 +12,8 @@ import { Avatar } from "../Avatar";
 import { Button } from "../Button";
 import { Alert } from "../Alert";
 import { Spinner } from "../Spinner";
+import { TokenBonding } from "../utils/deserializers/spl-token-bonding";
+import { useWallet } from "../contexts";
 
 interface IEditProfileProps {
   ownerWalletKey: PublicKey;
@@ -20,6 +22,7 @@ interface IEditProfileProps {
 
 export const EditProfile = React.memo(({ ownerWalletKey, onComplete }: IEditProfileProps) => {
   const hiddenFileInput = React.useRef<HTMLInputElement>(null);
+  const { awaitingApproval } = useWallet();
   const { handle } = useReverseTwitter(ownerWalletKey);
   const { info: tokenRef } = useClaimedTokenRef(ownerWalletKey);
   const { watch, register, handleSubmit, setValue, reset } =
@@ -30,8 +33,9 @@ export const EditProfile = React.memo(({ ownerWalletKey, onComplete }: IEditProf
     });
   const { info: tokenBonding } = useAccount(
     tokenRef?.tokenBonding,
-    TokenBondingV0.fromAccount
+    TokenBonding
   );
+
   const { image: metadataImage, metadata } = useTokenMetadata(
     tokenBonding?.targetMint
   );
@@ -74,12 +78,13 @@ export const EditProfile = React.memo(({ ownerWalletKey, onComplete }: IEditProf
     if (metadataImage) {
       setImgUrl(metadataImage);
     }
+    console.log(metadata);
     reset({
-      name: metadata?.data.name || handle,
-      symbol: metadata?.data.symbol || handle?.substr(0, 4).toUpperCase(),
-      founderRewardsPercent: 5,
+      name: metadata?.data.name,
+      symbol: metadata?.data.symbol,
+      founderRewardsPercent: ((tokenBonding?.targetRoyaltyPercentage || 0) / 4294967295),
     });
-  }, [handle, metadata, metadataImage]);
+  }, [metadata?.data.name, metadata?.data.symbol, metadataImage]);
 
 
   const avatar = <Avatar imgSrc={imgUrl} token name={symbol} />;
@@ -178,6 +183,8 @@ export const EditProfile = React.memo(({ ownerWalletKey, onComplete }: IEditProf
             </label>
             <div className="mt-1">
               <input
+                title="Royalties editing is disabled for beta"
+                disabled
                 required
                 {...register("founderRewardsPercent")}
                 className="shadow-sm mt-1 block w-full sm:text-sm border border-gray-300 rounded-md"
@@ -208,11 +215,14 @@ export const EditProfile = React.memo(({ ownerWalletKey, onComplete }: IEditProf
                 <Spinner size="sm" />
               </div>
             )}
-            {state === "idle" && "Save"}
-            {state === "submit-solana" && "Sending to Solana"}
-            {state === "submit-arweave" && "Uploading to Arweave"}
-            {state === "gathering-files" && "Gathering Files"}
-            {state === "awaiting-approval" && "Awaiting Approval"}
+            {!awaitingApproval && <>
+              {state === "idle" && "Save"}
+              {state === "submit-solana" && "Sending to Solana"}
+              {state === "submit-arweave" && "Uploading to Arweave"}
+              {state === "gathering-files" && "Gathering Files"}
+            </>
+            }
+            {awaitingApproval && "Awaiting Approval"}
           </Button>
         </div>
       </div>

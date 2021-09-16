@@ -4,8 +4,11 @@ import routes from "../../constants/routes";
 import {
   Alert,
   Claim,
-  useQuery
+  useAccountFetchCache,
+  useQuery,
+  TokenRef
 } from "wumbo-common";
+import { PublicKey } from "@solana/web3.js";
 import { useHistory } from "react-router-dom";
 import WalletRedirect from "../Wallet/WalletRedirect";
 
@@ -15,6 +18,7 @@ export const ClaimRoute = React.memo(() => {
   const name = query.get("name")
   const redirectUri = `${window.location.origin.replace(/\/$/, "")}${routes.claim.path}`;
   const history = useHistory();
+  const cache = useAccountFetchCache()
   
   if (!code) {
     return  <AppContainer>
@@ -29,11 +33,11 @@ export const ClaimRoute = React.memo(() => {
         handle={name || undefined}
         code={code}
         redirectUri={redirectUri}
-        onComplete={({ ownerKey }) => {
+        onComplete={({ owner }) => {
           history.push(
             routes.editProfile.path.replace(
               ":ownerWalletKey",
-              ownerKey.toBase58()
+              owner.toBase58()
             )
           );
         }}

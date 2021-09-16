@@ -14,8 +14,8 @@ interface IRoutes {
   wallet: Route;
 }
 
-export function profilePath(tokenBondingKey: PublicKey): string {
-  return routes.viewProfile.path.replace(":tokenBondingKey", tokenBondingKey.toBase58());
+export function profilePath(tokenRefKey: PublicKey): string {
+  return routes.viewProfile.path.replace(":tokenRefKey", tokenRefKey.toBase58());
 }
 
 export function nftPath(mint: PublicKey): string {
@@ -29,7 +29,7 @@ export function editProfile(ownerWalletKey: PublicKey): string {
 const routes: IRoutes = {
   claim: { path: "/claim" },
   wallet: { path: "/wallet" },
-  viewProfile: { path: "/profile/view/:tokenBondingKey" },
+  viewProfile: { path: "/profile/view/:tokenRefKey" },
   viewNft: { path: "/nft/view/:mint" },
   profile: { path: "/profile" },
   editProfile: { path: "/profile/edit/:ownerWalletKey" },

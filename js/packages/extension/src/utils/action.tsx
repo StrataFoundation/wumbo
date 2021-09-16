@@ -1,48 +1,46 @@
 import React, { useState, useCallback } from "react";
 import { useConnection } from "@oyster/common";
-import { buyBondingInstructions, sellBondingInstructions } from "@wum.bo/spl-token-bonding";
 import { PublicKey, Transaction, sendAndConfirmRawTransaction } from "@solana/web3.js";
 import { WalletNotConnectedError } from "@solana/wallet-adapter-base";
 import {
   SPL_ASSOCIATED_TOKEN_ACCOUNT_PROGRAM_ID,
   TOKEN_BONDING_PROGRAM_ID,
   TOKEN_PROGRAM_ID,
+  usePrograms,
   useWallet,
 } from "wumbo-common";
+import BN from "bn.js";
 
 export const useBuy = (): [
   (tokenBonding: PublicKey, amount: number, maxPrice: number) => Promise<void>,
   { data: any; loading: boolean; error: Error | undefined }
 ] => {
   const connection = useConnection();
-  const { connected, publicKey, signTransaction } = useWallet();
+  const { connected, signTransaction, publicKey } = useWallet();
   // TODO fix data type;
   const [data, setData] = useState<any>();
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<Error | undefined>();
+  const { splTokenBondingProgram } = usePrograms();
 
   const buy = useCallback(
-    async (tokenBonding, amount, maxPrice) => {
+    async (tokenBonding, amount, slippage) => {
       if (!connected || !publicKey) throw new WalletNotConnectedError();
       setLoading(true);
 
       try {
-        const instructions = await buyBondingInstructions(connection, {
-          splTokenBondingProgramId: TOKEN_BONDING_PROGRAM_ID,
-          splAssociatedTokenAccountProgramId: SPL_ASSOCIATED_TOKEN_ACCOUNT_PROGRAM_ID,
-          splTokenProgramId: TOKEN_PROGRAM_ID,
+        const { instructions, signers } = await splTokenBondingProgram!.buyV0Instructions({
           tokenBonding,
-          purchaser: publicKey,
-          amount: Math.floor(amount * Math.pow(10, 9)),
-          maxPrice: Math.floor(maxPrice * Math.pow(10, 9)),
+          desiredTargetAmount: new BN(Math.floor(amount * Math.pow(10, 9))),
+          slippage
         });
 
         const transaction = new Transaction({
           feePayer: publicKey,
           recentBlockhash: (await connection.getRecentBlockhash()).blockhash,
         });
-
-        transaction.instructions = instructions;
+        transaction.add(...instructions)
+        signers.length > 0 && transaction.partialSign(...signers)
         const signed = await signTransaction(transaction);
         const data = await sendAndConfirmRawTransaction(connection, signed.serialize());
         setData(data);
@@ -66,21 +64,18 @@ export const useSell = (): [
   const [data, setData] = useState<any>();
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<Error | undefined>();
+  const { splTokenBondingProgram } = usePrograms();
 
   const sell = useCallback(
-    async (tokenBonding, amount, minPrice) => {
+    async (tokenBonding, amount, slippage) => {
       if (!connected || !publicKey) throw new WalletNotConnectedError();
       setLoading(true);
 
       try {
-        const instructions = await sellBondingInstructions(connection, {
-          splTokenBondingProgramId: TOKEN_BONDING_PROGRAM_ID,
-          splAssociatedTokenAccountProgramId: SPL_ASSOCIATED_TOKEN_ACCOUNT_PROGRAM_ID,
-          splTokenProgramId: TOKEN_PROGRAM_ID,
+        const { instructions, signers } = await splTokenBondingProgram!.sellV0Instructions({
           tokenBonding,
-          seller: publicKey,
-          amount: Math.floor(amount * Math.pow(10, 9)),
-          minPrice: Math.floor(minPrice * Math.pow(10, 9)),
+          targetAmount: new BN(Math.floor(amount * Math.pow(10, 9))),
+          slippage
         });
 
         const transaction = new Transaction({
@@ -88,7 +83,9 @@ export const useSell = (): [
           recentBlockhash: (await connection.getRecentBlockhash()).blockhash,
         });
 
-        transaction.instructions = instructions;
+        transaction.add(...instructions);
+        signers.length > 0 && transaction.partialSign(...signers)
+
         const signed = await signTransaction(transaction);
         const data = await sendAndConfirmRawTransaction(connection, signed.serialize());
         setData(data);
