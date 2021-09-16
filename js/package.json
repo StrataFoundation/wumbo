@@ -14,7 +14,6 @@
   },
   "scripts": {
     "build": "lerna run build",
-    "watch:common": "lerna exec yarn watch --scope wumbo-common",
-    "rustywind-fix": "rustywind --write ."
+    "watch:common": "lerna exec yarn watch --scope wumbo-common"
   }
 }

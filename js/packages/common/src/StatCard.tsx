@@ -1,6 +1,6 @@
 import React from "react";
-import CoinIcon from "./svgs/stat_coin.svg";
-import WumboIcon from "./svgs/stat_wumbo.svg";
+import coinIcon from "./svgs/stat_coin.svg";
+import wumboIcon from "./svgs/stat_wumbo.svg";
 
 interface IStatCardProps {
   label: string;
@@ -23,14 +23,14 @@ export const StatCardWithIcon = ({
   value,
   icon,
 }: IStatCardWithIconProps) => (
-  <div className="flex p-2 border-1 border-gray-100">
+  <div className="flex gap-2 p-2 rounded-lg border-2 border-gray-100 items-center">
     <div>
-      {icon === "coin" && <CoinIcon />}
-      {icon === "wumbo" && <WumboIcon />}
+      {icon === "coin" && <img src={coinIcon} />}
+      {icon === "wumbo" && <img src={wumboIcon} />}
     </div>
     <div className="flex-1 flex flex-col">
-      <span className="text-md">{value}</span>
-      <span className="text-sm text-gray-500">{label}</span>
+      <span className="text-md leading-sm">{value}</span>
+      <span className="text-sm text-gray-500 leading-sm">{label}</span>
     </div>
   </div>
 );

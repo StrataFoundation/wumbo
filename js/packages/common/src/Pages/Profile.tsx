@@ -25,6 +25,7 @@ import {
 } from "../Leaderboard/TokenLeaderboard";
 import { NftList, NftListRaw } from "../Nft";
 import { TROPHY_CREATOR } from "../constants/globals";
+import { PencilAltIcon } from "@heroicons/react/outline";
 
 interface IProfileProps {
   tokenBondingKey: PublicKey;
@@ -89,44 +90,44 @@ export const Profile = React.memo(
 
     return (
       <div className="p-4 flex flex-col gap-6">
-        <div className="flex flex-col gap-2.5">
-          <div className="flex w-full">
-            <MetadataAvatar
-              size="xl"
-              tokenBonding={tokenBonding}
-              name="UNCLAIMED"
-            />
-            <div>
-              here
-              <StatCardWithIcon
-                icon="coin"
-                label="coin rank"
-                value={"#2,312"}
+        <div className="flex flex-col">
+          <div className="flex w-full justify-between">
+            <div className="flex flex-col gap-2.5">
+              <MetadataAvatar
+                size="xl"
+                tokenBonding={tokenBonding}
+                name="UNCLAIMED"
               />
-              <StatCardWithIcon icon="wumbo" label="WUM locked" value={"#15"} />
+              <div className="flex gap-2 items-center">
+                <p className="text-xl leading-none">
+                  {metadata?.data.name || "@" + handle}
+                </p>
+                <PencilAltIcon className="h-5 text-indigo-500 hover:cursor-pointer hover:text-indigo-700" />
+              </div>
+              <p className="text-sm">
+                {" "}
+                {metadata
+                  ? `${metadata.data.symbol} | @${handle}`
+                  : `UNCLAIMED | @${handle}`}
+              </p>
+              <div className="flex gap-2">
+                <Button size="xs" onClick={onTradeClick}>
+                  Trade
+                </Button>
+                <Badge
+                  size="sm"
+                  color="secondary"
+                  className="!text-white"
+                  onClick={onTradeClick}
+                >
+                  ${coinPriceUsd.toFixed(2)}
+                </Badge>
+              </div>
             </div>
-          </div>
-          <p className="text-xl leading-none">
-            {metadata?.data.name || "@" + handle}
-          </p>
-          <p className="text-sm">
-            {" "}
-            {metadata
-              ? `${metadata.data.symbol} | @${handle}`
-              : `UNCLAIMED | @${handle}`}
-          </p>
-          <div className="flex gap-2">
-            <Button size="xs" onClick={onTradeClick}>
-              Trade
-            </Button>
-            <Badge
-              size="sm"
-              color="secondary"
-              className="!text-white"
-              onClick={onTradeClick}
-            >
-              ${coinPriceUsd.toFixed(2)}
-            </Badge>
+            <div className="flex flex-col gap-2.5">
+              <StatCardWithIcon icon="coin" label="coin rank" value="TBD" />
+              <StatCardWithIcon icon="wumbo" label="WUM locked" value="TBD" />
+            </div>
           </div>
         </div>
         <div className="flex space-x-4">
