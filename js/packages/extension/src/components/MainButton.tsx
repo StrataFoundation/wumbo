@@ -29,7 +29,7 @@ export const MainButton: FC<Props> = ({
       <Link to={routes.create.path + `?name=${creatorName}&src=${creatorImg}`}>
         <Button
           size="xs"
-          colorScheme="purple"
+          colorScheme="indigo"
           variant="outline"
           onClick={() =>
             toggleDrawer({
@@ -49,8 +49,8 @@ export const MainButton: FC<Props> = ({
     return (
       <Spinner
         size="xs"
-        emptyColor="purple.900"
-        color="purple.600"
+        emptyColor="indigo.900"
+        color="indigo.500"
         {...spinnerProps}
       />
     );

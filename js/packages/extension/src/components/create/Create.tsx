@@ -1,6 +1,6 @@
 import React, { Fragment } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { Box, Button, Avatar } from "@chakra-ui/react";
+import { Box, Button, Avatar, VStack, Text } from "@chakra-ui/react";
 import { WumboDrawer } from "../WumboDrawer";
 import { routes } from "@/constants/routes";
 import { useWallet, useQuery } from "wumbo-common";
@@ -16,37 +16,52 @@ export const Create = () => {
     <Fragment>
       <WumboDrawer.Header title="Create Coin" />
       <WumboDrawer.Content>
-        <Box d="flex" bg="gray.100" rounded="lg">
-          <Avatar name={query.get("name")!} src={query.get("img")!} />
-          <div className="flex justify-between font-medium">
-            <span>{query.get("name")!}</span>
-            <span>$0.00</span>
-          </div>
-        </Box>
-        <div className="flex justify-center mt-4 text-xs">
-          <div className="w-full">
-            <span className="font-bold">
+        <VStack spacing={4} padding={4}>
+          <Box
+            d="flex"
+            w="full"
+            alignItems="center"
+            bg="gray.100"
+            rounded="lg"
+            padding={4}
+          >
+            <Avatar size="md" bg="indigo.500" src={query.get("img")!} />
+            <Box
+              d="flex"
+              flexGrow={1}
+              justifyContent="space-between"
+              marginLeft={4}
+            >
+              <Text fontSize="xl" fontWeight="medium">
+                {query.get("name")!}
+              </Text>
+              <Text fontSize="xl" fontWeight="medium">
+                $0.00
+              </Text>
+            </Box>
+          </Box>
+          <Text w="full" fontSize="small">
+            <Text fontWeight="bold">
               You will be the first to mint & own this person's token!
-            </span>{" "}
+            </Text>{" "}
             It will remain unverified until this person verifies it. Should the
             person opt out, no new tokens may be purchased and exisiting tokens
             may still be sold.
-          </div>
-        </div>
-        <div className="flex mt-4">
+          </Text>
           {connected && publicKey ? (
             <ClaimOrCreate />
           ) : (
-            <Link
+            <Button
+              as={Link}
               to={routes.wallet.path + `?redirect=${currentPath}`}
-              className="w-full"
+              size="md"
+              w="full"
+              colorScheme="indigo"
             >
-              <Button block color="primary" size="lg">
-                Connect Wallet
-              </Button>
-            </Link>
+              Connect Wallet
+            </Button>
           )}
-        </div>
+        </VStack>
       </WumboDrawer.Content>
       <WumboDrawer.Nav />
     </Fragment>

@@ -2,47 +2,52 @@ import React, { Fragment } from "react";
 import { Wallet } from "@solana/wallet-adapter-wallets";
 import { useWallet } from "../contexts/walletContext";
 import { WALLET_PROVIDERS } from "../constants/walletProviders";
-import { Button } from "../";
+import { Box, Button, Text, Link, VStack } from "@chakra-ui/react";
 
 export const WalletSelect = () => {
   const { connected, disconnect, select } = useWallet();
 
   return (
-    <div className="p-4">
+    <Box d="flex" flexDir="column" padding={4}>
       {connected ? (
-        <div className="flex flex-col space-y-4 px-4">
+        <VStack spacing={4} alignItems="start">
           <span className="test-sm">Wallet Connected!</span>
-          <Button block size="lg" color="primary" onClick={disconnect}>
+          <Button w="full" size="md" colorScheme="indigo" onClick={disconnect}>
             Disconnect
           </Button>
-        </div>
+        </VStack>
       ) : (
-        <div className="flex flex-col space-y-4 px-4">
-          <span className="test-sm">
+        <VStack spacing={4} alignItems="start">
+          <Text fontSize="sm">
             New to Crypto & dont have an existing wallet?
             <br />
-            <a href="https://www.sollet.io" className="text-purple-600">
+            <Link href="https://www.sollet.io" color="indigo.600">
               Get one here.
-            </a>
-          </span>
-          <div className="grid grid-flow-row gap-4">
-            {WALLET_PROVIDERS.map((provider: Wallet, idx: number) => (
-              <Button
-                block
-                key={idx}
-                size="lg"
-                color="primary"
-                onClick={() => select(provider.name)}
-              >
-                <div className="flex flex-row w-full">
-                  <img alt={`${provider.name}`} src={provider.icon} className="w-6 h-6 mr-4" />
-                  {provider.name}
-                </div>
-              </Button>
-            ))}
-          </div>
-        </div>
+            </Link>
+          </Text>
+          {WALLET_PROVIDERS.map((provider: Wallet, idx: number) => (
+            <Button
+              key={idx}
+              w="full"
+              size="md"
+              colorScheme="indigo"
+              justifyContent="left"
+              onClick={() => select(provider.name)}
+              leftIcon={
+                <Box w={4} h={4}>
+                  <img
+                    alt={`${provider.name}`}
+                    src={provider.icon}
+                    style={{ width: "100%", height: "100%" }}
+                  />
+                </Box>
+              }
+            >
+              <Text>{provider.name}</Text>
+            </Button>
+          ))}
+        </VStack>
       )}
-    </div>
+    </Box>
   );
 };

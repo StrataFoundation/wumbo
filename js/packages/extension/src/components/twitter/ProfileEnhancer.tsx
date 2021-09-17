@@ -1,6 +1,8 @@
 import React from "react";
 import ReactShadow from "react-shadow/emotion";
-import { ThemeProvider, theme, CSSReset, Box } from "@chakra-ui/react";
+import { ThemeProvider, CSSReset, Box } from "@chakra-ui/react";
+import { theme } from "@/theme";
+
 import { AppendChildPortal } from "wumbo-common";
 import { useProfile } from "../../utils/twitterSpotter";
 import { MainButton } from "../MainButton";

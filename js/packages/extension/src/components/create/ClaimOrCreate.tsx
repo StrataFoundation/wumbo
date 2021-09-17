@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { useHistory } from "react-router-dom";
+import { Box, Text, Button } from "@chakra-ui/react";
 import { useConnection } from "@oyster/common";
 import { claimPath, routes } from "@/constants/routes";
 import {
@@ -7,14 +8,12 @@ import {
   getTwitterRegistryKey,
   getTld,
   useWallet,
-  Button,
-  Spinner,
   useQuery,
   useClaimLink,
   usePrograms,
   useAccountFetchCache,
   TokenRef,
-  useReverseTwitter
+  useReverseTwitter,
 } from "wumbo-common";
 import { useAsyncCallback } from "react-async-hook";
 import { useClaimFlow } from "@/utils/claim";
@@ -24,7 +23,9 @@ export default React.memo(() => {
   const { splWumboProgram } = usePrograms();
   const query = useQuery();
   const { publicKey } = useWallet();
-  const { handle: ownerTwitterHandle } = useReverseTwitter(publicKey || undefined);
+  const { handle: ownerTwitterHandle } = useReverseTwitter(
+    publicKey || undefined
+  );
 
   const createCreator = async () => {
     const handle = query.get("name")!;
@@ -33,49 +34,55 @@ export default React.memo(() => {
       wumbo: WUMBO_INSTANCE_KEY,
       tokenName: handle,
       name: await getTwitterRegistryKey(handle, await getTld()),
-      nameParent: await getTld()
+      nameParent: await getTld(),
     });
     history.push(
       routes.trade.path.replace(":tokenBondingKey", tokenBonding.toBase58()) +
         `?name=${query.get("name")!}`
     );
   };
-  const { execute, loading: creationLoading, error } = useAsyncCallback(createCreator);
-  if (error) { // TODO: Actual error handling
+  const {
+    execute,
+    loading: creationLoading,
+    error,
+  } = useAsyncCallback(createCreator);
+  if (error) {
+    // TODO: Actual error handling
     console.error(error);
   }
   const { claim, loading } = useClaimFlow(query.get("name"));
-  
+
   return (
-    <div className="flex flex-grow flex-col">
-      <Button block color="primary" size="lg" onClick={execute} disabled={creationLoading}>
-        {creationLoading && (
-          <div className="mr-4">
-            <Spinner size="sm" />
-          </div>
-        )}
+    <>
+      <Button
+        w="full"
+        size="md"
+        colorScheme="indigo"
+        onClick={execute}
+        isLoading={creationLoading}
+        loadingText="Creating Token"
+      >
         Create Token
       </Button>
-      {(!ownerTwitterHandle || ownerTwitterHandle == query.get("name")) &&
+      {(!ownerTwitterHandle || ownerTwitterHandle == query.get("name")) && (
         <>
-          <div className="text-center text-bold text-lg mt-2 text-gray-500 mb-2">or</div>
+          <Box d="flex" justifyContent="center">
+            <Text fontSize="lg" color="gray.500">
+              Or
+            </Text>
+          </Box>
           <Button
-            disabled={loading}
-            block
-            color="twitterBlue"
+            w="full"
             size="lg"
+            colorScheme="twitter"
             onClick={claim}
+            isLoading={loading}
+            loadingText="Claiming"
           >
-            {loading && (
-              <div className="mr-4">
-                <Spinner size="sm" />
-              </div>
-            )}
-            {!loading && "This is me, Claim!"}
-            {loading && "Claiming"}
+            This is me, Claim!
           </Button>
         </>
-      }
-    </div>
+      )}
+    </>
   );
 });

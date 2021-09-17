@@ -1,6 +1,7 @@
 import React, { FC } from "react";
 import { MemoryRouter as Router, Switch, Route } from "react-router-dom";
-import { ThemeProvider, CSSReset, theme } from "@chakra-ui/react";
+import { ThemeProvider, CSSReset } from "@chakra-ui/react";
+import { theme } from "@/theme";
 
 import { routes, paths } from "@/constants/routes";
 import { ContextProviders } from "./ContextProviders";

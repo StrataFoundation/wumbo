@@ -1,7 +1,15 @@
 import React, { Fragment, ReactNode } from "react";
 import { Route, NavLink } from "react-router-dom";
 import startCase from "lodash/startCase";
-import { Box, Fade, Spinner, Text, IconButton, Link } from "@chakra-ui/react";
+import {
+  Box,
+  Fade,
+  Spinner,
+  Text,
+  IconButton,
+  Link,
+  Icon,
+} from "@chakra-ui/react";
 import { HiOutlineX } from "react-icons/hi";
 import { Toaster } from "react-hot-toast";
 import { Transition } from "@headlessui/react";
@@ -53,16 +61,11 @@ WumboDrawer.Header = (props: HeaderProps) => {
   const hasTitle = !!(props as HeaderNoChildren).title;
 
   return (
-    <Box
-      paddingX="6px"
-      paddingY="4px"
-      borderBottom="1px"
-      borderColor="gray.200"
-    >
+    <Box paddingX={4} paddingY={1} borderBottom="1px" borderColor="gray.200">
       <Box d="flex" alignItems="center" justifyContent="space-between">
         <Box w="full">
           {hasTitle && (
-            <Text fontSize="lg" fontWeight="medium" color="purple.600">
+            <Text fontSize="lg" fontWeight="medium" color="indigo.500">
               {(props as HeaderNoChildren).title}
             </Text>
           )}
@@ -71,9 +74,8 @@ WumboDrawer.Header = (props: HeaderProps) => {
         <IconButton
           colorScheme="gray"
           variant="ghost"
-          fontSize="lg"
           aria-label="Close Drawer"
-          icon={<HiOutlineX />}
+          icon={<Icon as={HiOutlineX} w={5} h={5} />}
           onClick={() => toggleDrawer()}
         />
       </Box>
@@ -103,7 +105,11 @@ WumboDrawer.Nav = () => {
       borderColor="gray.200"
     >
       {Object.keys(routes).map((route) => {
-        const { path, Icon, isDrawerNav } = routes[route as keyof IRoutes];
+        const {
+          path,
+          Icon: RouteIcon,
+          isDrawerNav,
+        } = routes[route as keyof IRoutes];
 
         // Fill paths with params in
         let filledPath = path;
@@ -128,16 +134,16 @@ WumboDrawer.Nav = () => {
                   flexDir="column"
                   justifyContent="center"
                   alignItems="center"
-                  color={match ? "purple.700" : "gray.600"}
+                  color={match ? "indigo.500" : "gray.600"}
                   fontWeight="medium"
                   p="4px"
                   borderBottom="3px"
                   borderBottomStyle="solid"
-                  borderColor={match ? "purple.700" : "transparent"}
+                  borderColor={match ? "indigo.500" : "transparent"}
                 >
                   {/* @ts-ignore */}
-                  <Icon />
-                  <Text fontSize="xs">{startCase(route)}</Text>
+                  <Icon as={RouteIcon} w={5} h={5} />
+                  <Text fontSize="sm">{startCase(route)}</Text>
                 </Link>
               )}
             />
@@ -155,7 +161,7 @@ WumboDrawer.Loading = () => (
     <WumboDrawer.Header />
     <WumboDrawer.Content>
       <Box d="flex" justifyContent="center" alignItems="center" h="full">
-        <Spinner size="md" emptyColor="purple.900" color="purple.600" />
+        <Spinner size="md" emptyColor="indigo.900" color="indigo.500" />
       </Box>
     </WumboDrawer.Content>
   </Fragment>

@@ -1,9 +1,13 @@
 import React, { Fragment, useState } from "react";
-import { ChevronRightIcon } from "@heroicons/react/solid";
-import { useBondingPricing, useFiatPrice, useOwnedAmount } from "./utils/pricing";
+import { Flex, Spinner } from "@chakra-ui/react";
+import { HiChevronRight } from "react-icons/hi";
+import {
+  useBondingPricing,
+  useFiatPrice,
+  useOwnedAmount,
+} from "./utils/pricing";
 import { useTokenMetadata } from "./utils/metaplex";
 import { MetadataAvatar } from "./Avatar";
-import { Spinner } from "./Spinner";
 import { Link, useHistory } from "react-router-dom";
 import { ITokenBonding } from "./utils/deserializers/spl-token-bonding";
 
@@ -52,19 +56,34 @@ export const TokenPill = React.memo(
     const history = useHistory();
 
     return (
-      <div onClick={() => detailsPath && history.push(detailsPath)} className="hover:cursor-pointer hover:bg-gray-200 flex bg-gray-100 p-4 rounded-lg space-x-4">
+      <Flex
+        w="full"
+        rounded="lg"
+        bgColor="gray.100"
+        padding={4}
+        _hover={{
+          bgColor: "gray.200",
+          cursor: "pointer",
+        }}
+        onClick={() => detailsPath && history.push(detailsPath)}
+      >
         {icon}
-
-        <div className="flex flex-col flex-grow justify-center text-gray-700">
-          <div className="flex justify-between font-medium">
+        <Flex
+          flexDir="column"
+          grow={1}
+          justify="center"
+          color="gray.700"
+          paddingLeft={4}
+        >
+          <Flex justify="space-between" fontSize="lg" fontWeight="medium">
             <span>{name}</span>
             <span>${toFiat(curve?.current() || 0).toFixed(2) || 0.0}</span>
-          </div>
-          <div className="flex justify-between text-xs">
+          </Flex>
+          <Flex justify="space-between" fontSize="xs">
             <span>{ticker}</span>
-          </div>
-        </div>
-      </div>
+          </Flex>
+        </Flex>
+      </Flex>
     );
   }
 );

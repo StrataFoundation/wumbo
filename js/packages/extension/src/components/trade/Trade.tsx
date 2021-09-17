@@ -1,5 +1,20 @@
 import React, { Fragment, useState, ReactNode, useMemo } from "react";
 import { Link, useParams, useLocation } from "react-router-dom";
+import {
+  VStack,
+  Flex,
+  Text,
+  Button,
+  Avatar,
+  Spinner,
+  Tabs,
+  TabList,
+  Tab,
+  TabPanels,
+  TabPanel,
+  Icon,
+} from "@chakra-ui/react";
+import { RiWallet3Line } from "react-icons/ri";
 import toast from "react-hot-toast";
 import { useBuy, useSell } from "@/utils/action";
 import {
@@ -13,11 +28,6 @@ import {
   useBondingPricing,
   useOwnedAmount,
   useQuery,
-  Tabs,
-  Tab,
-  Badge,
-  Spinner,
-  Avatar,
   TokenPill,
   Notification,
   useTokenMetadata,
@@ -25,11 +35,10 @@ import {
   useFtxPayLink,
   TokenBonding,
   ITokenBonding,
-  useTokenRefFromBonding
+  useTokenRefFromBonding,
 } from "wumbo-common";
 import { routes, viewProfilePath } from "@/constants/routes";
 import { TokenForm, FormValues } from "./TokenForm";
-import { CashIcon } from "@heroicons/react/solid";
 import Logo from "../../../public/assets/img/logo.svg";
 import { PublicKey } from "@solana/web3.js";
 import { TokenBondingV0 } from "@wum.bo/spl-token-bonding";
@@ -45,7 +54,9 @@ interface TokenInfo {
 }
 function useTokenInfo(tokenBonding: TokenBondingV0 | undefined): TokenInfo {
   const query = useQuery();
-  const { metadata, image, error, loading } = useTokenMetadata(tokenBonding?.targetMint);
+  const { metadata, image, error, loading } = useTokenMetadata(
+    tokenBonding?.targetMint
+  );
 
   return useMemo(() => {
     if (tokenBonding) {
@@ -62,7 +73,13 @@ function useTokenInfo(tokenBonding: TokenBondingV0 | undefined): TokenInfo {
           loading,
           error,
           ticker: metadata.data.symbol,
-          icon: <MetadataAvatar token tokenBonding={tokenBonding} name={"UNCLAIMED"} />,
+          icon: (
+            <MetadataAvatar
+              token
+              tokenBonding={tokenBonding}
+              name={"UNCLAIMED"}
+            />
+          ),
           name: metadata.data.name,
         };
       } else if (!loading) {
@@ -112,33 +129,55 @@ export const TradeRoute = () => {
     return <WumboDrawer.Loading />;
   }
 
-  const isTargetWUM = tokenBonding.targetMint.toBase58() == WUM_TOKEN.toBase58();
+  const isTargetWUM =
+    tokenBonding.targetMint.toBase58() == WUM_TOKEN.toBase58();
   const buyBaseLink = (showFiat = true) => {
     if (!connected) {
       return (
-        <Link to={routes.wallet.path + `?redirect=${location.pathname}${location.search}`}>
-          <Badge rounded hoverable color="neutral">
-            <CashIcon width="20" height="20" className="mr-2" /> Connect Wallet
-          </Badge>
-        </Link>
+        <Button
+          as={Link}
+          to={
+            routes.wallet.path +
+            `?redirect=${location.pathname}${location.search}`
+          }
+          size="sm"
+          leftIcon={<Icon as={RiWallet3Line} w={5} h={5} />}
+          colorScheme="gray"
+          rounded="full"
+        >
+          Connect Wallet
+        </Button>
       );
     } else if (isTargetWUM) {
       return (
-        <Link target="_blank" to={{ pathname: ftxPayLink }}>
-          <Badge rounded hoverable color="neutral">
-            <SolLogo width="20" height="20" className="mr-2" /> Buy SOL
-          </Badge>
-        </Link>
+        <Button
+          as={Link}
+          to={{ pathname: ftxPayLink }}
+          target="_blank"
+          size="sm"
+          leftIcon={<Icon as={SolLogo} w={5} h={5} />}
+          colorScheme="gray"
+          rounded="full"
+        >
+          Buy SOL
+        </Button>
       );
     } else {
       return (
-        <Link to={routes.trade.path.replace(":tokenBondingKey", WUM_BONDING.toBase58())}>
-          <Badge rounded hoverable color="primary">
-            <Logo width="20" height="20" className="mr-2" />
-            {showFiat && "$"}
-            {(showFiat && toFiat(ownedWUM || 0).toFixed(2)) || "Buy WUM"}
-          </Badge>
-        </Link>
+        <Button
+          as={Link}
+          to={routes.trade.path.replace(
+            ":tokenBondingKey",
+            WUM_BONDING.toBase58()
+          )}
+          size="sm"
+          leftIcon={<Icon as={Logo} w={5} h={5} />}
+          colorScheme="indigo"
+          rounded="full"
+        >
+          {showFiat && "$"}
+          {(showFiat && toFiat(ownedWUM || 0).toFixed(2)) || "Buy WUM"}
+        </Button>
       );
     }
   };
@@ -146,17 +185,22 @@ export const TradeRoute = () => {
   return (
     <Fragment>
       <WumboDrawer.Header>
-        <div className="flex justify-between w-full">
-          <p className="text-lg font-medium text-indigo-600">Trade WUM</p>
-          {/* TODO: link to ftx pay */}
+        <Flex justifyContent="space-between" alignItems="center">
+          <Text fontSize="lg" fontWeight="medium" color="indigo.500">
+            Trade WUM
+          </Text>
           {buyBaseLink()}
-        </div>
+        </Flex>
       </WumboDrawer.Header>
       <WumboDrawer.Content>
         <Trade
           baseTicker={isTargetWUM ? "SOL" : "WUM"}
           baseIcon={
-            isTargetWUM ? <SolLogo width="45" height="45" /> : <Logo width="45" height="45" />
+            isTargetWUM ? (
+              <SolLogo width="45" height="45" />
+            ) : (
+              <Logo width="45" height="45" />
+            )
           }
           ticker={isTargetWUM ? "WUM" : ticker || ""}
           name={name}
@@ -181,9 +225,7 @@ export const Trade = ({
 }: TradeParams) => {
   const [buy, { loading: buyIsSubmitting, error: buyError }] = useBuy();
   const [sell, { loading: sellIsSubmitting, error: sellError }] = useSell();
-  const {
-    curve
-  } = useBondingPricing(tokenBonding.publicKey);
+  const { curve } = useBondingPricing(tokenBonding.publicKey);
   const fiatPrice = useFiatPrice(tokenBonding.baseMint);
   const toFiat = (a: number) => (fiatPrice || 0) * a;
   const fromFiat = (a: number) => a / (fiatPrice || 0);
@@ -191,7 +233,7 @@ export const Trade = ({
   const ownedBase = useOwnedAmount(tokenBonding.baseMint);
   const ownedTarget = useOwnedAmount(tokenBonding.targetMint);
   const location = useLocation();
-  const { info: tokenRef } = useTokenRefFromBonding(tokenBonding.publicKey)
+  const { info: tokenRef } = useTokenRefFromBonding(tokenBonding.publicKey);
 
   const onHandleBuy = async (values: FormValues) => {
     await buy(tokenBonding.publicKey, +values.tokenAmount, BASE_SLIPPAGE);
@@ -201,7 +243,9 @@ export const Trade = ({
         show={t.visible}
         type="success"
         heading="Transaction Succesful"
-        message={`You now own ${Number(values.tokenAmount).toFixed(4)} of ${ticker}!`}
+        message={`You now own ${Number(values.tokenAmount).toFixed(
+          4
+        )} of ${ticker}!`}
         onDismiss={() => toast.dismiss(t.id)}
       />
     ));
@@ -216,79 +260,120 @@ export const Trade = ({
         show={t.visible}
         type="success"
         heading="Transaction Succesful"
-        message={`You now own ${curve?.sellTargetAmount(+values.tokenAmount).toFixed(
-          4
-        )} of ${baseTicker}!`}
+        message={`You now own ${curve
+          ?.sellTargetAmount(+values.tokenAmount)
+          .toFixed(4)} of ${baseTicker}!`}
         onDismiss={() => toast.dismiss(t.id)}
       />
     ));
   };
 
   const Info = (
-    <Fragment>
-      <span className="text-xxs">
-        Amounts shown in <span className="text-indigo-600">USD</span>
-      </span>
-      <div className="text-xxs w-full text-right">Own: {(ownedTarget || 0).toFixed(4)}</div>
-    </Fragment>
+    <Flex flexDir="column">
+      <Text w="full" textAlign="left" fontSize="xs">
+        Amounts shown in{" "}
+        <Text display="inline" color="indigo.500">
+          USD
+        </Text>
+      </Text>
+      <Text w="full" textAlign="right" fontSize="xs">
+        Own: {(ownedTarget || 0).toFixed(4)}
+      </Text>
+    </Flex>
   );
 
   return (
-    <Fragment>
+    <VStack spacing={4} padding={4}>
       <TokenPill
         tokenBonding={tokenBonding}
         name={name}
         ticker={ticker}
         icon={icon}
-        detailsPath={tokenRef && (viewProfilePath(tokenRef.publicKey) + location.search)}
+        detailsPath={
+          tokenRef && viewProfilePath(tokenRef.publicKey) + location.search
+        }
       />
-      <div className="flex justify-center mt-4">
-        {/* TODO: show owned amount in both tabs */}
-        <Tabs>
-          <Tab title="Buy">
-            <div className="mt-2">
-              {Info}
-              <TokenForm
-                fiatAmountFromTokenAmount={(tokenAmount: number) =>
-                  toFiat(curve?.buyTargetAmount(tokenAmount, tokenBonding.baseRoyaltyPercentage, tokenBonding.targetRoyaltyPercentage) || 0)
-                }
-                tokenAmountFromFiatAmount={(fiatAmount: number) =>
-                  curve?.buyWithBaseAmount(fromFiat(fiatAmount), tokenBonding.baseRoyaltyPercentage, tokenBonding.targetRoyaltyPercentage) || 0
-                }
-                icon={icon}
-                ticker={ticker}
-                type="buy"
-                onSubmit={onHandleBuy}
-                submitting={buyIsSubmitting}
-              />
-              <div className="flex flex-col justify-center mt-4">
-                <span className="flex justify-center text-xxs">
-                  You can buy up to {(curve?.buyTargetAmount(ownedBase || 0, tokenBonding.baseRoyaltyPercentage, tokenBonding.targetRoyaltyPercentage) || 0).toFixed(4)} {ticker} coins!
-                </span>
-                <div className="flex justify-center mt-4">{buyBaseLink(false)}</div>
-              </div>
-            </div>
+      <Tabs isFitted w="full">
+        <TabList>
+          <Tab
+            color="gray.300"
+            borderColor="gray.300"
+            _selected={{ color: "indigo.500", borderColor: "indigo.500" }}
+          >
+            Buy
           </Tab>
-          <Tab title="Sell">
-            <div className="mt-2">
-              {Info}
-              <TokenForm
-                fiatAmountFromTokenAmount={(tokenAmount: number) =>
-                  toFiat(Math.abs(curve?.sellTargetAmount(tokenAmount) || 0))
-                }
-                tokenAmountFromFiatAmount={(fiatAmount: number) =>
-                  Math.abs(curve?.buyWithBaseAmount(-fromFiat(fiatAmount), 0, 0) || 0)
-                }
-                icon={icon}
-                ticker={ticker}
-                type="sell"
-                onSubmit={onHandleSell}
-                submitting={sellIsSubmitting}
-              />
-            </div>
+          <Tab
+            color="gray.300"
+            borderColor="gray.300"
+            _selected={{ color: "indigo.500", borderColor: "indigo.500" }}
+          >
+            Sell
           </Tab>
-        </Tabs>
-      </div>
-    </Fragment>
+        </TabList>
+
+        <TabPanels>
+          <TabPanel paddingX={0}>
+            {Info}
+            <TokenForm
+              fiatAmountFromTokenAmount={(tokenAmount: number) =>
+                toFiat(
+                  curve?.buyTargetAmount(
+                    tokenAmount,
+                    tokenBonding.baseRoyaltyPercentage,
+                    tokenBonding.targetRoyaltyPercentage
+                  ) || 0
+                )
+              }
+              tokenAmountFromFiatAmount={(fiatAmount: number) =>
+                curve?.buyWithBaseAmount(
+                  fromFiat(fiatAmount),
+                  tokenBonding.baseRoyaltyPercentage,
+                  tokenBonding.targetRoyaltyPercentage
+                ) || 0
+              }
+              icon={icon}
+              ticker={ticker}
+              type="buy"
+              onSubmit={onHandleBuy}
+              submitting={buyIsSubmitting}
+            />
+            <Flex flexDir="column" justifyContent="center" marginTop={4}>
+              <Flex justifyContent="center" fontSize="xs">
+                You can buy up to{" "}
+                {(
+                  curve?.buyTargetAmount(
+                    ownedBase || 0,
+                    tokenBonding.baseRoyaltyPercentage,
+                    tokenBonding.targetRoyaltyPercentage
+                  ) || 0
+                ).toFixed(4)}{" "}
+                {ticker} coins!
+              </Flex>
+              <Flex justifyContent="center" marginTop={4}>
+                {buyBaseLink(false)}
+              </Flex>
+            </Flex>
+          </TabPanel>
+          <TabPanel paddingX={0}>
+            {Info}
+            <TokenForm
+              fiatAmountFromTokenAmount={(tokenAmount: number) =>
+                toFiat(Math.abs(curve?.sellTargetAmount(tokenAmount) || 0))
+              }
+              tokenAmountFromFiatAmount={(fiatAmount: number) =>
+                Math.abs(
+                  curve?.buyWithBaseAmount(-fromFiat(fiatAmount), 0, 0) || 0
+                )
+              }
+              icon={icon}
+              ticker={ticker}
+              type="sell"
+              onSubmit={onHandleSell}
+              submitting={sellIsSubmitting}
+            />
+          </TabPanel>
+        </TabPanels>
+      </Tabs>
+    </VStack>
   );
 };
