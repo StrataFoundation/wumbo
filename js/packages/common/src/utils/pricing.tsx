@@ -20,7 +20,10 @@ import { useWallet } from "../contexts/walletContext";
 import { useConnection } from "@oyster/common";
 import { useAsync } from "react-async-hook";
 import { useTwitterTokenRef } from "./tokenRef";
-import { Curve as DeserializeCurve, TokenBonding } from "./deserializers/spl-token-bonding";
+import {
+  Curve as DeserializeCurve,
+  TokenBonding,
+} from "./deserializers/spl-token-bonding";
 import { Curve, fromCurve } from "@wum.bo/spl-token-bonding";
 
 // TODO: Use actual connection. But this can't happen in dev
@@ -44,7 +47,10 @@ export function useRentExemptAmount(size: number): {
   error: Error | undefined;
 } {
   const connection = useConnection();
-  const { loading, error, result } = useAsync(connection.getMinimumBalanceForRentExemption, [size]);
+  const { loading, error, result } = useAsync(
+    connection.getMinimumBalanceForRentExemption,
+    [size]
+  );
 
   const amount = useMemo(() => (result || 0) / Math.pow(10, 9), [result]);
 
@@ -61,7 +67,10 @@ export function useSolOwnedAmount(): { amount: number; loading: boolean } {
     adapter?.publicKey || undefined,
     (_, account) => account.lamports
   );
-  const result = React.useMemo(() => (lamports || 0) / Math.pow(10, 9), [lamports]);
+  const result = React.useMemo(
+    () => (lamports || 0) / Math.pow(10, 9),
+    [lamports]
+  );
 
   return {
     amount: result,
@@ -85,10 +94,8 @@ export function useOwnedAmountForOwnerAndHandle(
     tokenRef?.tokenBonding,
     TokenBonding
   );
-  const { associatedAccount, loading: loadingAssociatedAccount } = useAssociatedAccount(
-    owner,
-    token?.targetMint
-  );
+  const { associatedAccount, loading: loadingAssociatedAccount } =
+    useAssociatedAccount(owner, token?.targetMint);
   const mint = useMint(token?.targetMint);
 
   useEffect(() => {
@@ -116,9 +123,14 @@ export function useOwnedAmountForOwnerAndHandle(
   return state;
 }
 
-export function useOwnedAmount(token: PublicKey | undefined): number | undefined {
-  const { adapter } = useWallet();
-  const { associatedAccount } = useAssociatedAccount(adapter?.publicKey, token);
+export function useOwnedAmount(
+  token: PublicKey | undefined
+): number | undefined {
+  const { adapter, publicKey } = useWallet();
+  const { associatedAccount } = useAssociatedAccount(
+    adapter?.publicKey || publicKey,
+    token
+  );
   const mint = useMint(token);
   const [amount, setAmount] = useState<number>();
 
@@ -133,11 +145,13 @@ export function useOwnedAmount(token: PublicKey | undefined): number | undefined
 
 export interface PricingState {
   loading: boolean;
-  curve?: Curve
+  curve?: Curve;
 }
-export function useBondingPricing(tokenBonding: PublicKey | undefined): PricingState {
+export function useBondingPricing(
+  tokenBonding: PublicKey | undefined
+): PricingState {
   const [state, setState] = useState<PricingState>({
-    loading: true
+    loading: true,
   });
   const { info: bonding } = useAccount(tokenBonding, TokenBonding);
   const { info: curve } = useAccount(bonding?.curve, DeserializeCurve);
@@ -148,7 +162,7 @@ export function useBondingPricing(tokenBonding: PublicKey | undefined): PricingS
     if (curve && base && target && bonding) {
       setState({
         loading: false,
-        curve: fromCurve(curve, base, target)
+        curve: fromCurve(curve, base, target),
       });
     }
   }, [curve, base, target, bonding]);
@@ -161,7 +175,9 @@ export const UsdWumboPriceProvider = ({ children = undefined as any }) => {
   const { curve } = useBondingPricing(WUM_BONDING);
 
   return (
-    <UsdWumboPriceContext.Provider value={(price || 0) * (curve ? curve.current() : 0)}>
+    <UsdWumboPriceContext.Provider
+      value={(price || 0) * (curve ? curve.current() : 0)}
+    >
       {children}
     </UsdWumboPriceContext.Provider>
   );
@@ -171,12 +187,19 @@ export const useWumboUsdPrice = () => {
   return useContext(UsdWumboPriceContext);
 };
 
-export const useMarketPrice = (marketAddress: PublicKey): number | undefined => {
+export const useMarketPrice = (
+  marketAddress: PublicKey
+): number | undefined => {
   const [price, setPrice] = useState<number>();
   useEffect(() => {
     const fetch = async () => {
       try {
-        let market = await Market.load(connection, marketAddress, undefined, SERUM_PROGRAM_ID);
+        let market = await Market.load(
+          connection,
+          marketAddress,
+          undefined,
+          SERUM_PROGRAM_ID
+        );
         const book = await market.loadAsks(connection);
         const top = book.items(false).next().value as Order;
         setPrice(top.price);

@@ -18,7 +18,7 @@ export default React.memo(() => {
 
   return (
     <AppContainer>
-      {publicKey ? <WalletCoins publicKey={publicKey} /> : <WalletSelect />}
+      {publicKey ? <WalletCoins /> : <WalletSelect />}
     </AppContainer>
   );
 });

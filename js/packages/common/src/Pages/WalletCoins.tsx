@@ -1,18 +1,35 @@
 import React from "react";
 import { PublicKey } from "@solana/web3.js";
 import { RiCoinLine } from "react-icons/ri";
-import { Avatar } from "../";
+import { Avatar, Spinner } from "../";
 import WumLogo from "../svgs/logo.svg";
 import SolLogo from "../svgs/sol.svg";
+import {
+  getReverseTokenRefKey,
+  TokenRef,
+  useAccount,
+  useOwnedAmount,
+  useUserTokenAccounts,
+} from "../utils";
+import { WUM_TOKEN } from "../constants";
+import { useWallet } from "../contexts";
+import { useUserSocialTokens } from "../hooks";
 
-interface WalletCoinsProps {
-  publicKey: PublicKey;
-}
+export const WalletCoins = () => {
+  const { loading, result, error } = useUserSocialTokens();
+  /* const ownedWUM = useOwnedAmount(WUM_TOKEN);
+  * const { result: tokenAccounts = [] } = useUserTokenAccounts(
+  *   publicKey || undefined
+  * );
 
-export const WalletCoins = ({ publicKey }: WalletCoinsProps) => {
+  * console.log("TA", tokenAccounts);
+  * tokenAccounts.map(async (ta) => {
+  *   console.log("TWTW", await getReverseTokenRefKey(ta.info.mint));
+  * }); */
   // getWum
   // getSol
   // getWumTokens
+  if (loading) return <Spinner />;
 
   const tokens = [
     {
@@ -28,6 +45,10 @@ export const WalletCoins = ({ publicKey }: WalletCoinsProps) => {
       metadata: { name: "Test1", symbol: "tst1" },
     },
   ];
+
+  console.log("RESULT", result);
+  console.log("Error", error);
+
   return (
     <div className="flex flex-col">
       <div className="flex justify-around divide-x divide-gray-200 border-b-1">

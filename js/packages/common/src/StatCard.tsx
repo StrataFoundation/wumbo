@@ -1,6 +1,6 @@
 import React from "react";
 import { RiCoinLine } from "react-icons/ri";
-import wumboIcon from "./svgs/stat_wumbo.svg";
+import wumboIcon from "./svgs/wumbo-indigo.svg";
 
 interface IStatCardProps {
   label: string;
