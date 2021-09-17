@@ -1,15 +1,14 @@
 import React from "react";
 import { Metadata as MetaplexMetadata } from "@oyster/common";
-import { useSocialTokenMetadata } from "../utils";
+import { ITokenBonding, useSocialTokenMetadata } from "../utils";
 import { Link } from "react-router-dom";
-import { TokenBondingV0 } from "../../../spl-token-bonding/dist/lib";
 import { PublicKey } from "@solana/web3.js";
 import { Avatar } from "../";
 
 export type GetCreatorLink = (
   c: PublicKey,
   t: MetaplexMetadata | undefined,
-  b: TokenBondingV0 | undefined
+  b: ITokenBonding | undefined
 ) => string;
 
 export const Creator = React.memo(

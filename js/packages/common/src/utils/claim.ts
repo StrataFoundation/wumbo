@@ -90,13 +90,14 @@ export function useCreateOrClaimCoin(): CreateState {
     let result;
     try {
       setCreating(true);
-      const key =
-        (await getTwitterClaimedTokenRefKey(connection, twitterHandle)) ||
-        (await getTwitterUnclaimedTokenRefKey(twitterHandle));
+      const claimedKey = await getTwitterClaimedTokenRefKey(connection, twitterHandle);
+      const unclaimedKey = await getTwitterUnclaimedTokenRefKey(twitterHandle)
+
       const twitterName = await getTwitterRegistryKey(twitterHandle, await getTld());
       const owner = (await getTwitterRegistry(connection, twitterHandle, await getTld())).owner;
-      const account = (await cache.search(key))?.account;
-      if (!account) {
+      const claimedAccount = (await cache.search(claimedKey))?.account;
+      const unclaimedAccount = (await cache.search(unclaimedKey))?.account;
+      if (!claimedAccount && !unclaimedAccount) {
         const isOwner = publicKey && owner.equals(publicKey);
         console.log("Creator does not exist, creating");
 
@@ -108,20 +109,28 @@ export function useCreateOrClaimCoin(): CreateState {
           name: isOwner ? undefined : twitterName,
           nameParent: await getTld()
         }
+        const { tokenRef } = await splWumboProgram!.createSocialToken(args);
         result = {
-          ...await splWumboProgram!.createSocialToken(args),
+          tokenRef,
+          owner
+        }
+      } else if (claimedAccount) {
+        result = {
+          tokenRef: claimedKey,
           owner
         }
       } else {
-        const creator = TokenRef(key, account);
+        const creator = TokenRef(unclaimedKey, unclaimedAccount!);
         result = {
           tokenRef: creator!.publicKey,
           owner
         };
+        console.log(owner.toBase58());
+        console.log(splWumboProgram?.wallet.publicKey.toBase58());
         if (!creator.isClaimed) {
           await splWumboProgram!.claimSocialToken({
             owner,
-            tokenRef: key
+            tokenRef: unclaimedKey
           })
         }
       }
