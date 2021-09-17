@@ -5,7 +5,6 @@ const CopyPlugin = require("copy-webpack-plugin");
 const srcDir = path.join(__dirname, "..", "src");
 const { ESBuildMinifyPlugin } = require("esbuild-loader");
 const TsconfigPathsPlugin = require("tsconfig-paths-webpack-plugin");
-const WindiCSS = require("windicss-webpack-plugin").default;
 
 module.exports = {
   entry: {
@@ -56,7 +55,7 @@ module.exports = {
   },
   resolve: {
     fallback: {
-      "fs": false
+      fs: false,
     },
     plugins: [new TsconfigPathsPlugin()],
     extensions: [".ts", ".tsx", ".js"],
@@ -69,7 +68,6 @@ module.exports = {
   },
   plugins: [
     new NodePolyfillPlugin(),
-    new WindiCSS(),
     new CopyPlugin({
       patterns: [{ from: ".", to: ".", context: "public" }],
       options: {},

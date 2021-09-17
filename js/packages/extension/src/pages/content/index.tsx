@@ -1,8 +1,8 @@
 import React from "react";
-import "../../bufferFill";
 import ReactDOM from "react-dom";
+import ReactShadow from "react-shadow/emotion";
 import App from "../../components/App";
-import "windi.css";
+import "../../bufferFill";
 
 const appMountElem = document.createElement("div");
 appMountElem.setAttribute("id", "WUM");
@@ -18,4 +18,9 @@ scriptMountElem.onload = function () {
 };
 (document.head || document.documentElement).appendChild(scriptMountElem);
 
-ReactDOM.render(<App />, appMountElem);
+ReactDOM.render(
+  <ReactShadow.div>
+    <App />
+  </ReactShadow.div>,
+  appMountElem
+);

@@ -1,4 +1,6 @@
 import React from "react";
+import ReactShadow from "react-shadow/emotion";
+import { ThemeProvider, theme, CSSReset, Box } from "@chakra-ui/react";
 import { AppendChildPortal } from "wumbo-common";
 import { useProfile } from "../../utils/twitterSpotter";
 import { MainButton } from "../MainButton";
@@ -12,8 +14,8 @@ export const ProfileEnhancer = () => {
         creatorName={profile.name}
         creatorImg={profile.avatar || ""}
         btnProps={{
-          size: "lg",
-          rounded: true,
+          size: "md",
+          borderRadius: "full",
         }}
         spinnerProps={{
           size: "md",
@@ -24,9 +26,20 @@ export const ProfileEnhancer = () => {
     if (buttonEl) {
       return (
         <AppendChildPortal container={profile.buttonTarget as Element}>
-          <div className="flex justify-center self-start ml-2 mb-3">
-            {buttonEl}
-          </div>
+          <ReactShadow.div>
+            <ThemeProvider theme={theme}>
+              <CSSReset />
+              <Box
+                d="flex"
+                justifyContent="center"
+                justifySelf="start"
+                marginLeft="4px"
+                marginBottom="11px"
+              >
+                {buttonEl}
+              </Box>
+            </ThemeProvider>
+          </ReactShadow.div>
         </AppendChildPortal>
       );
     }
