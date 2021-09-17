@@ -1,11 +1,5 @@
 import { ReactNode } from "react";
-import {
-  SwitchVerticalIcon,
-  SearchIcon,
-  DatabaseIcon,
-  CashIcon,
-  UserIcon,
-} from "@heroicons/react/outline";
+import { RiUserLine, RiWallet3Line, RiExchangeLine } from "react-icons/ri";
 import { PublicKey } from "@solana/web3.js";
 
 type Route = {
@@ -21,7 +15,6 @@ export interface IRoutes {
   trade: Route;
   myCoins: Route;
   wallet: Route;
-  search: Route;
   profile: Route;
   editProfile: Route;
   viewProfile: Route;
@@ -29,7 +22,10 @@ export interface IRoutes {
 }
 
 export function viewProfilePath(tokenRefKey: PublicKey): string {
-  return routes.viewProfile.path.replace(":tokenRefKey", tokenRefKey.toBase58());
+  return routes.viewProfile.path.replace(
+    ":tokenRefKey",
+    tokenRefKey.toBase58()
+  );
 }
 
 export function nftPath(mint: PublicKey): string {
@@ -37,7 +33,10 @@ export function nftPath(mint: PublicKey): string {
 }
 
 export function tradePath(tokenBondingKey: PublicKey): string {
-  return routes.trade.path.replace(":tokenBondingKey", tokenBondingKey.toBase58());
+  return routes.trade.path.replace(
+    ":tokenBondingKey",
+    tokenBondingKey.toBase58()
+  );
 }
 
 export function claimPath({
@@ -56,18 +55,21 @@ export const routes: IRoutes = {
   create: { path: "/create", Icon: null, isDrawerNav: false },
   claim: { path: "/claim", Icon: null, isDrawerNav: false },
   customize: { path: "/customize", Icon: null, isDrawerNav: false },
+  myCoins: { path: "/mycoins", Icon: null, isDrawerNav: false },
+  profile: { path: "/profile", Icon: RiUserLine, isDrawerNav: true },
+  wallet: { path: "/wallet", Icon: RiWallet3Line, isDrawerNav: true },
   trade: {
     path: "/trade/:tokenBondingKey",
-    Icon: SwitchVerticalIcon,
+    Icon: RiExchangeLine,
     isDrawerNav: true,
   },
-  myCoins: { path: "/mycoins", Icon: DatabaseIcon, isDrawerNav: true },
-  wallet: { path: "/wallet", Icon: CashIcon, isDrawerNav: true },
-  search: { path: "/search", Icon: SearchIcon, isDrawerNav: true },
-  profile: { path: "/profile", Icon: UserIcon, isDrawerNav: true },
-  editProfile: { path: "/profile/edit", Icon: UserIcon, isDrawerNav: false },
-  viewProfile: { path: "/profile/view/:tokenRefKey", Icon: UserIcon, isDrawerNav: false },
-  viewNft: { path: "/nft/view/:mint", Icon: UserIcon, isDrawerNav: false },
+  editProfile: { path: "/profile/edit", Icon: null, isDrawerNav: false },
+  viewProfile: {
+    path: "/profile/view/:tokenRefKey",
+    Icon: null,
+    isDrawerNav: false,
+  },
+  viewNft: { path: "/nft/view/:mint", Icon: null, isDrawerNav: false },
 };
 
 export const paths: string[] = Object.keys(routes).map(

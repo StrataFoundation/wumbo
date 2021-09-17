@@ -44,7 +44,7 @@ export const TweetsEnhancer = () => {
             <Fragment key={getElementId(tweet.buttonTarget)}>
               <AppendChildPortal container={tweet.buttonTarget as Element}>
                 <ReactShadow.div>
-                  <ThemeProvider theme={theme}>
+                  <ThemeProvider theme={theme} cssVarsRoot=":host,:root">
                     <CSSReset />
                     <Box d="flex" justifyContent="center" marginTop="6px">
                       {buttonEl}

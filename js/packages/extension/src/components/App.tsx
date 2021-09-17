@@ -1,6 +1,6 @@
 import React, { FC } from "react";
 import { MemoryRouter as Router, Switch, Route } from "react-router-dom";
-import { ThemeProvider, theme, CSSReset } from "@chakra-ui/react";
+import { ThemeProvider, CSSReset, theme } from "@chakra-ui/react";
 
 import { routes, paths } from "@/constants/routes";
 import { ContextProviders } from "./ContextProviders";
@@ -39,7 +39,6 @@ const App: FC = () => (
             <Route path={routes.trade.path} component={TradeRoute} />
             <Route path={routes.myCoins.path} component={MyCoins} />
             <Route path={routes.wallet.path} component={Wallet} />
-            <Route path={routes.search.path} component={Search} />
             <Route path={routes.viewProfile.path} component={Profile} />
             <Route path={routes.viewNft.path} component={ViewNft} />
             <Route
