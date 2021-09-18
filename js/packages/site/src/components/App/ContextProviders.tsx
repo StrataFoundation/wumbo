@@ -5,7 +5,9 @@ import {
   EndpointSetter,
   UsdWumboPriceProvider,
   AccountCacheContextProvider,
+  wumboApi
 } from "wumbo-common";
+import { ApolloProvider } from "@apollo/client";
 import { ConnectionProvider, AccountsProvider } from "@oyster/common";
 
 export const ContextProviders: React.FC = ({ children }) => {
@@ -13,15 +15,17 @@ export const ContextProviders: React.FC = ({ children }) => {
 
   return (
     <ConnectionProvider>
-      <AccountCacheContextProvider>
-        <EndpointSetter>
-          <AccountsProvider>
-            <UsdWumboPriceProvider>
-              <WalletProvider wallets={wallets}>{children}</WalletProvider>
-            </UsdWumboPriceProvider>
-          </AccountsProvider>
-        </EndpointSetter>
-      </AccountCacheContextProvider>
+      <ApolloProvider client={wumboApi}>
+        <AccountCacheContextProvider>
+          <EndpointSetter>
+            <AccountsProvider>
+              <UsdWumboPriceProvider>
+                <WalletProvider wallets={wallets}>{children}</WalletProvider>
+              </UsdWumboPriceProvider>
+            </AccountsProvider>
+          </EndpointSetter>
+        </AccountCacheContextProvider>
+      </ApolloProvider>
     </ConnectionProvider>
   );
 };

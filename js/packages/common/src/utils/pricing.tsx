@@ -116,9 +116,8 @@ export function useOwnedAmountForOwnerAndHandle(
   return state;
 }
 
-export function useOwnedAmount(token: PublicKey | undefined): number | undefined {
-  const { adapter } = useWallet();
-  const { associatedAccount } = useAssociatedAccount(adapter?.publicKey, token);
+export function useUserOwnedAmount(wallet: PublicKey | undefined, token: PublicKey | undefined): number | undefined {
+  const { associatedAccount } = useAssociatedAccount(wallet, token);
   const mint = useMint(token);
   const [amount, setAmount] = useState<number>();
 
@@ -129,6 +128,11 @@ export function useOwnedAmount(token: PublicKey | undefined): number | undefined
   }, [associatedAccount, mint]);
 
   return amount && Number(amount);
+}
+
+export function useOwnedAmount(token: PublicKey | undefined): number | undefined {
+  const { publicKey } = useWallet();
+  return useUserOwnedAmount(publicKey || undefined, token);
 }
 
 export interface PricingState {

@@ -73,6 +73,7 @@ export function useSetMetadata(tokenRefKey: PublicKey | undefined): SetMetadataS
     publicKey: metadataAccountKey,
     image,
     metadata: inflated,
+    error: tokenMetadataError
   } = useTokenMetadata(tokenBonding?.targetMint);
 
   const { publicKey, signTransaction } = useWallet();
@@ -199,7 +200,7 @@ export function useSetMetadata(tokenRefKey: PublicKey | undefined): SetMetadataS
 
   return {
     state,
-    error,
+    error: error || tokenMetadataError,
     setMetadata: execute,
   };
 }

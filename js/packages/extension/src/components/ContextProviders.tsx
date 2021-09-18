@@ -7,7 +7,10 @@ import {
   WalletProvider,
   Notification,
   AccountCacheContextProvider,
+  wumboApi,
+  ErrorHandlingContext
 } from "wumbo-common";
+import { ApolloProvider } from "@apollo/client"
 import { DrawerProvider } from "@/contexts/drawerContext";
 import { WalletName } from "@solana/wallet-adapter-wallets";
 import { InjectedWalletAdapter } from "@/utils/wallets";
@@ -35,8 +38,12 @@ export const ContextProviders: FC = ({ children }) => {
   );
 
   const onError = useCallback(
-    (error: WalletError) => {
-      console.log("error log!", error);
+    (error: Error) => {
+      console.error(error);
+      const code = (error.message?.match("custom program error: (.*)") || [])[1];
+      if (code == "0x1") {
+        error = new Error("Insufficient balance.")
+      }
       toast.custom((t) => (
         <Notification
           type="error"
@@ -52,17 +59,25 @@ export const ContextProviders: FC = ({ children }) => {
 
   return (
     <ConnectionProvider>
-      <AccountCacheContextProvider>
-        <EndpointSetter>
-          <AccountsProvider>
-            <WalletProvider wallets={alteredWallets} onError={onError}>
-              <UsdWumboPriceProvider>
-                <DrawerProvider>{children}</DrawerProvider>
-              </UsdWumboPriceProvider>
-            </WalletProvider>
-          </AccountsProvider>
-        </EndpointSetter>
-      </AccountCacheContextProvider>
+      <ErrorHandlingContext.Provider
+        value={{
+          onError
+        }}
+      >
+        <ApolloProvider client={wumboApi}>
+          <AccountCacheContextProvider>
+            <EndpointSetter>
+              <AccountsProvider>
+                <WalletProvider wallets={alteredWallets} onError={onError}>
+                  <UsdWumboPriceProvider>
+                    <DrawerProvider>{children}</DrawerProvider>
+                  </UsdWumboPriceProvider>
+                </WalletProvider>
+              </AccountsProvider>
+            </EndpointSetter>
+          </AccountCacheContextProvider>
+        </ApolloProvider>
+      </ErrorHandlingContext.Provider>
     </ConnectionProvider>
   );
 };

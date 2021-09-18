@@ -140,10 +140,14 @@ export function useUserTokensWithMeta(
   owner?: PublicKey
 ): UseAsyncReturn<ITokenWithMetaAndAccount[]> {
   const connection = useConnection();
-  const { result: tokenAccounts } = useUserTokenAccounts(owner);
+  const { result: tokenAccounts, error } = useUserTokenAccounts(owner);
   const cache = useAccountFetchCache();
 
-  return useAsync(getUserTokensWithMeta, [cache, connection, tokenAccounts]);
+  const asyncResult = useAsync(getUserTokensWithMeta, [cache, connection, tokenAccounts]);
+  return {
+    ...asyncResult,
+    error: asyncResult.error || error
+  }
 }
 
 export interface IUseTokenMetadataResult extends ITokenWithMetaAndAccount {

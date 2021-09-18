@@ -11,7 +11,8 @@ export const DEV_TWITTER_VERIFIER: Keypair = Keypair.fromSecretKey(
   Uint8Array.of(...key)
 )
 
-export const NFT_VERIFIER_URL = "http://localhost:8080";
+export const WUMBO_API_URL = "https://dev-api.teamwumbo.com/graphql"
+export const NFT_VERIFIER_URL = "https://dev-nft-verifier.teamwumbo.com"
 
 export const NFT_VERIFIER_TLD = new PublicKey("12UFqXT52JUuArrHy8FPqVtzBVF2pkB8H4C9HVMAJRU6");
 
@@ -25,13 +26,13 @@ export const TWITTER_REGISTRAR_SERVER_URL =
 // export const SOLANA_API_URL = "https://api.mainnet-beta.solana.com"
 export const WUM_REWARDS_PERCENTAGE = 1000;
 export const WUM_BONDING = new PublicKey(
-  "GB38uYDgKrWEarKZm7SknGiiUrMhKybxbtPvEsQyzkMh"
+  "7nJDuTbRB8R7XaAq87Ka5uHGqNigKBb2k8mK6fSwveEy"
 );
 export const WUM_TOKEN = new PublicKey(
-  "GAtKftN91L58AXFKFHEJNtceA5iS1KVDCRRhY7bVtAgp"
+  "BgVmCfZXhcyibL5qa8vcqNzDcWGYxkmcg76s7hc3oRj4"
 );
 export const WUMBO_INSTANCE_KEY: PublicKey = new PublicKey(
-  "DYhmpg9JJLpGG3w7DqFGDceyKofMgBGhxFanU62dSmw2"
+  "AYhepJ6utyTCp3rmm7LjswMuHTUfaKApUkxfDusLx5FD"
 );
 
 export const SOL_TOKEN = new PublicKey(

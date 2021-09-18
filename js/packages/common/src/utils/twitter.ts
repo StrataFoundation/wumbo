@@ -228,7 +228,7 @@ export function useReverseTwitter(owner: PublicKey | undefined): ReverseTwitterS
 
   return {
     loading,
-    error,
+    error: error?.message?.includes("Invalid reverse Twitter account provided") ? undefined : error,
     handle,
   };
 }

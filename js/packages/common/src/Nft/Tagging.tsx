@@ -6,7 +6,7 @@ import compareImages from "resemblejs/compareImages";
 import axios from "axios";
 import { useAsync, useAsyncCallback } from "react-async-hook";
 import { NFT_VERIFIER_URL } from "../constants/globals";
-import { useWallet } from "../contexts";
+import { handleErrors, useWallet } from "../contexts";
 import { useAccountFetchCache, truthy, getNftNameRecordKey, classNames } from "../utils";
 import { Button, Spinner, Alert } from "../";
 
@@ -152,13 +152,15 @@ export const TaggableImages = ({
 }) => {
   const connection = useConnection();
   const images = useMemo(() => getUntaggedImages(), [refreshCounter]);
-  const { result: img1 } = useAsync(getBufferFromUrl, [src]);
+  const { result: img1, error: bufferError } = useAsync(getBufferFromUrl, [src]);
   const [matches, setMatches] = useState<Record<string, TagMatch>>({});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<Error>();
   const [selected, setSelected] = useState<Record<string, boolean>>({});
   const [allSelected, setAllSelected] = useState<boolean>(false);
   const { awaitingApproval, publicKey, signTransaction } = useWallet();
+
+  handleErrors(bufferError, error)
   const cache = useAccountFetchCache();
 
   const handleSetSelected = (src: string) => {
@@ -202,11 +204,7 @@ export const TaggableImages = ({
   };
 
   const { execute, loading: executing, error: executeError } = useAsyncCallback(tagAll);
-
-  if (error) {
-    // TODO add to global error
-    console.error(error);
-  }
+  handleErrors(executeError);
 
   useEffect(() => {
     if (allSelected) {
@@ -280,9 +278,6 @@ export const TaggableImages = ({
 
   return (
     <div className="flex flex-col items-center">
-      {(error || executeError) && (
-        <Alert type="error" message={(error || executeError)!.toString()} />
-      )}
       {loading && <Spinner color="primary" />}
       {!loading && (
         <label

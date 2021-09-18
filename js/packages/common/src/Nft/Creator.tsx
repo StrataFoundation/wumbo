@@ -4,6 +4,7 @@ import { ITokenBonding, useSocialTokenMetadata } from "../utils";
 import { Link } from "react-router-dom";
 import { PublicKey } from "@solana/web3.js";
 import { Avatar } from "../";
+import { handleErrors } from "../contexts";
 
 export type GetCreatorLink = (
   c: PublicKey,
@@ -13,7 +14,8 @@ export type GetCreatorLink = (
 
 export const Creator = React.memo(
   ({ creator, getCreatorLink }: { creator: PublicKey; getCreatorLink: GetCreatorLink }) => {
-    const { metadata, tokenBonding } = useSocialTokenMetadata(creator);
+    const { metadata, tokenBonding, error } = useSocialTokenMetadata(creator);
+    handleErrors(error);
     const truncatePubkey = (pkey: PublicKey): string => {
       const pkeyStr = pkey.toString();
 

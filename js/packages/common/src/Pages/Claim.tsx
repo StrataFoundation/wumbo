@@ -7,6 +7,7 @@ import { Button, LinkButton } from "../Button";
 import { Alert } from "../Alert";
 import { useFtxPayLink } from "../utils/ftxPay";
 import { PublicKey } from "@solana/web3.js";
+import { handleErrors } from "../contexts";
 
 export interface IClaimProps {
   onComplete(result: { tokenRef: PublicKey, owner: PublicKey }): void;
@@ -31,17 +32,11 @@ export const Claim = React.memo(({ handle, redirectUri, code, onComplete }: ICla
   } = useCreateOrClaimCoin();
 
   const { amount: sol, loading: solLoading } = useSolOwnedAmount();
-  const { amount: amountNeeded, loading: amountNeededLoading } = useRentExemptAmount(
+  const { amount: amountNeeded, loading: amountNeededLoading, error: rentExemptError } = useRentExemptAmount(
     TWITTER_REGISTRY_SIZE + 512 + 2*512 // bonding, token refx2
   );
 
-  if (error) {
-    console.error(error);
-  }
-
-  if (createCoinError) {
-    console.error(createCoinError);
-  }
+  handleErrors(rentExemptError, createCoinError, error);
 
   if (solLoading || amountNeededLoading) {
     return (

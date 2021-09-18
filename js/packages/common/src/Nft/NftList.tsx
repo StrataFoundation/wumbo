@@ -3,6 +3,7 @@ import { NftCard } from "./NftCard";
 import React from "react";
 import { Spinner } from "../Spinner";
 import { ITokenWithMeta, ITokenWithMetaAndAccount, useUserTokensWithMeta } from "../utils";
+import { handleErrors } from "../contexts";
 
 export const NftListRaw = React.memo(
   ({
@@ -41,6 +42,7 @@ export const NftListRaw = React.memo(
 export const NftList = React.memo(
   ({ owner, getLink }: { owner?: PublicKey; getLink: (t: ITokenWithMeta) => string }) => {
     const { result: tokens, loading, error } = useUserTokensWithMeta(owner);
+    handleErrors(error);
     return <NftListRaw getLink={getLink} loading={loading} tokens={tokens} />;
   }
 );

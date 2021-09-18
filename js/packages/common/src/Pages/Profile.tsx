@@ -8,11 +8,12 @@ import { TokenRef, ITokenWithMeta, supplyAsNum, useBondingPricing, useFiatPrice,
 import { StatCard, StatCardWithIcon } from "../StatCard";
 import { Badge, Button, MetadataAvatar, Tab, Tabs, useWallet } from '..';
 import { PencilAltIcon } from '@heroicons/react/outline';
-import { TokenAccountsContextProvider, TokenLeaderboard } from '../Leaderboard/TokenLeaderboard';
+import { TokenLeaderboard } from '../Leaderboard/TokenLeaderboard';
 import { AccountInfo as TokenAccountInfo } from '@solana/spl-token';
 import { NftList, NftListRaw } from '../Nft';
 import { TROPHY_CREATOR } from '../constants/globals';
 import { Link } from 'react-router-dom';
+import { handleErrors } from '../contexts';
 
 interface IProfileProps {
   tokenRefKey: PublicKey;
@@ -34,9 +35,9 @@ export const Profile = React.memo(({ useClaimFlow, tokenRefKey, onAccountClick, 
   const ownerWalletKey = tokenRef?.owner as PublicKey | undefined;
   const { info: walletTokenRef } = useClaimedTokenRef(ownerWalletKey);
   const { info: tokenBonding, loading: tokenBondingLoading } = useAccount(tokenRef?.tokenBonding, TokenBonding);
-  const { metadata, loading: loadingMetadata } = useTokenMetadata(tokenBonding?.targetMint);
+  const { metadata, loading: loadingMetadata, error: tokenMetadataError } = useTokenMetadata(tokenBonding?.targetMint);
   const { publicKey } = useWallet();
-  const { handle: walletTwitterHandle } = useReverseTwitter(publicKey || undefined);
+  const { handle: walletTwitterHandle, error: reverseTwitterError } = useReverseTwitter(publicKey || undefined);
   
   const mint = useMint(tokenBonding?.targetMint);
   const supply = mint ? supplyAsNum(mint) : 0;
@@ -52,11 +53,12 @@ export const Profile = React.memo(({ useClaimFlow, tokenRefKey, onAccountClick, 
   const { result: tokens, loading: loadingCollectibles, error } = useUserTokensWithMeta(ownerWalletKey);
 
   const query = useQuery();
-  let { handle } = useReverseTwitter(ownerWalletKey);
+  let { handle, error: reverseTwitterError2 } = useReverseTwitter(ownerWalletKey);
   if (!handle) {
     handle = query.get("name") || undefined
   }
   const { claim, loading: claiming } = useClaimFlow(handle);
+  handleErrors(error, reverseTwitterError, reverseTwitterError2, tokenMetadataError);
 
   if (loading || tokenBondingLoading || !tokenBonding || loadingMetadata) {
     return <Spinner />;
@@ -138,12 +140,10 @@ export const Profile = React.memo(({ useClaimFlow, tokenRefKey, onAccountClick, 
       <div>
         <Tabs>
           <Tab title="Backers">
-            <TokenAccountsContextProvider mint={tokenBonding.targetMint}>
-              <TokenLeaderboard
-                onAccountClick={onAccountClick}
-                mint={tokenBonding.targetMint}
-              />
-            </TokenAccountsContextProvider>
+            <TokenLeaderboard
+              onAccountClick={onAccountClick}
+              mint={tokenBonding.targetMint}
+            />
           </Tab>
           <Tab title="Collectibles">
             <NftListRaw
