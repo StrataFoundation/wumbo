@@ -25,13 +25,13 @@ export const TWITTER_REGISTRAR_SERVER_URL =
 // export const SOLANA_API_URL = "https://api.mainnet-beta.solana.com"
 export const WUM_REWARDS_PERCENTAGE = 1000;
 export const WUM_BONDING = new PublicKey(
-  "BadDMywdot7WVgChsoxGqu85GW8aUpGgpUJVSeFAzYKo"
+  "GB38uYDgKrWEarKZm7SknGiiUrMhKybxbtPvEsQyzkMh"
 );
 export const WUM_TOKEN = new PublicKey(
-  "BmPvFh1iE8fLLWpypuaxX5FWbKo6KX3r5Wwrwqt8h35T"
+  "GAtKftN91L58AXFKFHEJNtceA5iS1KVDCRRhY7bVtAgp"
 );
 export const WUMBO_INSTANCE_KEY: PublicKey = new PublicKey(
-  "ezxdRqVTJ8EKQQrt2FQ3Z5JkdQ256iUD43zbWoSGMff"
+  "DYhmpg9JJLpGG3w7DqFGDceyKofMgBGhxFanU62dSmw2"
 );
 
 export const SOL_TOKEN = new PublicKey(
@@ -44,7 +44,7 @@ export const SPL_NAME_SERVICE_PROGRAM_ID = new PublicKey(
 export const TOKEN_BONDING_PROGRAM_ID = new PublicKey(
   "4K8fnycnTESeyad4DqfXPF8TbkuyscPK4EjAwY35emyW"
 );
-// export const SOLANA_API_URL = "https://devnet.solana.com";
+// export const SOLANA_API_URL = "https://api.devnet.solana.com";
 export const SOLANA_API_URL = "https://wumbo.devnet.rpcpool.com/";
 
 export const SERUM_PROGRAM_ID = new PublicKey(
