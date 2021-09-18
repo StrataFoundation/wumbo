@@ -240,7 +240,7 @@ export const TaggableImages = ({
             await Promise.all(
               Object.entries(imagesBySrc).map(async ([img2Src, images]) => {
                 const key = await getNftNameRecordKey(img2Src);
-                const alreadyExists = await cache.search(key);
+                const alreadyExists = await cache.search(key, undefined, true);
 
                 if (!alreadyExists) {
                   const img2 = await getBufferFromUrl(img2Src);

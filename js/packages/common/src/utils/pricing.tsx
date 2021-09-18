@@ -140,7 +140,7 @@ export function useBondingPricing(tokenBonding: PublicKey | undefined): PricingS
     loading: true
   });
   const { info: bonding } = useAccount(tokenBonding, TokenBonding);
-  const { info: curve } = useAccount(bonding?.curve, DeserializeCurve);
+  const { info: curve } = useAccount(bonding?.curve, DeserializeCurve, true);
 
   const base = useMint(bonding?.baseMint);
   const target = useMint(bonding?.targetMint);

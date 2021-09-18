@@ -83,7 +83,7 @@ export function useCreateOrClaimCoin(): CreateState {
   const connection = useConnection();
   const { adapter, publicKey } = useWallet();
   const [creating, setCreating] = useState<boolean>(false);
-  const { info: wumboInstance } = useAccount(WUMBO_INSTANCE_KEY, WumboInstance);
+  const { info: wumboInstance } = useAccount(WUMBO_INSTANCE_KEY, WumboInstance, true);
   const { splWumboProgram } = usePrograms();
 
   async function exec(twitterHandle: string) {
@@ -95,8 +95,8 @@ export function useCreateOrClaimCoin(): CreateState {
 
       const twitterName = await getTwitterRegistryKey(twitterHandle, await getTld());
       const owner = (await getTwitterRegistry(connection, twitterHandle, await getTld())).owner;
-      const claimedAccount = (await cache.search(claimedKey))?.account;
-      const unclaimedAccount = (await cache.search(unclaimedKey))?.account;
+      const claimedAccount = (await cache.search(claimedKey, undefined, true))?.account;
+      const unclaimedAccount = (await cache.search(unclaimedKey, undefined, true))?.account;
       if (!claimedAccount && !unclaimedAccount) {
         const isOwner = publicKey && owner.equals(publicKey);
         console.log("Creator does not exist, creating");

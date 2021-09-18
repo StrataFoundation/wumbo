@@ -69,7 +69,8 @@ export const AccountCacheContextProvider: React.FC = ({ children }) => {
 
 export function useAccount<T>(
   key: undefined | PublicKey,
-  parser?: TypedAccountParser<T>
+  parser?: TypedAccountParser<T>,
+  isStatic: Boolean = false // Set if the accounts data will never change, optimisation to lower websocket usage.
 ): UseAccountState<T> {
   const cache = useAccountFetchCache();
   const [state, setState] = useState<UseAccountState<T>>({
@@ -96,7 +97,7 @@ export function useAccount<T>(
     }
 
     cache
-      .search(id, parsedAccountBaseParser)
+      .search(id, parsedAccountBaseParser, isStatic)
       .then((acc) => {
         if (acc) {
           setState({

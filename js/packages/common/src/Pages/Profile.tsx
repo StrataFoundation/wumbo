@@ -30,7 +30,7 @@ export interface IClaimFlowOutput {
 }
 
 export const Profile = React.memo(({ useClaimFlow, tokenRefKey, onAccountClick, onTradeClick, getNftLink, editPath }: IProfileProps) => {
-  const { info: tokenRef, loading } = useAccount(tokenRefKey, TokenRef)
+  const { info: tokenRef, loading } = useAccount(tokenRefKey, TokenRef, true)
   const ownerWalletKey = tokenRef?.owner as PublicKey | undefined;
   const { info: walletTokenRef } = useClaimedTokenRef(ownerWalletKey);
   const { info: tokenBonding, loading: tokenBondingLoading } = useAccount(tokenRef?.tokenBonding, TokenBonding);

@@ -23,6 +23,7 @@ export class AccountFetchCache {
   delay: number;
   commitment: Commitment;
   accountChangeListeners = new Map<string, number>();
+  statics = new Set<string>();
   missingAcccounts = new Map<string, AccountParser<unknown> | undefined>();
   genericCache = new Map<string, ParsedAccountBase<unknown> | null>();
   keyToAccountParser = new Map<string, AccountParser<unknown>>();
@@ -79,7 +80,7 @@ export class AccountFetchCache {
 
   async fetchMissing() {
     try {
-      await Promise.all([...this.missingAcccounts].map(account => this.addToBatch(new PublicKey(account))))
+      await Promise.all([...this.missingAcccounts].map(([account, _]) => this.search(new PublicKey(account), this.missingAcccounts.get(account))))
     } catch(e) {
       // This happens in an interval, so just log errors
       console.error(e);
@@ -143,7 +144,8 @@ export class AccountFetchCache {
     pubKey: string | PublicKey,
     parser: AccountParser<T> = (pubkey, account) => ({
       pubkey, account
-    })
+    }),
+    isStatic: Boolean = false // optimization, set if the data will never change
   ): Promise<ParsedAccountBase<T> | undefined> {
     let id: PublicKey;
     if (typeof pubKey === 'string') {
@@ -153,7 +155,10 @@ export class AccountFetchCache {
     }
 
     const address = id.toBase58();
-
+    if (isStatic) {
+      this.statics.add(address)
+    }
+    
     let account = this.genericCache.get(address) as ParsedAccountBase<T>;
     if (account) {
       return account;
@@ -187,16 +192,23 @@ export class AccountFetchCache {
   }
 
   watch<T>(id: PublicKey, parser?: AccountParser<T>, exists: Boolean = true): void {
-    if (exists) { // Only websocket watch accounts that exist
-      console.log(`Watching found ${id.toBase58()}`);
-      this.missingAcccounts.delete(id.toBase58());
+    const address = id.toBase58()
+    const isStatic = this.statics.has(address)
+    if (exists && !isStatic) { // Only websocket watch accounts that exist
+      this.missingAcccounts.delete(address);
 
-      this.accountChangeListeners.set(
-        id.toBase58(),
-        this.connection.onAccountChange(id, this.onAccountChange.bind(this, id, parser), this.commitment)
-      );
+      // Don't recreate listeners
+      if (!this.accountChangeListeners.has(address)) {
+        console.log(`Watching ${address}`);
+        this.accountChangeListeners.set(
+          address,
+          this.connection.onAccountChange(id, this.onAccountChange.bind(this, id, parser), this.commitment)
+        );
+      }
     } else { // Poll accounts that don't exist
-      this.missingAcccounts.set(id.toBase58(), parser);
+      if (!this.missingAcccounts.has(address) && !this.missingAcccounts.get(address)) { // If a parser is defined, don't set it.
+        this.missingAcccounts.set(address, parser);
+      }
     }
   }
 

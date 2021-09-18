@@ -14,7 +14,7 @@ export const Profile = () => {
   const walletTokenRefKey = useClaimedTokenRefKey(publicKey || undefined);
   const passedTokenRefKey = params.tokenRefKey ? new PublicKey(params.tokenRefKey) : undefined;
   const tokenRefKey = passedTokenRefKey || walletTokenRefKey;
-  const { info: tokenRef, loading } = useAccount(tokenRefKey, TokenRef);
+  const { info: tokenRef, loading } = useAccount(tokenRefKey, TokenRef, true);
 
   const history = useHistory();
 

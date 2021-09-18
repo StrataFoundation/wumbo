@@ -67,7 +67,7 @@ type SetMetadataState = {
 };
 export function useSetMetadata(tokenRefKey: PublicKey | undefined): SetMetadataState {
   const connection = useConnection();
-  const { info: tokenRef } = useAccount(tokenRefKey, TokenRef);
+  const { info: tokenRef } = useAccount(tokenRefKey, TokenRef, true);
   const { info: tokenBonding } = useAccount(tokenRef?.tokenBonding, TokenBonding);
   const {
     publicKey: metadataAccountKey,
