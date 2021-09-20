@@ -79,19 +79,19 @@ export function useTokenRefFromBonding(tokenBonding: PublicKey | undefined): Use
     bonding && getReverseTokenRefKey(bonding.targetMint),
     [bonding.info]
   );
-  return useAccount(key, TokenRef)
+  return useAccount(key, TokenRef, true)
 }
 
 export function useClaimedTokenRef(owner: PublicKey | undefined): UseAccountState<ITokenRef> {
   const key = useClaimedTokenRefKey(owner);
-  return useAccount(key, TokenRef)
+  return useAccount(key, TokenRef, true)
 }
 
 export const useTwitterTokenRef = (name: string | undefined): UseAccountState<ITokenRef> => {
   const claimedKey = useClaimedTwitterTokenRefKey(name);
   const unclaimedKey = useUnclaimedTwitterTokenRefKey(name);
-  const claimed = useAccount(claimedKey, TokenRef);
-  const unclaimed = useAccount(unclaimedKey, TokenRef);
+  const claimed = useAccount(claimedKey, TokenRef, true);
+  const unclaimed = useAccount(unclaimedKey, TokenRef, true);
   const result = useMemo(() => {
     if (claimed.info) {
       return claimed;

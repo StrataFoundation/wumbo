@@ -13,7 +13,7 @@ import { Button } from "../Button";
 import { Alert } from "../Alert";
 import { Spinner } from "../Spinner";
 import { TokenBonding } from "../utils/deserializers/spl-token-bonding";
-import { useWallet } from "../contexts";
+import { handleErrors, useWallet } from "../contexts";
 
 interface IEditProfileProps {
   ownerWalletKey: PublicKey;
@@ -23,7 +23,6 @@ interface IEditProfileProps {
 export const EditProfile = React.memo(({ ownerWalletKey, onComplete }: IEditProfileProps) => {
   const hiddenFileInput = React.useRef<HTMLInputElement>(null);
   const { awaitingApproval } = useWallet();
-  const { handle } = useReverseTwitter(ownerWalletKey);
   const { info: tokenRef } = useClaimedTokenRef(ownerWalletKey);
   const { watch, register, handleSubmit, setValue, reset } =
     useForm<SetMetadataArgs>({
@@ -36,14 +35,13 @@ export const EditProfile = React.memo(({ ownerWalletKey, onComplete }: IEditProf
     TokenBonding
   );
 
-  const { image: metadataImage, metadata } = useTokenMetadata(
+  const { image: metadataImage, metadata, error: tokenMetadataError } = useTokenMetadata(
     tokenBonding?.targetMint
   );
   const { name = "", symbol = "", founderRewardsPercent, image } = watch();
   const { setMetadata, state, error } = useSetMetadata(tokenRef?.publicKey);
-  if (error) {
-    console.error(error);
-  }
+  
+  handleErrors(tokenMetadataError, error)
   
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setValue("image", e.target.files![0] || null);

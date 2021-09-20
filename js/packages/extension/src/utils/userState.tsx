@@ -46,7 +46,8 @@ export const useUserInfo = (name: string): UserInfoState => {
   );
   const { info: curve } = useAccount(
     tokenBonding?.curve,
-    Curve
+    Curve,
+    true
   );
   const mint = useMint(creator && tokenBonding?.targetMint);
   const wumboUsdPrice = useWumboUsdPrice();

@@ -1,14 +1,10 @@
-import React, { Fragment, useContext, useEffect, useState } from "react";
+import React, { Fragment, useEffect, useState } from "react";
 import { Spinner } from "../Spinner";
-import { AccountInfo as TokenAccountInfo } from "@solana/spl-token";
-import { PublicKey, Connection } from "@solana/web3.js";
+import { PublicKey } from "@solana/web3.js";
 import { Leaderboard, LeaderboardNumber, MetadataLeaderboardElement } from "../Leaderboard";
-import { amountAsNum, useMint, useOwnedAmount } from "../utils";
 import { useWallet } from "../contexts/walletContext";
 import { ChevronUpIcon, ChevronDownIcon } from "@heroicons/react/solid";
-import { TokenAccountParser, useConnection } from "@oyster/common";
-import { useAsync } from "react-async-hook";
-import { TOKEN_PROGRAM_ID } from "../constants/globals";
+import { useQuery, gql } from '@apollo/client';
 
 const WhiteCard = ({ children = null as any }) => (
   <div className="bg-white rounded-md shadow-md border-1">{children}</div>
@@ -29,115 +25,92 @@ const PageChevron = ({
   </div>
 );
 
-const TokenAccountsContext = React.createContext<{ accounts: AccountAndRank[]; loading: boolean }>({
-  accounts: [],
-  loading: true,
-});
-
-async function getAllTokenAccounts(
-  connection: Connection,
-  mint: PublicKey | undefined
-): Promise<AccountAndRank[]> {
-  if (mint) {
-    // @ts-ignore
-    const vals = (
-      await connection.getProgramAccounts(TOKEN_PROGRAM_ID, {
-        filters: [
-          {
-            memcmp: {
-              bytes: mint.toBase58(),
-              offset: 0,
-            },
-          },
-        ],
-      })
-    )
-      .map(({ account, pubkey }) => TokenAccountParser(pubkey, account)!.info)
-      .sort((a, b) => b.amount.toNumber() - a.amount.toNumber())
-      .map((account, index) => ({
-        rank: index + 1,
-        account,
-      }));
-
-    return vals;
-  }
-
-  return [];
-}
-
-export function TokenAccountsContextProvider({
-  children = null as any,
-  mint,
-}: {
-  children: any;
-  mint: PublicKey | undefined;
-}): React.ReactElement {
-  const connection = useConnection();
-  const { result: accounts, loading, error } = useAsync(getAllTokenAccounts, [connection, mint]);
-
-  if (error) {
-    console.error(error);
-  }
-
-  return (
-    <TokenAccountsContext.Provider
-      value={{
-        accounts: accounts || [],
-        loading,
-      }}
-    >
-      {children}
-    </TokenAccountsContext.Provider>
-  );
-}
-
-export function useTokenAccounts(): { loading: boolean; accounts: AccountAndRank[] } {
-  return useContext(TokenAccountsContext);
-}
-
-type AccountAndRank = {
+type WalletAndRank = {
   rank: number;
-  account: TokenAccountInfo;
+  wallet: PublicKey;
 };
 interface IAccountsPagination {
   loading: boolean;
-  accounts: AccountAndRank[];
+  accounts?: WalletAndRank[];
   pageUp(): void;
   pageDown(): void;
 }
 function zeroMin(input: number): number {
   return input < 0 ? 0 : input;
 }
-function idxMax(input: number, index: number) {
-  return input > index ? index : input;
-}
-function useAccountsPagination(
+const GET_TOP_HOLDERS = gql`
+  query GetTopHolders($mint: String!, $startRank: Int!, $stopRank: Int!) {
+    topHolders(mint: $mint, startRank: $startRank, stopRank: $stopRank) {
+      publicKey
+    }
+  }
+`;
+const GET_HOLDER_RANK = gql`
+  query GetHolderRank($mint: String!, $key: String!) {
+    accountRank(mint: $mint, publicKey: $key)
+  }
+`;
+function useLocalAccountsPagination(
   mintKey: PublicKey | undefined,
-  findAmount?: number
-): IAccountsPagination {
-  const { accounts: accountsIn, loading } = useTokenAccounts();
+  findAccount?: PublicKey
+): IAccountsPagination & { userRank?: number } {
   const [startIndex, setStartIndex] = useState<number>(0);
-  const [stopIndex, setStopIndex] = useState<number>(5);
-  const mint = useMint(mintKey);
+  const [stopIndex, setStopIndex] = useState<number>(0);
+
+  const { loading: loadingRank, data: { accountRank } = {} } = useQuery<{ accountRank: number | undefined }>(GET_HOLDER_RANK, {
+    variables: {
+      mint: mintKey?.toBase58(),
+      key: findAccount?.toBase58()
+    }
+  })
 
   useEffect(() => {
-    if (findAmount) {
-      setStartIndex(0);
-    } else {
-      const index = accountsIn.findIndex((v) => mint && amountAsNum(v.account.amount, mint));
-      setStartIndex(index);
+    if (accountRank) {
+      setStartIndex(accountRank);
+      setStopIndex(accountRank + 5);
     }
-  }, [findAmount, accountsIn]);
-  const accounts = React.useMemo(
-    () => accountsIn.slice(startIndex, stopIndex),
-    [accountsIn, startIndex, stopIndex]
-  );
+  }, [accountRank])
+  const { loading, data: { topHolders: accounts } = {} } = useQuery<{ topHolders: { publicKey: string }[] }>(GET_TOP_HOLDERS, {
+    variables: {
+      mint: mintKey?.toBase58(),
+      startRank: startIndex,
+      stopRank: stopIndex
+    }
+  })
 
   return {
-    accounts,
-    loading,
+    accounts: accounts?.map(({ publicKey }, index) => ({
+      rank: startIndex + index + 1,
+      wallet: new PublicKey(publicKey)
+    })),
+    userRank: accountRank,
+    loading: loadingRank || loading,
     pageUp: () => setStartIndex((startIndex) => zeroMin(startIndex - 5)),
-    pageDown: () => setStopIndex((stopIndex) => idxMax(stopIndex + 5, accountsIn.length)),
+    pageDown: () => setStopIndex((stopIndex) => stopIndex + 5),
+  };
+}
+function useAccountsPagination(
+  mintKey: PublicKey | undefined
+): IAccountsPagination {
+  const [startIndex, setStartIndex] = useState<number>(0);
+  const [stopIndex, setStopIndex] = useState<number>(5);
+
+  const { loading, data: { topHolders: accounts } = {} } = useQuery<{ topHolders: { publicKey: string }[] }>(GET_TOP_HOLDERS, {
+    variables: {
+      mint: mintKey?.toBase58(),
+      startRank: startIndex,
+      stopRank: stopIndex
+    }
+  })
+
+  return {
+    accounts: accounts?.map(({ publicKey }, index) => ({
+      rank: startIndex + index + 1,
+      wallet: new PublicKey(publicKey)
+    })),
+    loading: loading,
+    pageUp: () => setStartIndex((startIndex) => zeroMin(startIndex - 5)),
+    pageDown: () => setStopIndex((stopIndex) => stopIndex + 5),
   };
 }
 
@@ -149,16 +122,11 @@ export const TokenLeaderboard = React.memo(
     mint: PublicKey;
     onAccountClick?: (tokenRefKey: PublicKey) => void;
   }) => {
-    const ownedAmount = useOwnedAmount(mint);
-    const top = useAccountsPagination(mint);
-    const local = useAccountsPagination(mint, ownedAmount);
-    const { accounts } = useTokenAccounts();
     const { publicKey } = useWallet();
-    const userIndex = accounts.findIndex(
-      (a) => a.account.owner.toBase58() == publicKey?.toBase58()
-    );
+    const top = useAccountsPagination(mint);
+    const local = useLocalAccountsPagination(mint, publicKey || undefined);
 
-    if (top.loading || local.loading) {
+    if (top.loading || local.loading || !local.accounts || !top.accounts) {
       return (
         <div className="flex flex-col items-center flex-grow">
           <Spinner color="primary" size="lg" />
@@ -166,7 +134,7 @@ export const TokenLeaderboard = React.memo(
       );
     }
 
-    if (accounts.length === 0) {
+    if (top.accounts?.length === 0) {
       return <div>No token holders</div>;
     }
 
@@ -176,19 +144,20 @@ export const TokenLeaderboard = React.memo(
         <WhiteCard>
           <PageChevron direction="up" onClick={local.pageUp} />
           <Leaderboard
-            numbers={local.accounts.map(({ rank, account }) => (
+            numbers={local.accounts.map(({ rank, wallet }) => (
               <LeaderboardNumber
-                selected={account.owner.toBase58() == publicKey?.toBase58()}
+                selected={wallet.toBase58() == publicKey?.toBase58()}
                 key={"num" + rank}
               >
                 {rank}
               </LeaderboardNumber>
             ))}
-            elements={local.accounts.map(({ rank, account }) => (
+            elements={local.accounts.map(({ rank, wallet }) => (
               <MetadataLeaderboardElement
+                mint={mint}
                 onClick={onAccountClick}
                 key={"el" + rank}
-                account={account}
+                wallet={wallet}
               />
             ))}
           />
@@ -201,25 +170,26 @@ export const TokenLeaderboard = React.memo(
       <div className="pt-2 flex flex-col items-stretch">
         <WhiteCard>
           <Leaderboard
-            numbers={top.accounts.map(({ rank, account }) => (
+            numbers={top.accounts.map(({ rank, wallet }) => (
               <LeaderboardNumber
-                selected={account.owner.toBase58() == publicKey?.toBase58()}
+                selected={!!publicKey && wallet.equals(publicKey)}
                 key={"num" + rank}
               >
                 {rank}
               </LeaderboardNumber>
             ))}
-            elements={top.accounts.map(({ rank, account }) => (
+            elements={top.accounts.map(({ rank, wallet }) => (
               <MetadataLeaderboardElement
+                mint={mint}
                 onClick={onAccountClick}
                 key={"el" + rank}
-                account={account}
+                wallet={wallet}
               />
             ))}
           />
           <PageChevron direction="down" onClick={top.pageDown} />
         </WhiteCard>
-        {userIndex > top.accounts.length - 1 && localLeaderboard}
+        {(local.userRank || 0) > top.accounts.length - 1 && localLeaderboard}
       </div>
     );
   }

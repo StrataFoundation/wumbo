@@ -27,12 +27,15 @@ const DEFAULT_COMMITMENT = "processed";
 
 export const AccountCacheContextProvider: React.FC = ({ children }) => {
   const connection = useConnection();
-  const cache = useMemo(() => {
-    const ret = new AccountFetchCache({
+  const cache = React.useMemo(() => {
+    return new AccountFetchCache({
       connection,
       delay: 250,
       commitment: DEFAULT_COMMITMENT
     })
+  }, [connection])
+
+  useEffect(() => {
     const oldGetAccountInfo = connection.getAccountInfo.bind(connection);
     // Make sure everything in our app is using the cache
     connection.getAccountInfo = function(
@@ -40,11 +43,10 @@ export const AccountCacheContextProvider: React.FC = ({ children }) => {
       commitment?: Commitment,
     ): Promise<AccountInfo<Buffer> | null> {
       if (commitment && commitment != DEFAULT_COMMITMENT) {
-        debugger;
         return oldGetAccountInfo(publicKey, commitment);
       }
 
-      return ret.search(publicKey).then(i => {
+      return cache.search(publicKey).then(i => {
         if (i) {
           return i.account;
         }
@@ -53,7 +55,9 @@ export const AccountCacheContextProvider: React.FC = ({ children }) => {
       })
     }
 
-    return ret;
+    return () => {
+      cache.close();
+    }
   }, [connection]);
 
   return <AccountCacheContext.Provider
@@ -65,7 +69,8 @@ export const AccountCacheContextProvider: React.FC = ({ children }) => {
 
 export function useAccount<T>(
   key: undefined | PublicKey,
-  parser?: TypedAccountParser<T>
+  parser?: TypedAccountParser<T>,
+  isStatic: Boolean = false // Set if the accounts data will never change, optimisation to lower websocket usage.
 ): UseAccountState<T> {
   const cache = useAccountFetchCache();
   const [state, setState] = useState<UseAccountState<T>>({
@@ -92,7 +97,7 @@ export function useAccount<T>(
     }
 
     cache
-      .search(id, parsedAccountBaseParser)
+      .search(id, parsedAccountBaseParser, isStatic)
       .then((acc) => {
         if (acc) {
           setState({

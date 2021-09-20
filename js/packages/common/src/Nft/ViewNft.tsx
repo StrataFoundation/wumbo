@@ -8,6 +8,7 @@ import { Nft, Creator, GetCreatorLink, TaggableImages } from "./";
 import { WalletSelect } from "../Pages/WalletSelect";
 import { Button } from "../";
 import { ExpandedNft } from "./ExpandedNft";
+import { handleErrors } from "../contexts";
 
 const displayNames = {
   vr: "VR",
@@ -168,9 +169,7 @@ export const ViewNft = React.memo(
     getCreatorLink: GetCreatorLink;
   }) => {
     const tokenWithMeta = useTokenMetadata(token);
-    if (tokenWithMeta.error) {
-      console.error(tokenWithMeta.error);
-    }
+    handleErrors(tokenWithMeta.error)
 
     return <ViewNftRaw token={tokenWithMeta} owner={owner} getCreatorLink={getCreatorLink} />;
   }

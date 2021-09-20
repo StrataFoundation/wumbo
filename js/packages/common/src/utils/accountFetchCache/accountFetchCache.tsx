@@ -1,4 +1,4 @@
-import { AccountInfo, Connection, PublicKey } from '@solana/web3.js';
+import { AccountInfo, Connection, PublicKey, SendOptions, Signer, Transaction, TransactionInstruction } from '@solana/web3.js';
 import { getMultipleAccounts } from './getMultipleAccounts';
 import { EventEmitter } from './eventEmitter';
 import { Commitment } from '@solana/web3.js';
@@ -23,6 +23,8 @@ export class AccountFetchCache {
   delay: number;
   commitment: Commitment;
   accountChangeListeners = new Map<string, number>();
+  statics = new Set<string>();
+  missingAcccounts = new Map<string, AccountParser<unknown> | undefined>();
   genericCache = new Map<string, ParsedAccountBase<unknown> | null>();
   keyToAccountParser = new Map<string, AccountParser<unknown>>();
   timeout: NodeJS.Timeout | null = null
@@ -31,11 +33,62 @@ export class AccountFetchCache {
   pendingCalls = new Map<string, Promise<ParsedAccountBase<unknown>>>();;
   emitter = new EventEmitter();
 
-  constructor({ connection, chunkSize = DEFAULT_CHUNK_SIZE, delay = DEFAULT_DELAY, commitment }: { connection: Connection, chunkSize?: number, delay?: number, commitment: Commitment }) {
+  missingInterval: NodeJS.Timeout
+
+  constructor({ connection, chunkSize = DEFAULT_CHUNK_SIZE, delay = DEFAULT_DELAY, commitment, missingRefetchDelay = 10000 }: { connection: Connection, chunkSize?: number, delay?: number, commitment: Commitment, missingRefetchDelay?: number }) {
     this.connection = connection;
     this.chunkSize = chunkSize;
     this.delay = delay;
     this.commitment = commitment;
+    this.missingInterval = setInterval(this.fetchMissing.bind(this), missingRefetchDelay);
+
+    const oldSendTransaction = connection.sendTransaction.bind(connection);
+    const oldSendRawTransaction = connection.sendRawTransaction.bind(connection);
+
+    const self = this;
+    connection.sendTransaction = async function overloadedSendTransaction(
+      transaction: Transaction,
+      signers: Array<Signer>,
+      options?: SendOptions
+    ) {
+      const result = await oldSendTransaction(transaction, signers, options);
+      self.requeryMissing(transaction.instructions)
+
+      return result;
+    }
+
+    connection.sendRawTransaction = async function overloadedSendRawTransaction(
+      rawTransaction: Buffer | Uint8Array | Array<number>,
+      options?: SendOptions,
+    ) {
+      const result = await oldSendRawTransaction(rawTransaction, options);
+      self.requeryMissing(Transaction.from(rawTransaction).instructions)
+
+      return result;
+    }
+  }
+
+  async requeryMissing(instructions: TransactionInstruction[]) {
+    const writeableAccounts = instructions.flatMap(i => i.keys.filter(k => k.isWritable)).map(a => a.pubkey.toBase58());
+    const affectedAccounts = writeableAccounts.filter(acct => this.missingAcccounts.has(acct));
+    await Promise.all(affectedAccounts.map(async account => {
+      const parser = this.missingAcccounts.get(account);
+      const result = await this.addToBatch(new PublicKey(account))
+      this.onAccountChange(new PublicKey(account), parser, result);
+    }))
+  }
+
+  async fetchMissing() {
+    try {
+      await Promise.all([...this.missingAcccounts].map(([account, _]) => this.search(new PublicKey(account), this.missingAcccounts.get(account))))
+    } catch(e) {
+      // This happens in an interval, so just log errors
+      console.error(e);
+    }
+  }
+
+  close() {
+    clearInterval(this.missingInterval);
   }
 
   async fetchBatch() {
@@ -91,7 +144,8 @@ export class AccountFetchCache {
     pubKey: string | PublicKey,
     parser: AccountParser<T> = (pubkey, account) => ({
       pubkey, account
-    })
+    }),
+    isStatic: Boolean = false // optimization, set if the data will never change
   ): Promise<ParsedAccountBase<T> | undefined> {
     let id: PublicKey;
     if (typeof pubKey === 'string') {
@@ -101,7 +155,10 @@ export class AccountFetchCache {
     }
 
     const address = id.toBase58();
-
+    if (isStatic) {
+      this.statics.add(address)
+    }
+    
     let account = this.genericCache.get(address) as ParsedAccountBase<T>;
     if (account) {
       return account;
@@ -112,9 +169,8 @@ export class AccountFetchCache {
       return existingQuery;
     }
 
-    this.watch(id, parser);
-
     const query = this.addToBatch(id).then(data => {
+      this.watch(id, parser, !!data);
       if (!data) {
         this.genericCache.set(id.toBase58(), null)
         return undefined;
@@ -135,11 +191,25 @@ export class AccountFetchCache {
     this.add(key, account, parser)
   }
 
-  watch<T>(id: PublicKey, parser?: AccountParser<T>): void {
-    this.accountChangeListeners.set(
-      id.toBase58(),
-      this.connection.onAccountChange(id, this.onAccountChange.bind(this, id, parser), this.commitment)
-    );
+  watch<T>(id: PublicKey, parser?: AccountParser<T>, exists: Boolean = true): void {
+    const address = id.toBase58()
+    const isStatic = this.statics.has(address)
+    if (exists && !isStatic) { // Only websocket watch accounts that exist
+      this.missingAcccounts.delete(address);
+
+      // Don't recreate listeners
+      if (!this.accountChangeListeners.has(address)) {
+        console.log(`Watching ${address}`);
+        this.accountChangeListeners.set(
+          address,
+          this.connection.onAccountChange(id, this.onAccountChange.bind(this, id, parser), this.commitment)
+        );
+      }
+    } else { // Poll accounts that don't exist
+      if (!this.missingAcccounts.has(address) && !this.missingAcccounts.get(address)) { // If a parser is defined, don't set it.
+        this.missingAcccounts.set(address, parser);
+      }
+    }
   }
 
   async query<T>(

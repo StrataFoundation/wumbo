@@ -14,6 +14,7 @@ import {
   useAccountFetchCache,
   TokenRef,
   useReverseTwitter,
+  handleErrors,
 } from "wumbo-common";
 import { useAsyncCallback } from "react-async-hook";
 import { useClaimFlow } from "@/utils/claim";
@@ -23,9 +24,8 @@ export default React.memo(() => {
   const { splWumboProgram } = usePrograms();
   const query = useQuery();
   const { publicKey } = useWallet();
-  const { handle: ownerTwitterHandle } = useReverseTwitter(
-    publicKey || undefined
-  );
+  const { handle: ownerTwitterHandle, error: reverseTwitterError } =
+    useReverseTwitter(publicKey || undefined);
 
   const createCreator = async () => {
     const handle = query.get("name")!;
@@ -41,16 +41,14 @@ export default React.memo(() => {
         `?name=${query.get("name")!}`
     );
   };
+
   const {
     execute,
     loading: creationLoading,
     error,
   } = useAsyncCallback(createCreator);
-  if (error) {
-    // TODO: Actual error handling
-    console.error(error);
-  }
-  const { claim, loading } = useClaimFlow(query.get("name"));
+  const { claim, loading, error: claimError } = useClaimFlow(query.get("name"));
+  handleErrors(reverseTwitterError, error, claimError);
 
   return (
     <>

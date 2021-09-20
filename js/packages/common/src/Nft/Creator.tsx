@@ -1,9 +1,10 @@
 import React from "react";
 import { Metadata as MetaplexMetadata } from "@oyster/common";
-import { useSocialTokenMetadata, ITokenBonding } from "../utils";
+import { ITokenBonding, useSocialTokenMetadata } from "../utils";
 import { Link } from "react-router-dom";
 import { PublicKey } from "@solana/web3.js";
 import { Avatar } from "../";
+import { handleErrors } from "../contexts";
 
 export type GetCreatorLink = (
   c: PublicKey,
@@ -12,14 +13,10 @@ export type GetCreatorLink = (
 ) => string;
 
 export const Creator = React.memo(
-  ({
-    creator,
-    getCreatorLink,
-  }: {
-    creator: PublicKey;
-    getCreatorLink: GetCreatorLink;
-  }) => {
-    const { metadata, tokenBonding } = useSocialTokenMetadata(creator);
+  ({ creator, getCreatorLink }: { creator: PublicKey; getCreatorLink: GetCreatorLink }) => {
+    const { metadata, tokenBonding, error } = useSocialTokenMetadata(creator);
+    handleErrors(error);
+
     const truncatePubkey = (pkey: PublicKey): string => {
       const pkeyStr = pkey.toString();
 

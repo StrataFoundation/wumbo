@@ -8,7 +8,7 @@ export function useClaimFlow(name?: string | null): IClaimFlowOutput {
   const { claim, redirectUri } = useClaimLink({ handle: `${name}` });
   const [claimWindow, setClaimWindow] = useState<Window>();
   const { publicKey } = useWallet();
-  const { handle: ownerTwitterHandle } = useReverseTwitter(publicKey || undefined);
+  const { handle: ownerTwitterHandle, error: reverseTwitterError } = useReverseTwitter(publicKey || undefined);
   const {
     create,
     error: createCoinError,
@@ -43,6 +43,6 @@ export function useClaimFlow(name?: string | null): IClaimFlowOutput {
   return {
     claim: smartClaim,
     loading: creating,
-    error: createCoinError
+    error: createCoinError || reverseTwitterError
   }
 }

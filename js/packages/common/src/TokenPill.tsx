@@ -10,6 +10,7 @@ import { useTokenMetadata } from "./utils/metaplex";
 import { MetadataAvatar } from "./Avatar";
 import { Link, useHistory } from "react-router-dom";
 import { ITokenBonding } from "./utils/deserializers/spl-token-bonding";
+import { handleErrors } from "./contexts";
 
 interface TokenPillProps {
   name?: String;
@@ -27,9 +28,10 @@ interface MetadataTokenPillProps {
 }
 export const MetadataTokenPill = React.memo(
   ({ name, ticker, tokenBonding, detailsPath }: MetadataTokenPillProps) => {
-    const { metadata, loading } = useTokenMetadata(tokenBonding?.targetMint);
+    const { metadata, loading, error } = useTokenMetadata(tokenBonding?.targetMint);
     const displayTicker = metadata?.data.symbol || ticker;
     const displayName = metadata?.data.name || name;
+    handleErrors(error);
     const displayIcon = loading ? (
       <Spinner size="md" />
     ) : (

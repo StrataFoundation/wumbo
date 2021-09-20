@@ -36,6 +36,7 @@ import {
   TokenBonding,
   ITokenBonding,
   useTokenRefFromBonding,
+  handleErrors,
 } from "wumbo-common";
 import { routes, viewProfilePath } from "@/constants/routes";
 import { TokenForm, FormValues } from "./TokenForm";
@@ -118,12 +119,14 @@ export const TradeRoute = () => {
   const tokenBondingKey = new PublicKey(params.tokenBondingKey);
   const { info: tokenBonding } = useAccount(tokenBondingKey, TokenBonding);
   const info = useTokenInfo(tokenBonding);
-  const { name, ticker, icon, loading } = info;
+  const { name, ticker, icon, error: tokenInfoError } = info;
   const ownedWUM = useOwnedAmount(WUM_TOKEN);
   const fiatPrice = useFiatPrice(tokenBonding?.baseMint);
   const toFiat = (a: number) => (fiatPrice || 0) * a;
   const ftxPayLink = useFtxPayLink();
   const location = useLocation();
+
+  handleErrors(tokenInfoError);
 
   if (!tokenBonding || !name || !icon) {
     return <WumboDrawer.Loading />;
@@ -234,6 +237,8 @@ export const Trade = ({
   const ownedTarget = useOwnedAmount(tokenBonding.targetMint);
   const location = useLocation();
   const { info: tokenRef } = useTokenRefFromBonding(tokenBonding.publicKey);
+
+  handleErrors(buyError, sellError);
 
   const onHandleBuy = async (values: FormValues) => {
     await buy(tokenBonding.publicKey, +values.tokenAmount, BASE_SLIPPAGE);

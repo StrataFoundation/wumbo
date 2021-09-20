@@ -16,7 +16,7 @@ import {
   WalletNotReadyError,
 } from "@solana/wallet-adapter-base";
 import { Wallet, WalletName } from "@solana/wallet-adapter-wallets";
-import { PublicKey, Transaction } from "@solana/web3.js";
+import { PublicKey, Transaction, TransactionInstruction } from "@solana/web3.js";
 import { useLocalStorage } from "../utils";
 import { Provider } from "@wum.bo/anchor";
 import { useConnection } from "@oyster/common";

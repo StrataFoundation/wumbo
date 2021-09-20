@@ -116,9 +116,8 @@ export function useOwnedAmountForOwnerAndHandle(
   return state;
 }
 
-export function useOwnedAmount(token: PublicKey | undefined): number | undefined {
-  const { adapter } = useWallet();
-  const { associatedAccount } = useAssociatedAccount(adapter?.publicKey, token);
+export function useUserOwnedAmount(wallet: PublicKey | undefined, token: PublicKey | undefined): number | undefined {
+  const { associatedAccount } = useAssociatedAccount(wallet, token);
   const mint = useMint(token);
   const [amount, setAmount] = useState<number>();
 
@@ -131,6 +130,11 @@ export function useOwnedAmount(token: PublicKey | undefined): number | undefined
   return amount && Number(amount);
 }
 
+export function useOwnedAmount(token: PublicKey | undefined): number | undefined {
+  const { publicKey } = useWallet();
+  return useUserOwnedAmount(publicKey || undefined, token);
+}
+
 export interface PricingState {
   loading: boolean;
   curve?: Curve
@@ -140,7 +144,7 @@ export function useBondingPricing(tokenBonding: PublicKey | undefined): PricingS
     loading: true
   });
   const { info: bonding } = useAccount(tokenBonding, TokenBonding);
-  const { info: curve } = useAccount(bonding?.curve, DeserializeCurve);
+  const { info: curve } = useAccount(bonding?.curve, DeserializeCurve, true);
 
   const base = useMint(bonding?.baseMint);
   const target = useMint(bonding?.targetMint);

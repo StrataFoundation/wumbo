@@ -22,7 +22,7 @@ export const MainButton: FC<Props> = ({
   const { toggleDrawer } = useDrawer();
   const creatorInfoState = useUserInfo(creatorName);
   const { userInfo: creatorInfo, loading } = creatorInfoState;
-  const { info: wumboInstance } = useAccount(WUMBO_INSTANCE_KEY, WumboInstance);
+  const { info: wumboInstance } = useAccount(WUMBO_INSTANCE_KEY, WumboInstance, true);
 
   if (!loading && !creatorInfo && wumboInstance) {
     return (
