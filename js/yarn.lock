@@ -4588,54 +4588,54 @@
     snake-case "^3.0.4"
     toml "^3.0.0"
 
-"@wum.bo/spl-token-account-split@^0.0.18":
-  version "0.0.18"
-  resolved "https://registry.yarnpkg.com/@wum.bo/spl-token-account-split/-/spl-token-account-split-0.0.18.tgz#d7b70594b3d42903dbe858439ddeb9133add5e8a"
-  integrity sha512-U2EQ4+ZV9TapDnQWY4oTiSOhf6uTCVf+esKussRlRWhgOylaYDkt2JoAqwyeSE3zX0jP/rhhzst/lX/GVjBQ4A==
+"@wum.bo/spl-token-account-split@^0.0.20":
+  version "0.0.20"
+  resolved "https://registry.yarnpkg.com/@wum.bo/spl-token-account-split/-/spl-token-account-split-0.0.20.tgz#d9e467d0e4bc0eddfce0331643bba89697e6f89d"
+  integrity sha512-o1xMU/JFDz/D0ad+JXS2HovXeRR4a+UzSA1PjqJJ8JYjs7ikOOSh8fqHTjRhCNnbjQGFkjGtHTem9wpGlra1hQ==
   dependencies:
     "@project-serum/common" "^0.0.1-beta.3"
     "@solana/web3.js" "^1.24.1"
-    "@wum.bo/spl-token-staking" "^0.0.18"
+    "@wum.bo/spl-token-staking" "^0.0.20"
     bn.js "^5.2.0"
 
-"@wum.bo/spl-token-bonding@^0.0.18":
-  version "0.0.18"
-  resolved "https://registry.yarnpkg.com/@wum.bo/spl-token-bonding/-/spl-token-bonding-0.0.18.tgz#3d871cfb7d0add73c915747729676a1f81135dd1"
-  integrity sha512-vIycTUdRHFEJ0nvyMeIBA+4N0loNQvUfCj33j5g/gSCaB1B8WQyjadswTgwYZdGNHV7xdSaRr2hUJq1tttFMhA==
+"@wum.bo/spl-token-bonding@^0.0.20":
+  version "0.0.20"
+  resolved "https://registry.yarnpkg.com/@wum.bo/spl-token-bonding/-/spl-token-bonding-0.0.20.tgz#e268b5f9175a7306653fe0a838c13392648351f2"
+  integrity sha512-Nb4tBcDe37ekn3uCU6rhCXO1yt1Hl40Ph6ri9mUx5chLO41Lm1IpuAZ3THTrs0wfYUceEZgiKWIap2ELfJEkkw==
   dependencies:
     "@project-serum/common" "^0.0.1-beta.3"
     "@solana/web3.js" "^1.24.1"
     bn.js "^5.2.0"
     copyfiles "^2.4.1"
 
-"@wum.bo/spl-token-staking@^0.0.18":
-  version "0.0.18"
-  resolved "https://registry.yarnpkg.com/@wum.bo/spl-token-staking/-/spl-token-staking-0.0.18.tgz#fd56a8f0f1356b6aff97107b2f26649745a37ff4"
-  integrity sha512-xMXlZaz5f6v1hf6nujobsPtkR9UYWw5dgZt1JXjullBDqG24+Wuna5nMmB6coBSBFq/z2h/7JmNNB4Kcl/VidQ==
+"@wum.bo/spl-token-staking@^0.0.20":
+  version "0.0.20"
+  resolved "https://registry.yarnpkg.com/@wum.bo/spl-token-staking/-/spl-token-staking-0.0.20.tgz#3f40a949b75ec57a1c8a82dce1cb335c49c263ae"
+  integrity sha512-y9JB+1UJMmj6s2vxyJvK36Cj7MBwprfK/O91g7yDZI1EyFU7RRjtXAe06TMNB6K7KOvFkdXAx/1ErsFRcBe0VA==
   dependencies:
     "@project-serum/common" "^0.0.1-beta.3"
     "@solana/web3.js" "^1.24.1"
     bn.js "^5.2.0"
 
-"@wum.bo/spl-utils@^0.0.18":
-  version "0.0.18"
-  resolved "https://registry.yarnpkg.com/@wum.bo/spl-utils/-/spl-utils-0.0.18.tgz#1b8f81d80c18f4a37b5d8c97122dfe0c2e67ea9d"
-  integrity sha512-F+c/sdQ0C1g44jCXWTQDK2mWlAEuG8k3+OSLblbPJW4sRzjoezrQuECFT1cUsCPdjnuTaXGQ4U58NS8MxlEwtQ==
+"@wum.bo/spl-utils@^0.0.20":
+  version "0.0.20"
+  resolved "https://registry.yarnpkg.com/@wum.bo/spl-utils/-/spl-utils-0.0.20.tgz#a2a2b95be46bca5ab5fbc398df4e081b9b29afa8"
+  integrity sha512-mkqcLbzcCBg8T36EtPUMvFnRNcvbUzBEqBhq5IwV1XjrDpzwiMHFlul/w04TmBi7W/x34hfM44ZuFhLtEwYsqQ==
   dependencies:
     bs58 "^4.0.1"
 
-"@wum.bo/spl-wumbo@^0.0.18":
-  version "0.0.18"
-  resolved "https://registry.yarnpkg.com/@wum.bo/spl-wumbo/-/spl-wumbo-0.0.18.tgz#32218b7c1f0ab90a163061e763dd9682ae2ff66f"
-  integrity sha512-1NvYJxZRvgdFEVN5rowjFphT/Ma4rg/jNuHth+D3ZD7nCAtikgoFgV+hHCiMXh1mhBjqDDF/SKHHfNHCFQ1A3g==
+"@wum.bo/spl-wumbo@^0.0.20":
+  version "0.0.20"
+  resolved "https://registry.yarnpkg.com/@wum.bo/spl-wumbo/-/spl-wumbo-0.0.20.tgz#00c7a97e654aab2e396b12a55f4bab6e296147c1"
+  integrity sha512-T7zLsf3YnxojU9MDNp+7SZyIASLkz5RQC/w1k9+6Jcw0vyrvllox9RUsuOGYFc86TwE+E4rkLs7gok/tXVygdg==
   dependencies:
     "@bonfida/spl-name-service" "^0.1.14"
     "@project-serum/common" "^0.0.1-beta.3"
     "@solana/web3.js" "^1.24.1"
-    "@wum.bo/spl-token-account-split" "^0.0.18"
-    "@wum.bo/spl-token-bonding" "^0.0.18"
-    "@wum.bo/spl-token-staking" "^0.0.18"
-    "@wum.bo/spl-utils" "^0.0.18"
+    "@wum.bo/spl-token-account-split" "^0.0.20"
+    "@wum.bo/spl-token-bonding" "^0.0.20"
+    "@wum.bo/spl-token-staking" "^0.0.20"
+    "@wum.bo/spl-utils" "^0.0.20"
     bn.js "^5.2.0"
     copyfiles "^2.4.1"
 

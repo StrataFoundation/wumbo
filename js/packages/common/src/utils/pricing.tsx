@@ -1,5 +1,6 @@
 import { Market } from "@project-serum/serum";
-import { Connection, PublicKey } from "@solana/web3.js";
+import { AccountInfo, Connection, PublicKey } from "@solana/web3.js";
+import BN from "bn.js";
 import React, { useContext, useEffect, useMemo, useState } from "react";
 import {
   SERUM_PROGRAM_ID,
@@ -17,11 +18,12 @@ import { useAccount } from "./account";
 import { useMint } from "./mintState";
 import { useAssociatedAccount } from "./walletState";
 import { useWallet } from "../contexts/walletContext";
-import { useConnection } from "@oyster/common";
+import { TokenAccountParser, useConnection } from "@oyster/common";
 import { useAsync } from "react-async-hook";
 import { useTwitterTokenRef } from "./tokenRef";
 import { Curve as DeserializeCurve, TokenBonding } from "./deserializers/spl-token-bonding";
 import { Curve, fromCurve } from "@wum.bo/spl-token-bonding";
+import { useQuery, gql } from '@apollo/client';
 
 // TODO: Use actual connection. But this can't happen in dev
 let connection = new Connection("https://api.mainnet-beta.solana.com");
@@ -160,12 +162,36 @@ export function useBondingPricing(tokenBonding: PublicKey | undefined): PricingS
   return state;
 }
 
+
+const GET_TOTAL_WUM_LOCKED = gql`
+  query GetTotalWumLocked {
+    totalWumLocked
+  }
+`;
 export const UsdWumboPriceProvider = ({ children = undefined as any }) => {
-  const price = useMarketPrice(SOL_TO_USD_MARKET);
-  const { curve } = useBondingPricing(WUM_BONDING);
+  const solPrice = useMarketPrice(SOL_TO_USD_MARKET);
+
+  // Normal wum price...
+  // const { curve } = useBondingPricing(WUM_BONDING);
+  // const wumPrice = (solPrice || 0) * (curve ? curve.current() : 0);
+
+  // Beta wum price...
+  const solMint = useMint(SOL_TOKEN);
+  const { info: wumBonding } = useAccount(WUM_BONDING, TokenBonding);
+  const { info: baseStorage } = useAccount(
+    wumBonding?.baseStorage,
+    (pubkey: PublicKey, acct: AccountInfo<Buffer>) => {
+      return TokenAccountParser(pubkey, acct)!.info;
+    }
+  );
+  const { data: { totalWumLocked } = {} } = useQuery<{ totalWumLocked: number | undefined }>(GET_TOTAL_WUM_LOCKED, {})
+  const baseStorageAmount = baseStorage && solMint ? amountAsNum(baseStorage.amount, solMint) : 0
+  const bwumPrice = (baseStorageAmount / (totalWumLocked || 0)) * (solPrice || 0)
+
+  console.log(baseStorageAmount);
 
   return (
-    <UsdWumboPriceContext.Provider value={(price || 0) * (curve ? curve.current() : 0)}>
+    <UsdWumboPriceContext.Provider value={bwumPrice}>
       {children}
     </UsdWumboPriceContext.Provider>
   );
