@@ -13,6 +13,7 @@ import { WalletName } from "@solana/wallet-adapter-wallets";
 import { InjectedWalletAdapter } from "@/utils/wallets";
 import { WalletError } from "@solana/wallet-adapter-base";
 import toast from "react-hot-toast";
+import { ThemeProvider } from "@/contexts/themeContext";
 
 export const ContextProviders: FC = ({ children }) => {
   const alteredWallets = useMemo(
@@ -26,7 +27,8 @@ export const ContextProviders: FC = ({ children }) => {
         ];
 
         if (injectedWalletNames.includes(wallet.name)) {
-          wallet.adapter = () => new InjectedWalletAdapter({ name: wallet.name });
+          wallet.adapter = () =>
+            new InjectedWalletAdapter({ name: wallet.name });
         }
 
         return wallet;
@@ -57,7 +59,9 @@ export const ContextProviders: FC = ({ children }) => {
           <AccountsProvider>
             <WalletProvider wallets={alteredWallets} onError={onError}>
               <UsdWumboPriceProvider>
-                <DrawerProvider>{children}</DrawerProvider>
+                <DrawerProvider>
+                  <ThemeProvider>{children}</ThemeProvider>
+                </DrawerProvider>
               </UsdWumboPriceProvider>
             </WalletProvider>
           </AccountsProvider>

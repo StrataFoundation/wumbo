@@ -1,7 +1,7 @@
 import React, { Fragment } from "react";
 import ReactShadow from "react-shadow/emotion";
-import { ThemeProvider, Box, CSSReset } from "@chakra-ui/react";
-import { theme } from "@/theme";
+import { Box } from "@chakra-ui/react";
+import { ThemeProvider } from "@/contexts/themeContext";
 
 import { AppendChildPortal } from "wumbo-common";
 import { useUserCells } from "../../utils/twitterSpotter";
@@ -47,8 +47,7 @@ export const UserCellEnhancer = () => {
             <Fragment key={cell.name + getElementId(cell.buttonTarget)}>
               <AppendChildPortal container={cell.buttonTarget as Element}>
                 <ReactShadow.div>
-                  <ThemeProvider theme={theme}>
-                    <CSSReset />
+                  <ThemeProvider>
                     <Box
                       d="flex"
                       justifyContent="center"

@@ -7,7 +7,7 @@ import {
   Spinner,
   Text,
   IconButton,
-  Link,
+  Button,
   Icon,
 } from "@chakra-ui/react";
 import { HiOutlineX } from "react-icons/hi";
@@ -127,11 +127,12 @@ WumboDrawer.Nav = () => {
               key={path}
               path={filledPath}
               children={({ match }) => (
-                <Link
+                <Button
                   as={NavLink}
                   to={filledPath}
                   d="inline-flex"
                   flexDir="column"
+                  variant="unstyled"
                   justifyContent="center"
                   alignItems="center"
                   color={match ? "indigo.500" : "gray.600"}
@@ -140,11 +141,12 @@ WumboDrawer.Nav = () => {
                   borderBottom="3px"
                   borderBottomStyle="solid"
                   borderColor={match ? "indigo.500" : "transparent"}
+                  borderRadius="none"
                 >
                   {/* @ts-ignore */}
                   <Icon as={RouteIcon} w={5} h={5} />
                   <Text fontSize="sm">{startCase(route)}</Text>
-                </Link>
+                </Button>
               )}
             />
           );

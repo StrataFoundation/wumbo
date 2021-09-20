@@ -1,7 +1,7 @@
 import React from "react";
 import ReactShadow from "react-shadow/emotion";
-import { ThemeProvider, CSSReset, Box } from "@chakra-ui/react";
-import { theme } from "@/theme";
+import { Box } from "@chakra-ui/react";
+import { ThemeProvider } from "@/contexts/themeContext";
 
 import { AppendChildPortal } from "wumbo-common";
 import { useProfile } from "../../utils/twitterSpotter";
@@ -29,8 +29,7 @@ export const ProfileEnhancer = () => {
       return (
         <AppendChildPortal container={profile.buttonTarget as Element}>
           <ReactShadow.div>
-            <ThemeProvider theme={theme}>
-              <CSSReset />
+            <ThemeProvider>
               <Box
                 d="flex"
                 justifyContent="center"

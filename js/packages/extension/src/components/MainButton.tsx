@@ -31,6 +31,7 @@ export const MainButton: FC<Props> = ({
           size="xs"
           colorScheme="indigo"
           variant="outline"
+          _focus={{ boxShadow: "none" }}
           onClick={() =>
             toggleDrawer({
               isOpen: true,
