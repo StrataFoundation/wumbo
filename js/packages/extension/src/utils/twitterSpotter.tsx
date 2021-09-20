@@ -87,27 +87,23 @@ enum Elements {
   TweetMintButton,
 }
 
-const findButtonTarget = (nameEl: HTMLElement) => {
-  const traverseUp = (el: HTMLElement | null): HTMLElement | null => {
-    if (!el) return null;
-    // traverase upwards until the parent has a sibling.
-    // we found the two columns that make up a tweet
-    // the first holding the profile img
-    if (el.parentElement!.nextSibling) return el.parentElement;
-    return traverseUp(el.parentElement);
-  };
+function findChildWithDimension(el: Element, width: number, height: number): Element | undefined {
+  const children =  [...el.children];
+  const childWithWidth = children.find(c => {
+    const computed = getComputedStyle(c);
+    return computed.width == `${width}px` && computed.height == `${height}px`
+  });
+  if (!childWithWidth) {
+    for (const child of children) {
+      const found = findChildWithDimension(child, width, height);
+      if (found) {
+        return found
+      }
+    }
+  }
 
-  return traverseUp(nameEl);
-};
-
-// TODO: (Bry) Figure out better way
-const findTweetChildren = (tweet: Element): HTMLCollection | null => {
-  // go down until we find multiple children
-  // this is usualy the main content of the tweet
-  if (!tweet.children.length) return null;
-  if (tweet.children.length > 1) return tweet.children;
-  return findTweetChildren(tweet.children[0]);
-};
+  return childWithWidth;
+}
 
 export const useTweets = (): IParsedTweet[] | null => {
   const [tweets, setTweets] = useState<IParsedTweet[]>([]);
@@ -125,19 +121,12 @@ export const useTweets = (): IParsedTweet[] | null => {
 
         const parsedTweets = tweets.reduce(
           (acc: any, tweet: any, index: number): IParsedTweet[] => {
-            const tweetChildren = findTweetChildren(tweet);
-            let nameEl;
-
-            if (!tweetChildren) {
-              nameEl = tweet.querySelector("a");
-            } else {
-              nameEl = tweetChildren[1].querySelector("a");
-            }
+            const buttonTarget = findChildWithDimension(tweet, 48, 48)!
+            const nameEl = buttonTarget.querySelector("a");
 
             if (nameEl) {
               const name = nameEl.href.split("/").slice(-1)[0];
               const imgEl = nameEl.querySelector("img");
-              const buttonTarget = findButtonTarget(nameEl);
               let mentions: string[] | null = null;
               let replyTokensTarget: Element | null = null;
 

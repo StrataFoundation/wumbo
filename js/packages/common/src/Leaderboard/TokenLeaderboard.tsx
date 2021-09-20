@@ -47,9 +47,7 @@ const GET_TOP_HOLDERS = gql`
 `;
 const GET_HOLDER_RANK = gql`
   query GetHolderRank($mint: String!, $key: String!) {
-    accountRank(mint: $mint, startRank: $startRank, stopRank: $stopRank) {
-      publicKey
-    }
+    accountRank(mint: $mint, publicKey: $key)
   }
 `;
 function useLocalAccountsPagination(

@@ -245,7 +245,7 @@ export const TaggableImages = ({
                   const mismatchPercent = +(
                     await compareImages(img1, img2, { scaleToSameSize: true })
                   ).misMatchPercentage;
-                  if (mismatchPercent <= 15) {
+                  if (mismatchPercent <= 25) {
                     return [
                       img2Src,
                       {
