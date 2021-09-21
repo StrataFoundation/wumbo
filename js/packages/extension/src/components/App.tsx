@@ -33,8 +33,8 @@ const App: FC = () => (
           <Route path={routes.claim.path} component={Claim} />
           <Route path={routes.customize.path} component={Customize} />
           <Route path={routes.trade.path} component={TradeRoute} />
-          <Route path={routes.myCoins.path} component={MyCoins} />
-          <Route path={routes.wallet.path} component={Wallet} />
+          <Route path={routes.wallet.path} component={MyCoins} />
+          <Route path={routes.manageWallet.path} component={Wallet} />
           <Route path={routes.viewProfile.path} component={Profile} />
           <Route path={routes.viewNft.path} component={ViewNft} />
           <Route path={routes.editProfile.path} component={EditProfileRoute} />

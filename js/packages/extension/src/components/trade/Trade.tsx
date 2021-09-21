@@ -140,7 +140,7 @@ export const TradeRoute = () => {
         <Button
           as={Link}
           to={
-            routes.wallet.path +
+            routes.manageWallet.path +
             `?redirect=${location.pathname}${location.search}`
           }
           size="sm"
