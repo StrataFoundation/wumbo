@@ -12,7 +12,7 @@ export default React.memo(() => {
     const redirect = query.get("redirect");
     if (connected && redirect) {
       console.log(`Redirecting to ${redirect}`);
-      history.push(redirect);
+      history.replace(redirect);
     }
   }, [connected, query.get("redirect"), history]);
 

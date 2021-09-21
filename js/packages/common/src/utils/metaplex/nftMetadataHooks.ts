@@ -95,7 +95,7 @@ export async function getEditionInfo(
         account.data[0] == MetadataKey.EditionV1
           ? decodeEdition(account.data)
           : decodeMasterEdition(account.data),
-    }))) || {};
+    }), true)) || {};
 
   if (editionOrMasterEdition instanceof Edition) {
     edition = editionOrMasterEdition;
@@ -104,7 +104,7 @@ export async function getEditionInfo(
         pubkey,
         account,
         info: decodeMasterEdition(account.data),
-      }))) || {};
+      }), true)) || {};
     masterEdition = masterEditionInfo;
   } else {
     masterEdition = editionOrMasterEdition;
@@ -121,7 +121,7 @@ export async function getTokenMetadata(
   metadataKey: PublicKey
 ): Promise<ITokenWithMeta> {
   const { info: metadata } =
-    (await cache.search(metadataKey, MetadataParser)) || {};
+    (await cache.search(metadataKey, MetadataParser, true)) || {};
   const data = await getArweaveMetadata(metadata?.data.uri);
   const image = data?.image;
   const description = data?.description;
@@ -165,7 +165,8 @@ export function useTokenMetadata(
   } = useAsync(getMetadataKey, [token]);
   const { info: metadata, loading: accountLoading } = useAccount(
     metadataAccountKey,
-    (_, acct) => decodeMetadata(acct.data)
+    (_, acct) => decodeMetadata(acct.data),
+    true
   );
 
   const cache = useAccountFetchCache();

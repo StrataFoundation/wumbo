@@ -1,8 +1,9 @@
 import React, { Fragment, ReactNode } from "react";
-import { Route, NavLink, Link } from "react-router-dom";
+import { Route, NavLink, Link, useHistory } from "react-router-dom";
 import startCase from "lodash/startCase";
 import { Flex, Box, Fade, Text, IconButton, Button, Icon } from "@chakra-ui/react";
 import { HiOutlineX } from "react-icons/hi";
+import { IoMdArrowRoundBack } from "react-icons/io";
 import { BiRadioCircleMarked } from "react-icons/bi";
 import { RiWallet3Line } from "react-icons/ri";
 import { Toaster } from "react-hot-toast";
@@ -55,6 +56,7 @@ WumboDrawer.Header = (props: HeaderProps) => {
   const { toggleDrawer } = useDrawer();
   const hasTitle = !!(props as HeaderNoChildren).title;
   const { connected } = useWallet();
+  const history = useHistory();
 
   return (
     <Box
@@ -64,33 +66,52 @@ WumboDrawer.Header = (props: HeaderProps) => {
       fontFamily="body"
     >
       <Box d="flex" alignItems="center" justifyContent="space-between">
-        <Box w="full">
+        <Flex w="full" alignItems="center">
+          { history.length > 1 && 
+          <Box
+            _hover={{cursor: "pointer"}}
+            onClick={() => history.goBack()}
+          >
+            <Icon
+              mr={2}
+              w={5}
+              h={5}
+              as={IoMdArrowRoundBack}
+              fontSize="lg"
+              fontWeight="medium"
+              color="indigo.500"
+            />
+          </Box>
+          }
           {hasTitle && (
             <Text fontSize="lg" fontWeight="medium" color="indigo.500">
               {(props as HeaderNoChildren).title}
             </Text>
           )}
           {!hasTitle && (props as HeaderWithChildren).children}
-        </Box>
-        <Flex pr={2} direction="row" justifyContent="flex-end">
-          <Link
-            to={routes.manageWallet.path}
-          >
-            <Box position="relative">
-              <Icon as={RiWallet3Line} />
-              <Icon
-                w={4}
-                h={4}
-                fontWeight="bold"
-                position="absolute"
-                left={-1.5}
-                bottom={-1.5}
-                as={BiRadioCircleMarked}
-                color={connected ? "green.500" : "red.500"}
-              />
-            </Box>
-          </Link>
         </Flex>
+        <Flex alignItems="center">
+          <Box pr={2}>
+            <Link
+              to={routes.manageWallet.path}
+            >
+              <Box position="relative">
+                <Icon as={RiWallet3Line} />
+                <Icon
+                  w={4}
+                  h={4}
+                  fontWeight="bold"
+                  position="absolute"
+                  left={-1.5}
+                  bottom={-1.5}
+                  as={BiRadioCircleMarked}
+                  color={connected ? "green.500" : "red.500"}
+                />
+              </Box>
+            </Link>
+          </Box>
+        </Flex>
+
         <Box
           color="gray.400"
           _hover={{ color: "gray.500", cursor: "pointer" }}

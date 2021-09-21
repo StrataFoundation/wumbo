@@ -1,6 +1,6 @@
 import React from "react";
 import { Metadata as MetaplexMetadata } from "@oyster/common";
-import { ITokenBonding, useSocialTokenMetadata } from "../utils";
+import { ITokenBonding, ITokenRef, useSocialTokenMetadata } from "../utils";
 import { Link } from "react-router-dom";
 import { PublicKey } from "@solana/web3.js";
 import { Avatar } from "../";
@@ -9,7 +9,7 @@ import { handleErrors } from "../contexts";
 export type GetCreatorLink = (
   c: PublicKey,
   t: MetaplexMetadata | undefined,
-  b: ITokenBonding | undefined
+  b: ITokenRef | undefined
 ) => string;
 
 export const Creator = React.memo(
@@ -20,7 +20,7 @@ export const Creator = React.memo(
     creator: PublicKey;
     getCreatorLink: GetCreatorLink;
   }) => {
-    const { metadata, tokenBonding, error } = useSocialTokenMetadata(creator);
+    const { metadata, tokenRef, error, image } = useSocialTokenMetadata(creator);
     handleErrors(error);
 
     const truncatePubkey = (pkey: PublicKey): string => {
@@ -30,12 +30,12 @@ export const Creator = React.memo(
     };
 
     return (
-      <Link to={getCreatorLink(creator, metadata, tokenBonding)}>
+      <Link to={getCreatorLink(creator, metadata, tokenRef)}>
         {metadata && (
           <Avatar
             showDetails
             size="xs"
-            src={metadata.data.uri}
+            src={image}
             name={metadata.data.name}
           />
         )}

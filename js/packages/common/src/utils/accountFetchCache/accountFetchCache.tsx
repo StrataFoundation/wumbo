@@ -158,6 +158,8 @@ export class AccountFetchCache {
     const address = id.toBase58();
     if (isStatic) {
       this.statics.add(address)
+    } else if (this.statics.has(address)) {
+      this.statics.delete(address) // If trying to use this as not static, need to rm it from the statics list.
     }
     
     if (!forceRequery && this.genericCache.has(address)) {
