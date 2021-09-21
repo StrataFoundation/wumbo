@@ -55,21 +55,13 @@ interface TokenInfo {
 }
 function useTokenInfo(tokenBonding: TokenBondingV0 | undefined): TokenInfo {
   const query = useQuery();
-  const { metadata, image, error, loading } = useTokenMetadata(
+  const { metadata, image, error, metadataKey, loading } = useTokenMetadata(
     tokenBonding?.targetMint
   );
 
   return useMemo(() => {
     if (tokenBonding) {
-      if (tokenBonding.targetMint.toBase58() == WUM_TOKEN.toBase58()) {
-        return {
-          loading,
-          error,
-          ticker: "WUM",
-          icon: <Logo width="45" height="45" />,
-          name: "WUM",
-        };
-      } else if (metadata) {
+      if (metadata) {
         return {
           loading,
           error,
@@ -109,7 +101,7 @@ interface TradeParams {
   ticker: string;
   icon: React.ReactElement;
   baseTicker: string;
-  baseIcon: React.ReactElement;
+  baseIcon?: React.ReactElement;
   buyBaseLink: (arg0: boolean) => React.ReactElement;
 }
 
@@ -140,7 +132,7 @@ export const TradeRoute = () => {
         <Button
           as={Link}
           to={
-            routes.wallet.path +
+            routes.manageWallet.path +
             `?redirect=${location.pathname}${location.search}`
           }
           size="sm"
@@ -188,7 +180,7 @@ export const TradeRoute = () => {
   return (
     <Fragment>
       <WumboDrawer.Header>
-        <Flex justifyContent="space-between" alignItems="center">
+        <Flex w="full" justifyContent="space-between" alignItems="center">
           <Text fontSize="lg" fontWeight="medium" color="indigo.500">
             Trade WUM
           </Text>
@@ -197,15 +189,8 @@ export const TradeRoute = () => {
       </WumboDrawer.Header>
       <WumboDrawer.Content>
         <Trade
-          baseTicker={isTargetWUM ? "SOL" : "WUM"}
-          baseIcon={
-            isTargetWUM ? (
-              <SolLogo width="45" height="45" />
-            ) : (
-              <Logo width="45" height="45" />
-            )
-          }
-          ticker={isTargetWUM ? "WUM" : ticker || ""}
+          baseTicker={isTargetWUM ? "SOL" : (ticker || "")}
+          ticker={ticker || ""}
           name={name}
           tokenBonding={tokenBonding}
           icon={icon}
@@ -219,7 +204,6 @@ export const TradeRoute = () => {
 
 export const Trade = ({
   baseTicker,
-  baseIcon,
   name,
   icon,
   ticker,

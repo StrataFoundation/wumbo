@@ -14,6 +14,7 @@ import { TradeRoute } from "./trade/Trade";
 import { MyCoins } from "./my-coins/MyCoins";
 import { Wallet } from "./wallet/Wallet";
 import { ViewNft } from "./nft/ViewNft";
+import { TagNft } from "./nft/TagNft";
 import { Profile } from "./profile/Profile";
 import Claim from "./claim/Claim";
 import { EditProfileRoute } from "./profile/EditProfile";
@@ -33,10 +34,11 @@ const App: FC = () => (
           <Route path={routes.claim.path} component={Claim} />
           <Route path={routes.customize.path} component={Customize} />
           <Route path={routes.trade.path} component={TradeRoute} />
-          <Route path={routes.myCoins.path} component={MyCoins} />
-          <Route path={routes.wallet.path} component={Wallet} />
+          <Route path={routes.wallet.path} component={MyCoins} />
+          <Route path={routes.manageWallet.path} component={Wallet} />
           <Route path={routes.viewProfile.path} component={Profile} />
           <Route path={routes.viewNft.path} component={ViewNft} />
+          <Route path={routes.tagNft.path} component={TagNft} />
           <Route path={routes.editProfile.path} component={EditProfileRoute} />
           <Route path={routes.profile.path} exact component={Profile} />
         </Switch>

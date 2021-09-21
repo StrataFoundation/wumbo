@@ -11,6 +11,7 @@ interface IRoutes {
   viewNft: Route;
   profile: Route;
   editProfile: Route;
+  manageWallet: Route;
   wallet: Route;
 }
 
@@ -28,6 +29,7 @@ export function editProfile(ownerWalletKey: PublicKey): string {
 
 const routes: IRoutes = {
   claim: { path: "/claim" },
+  manageWallet: { path: "/manage-wallet" },
   wallet: { path: "/wallet" },
   viewProfile: { path: "/profile/view/:tokenRefKey" },
   viewNft: { path: "/nft/view/:mint" },

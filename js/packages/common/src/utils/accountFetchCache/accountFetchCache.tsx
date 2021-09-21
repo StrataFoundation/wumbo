@@ -158,6 +158,8 @@ export class AccountFetchCache {
     const address = id.toBase58();
     if (isStatic) {
       this.statics.add(address)
+    } else if (this.statics.has(address)) {
+      this.statics.delete(address) // If trying to use this as not static, need to rm it from the statics list.
     }
     
     if (!forceRequery && this.genericCache.has(address)) {
@@ -197,9 +199,11 @@ export class AccountFetchCache {
   watch<T>(id: PublicKey, parser?: AccountParser<T>, exists: Boolean = true): void {
     const address = id.toBase58()
     const isStatic = this.statics.has(address)
-    if (exists && !isStatic) { // Only websocket watch accounts that exist
+    if (exists) {
       this.missingAcccounts.delete(address);
+    }
 
+    if (exists && !isStatic) { // Only websocket watch accounts that exist
       // Don't recreate listeners
       if (!this.accountChangeListeners.has(address)) {
         console.log(`Watching ${address}`);
@@ -208,7 +212,7 @@ export class AccountFetchCache {
           this.connection.onAccountChange(id, this.onAccountChange.bind(this, id, parser), this.commitment)
         );
       }
-    } else { // Poll accounts that don't exist
+    } else if (!exists) { // Poll accounts that don't exist
       if (!this.missingAcccounts.has(address) && !this.missingAcccounts.get(address)) { // If a parser is defined, don't set it.
         this.missingAcccounts.set(address, parser);
       }

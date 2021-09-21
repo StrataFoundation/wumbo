@@ -9,7 +9,7 @@ import { useClaimLink } from "wumbo-common";
 import routes from "../../constants/routes";
 
 const BetaSplash: React.FC = () => {
-  const claim = useClaimLink({ redirectUri: routes.claim.path });
+  const { claim } = useClaimLink({ handle: "" });
 
   return (
     <div

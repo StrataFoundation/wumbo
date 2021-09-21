@@ -13,12 +13,13 @@ export interface IRoutes {
   claim: Route;
   customize: Route;
   trade: Route;
-  myCoins: Route;
   wallet: Route;
+  manageWallet: Route;
   profile: Route;
   editProfile: Route;
   viewProfile: Route;
   viewNft: Route;
+  tagNft: Route;
 }
 
 export function viewProfilePath(tokenRefKey: PublicKey): string {
@@ -30,6 +31,10 @@ export function viewProfilePath(tokenRefKey: PublicKey): string {
 
 export function nftPath(mint: PublicKey): string {
   return routes.viewNft.path.replace(":mint", mint.toBase58());
+}
+
+export function tagNftPath(mint: PublicKey): string {
+  return routes.tagNft.path.replace(":mint", mint.toBase58());
 }
 
 export function tradePath(tokenBondingKey: PublicKey): string {
@@ -55,9 +60,9 @@ export const routes: IRoutes = {
   create: { path: "/create", Icon: null, isDrawerNav: false },
   claim: { path: "/claim", Icon: null, isDrawerNav: false },
   customize: { path: "/customize", Icon: null, isDrawerNav: false },
-  myCoins: { path: "/mycoins", Icon: null, isDrawerNav: false },
   profile: { path: "/profile", Icon: RiUserLine, isDrawerNav: true },
   wallet: { path: "/wallet", Icon: RiWallet3Line, isDrawerNav: true },
+  manageWallet: { path: "/manage-wallet", Icon: null, isDrawerNav: false },
   trade: {
     path: "/trade/:tokenBondingKey",
     Icon: RiExchangeLine,
@@ -70,6 +75,7 @@ export const routes: IRoutes = {
     isDrawerNav: false,
   },
   viewNft: { path: "/nft/view/:mint", Icon: null, isDrawerNav: false },
+  tagNft: { path: "/nft/tag/:mint", Icon: null, isDrawerNav: false },
 };
 
 export const paths: string[] = Object.keys(routes).map(

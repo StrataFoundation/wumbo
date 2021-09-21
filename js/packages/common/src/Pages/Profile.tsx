@@ -15,7 +15,7 @@ import {
   TabPanel,
 } from "@chakra-ui/react";
 import { HiOutlinePencilAlt } from "react-icons/hi";
-import { useClaimedTokenRef, useTokenRefFromBonding } from "../utils/tokenRef";
+import { useClaimedTokenRef, useClaimedTokenRefKey } from "../utils/tokenRef";
 import { Spinner } from "../Spinner";
 import { useAccount } from "../utils/account";
 import { TokenBonding } from "../utils/deserializers/spl-token-bonding";
@@ -90,6 +90,7 @@ export const Profile = React.memo(
       error: tokenMetadataError,
     } = useTokenMetadata(tokenBonding?.targetMint);
     const { publicKey } = useWallet();
+    const myTokenRefKey = useClaimedTokenRefKey(publicKey || undefined);
     const { handle: walletTwitterHandle, error: reverseTwitterError } =
       useReverseTwitter(publicKey || undefined);
     const { data: { wumRank } = {} } = apolloUseQuery<{
@@ -155,7 +156,7 @@ export const Profile = React.memo(
               <Text fontSize="18px" lineHeight="none">
                 {metadata?.data.name || "@" + handle}
               </Text>
-              {walletTokenRef && (
+              {myTokenRefKey && walletTokenRef?.publicKey.equals(myTokenRefKey) && (
                 <Link to={editPath}>
                   <Icon
                     as={HiOutlinePencilAlt}
@@ -182,13 +183,13 @@ export const Profile = React.memo(
                 typeof tokenRank != undefined ? (tokenRank! + 1).toString() : ""
               }
             />
-            <StatCardWithIcon
+            { tokenRef?.isClaimed && <StatCardWithIcon
               icon="wumbo"
               label="WUM Locked"
               value={
                 typeof wumRank != undefined ? (wumRank! + 1).toString() : ""
               }
-            />
+            /> }
           </VStack>
         </HStack>
         <HStack spacing={2} w="full">

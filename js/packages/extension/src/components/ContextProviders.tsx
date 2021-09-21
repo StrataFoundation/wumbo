@@ -9,6 +9,7 @@ import {
   AccountCacheContextProvider,
   wumboApi,
   ErrorHandlingContext,
+  ThemeProvider
 } from "wumbo-common";
 import { ApolloProvider } from "@apollo/client";
 import { DrawerProvider } from "@/contexts/drawerContext";
@@ -16,7 +17,6 @@ import { WalletName } from "@solana/wallet-adapter-wallets";
 import { InjectedWalletAdapter } from "@/utils/wallets";
 import { WalletError } from "@solana/wallet-adapter-base";
 import toast from "react-hot-toast";
-import { ThemeProvider } from "@/contexts/themeContext";
 
 export const ContextProviders: FC = ({ children }) => {
   const alteredWallets = useMemo(

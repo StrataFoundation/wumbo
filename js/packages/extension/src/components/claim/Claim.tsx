@@ -29,7 +29,7 @@ export default React.memo(() => {
     <WalletRedirect />
     <WumboDrawer.Header title="Claim" />
     <WumboDrawer.Content>
-      <Claim handle={name} redirectUri={redirectUri} code={code} onComplete={() => history.push(routes.editProfile.path)} />
+      <Claim handle={name} redirectUri={redirectUri} code={code} onComplete={() => history.replace(routes.editProfile.path)} />
     </WumboDrawer.Content>
     <WumboDrawer.Nav />
   </Fragment>
