@@ -6,10 +6,10 @@ import {
   pxToNum,
   NftBadgeIcon,
   NftBadgeHoverIcon,
+  ThemeProvider,
 } from "wumbo-common";
 import { useNfts } from "../../utils/nftSpotter";
 import { useDrawer } from "@/contexts/drawerContext";
-import { ThemeProvider } from "@/contexts/themeContext";
 import { useHistory } from "react-router-dom";
 import { nftPath } from "@/constants/routes";
 import { PublicKey } from "@solana/web3.js";
