@@ -1,12 +1,20 @@
-import React from "react";
+import { WalletName } from "@solana/wallet-adapter-wallets";
+import React, { useEffect } from "react";
 import { Redirect, useLocation } from "react-router";
-import { useWallet } from "wumbo-common";
+import { useLocalStorage, useWallet } from "wumbo-common";
 import routes from "../../constants/routes";
 
 export default React.memo(() => {
   const location = useLocation();
-  const { wallet, connected } = useWallet();
-
+  const { wallet, connected, ready, select } = useWallet();
+  const [name, setName] = useLocalStorage<WalletName | null>("walletName", null);
+  useEffect(() => {
+    if (ready && !wallet && name && [WalletName.Phantom, WalletName.Solflare, WalletName.Torus].includes(name)) {
+      select(name)
+    } else if (wallet && !name) {
+      setName(wallet.name)
+    }
+  }, [name, wallet, ready])
   const redirectUri =
     routes.wallet.path + `?redirect=${location.pathname}${location.search}`;
 
