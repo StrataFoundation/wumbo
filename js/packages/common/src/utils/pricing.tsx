@@ -201,6 +201,20 @@ export const useWumboUsdPrice = () => {
   return useContext(UsdWumboPriceContext);
 };
 
+const SolPriceContext = React.createContext<number | undefined>(undefined);
+export const useSolPrice = () => {
+  return useContext(SolPriceContext)
+}
+
+export const SolPriceProvider: React.FC = ({ children }) => {
+  const price = useMarketPrice(SOL_TO_USD_MARKET);
+  return <SolPriceContext.Provider
+    value={price}
+    >
+      { children }
+    </SolPriceContext.Provider>
+}
+
 export const useMarketPrice = (marketAddress: PublicKey): number | undefined => {
   const [price, setPrice] = useState<number>();
   useEffect(() => {
@@ -226,7 +240,7 @@ export const useMarketPrice = (marketAddress: PublicKey): number | undefined => 
 
 export function useFiatPrice(token: PublicKey | undefined): number | undefined {
   const wumboPrice = useWumboUsdPrice();
-  const solPrice = useMarketPrice(SOL_TO_USD_MARKET);
+  const solPrice = useSolPrice();
 
   const [price, setPrice] = useState<number>();
 

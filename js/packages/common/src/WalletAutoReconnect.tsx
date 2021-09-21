@@ -4,7 +4,7 @@ import { useWallet } from "./contexts";
 import { useLocalStorage, usePrevious } from "./utils";
 
 export const WalletAutoReconnect: React.FC = () => {
-  const { wallet, disconnecting, connected, ready, select } = useWallet();
+  const { wallet, ready, select } = useWallet();
   const [name, setName] = useLocalStorage<WalletName | null>("walletName", null);
   const lastWallet = usePrevious(wallet);
 
@@ -18,7 +18,7 @@ export const WalletAutoReconnect: React.FC = () => {
         setName(wallet.name)
       }
     }
-  }, [name, wallet, disconnecting])
+  }, [name, wallet, ready])
 
   return null;
 }
