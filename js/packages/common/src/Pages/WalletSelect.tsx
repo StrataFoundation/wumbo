@@ -12,7 +12,7 @@ export const WalletSelect = () => {
       {connected ? (
         <VStack spacing={4} alignItems="start">
           <span className="test-sm">Wallet Connected!</span>
-          <Button w="full" size="md" colorScheme="indigo" onClick={disconnect}>
+          <Button w="full" size="lg" colorScheme="indigo" onClick={disconnect}>
             Disconnect
           </Button>
         </VStack>
@@ -29,12 +29,12 @@ export const WalletSelect = () => {
             <Button
               key={idx}
               w="full"
-              size="md"
+              size="lg"
               colorScheme="indigo"
               justifyContent="left"
               onClick={() => select(provider.name)}
               leftIcon={
-                <Box w={4} h={4}>
+                <Box w={5} h={5}>
                   <img
                     alt={`${provider.name}`}
                     src={provider.icon}

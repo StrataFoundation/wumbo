@@ -1,8 +1,21 @@
-import { classNames } from '../utils';
-import React from 'react';
+import React from "react";
+import { Text } from "@chakra-ui/react";
 
-export const LeaderboardNumber = React.memo(({ children = null as any, selected = false }: { children: any, selected?: boolean }) => 
-  <div className={classNames("w-10 font-semibold text-sm text-center", selected ? "text-gray-700" : "text-gray-400")}>
-    {children}
-  </div>
-)
+export const LeaderboardNumber = React.memo(
+  ({
+    children = null as any,
+    selected = false,
+  }: {
+    children: any;
+    selected?: boolean;
+  }) => (
+    <Text
+      fontWeight="semibold"
+      fontSize="sm"
+      fontColor={selected ? "gray.700" : "gray.400"}
+      textAlign="center"
+    >
+      {children}
+    </Text>
+  )
+);

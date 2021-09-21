@@ -1,22 +1,14 @@
 import React, { Fragment, ReactNode } from "react";
 import { Route, NavLink } from "react-router-dom";
 import startCase from "lodash/startCase";
-import {
-  Box,
-  Fade,
-  Spinner,
-  Text,
-  IconButton,
-  Button,
-  Icon,
-} from "@chakra-ui/react";
+import { Box, Fade, Text, IconButton, Button, Icon } from "@chakra-ui/react";
 import { HiOutlineX } from "react-icons/hi";
 import { Toaster } from "react-hot-toast";
 import { Transition } from "@headlessui/react";
 import { useDrawer } from "@/contexts/drawerContext";
 import { routes, IRoutes } from "@/constants/routes";
 import { useUserInfo } from "@/utils/userState";
-import { WUM_BONDING } from "wumbo-common";
+import { Spinner, WUM_BONDING } from "wumbo-common";
 
 export const WumboDrawer = (props: { children: ReactNode }) => {
   const { isOpen, toggleDrawer } = useDrawer();
@@ -25,10 +17,10 @@ export const WumboDrawer = (props: { children: ReactNode }) => {
   return (
     <Fragment>
       {isOpen && (
-        <Box w="340px" pos="fixed" right="0" top="20">
+        <Box w="345px" pos="fixed" right="0" top="20">
           <Fade in={true} style={{ zIndex: 99999 }}>
             <Box
-              w="340px"
+              w="345px"
               h="560px"
               bg="white"
               d="flex"
@@ -61,7 +53,12 @@ WumboDrawer.Header = (props: HeaderProps) => {
   const hasTitle = !!(props as HeaderNoChildren).title;
 
   return (
-    <Box paddingX={4} paddingY={1} borderBottom="1px" borderColor="gray.200">
+    <Box
+      padding={4}
+      borderBottom="1px"
+      borderColor="gray.200"
+      fontFamily="body"
+    >
       <Box d="flex" alignItems="center" justifyContent="space-between">
         <Box w="full">
           {hasTitle && (
@@ -71,13 +68,13 @@ WumboDrawer.Header = (props: HeaderProps) => {
           )}
           {!hasTitle && (props as HeaderWithChildren).children}
         </Box>
-        <IconButton
-          colorScheme="gray"
-          variant="ghost"
-          aria-label="Close Drawer"
-          icon={<Icon as={HiOutlineX} w={5} h={5} />}
+        <Box
+          color="gray.400"
+          _hover={{ color: "gray.500", cursor: "pointer" }}
           onClick={() => toggleDrawer()}
-        />
+        >
+          <Icon as={HiOutlineX} w={5} h={5} />
+        </Box>
       </Box>
     </Box>
   );
@@ -85,7 +82,7 @@ WumboDrawer.Header = (props: HeaderProps) => {
 
 // Minimal Styling, nested comps should style themselves
 WumboDrawer.Content = (props: { children: ReactNode }) => (
-  <Box pos="relative" flexGrow={1} overflowY="auto">
+  <Box pos="relative" flexGrow={1} overflowY="auto" fontFamily="body">
     {props.children}
   </Box>
 );
@@ -103,6 +100,7 @@ WumboDrawer.Nav = () => {
       px="4px"
       borderTop="1px"
       borderColor="gray.200"
+      fontFamily="body"
     >
       {Object.keys(routes).map((route) => {
         const {
@@ -145,7 +143,7 @@ WumboDrawer.Nav = () => {
                 >
                   {/* @ts-ignore */}
                   <Icon as={RouteIcon} w={5} h={5} />
-                  <Text fontSize="sm">{startCase(route)}</Text>
+                  <Text fontSize="xs">{startCase(route)}</Text>
                 </Button>
               )}
             />
@@ -163,7 +161,7 @@ WumboDrawer.Loading = () => (
     <WumboDrawer.Header />
     <WumboDrawer.Content>
       <Box d="flex" justifyContent="center" alignItems="center" h="full">
-        <Spinner size="md" emptyColor="indigo.900" color="indigo.500" />
+        <Spinner />
       </Box>
     </WumboDrawer.Content>
   </Fragment>

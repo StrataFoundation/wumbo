@@ -1,113 +1,54 @@
 import React from "react";
+import {
+  HStack,
+  VStack,
+  Text,
+  TextProps,
+  Avatar as ChakraAvatar,
+  AvatarProps as ChakraAvatarProps,
+} from "@chakra-ui/react";
 import { Spinner, useTokenMetadata } from ".";
 import { TokenBondingV0 } from "@wum.bo/spl-token-bonding/dist/lib";
-import { classNames } from "./utils/utils";
 import { handleErrors } from "./contexts";
 
-/*
- ** Basic Avatar
- ** extendable if we need more functionality
- ** https://tailwindui.com/components/application-ui/elements/avatars
- */
-
-export interface IAvatarProps {
-  name?: string;
+export interface AvatarProps extends ChakraAvatarProps {
+  nameProps?: TextProps;
   subText?: string;
-  imgSrc?: string;
-  rounded?: boolean;
-  token?: boolean;
+  subTextProps?: TextProps;
   showDetails?: boolean;
-  size?: "xxs" | "xs" | "sm" | "md" | "lg" | "xl";
 }
-
-const style = {
-  default: `inline-flex items-center justify-center rounded-full bg-gray-500 rounded-md`,
-  rounded: "!rounded-full",
-  token: "!bg-gradient-to-r !from-yellow-400 !to-red-400",
-  sizes: {
-    xxs: {
-      default: "h-6 w-6",
-      text: "text-xxs font-medium leading-none text-white",
-    },
-    xs: {
-      default: "h-8 w-8",
-      text: "text-xs font-medium leading-none text-white",
-    },
-    sm: {
-      default: "h-10 w-10",
-      text: "text-sm font-medium leading-none text-white",
-    },
-    md: {
-      default: "h-12 w-12",
-      text: "font-medium leading-none text-white",
-    },
-    lg: {
-      default: "h-14 w-14",
-      text: "text-lg font-medium leading-none text-white",
-    },
-    xl: {
-      default: "h-16 w-16",
-      text: "text-xl font-medium leading-none text-white",
-    },
-  },
-};
 
 export const Avatar = ({
   name,
-  imgSrc,
+  nameProps = {},
+  src,
   subText,
+  subTextProps = {},
   showDetails,
-  rounded = true,
-  token = false,
   size = "md",
-}: IAvatarProps) => (
-  <div className={classNames("flex items-center", style.sizes[size].default)}>
-    {imgSrc && (
-      <img
-        src={imgSrc}
-        className={classNames(
-          style.default,
-          rounded && style.rounded,
-          style.sizes[size].default
-        )}
-      />
-    )}
-    {!imgSrc && (
-      <span
-        className={classNames(
-          style.default,
-          rounded && style.rounded,
-          token && style.token,
-          style.sizes[size].default
-        )}
-      >
-        <span className={style.sizes[size].text}>
-          {name && name.substr(0, 2).toUpperCase()}
-        </span>
-      </span>
-    )}
+}: AvatarProps) => (
+  <HStack spacing={2} alignItems="center">
+    <ChakraAvatar size={size} src={src} bgColor="indigo.500" />
     {showDetails && (
-      <div className="ml-3">
-        <p className="font-medium text-gray-700">{name}</p>
-        {subText && (
-          <p className="text-xs font-medium text-gray-700">{subText}</p>
-        )}
-      </div>
+      <VStack spacing={2}>
+        <Text {...nameProps}>{name}</Text>
+        {subText && <Text {...subTextProps}>{subText}</Text>}
+      </VStack>
     )}
-  </div>
+  </HStack>
 );
 
-interface MetadataAvatarProps extends IAvatarProps {
+interface MetadataAvatarProps extends AvatarProps {
   tokenBonding: TokenBondingV0 | undefined;
 }
 
 export const MetadataAvatar = React.memo(
-  ({ name, imgSrc, tokenBonding, ...props }: MetadataAvatarProps) => {
+  ({ name, src, tokenBonding, ...props }: MetadataAvatarProps) => {
     const {
       image: metadataImage,
       metadata,
       loading,
-      error
+      error,
     } = useTokenMetadata(tokenBonding?.targetMint);
     handleErrors(error);
 
@@ -119,7 +60,7 @@ export const MetadataAvatar = React.memo(
       <Avatar
         {...props}
         name={metadata?.data.symbol || name}
-        imgSrc={metadataImage || imgSrc}
+        src={metadataImage || src}
       />
     );
   }

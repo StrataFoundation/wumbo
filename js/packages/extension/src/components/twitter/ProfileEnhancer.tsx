@@ -20,7 +20,7 @@ export const ProfileEnhancer = () => {
           borderRadius: "full",
         }}
         spinnerProps={{
-          size: "md",
+          size: "lg",
         }}
       />
     ) : null;

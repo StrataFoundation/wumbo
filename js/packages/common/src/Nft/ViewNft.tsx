@@ -1,12 +1,22 @@
-import React, { Fragment, useState } from "react";
+import React, { Fragment, useState, useRef } from "react";
+import {
+  IconButton,
+  Box,
+  Flex,
+  VStack,
+  HStack,
+  StackDivider,
+  Icon,
+  Text,
+  Button,
+} from "@chakra-ui/react";
+import { HiOutlineRefresh, HiOutlineArrowsExpand } from "react-icons/hi";
 import { MetadataCategory, useWallet } from "@oyster/common";
 import { PublicKey } from "@solana/web3.js";
-import { RefreshIcon, ArrowsExpandIcon } from "@heroicons/react/outline";
 import { ITokenWithMeta, useTokenMetadata } from "../utils";
 import { Nft, Creator, GetCreatorLink, TaggableImages } from "./";
 // @ts-ignore
 import { WalletSelect } from "../Pages/WalletSelect";
-import { Button } from "../";
 import { ExpandedNft } from "./ExpandedNft";
 import { handleErrors } from "../contexts";
 
@@ -17,7 +27,9 @@ const displayNames = {
   audio: "Audio",
 };
 
-function displayName(category: MetadataCategory | undefined): string | undefined {
+function displayName(
+  category: MetadataCategory | undefined
+): string | undefined {
   return category && displayNames[category];
 }
 
@@ -37,10 +49,12 @@ export const ViewNftRaw = React.memo(
     owner: PublicKey | undefined;
     getCreatorLink: GetCreatorLink;
   }) => {
+    const portalRef = useRef() as React.MutableRefObject<HTMLInputElement>;
     const [taggingMode, setTaggingMode] = useState<boolean>(false);
     const [refreshCounter, setRefreshCounter] = useState<number>(0);
     const [isExpanded, setIsExpanded] = useState<boolean>(false);
-    const incRefreshCounter = () => taggingMode && setRefreshCounter(refreshCounter + 1);
+    const incRefreshCounter = () =>
+      taggingMode && setRefreshCounter(refreshCounter + 1);
 
     const handleNftAction = (taggingMode: boolean) => {
       if (taggingMode) incRefreshCounter();
@@ -57,103 +71,174 @@ export const ViewNftRaw = React.memo(
      * } */
 
     return (
-      <Fragment>
-        <div>
-          <div className="flex flex-col relative py-6 bg-gradient-to-tr from-blue-600 via-indigo-600 to-purple-600">
-            <div
-              onClick={() => handleNftAction(taggingMode)}
-              className="text-white absolute right-4 top-4 bg-gray-900 bg-opacity-30 rounded-full p-1.5 hover:bg-opacity-40 hover:cursor-pointer"
-            >
-              {taggingMode && <RefreshIcon width={26} />}
-              {!taggingMode && <ArrowsExpandIcon width={26} />}
-            </div>
-            {token.data && <Nft className="w-44 m-auto rounded-lg" data={token.data} />}
-            <span className="pt-2 text-white text-center text-2xl font-medium">
-              {token.metadata?.data.name}
-            </span>
-          </div>
-          <div className="px-4 py-4">
-            {taggingMode && (
-              <TaggableImages
-                src={token.image!}
-                metadata={token.metadataKey!}
-                refreshCounter={refreshCounter}
+      <>
+        <VStack w="full">
+          <VStack
+            width="full"
+            alignItems="center"
+            padding={4}
+            spacing={4}
+            position="relative"
+            bgGradient="linear(to-tr, indigo.600, purple.600)"
+          >
+            {token.data && (
+              <Nft
+                data={token.data}
+                imageProps={{ w: "110px", m: "auto", rounded: "lg" }}
               />
             )}
-            {!taggingMode && (
-              <div className="grid grid-cols-1 divide-y divide-gray-200">
-                <dl className="pb-6 flex-grow flex flex-col justify-between">
-                  <dd className="text-gray-500 text-sm">
-                    {displayName(token.data?.properties.category)} •{" "}
-                    {token.edition
-                      ? `Edition no. ${token.edition.edition.toNumber()} of ${token.masterEdition?.supply.toNumber()}`
-                      : "Master Edition"}
-                  </dd>
-                  {token.metadata && (
-                    <Fragment>
-                      <dd className="pt-3">
-                        <p className="text-sm text-gray-900 font-bold">Owner:</p>
-                        <span className="text-sm text-gray-500 font-medium break-words hover:text-indigo-600">
-                          {owner ? (
-                            <Creator creator={owner} getCreatorLink={getCreatorLink} />
-                          ) : (
-                            <span>Unknown</span>
-                          )}
-                        </span>
-                      </dd>
-                      <dd className="pt-3">
-                        <p className="text-sm text-gray-900 font-bold">Authority:</p>
-                        <span className="text-sm text-gray-500 font-medium break-words hover:text-indigo-600">
+            <Flex
+              w="full"
+              color="white"
+              justifyContent="center"
+              fontWeight="md"
+              fontSize="2xl"
+            >
+              {token.metadata?.data.name}
+            </Flex>
+            <IconButton
+              margin="0px"
+              position="absolute"
+              top={0}
+              right={2}
+              rounded="full"
+              colorScheme="purple"
+              aria-label="NFT Action"
+              size="md"
+              fontSize={20}
+              icon={
+                <Icon
+                  as={taggingMode ? HiOutlineRefresh : HiOutlineArrowsExpand}
+                />
+              }
+              onClick={() => handleNftAction(taggingMode)}
+            />
+          </VStack>
+          {taggingMode && (
+            <TaggableImages
+              src={token.image!}
+              metadata={token.metadataKey!}
+              refreshCounter={refreshCounter}
+            />
+          )}
+          {!taggingMode && (
+            <VStack
+              w="full"
+              spacing={4}
+              padding={4}
+              divider={<StackDivider borderColor="gray.200" />}
+              align="stretch"
+            >
+              <VStack w="full" spacing={2} alignItems="start">
+                <Flex
+                  color="gray.500"
+                  fontWeight="semibold"
+                  letterSpacing="wide"
+                  fontSize="sm"
+                >
+                  {displayName(token.data?.properties.category)} &bull;{" "}
+                  {token.edition
+                    ? `Editon no. ${token.edition.edition.toNumber()} of ${token.masterEdition?.supply.toNumber()}`
+                    : "Master Edition"}
+                </Flex>
+                {token.metadata && (
+                  <>
+                    <HStack alignItems="center" spacing={2}>
+                      <Text fontSize="sm" fontWeight="bold" color="gray.900">
+                        Owner:
+                      </Text>
+                      <Text
+                        fontSize="sm"
+                        fontWeight="medium"
+                        color="gray.500"
+                        _hover={{ color: "indigo.600" }}
+                      >
+                        {owner ? (
                           <Creator
-                            creator={token.metadata.updateAuthority}
+                            creator={owner}
                             getCreatorLink={getCreatorLink}
                           />
-                        </span>
-                      </dd>
-                      <dd className="pt-3">
-                        <p className="text-sm text-gray-900 font-bold">Created by:</p>
-                        <span className="text-sm text-gray-500 font-medium break-words hover:text-indigo-600">
-                          {token.metadata?.data.creators
-                            ?.filter((c) => c.verified)
-                            .map((creator) => (
-                              <Creator
-                                key={creator.address.toBase58()}
-                                creator={creator.address}
-                                getCreatorLink={getCreatorLink}
-                              />
-                            ))}
-                        </span>
-                      </dd>
-                    </Fragment>
-                  )}
-                </dl>
-                {token.image && token.metadataKey && (
-                  <div className="py-6 divide-y divide-gray-200">
-                    <div className="flex">
-                      <div className="w-0 flex-1 flex">
-                        <Button onClick={() => setTaggingMode(true)}>Tag</Button>
-                      </div>
-                    </div>
-                  </div>
+                        ) : (
+                          "Unknown"
+                        )}
+                      </Text>
+                    </HStack>
+                    <HStack alignItems="center" spacing={2}>
+                      <Text fontSize="sm" fontWeight="bold" color="gray.900">
+                        Authority:
+                      </Text>
+                      <Text
+                        fontSize="sm"
+                        fontWeight="medium"
+                        color="gray.500"
+                        _hover={{ color: "indigo.600" }}
+                      >
+                        <Creator
+                          creator={token.metadata.updateAuthority}
+                          getCreatorLink={getCreatorLink}
+                        />
+                      </Text>
+                    </HStack>
+                    <HStack alignItems="center" spacing={2}>
+                      <Text fontSize="sm" fontWeight="bold" color="gray.900">
+                        Created by:
+                      </Text>
+                      <Text
+                        fontSize="sm"
+                        fontWeight="medium"
+                        color="gray.500"
+                        _hover={{ color: "indigo.600" }}
+                      >
+                        {token.metadata?.data.creators
+                          ?.filter((c) => c.verified)
+                          .map((creator) => (
+                            <Creator
+                              key={creator.address.toBase58()}
+                              creator={creator.address}
+                              getCreatorLink={getCreatorLink}
+                            />
+                          ))}
+                      </Text>
+                    </HStack>
+                  </>
                 )}
-                <div className="text-sm py-6">{token.description}</div>
-                {
-                  // @ts-ignore
-                  (token.data?.attributes || []).map(
-                    ({ trait_type, display_type, value }: Attribute) => (
-                      <div className="py-6 flex flex-row">
-                        <div className="text-sm text-gray-500 w-32">{trait_type}</div>
-                        <span className="text-sm">{value}</span>
-                      </div>
-                    )
+                {token.image && token.metadataKey && (
+                  <Button
+                    size="md"
+                    colorScheme="indigo"
+                    onClick={() => setTaggingMode(true)}
+                  >
+                    Tag
+                  </Button>
+                )}
+              </VStack>
+              <Flex fontSize="sm">{token.description}</Flex>
+              {
+                // @ts-ignore
+                (token.data?.attributes || []).map(
+                  ({ trait_type, display_type, value }: Attribute) => (
+                    <HStack spacing={2} key={trait_type}>
+                      <Text fontSize="sm" color="gray.500" w={24}>
+                        {trait_type}
+                      </Text>
+                      <Text fontSize="sm">{value}</Text>
+                    </HStack>
                   )
-                }
-              </div>
-            )}
-          </div>
-        </div>
-        <ExpandedNft isExpanded={isExpanded} setIsExpanded={setIsExpanded} tokenData={token} />
-      </Fragment>
+                )
+              }
+            </VStack>
+          )}
+        </VStack>
+        <ExpandedNft
+          isExpanded={isExpanded}
+          setIsExpanded={setIsExpanded}
+          tokenData={token}
+          portalProps={{
+            containerRef: portalRef,
+          }}
+        />
+        <Box ref={portalRef} />
+      </>
     );
   }
 );
@@ -169,8 +254,14 @@ export const ViewNft = React.memo(
     getCreatorLink: GetCreatorLink;
   }) => {
     const tokenWithMeta = useTokenMetadata(token);
-    handleErrors(tokenWithMeta.error)
+    handleErrors(tokenWithMeta.error);
 
-    return <ViewNftRaw token={tokenWithMeta} owner={owner} getCreatorLink={getCreatorLink} />;
+    return (
+      <ViewNftRaw
+        token={tokenWithMeta}
+        owner={owner}
+        getCreatorLink={getCreatorLink}
+      />
+    );
   }
 );

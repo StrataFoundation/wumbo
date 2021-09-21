@@ -13,7 +13,13 @@ export type GetCreatorLink = (
 ) => string;
 
 export const Creator = React.memo(
-  ({ creator, getCreatorLink }: { creator: PublicKey; getCreatorLink: GetCreatorLink }) => {
+  ({
+    creator,
+    getCreatorLink,
+  }: {
+    creator: PublicKey;
+    getCreatorLink: GetCreatorLink;
+  }) => {
     const { metadata, tokenBonding, error } = useSocialTokenMetadata(creator);
     handleErrors(error);
 
@@ -29,7 +35,7 @@ export const Creator = React.memo(
           <Avatar
             showDetails
             size="xs"
-            imgSrc={metadata.data.uri}
+            src={metadata.data.uri}
             name={metadata.data.name}
           />
         )}

@@ -1,34 +1,59 @@
 import React from "react";
+import { Flex, Box, Tag, Text } from "@chakra-ui/react";
 import { ITokenWithMeta } from "../utils/metaplex/nftMetadataHooks";
-import { Badge } from "../Badge";
 import { Link } from "react-router-dom";
 import { Nft } from "./Nft";
 
 export const NftCard = React.memo(
-  ({ token, getLink }: { token: ITokenWithMeta; getLink: (t: ITokenWithMeta) => string }) => {
-    return (
-      <Link
-        to={getLink(token)}
-        className="flex-1 flex flex-col rounded-lg overflow-hidden hover:opacity-25"
+  ({
+    token,
+    getLink,
+  }: {
+    token: ITokenWithMeta;
+    getLink: (t: ITokenWithMeta) => string;
+  }) => (
+    <Flex
+      w="full"
+      flexDirection="column"
+      borderWidth="1px"
+      borderColor="gray.200"
+      rounded="lg"
+      _hover={{ opacity: "0.5" }}
+      as={Link}
+      to={getLink(token)}
+    >
+      <Flex
+        w="full"
+        padding={2}
+        bgColor="gray.200"
+        alignItems="center"
+        justifyContent="center"
       >
-        <div className="flex py-2 px-2 justify-center w-full bg-gray-100">
-          {token.data && (
-            <Nft meshEnabled={false} className="w-24 h-24 object-cover" data={token.data} />
-          )}
-        </div>
-        <div className="flex flex-col w-full p-2 text-left items-start space-y-1 overflow-hidden">
-          <span className="w-full truncate text-sm font-bold">{token.metadata?.data.name}</span>
-          {token.masterEdition && (
-            <div className="flex flex-row">
-              <Badge size="sm">
-                {token.masterEdition && !token.edition && "Master"}
-                {token.edition &&
-                  `${token.edition.edition.toNumber()} of ${token.masterEdition?.supply.toNumber()}`}
-              </Badge>
-            </div>
-          )}
-        </div>
-      </Link>
-    );
-  }
+        <Box w={20} height={20}>
+          {token.data && <Nft meshEnabled={false} data={token.data} />}
+        </Box>
+      </Flex>
+      <Flex w="full" flexDirection="column" padding={2} alignItems="start">
+        <Text
+          w="full"
+          fontWeight="semibold"
+          fontSize="14px"
+          marginTop={2}
+          as="h4"
+          lineHeight="tight"
+          isTruncated
+        >
+          {token.metadata?.data.name}
+        </Text>
+
+        {token.masterEdition && (
+          <Tag fontSize="xs" marginTop={2}>
+            {token.masterEdition && !token.edition && "Master"}
+            {token.edition &&
+              `${token.edition.edition.toNumber()} of ${token.masterEdition?.supply.toNumber()}`}
+          </Tag>
+        )}
+      </Flex>
+    </Flex>
+  )
 );

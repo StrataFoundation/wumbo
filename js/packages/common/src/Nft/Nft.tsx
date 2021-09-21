@@ -1,4 +1,5 @@
 import React, { useCallback, useEffect, useState } from "react";
+import { Image, ImageProps } from "@chakra-ui/react";
 import { MeshViewer } from "./MeshViewer";
 import { IMetadataExtension, MetadataFile } from "@oyster/common";
 import { Stream, StreamPlayerApi } from "@cloudflare/stream-react";
@@ -7,14 +8,12 @@ const MeshArtContent = ({
   uri,
   image,
   animationUrl,
-  className,
   style,
   files,
 }: {
   uri?: string;
   image?: string;
   animationUrl?: string;
-  className?: string;
   style?: React.CSSProperties;
   files?: (MetadataFile | string)[];
 }) => {
@@ -23,25 +22,16 @@ const MeshArtContent = ({
       ? files[0]
       : animationUrl;
 
-  return (
-    <MeshViewer
-      image={image}
-      url={renderURL}
-      className={className}
-      style={style}
-    />
-  );
+  return <MeshViewer image={image} url={renderURL} style={style} />;
 };
 
 const VideoArtContent = ({
-  className,
   style,
   files,
   uri,
   animationURL,
   active,
 }: {
-  className?: string;
   style?: React.CSSProperties;
   files?: (MetadataFile | string)[];
   uri?: string;
@@ -75,25 +65,22 @@ const VideoArtContent = ({
   const content =
     likelyVideo &&
     likelyVideo.startsWith("https://watch.videodelivery.net/") ? (
-      <div className={`${className} square`}>
-        <Stream
-          streamRef={(e: any) => playerRef(e)}
-          src={likelyVideo.replace("https://watch.videodelivery.net/", "")}
-          loop={true}
-          height={600}
-          width={600}
-          controls={false}
-          videoDimensions={{
-            videoHeight: 700,
-            videoWidth: 400,
-          }}
-          autoplay={true}
-          muted={true}
-        />
-      </div>
+      <Stream
+        streamRef={(e: any) => playerRef(e)}
+        src={likelyVideo.replace("https://watch.videodelivery.net/", "")}
+        loop={true}
+        height={600}
+        width={600}
+        controls={false}
+        videoDimensions={{
+          videoHeight: 700,
+          videoWidth: 400,
+        }}
+        autoplay={true}
+        muted={true}
+      />
     ) : (
       <video
-        className={className}
         playsInline={true}
         autoPlay={true}
         muted={true}
@@ -130,10 +117,10 @@ function getLast<T>(arr: T[]) {
 
 export const Nft: React.FC<{
   data: IMetadataExtension;
-  className?: string;
   meshEnabled?: boolean;
   style?: React.CSSProperties;
-}> = ({ data, className, style, meshEnabled = true }) => {
+  imageProps?: ImageProps;
+}> = ({ data, style, meshEnabled = true, imageProps = {} }) => {
   const animationURL = data?.animation_url || "";
   const animationUrlExt = new URLSearchParams(
     getLast(animationURL.split("?"))
@@ -152,7 +139,6 @@ export const Nft: React.FC<{
       <MeshArtContent
         image={data?.image}
         style={style}
-        className={className}
         uri={uri}
         animationUrl={animationURL}
         files={data?.properties.files}
@@ -163,7 +149,6 @@ export const Nft: React.FC<{
   if (category === "video") {
     return (
       <VideoArtContent
-        className={className}
         files={data?.properties.files}
         uri={uri}
         animationURL={animationURL}
@@ -172,5 +157,5 @@ export const Nft: React.FC<{
     );
   }
 
-  return <img className={`${className}`} src={data?.image} alt={data?.name} />;
+  return <Image src={data?.image} alt={data?.name} {...imageProps} />;
 };

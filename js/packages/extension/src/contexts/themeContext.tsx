@@ -7,6 +7,10 @@ import {
 
 export const theme = extendTheme({
   components: { Button: { baseStyle: { _focus: { boxShadow: "none" } } } },
+  fonts: {
+    body: `Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol"`,
+    heading: `Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol"`,
+  },
   colors: {
     gray: {
       50: "#F9FAFB",

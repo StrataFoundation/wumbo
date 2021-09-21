@@ -1,13 +1,28 @@
 import React, { Fragment, useEffect, useState } from "react";
-import { Spinner } from "../Spinner";
 import { PublicKey } from "@solana/web3.js";
-import { Leaderboard, LeaderboardNumber, MetadataLeaderboardElement } from "../Leaderboard";
+import { Center, Box, Flex, Icon } from "@chakra-ui/react";
+import { HiChevronUp, HiChevronDown } from "react-icons/hi";
+import {
+  Leaderboard,
+  LeaderboardNumber,
+  MetadataLeaderboardElement,
+} from "../Leaderboard";
+import { Spinner } from "../Spinner";
 import { useWallet } from "../contexts/walletContext";
-import { ChevronUpIcon, ChevronDownIcon } from "@heroicons/react/solid";
-import { useQuery, gql } from '@apollo/client';
+import { useQuery, gql } from "@apollo/client";
 
 const WhiteCard = ({ children = null as any }) => (
-  <div className="bg-white rounded-md shadow-md border-1">{children}</div>
+  <Box
+    w="full"
+    bg="white"
+    boxShadow="lg"
+    rounded="md"
+    overflow="hidden"
+    borderWidth="1px"
+    borderColor="gray.100"
+  >
+    {children}
+  </Box>
 );
 
 const PageChevron = ({
@@ -17,12 +32,18 @@ const PageChevron = ({
   direction: "up" | "down";
   onClick?: () => void;
 }) => (
-  <div className="hover:bg-gray-100 hover:cursor-pointer w-full flex flex-col items-center">
-    {direction == "up" && <ChevronUpIcon onClick={onClick} className="h-4 w-4 text-indigo-600" />}
-    {direction == "down" && (
-      <ChevronDownIcon onClick={onClick} className="h-4 w-4 text-indigo-600" />
-    )}
-  </div>
+  <Flex
+    w="full"
+    padding={2}
+    alignItems="center"
+    justifyContent="center"
+    color="indigo.600"
+    _hover={{ cursor: "pointer", bgColor: "gray.100" }}
+    onClick={onClick}
+  >
+    {direction == "up" && <Icon as={HiChevronUp} h={4} w={4} />}
+    {direction == "down" && <Icon as={HiChevronDown} h={4} w={4} />}
+  </Flex>
 );
 
 type WalletAndRank = {
@@ -57,31 +78,35 @@ function useLocalAccountsPagination(
   const [startIndex, setStartIndex] = useState<number>(0);
   const [stopIndex, setStopIndex] = useState<number>(0);
 
-  const { loading: loadingRank, data: { accountRank } = {} } = useQuery<{ accountRank: number | undefined }>(GET_HOLDER_RANK, {
+  const { loading: loadingRank, data: { accountRank } = {} } = useQuery<{
+    accountRank: number | undefined;
+  }>(GET_HOLDER_RANK, {
     variables: {
       mint: mintKey?.toBase58(),
-      key: findAccount?.toBase58()
-    }
-  })
+      key: findAccount?.toBase58(),
+    },
+  });
 
   useEffect(() => {
     if (accountRank) {
       setStartIndex(accountRank);
       setStopIndex(accountRank + 5);
     }
-  }, [accountRank])
-  const { loading, data: { topHolders: accounts } = {} } = useQuery<{ topHolders: { publicKey: string }[] }>(GET_TOP_HOLDERS, {
+  }, [accountRank]);
+  const { loading, data: { topHolders: accounts } = {} } = useQuery<{
+    topHolders: { publicKey: string }[];
+  }>(GET_TOP_HOLDERS, {
     variables: {
       mint: mintKey?.toBase58(),
       startRank: startIndex,
-      stopRank: stopIndex
-    }
-  })
+      stopRank: stopIndex,
+    },
+  });
 
   return {
     accounts: accounts?.map(({ publicKey }, index) => ({
       rank: startIndex + index + 1,
-      wallet: new PublicKey(publicKey)
+      wallet: new PublicKey(publicKey),
     })),
     userRank: accountRank,
     loading: loadingRank || loading,
@@ -95,18 +120,20 @@ function useAccountsPagination(
   const [startIndex, setStartIndex] = useState<number>(0);
   const [stopIndex, setStopIndex] = useState<number>(5);
 
-  const { loading, data: { topHolders: accounts } = {} } = useQuery<{ topHolders: { publicKey: string }[] }>(GET_TOP_HOLDERS, {
+  const { loading, data: { topHolders: accounts } = {} } = useQuery<{
+    topHolders: { publicKey: string }[];
+  }>(GET_TOP_HOLDERS, {
     variables: {
       mint: mintKey?.toBase58(),
       startRank: startIndex,
-      stopRank: stopIndex
-    }
-  })
+      stopRank: stopIndex,
+    },
+  });
 
   return {
     accounts: accounts?.map(({ publicKey }, index) => ({
       rank: startIndex + index + 1,
-      wallet: new PublicKey(publicKey)
+      wallet: new PublicKey(publicKey),
     })),
     loading: loading,
     pageUp: () => setStartIndex((startIndex) => zeroMin(startIndex - 5)),
@@ -123,8 +150,8 @@ export const TokenLeaderboard = React.memo(
     onAccountClick?: (tokenRefKey: PublicKey) => void;
   }) => {
     const { publicKey } = useWallet();
-    const top = useAccountsPagination(mint);
-    const local = useLocalAccountsPagination(mint, publicKey || undefined);
+    let top = useAccountsPagination(mint);
+    let local = useLocalAccountsPagination(mint, publicKey || undefined);
 
     if (top.loading || local.loading || !local.accounts || !top.accounts) {
       return (
@@ -138,9 +165,26 @@ export const TokenLeaderboard = React.memo(
       return <div>No token holders</div>;
     }
 
+    top.accounts = [...Array(5).keys()].map((x, index) => ({
+      rank: index + 1,
+      wallet: new PublicKey(index + 1),
+    }));
+
+    local.accounts = [...Array(100).keys()].map((x, index) => ({
+      rank: index + 1,
+      wallet: new PublicKey(index + 1),
+    }));
+
     const localLeaderboard = (
       <Fragment>
-        <div className="text-center text-bold text-2xl text-gray-500 mb-2">...</div>
+        <Center
+          fontWeight="bold"
+          fontSize="2xl"
+          color="gray.500"
+          marginBottom={2}
+        >
+          ...
+        </Center>
         <WhiteCard>
           <PageChevron direction="up" onClick={local.pageUp} />
           <Leaderboard
@@ -167,7 +211,7 @@ export const TokenLeaderboard = React.memo(
     );
 
     return (
-      <div className="pt-2 flex flex-col items-stretch">
+      <Flex flexDirection="column" paddingTop={2} alignItems="stretch">
         <WhiteCard>
           <Leaderboard
             numbers={top.accounts.map(({ rank, wallet }) => (
@@ -190,7 +234,7 @@ export const TokenLeaderboard = React.memo(
           <PageChevron direction="down" onClick={top.pageDown} />
         </WhiteCard>
         {(local.userRank || 0) > top.accounts.length - 1 && localLeaderboard}
-      </div>
+      </Flex>
     );
   }
 );

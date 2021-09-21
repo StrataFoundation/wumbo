@@ -1,11 +1,12 @@
 import React, { Fragment, useState } from "react";
-import { Flex, Spinner } from "@chakra-ui/react";
+import { Flex } from "@chakra-ui/react";
 import { HiChevronRight } from "react-icons/hi";
 import {
   useBondingPricing,
   useFiatPrice,
   useOwnedAmount,
 } from "./utils/pricing";
+import { Spinner } from "./";
 import { useTokenMetadata } from "./utils/metaplex";
 import { MetadataAvatar } from "./Avatar";
 import { Link, useHistory } from "react-router-dom";
@@ -28,14 +29,16 @@ interface MetadataTokenPillProps {
 }
 export const MetadataTokenPill = React.memo(
   ({ name, ticker, tokenBonding, detailsPath }: MetadataTokenPillProps) => {
-    const { metadata, loading, error } = useTokenMetadata(tokenBonding?.targetMint);
+    const { metadata, loading, error } = useTokenMetadata(
+      tokenBonding?.targetMint
+    );
     const displayTicker = metadata?.data.symbol || ticker;
     const displayName = metadata?.data.name || name;
     handleErrors(error);
     const displayIcon = loading ? (
-      <Spinner size="md" />
+      <Spinner />
     ) : (
-      <MetadataAvatar tokenBonding={tokenBonding} token name={displayTicker} />
+      <MetadataAvatar tokenBonding={tokenBonding} name={displayTicker} />
     );
 
     return (

@@ -6,7 +6,6 @@ import {
   Text,
   Button,
   Avatar,
-  Spinner,
   Tabs,
   TabList,
   Tab,
@@ -29,6 +28,7 @@ import {
   useOwnedAmount,
   useQuery,
   TokenPill,
+  Spinner,
   Notification,
   useTokenMetadata,
   MetadataAvatar,
@@ -89,7 +89,7 @@ function useTokenInfo(tokenBonding: TokenBondingV0 | undefined): TokenInfo {
           loading,
           error,
           ticker: "UNCLAIMED",
-          icon: <Avatar token imgSrc={image} name={name} />,
+          icon: <Avatar src={image} name={name} />,
           name: query.get("name") || undefined,
         };
       }
