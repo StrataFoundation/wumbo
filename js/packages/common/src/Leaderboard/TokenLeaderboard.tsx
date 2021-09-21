@@ -150,8 +150,8 @@ export const TokenLeaderboard = React.memo(
     onAccountClick?: (tokenRefKey: PublicKey) => void;
   }) => {
     const { publicKey } = useWallet();
-    let top = useAccountsPagination(mint);
-    let local = useLocalAccountsPagination(mint, publicKey || undefined);
+    const top = useAccountsPagination(mint);
+    const local = useLocalAccountsPagination(mint, publicKey || undefined);
 
     if (top.loading || local.loading || !local.accounts || !top.accounts) {
       return (
@@ -164,16 +164,6 @@ export const TokenLeaderboard = React.memo(
     if (top.accounts?.length === 0) {
       return <div>No token holders</div>;
     }
-
-    top.accounts = [...Array(5).keys()].map((x, index) => ({
-      rank: index + 1,
-      wallet: new PublicKey(index + 1),
-    }));
-
-    local.accounts = [...Array(100).keys()].map((x, index) => ({
-      rank: index + 1,
-      wallet: new PublicKey(index + 1),
-    }));
 
     const localLeaderboard = (
       <Fragment>
