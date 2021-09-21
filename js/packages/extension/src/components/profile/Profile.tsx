@@ -1,8 +1,6 @@
 import React, { Fragment } from "react";
-import { Link, useHistory, useParams } from "react-router-dom";
-import { Flex, Text, Button, Icon } from "@chakra-ui/react";
+import { useHistory, useParams } from "react-router-dom";
 import { PublicKey } from "@solana/web3.js";
-import { HiPencilAlt } from "react-icons/hi";
 import {
   useAccount,
   TokenRef,

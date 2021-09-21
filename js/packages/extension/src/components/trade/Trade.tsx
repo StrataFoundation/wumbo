@@ -244,7 +244,6 @@ export const Trade = ({
     await buy(tokenBonding.publicKey, +values.tokenAmount, BASE_SLIPPAGE);
     toast.custom((t) => (
       <Notification
-        className="rounded-b-lg"
         show={t.visible}
         type="success"
         heading="Transaction Succesful"
@@ -261,7 +260,6 @@ export const Trade = ({
 
     toast.custom((t) => (
       <Notification
-        className="rounded-b-lg"
         show={t.visible}
         type="success"
         heading="Transaction Succesful"
