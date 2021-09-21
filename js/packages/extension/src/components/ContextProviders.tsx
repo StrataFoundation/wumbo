@@ -46,6 +46,8 @@ export const ContextProviders: FC = ({ children }) => {
         [])[1];
       if (code == "0x1") {
         error = new Error("Insufficient balance.");
+      } else if (code == "0x136") {
+        error = new Error("Purchased more than the cap of 100 bWUM");
       }
       toast.custom((t) => (
         <Notification

@@ -39,6 +39,7 @@ import { TokenLeaderboard } from "../Leaderboard/TokenLeaderboard";
 import { NftListRaw } from "../Nft";
 import { TROPHY_CREATOR } from "../constants/globals";
 import { handleErrors } from "../contexts";
+import { useQuery as apolloUseQuery, gql } from "@apollo/client";
 
 interface IProfileProps {
   tokenRefKey: PublicKey;
@@ -54,6 +55,18 @@ export interface IClaimFlowOutput {
   loading: boolean;
   claim: () => void;
 }
+
+const GET_WUM_RANK = gql`
+  query GetWumRank($wallet: String!) {
+    wumRank(publicKey: $wallet)
+  }
+`;
+
+const GET_TOKEN_RANK = gql`
+  query GetTokenRank($tokenBonding: String!) {
+    tokenRank(tokenBondingKey: $tokenBonding)
+  }
+`;
 
 export const Profile = React.memo(
   ({
@@ -79,6 +92,14 @@ export const Profile = React.memo(
     const { publicKey } = useWallet();
     const { handle: walletTwitterHandle, error: reverseTwitterError } =
       useReverseTwitter(publicKey || undefined);
+    const { data: { wumRank } = {} } = apolloUseQuery<{
+      wumRank: number | undefined;
+    }>(GET_WUM_RANK, { variables: { wallet: ownerWalletKey?.toBase58() } });
+    const { data: { tokenRank } = {} } = apolloUseQuery<{
+      tokenRank: number | undefined;
+    }>(GET_TOKEN_RANK, {
+      variables: { tokenBonding: tokenRef?.tokenBonding.toBase58() },
+    });
 
     const mint = useMint(tokenBonding?.targetMint);
     const supply = mint ? supplyAsNum(mint) : 0;
@@ -154,19 +175,29 @@ export const Profile = React.memo(
           </VStack>
           <Spacer />
           <VStack spacing={2}>
-            <StatCardWithIcon icon="coin" label="coin rank" value="TBD" />
-            <StatCardWithIcon icon="wumbo" label="WUM locked" value="TBD" />
+            <StatCardWithIcon
+              icon="coin"
+              label="Token Rank"
+              value={
+                typeof tokenRank != undefined ? (tokenRank! + 1).toString() : ""
+              }
+            />
+            <StatCardWithIcon
+              icon="wumbo"
+              label="WUM Locked"
+              value={
+                typeof wumRank != undefined ? (wumRank! + 1).toString() : ""
+              }
+            />
           </VStack>
         </HStack>
         <HStack spacing={2} w="full">
           <Button size="xs" colorScheme="indigo" onClick={onTradeClick}>
             Trade
           </Button>
-          {tokenRef && tokenRef.isClaimed && (
-            <Button size="xs" colorScheme="green" onClick={onTradeClick}>
-              ${coinPriceUsd.toFixed(2)}
-            </Button>
-          )}
+          <Button size="xs" colorScheme="green" onClick={onTradeClick}>
+            ${coinPriceUsd.toFixed(2)}
+          </Button>
           {tokenRef &&
             !tokenRef.isClaimed &&
             !walletTokenRef &&
