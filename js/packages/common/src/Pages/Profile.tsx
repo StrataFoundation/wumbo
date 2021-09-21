@@ -14,6 +14,7 @@ import { NftList, NftListRaw } from '../Nft';
 import { TROPHY_CREATOR } from '../constants/globals';
 import { Link } from 'react-router-dom';
 import { handleErrors } from '../contexts';
+import { useQuery as apolloUseQuery, gql } from '@apollo/client';
 
 interface IProfileProps {
   tokenRefKey: PublicKey;
@@ -30,6 +31,18 @@ export interface IClaimFlowOutput {
   claim: () => void
 }
 
+const GET_WUM_RANK = gql`
+  query GetWumRank($wallet: String!) {
+    wumRank(publicKey: $wallet)
+  }
+`;
+
+const GET_TOKEN_RANK = gql`
+  query GetTokenRank($tokenBonding: String!) {
+    tokenRank(tokenBondingKey: $tokenBonding)
+  }
+`;
+
 export const Profile = React.memo(({ useClaimFlow, tokenRefKey, onAccountClick, onTradeClick, getNftLink, editPath }: IProfileProps) => {
   const { info: tokenRef, loading } = useAccount(tokenRefKey, TokenRef, true)
   const ownerWalletKey = tokenRef?.owner as PublicKey | undefined;
@@ -38,6 +51,8 @@ export const Profile = React.memo(({ useClaimFlow, tokenRefKey, onAccountClick, 
   const { metadata, loading: loadingMetadata, error: tokenMetadataError } = useTokenMetadata(tokenBonding?.targetMint);
   const { publicKey } = useWallet();
   const { handle: walletTwitterHandle, error: reverseTwitterError } = useReverseTwitter(publicKey || undefined);
+  const { data: { wumRank } = {} } = apolloUseQuery<{ wumRank: number | undefined }>(GET_WUM_RANK, { variables: { wallet: ownerWalletKey?.toBase58() } })
+  const { data: { tokenRank } = {} } = apolloUseQuery<{ tokenRank: number | undefined }>(GET_TOKEN_RANK, { variables: { tokenBonding: tokenRef?.tokenBonding.toBase58() } })
   
   const mint = useMint(tokenBonding?.targetMint);
   const supply = mint ? supplyAsNum(mint) : 0;
@@ -121,8 +136,8 @@ export const Profile = React.memo(({ useClaimFlow, tokenRefKey, onAccountClick, 
             </div>
           </div>
           <div className="flex flex-col gap-2.5">
-            <StatCardWithIcon icon="coin" label="coin rank" value="TBD" />
-            <StatCardWithIcon icon="wumbo" label="WUM locked" value="TBD" />
+            <StatCardWithIcon icon="coin" label="Token Rank" value={typeof tokenRank != undefined ? (tokenRank! + 1).toString() : ""} />
+            <StatCardWithIcon icon="wumbo" label="WUM Locked" value={typeof wumRank != undefined ? (wumRank! + 1).toString() : ""} />
           </div>
         </div>
       </div>
