@@ -13,11 +13,15 @@ import { Spinner, WUM_BONDING } from "wumbo-common";
 export const WumboDrawer = (props: { children: ReactNode }) => {
   const { isOpen, toggleDrawer } = useDrawer();
 
-  // TODO center on screen
   return (
     <Fragment>
       {isOpen && (
-        <Box w="345px" pos="fixed" right="0" top="20">
+        <Box
+          w="345px"
+          pos="fixed"
+          right="0"
+          style={{ top: "calc(50% - 280px)" }}
+        >
           <Fade in={true} style={{ zIndex: 99999 }}>
             <Box
               w="345px"
