@@ -1,11 +1,8 @@
-import { useAsync, useAsyncCallback } from "react-async-hook";
+import { useAsyncCallback } from "react-async-hook";
+import { useConnection } from "../../contexts/connection";
 import {
   Creator,
-  decodeMetadata,
-  Metadata,
   MetadataCategory,
-  METADATA_PREFIX,
-  useConnection,
 } from "@oyster/common";
 import { useAccount } from "../account";
 import {
@@ -16,12 +13,9 @@ import {
   Transaction,
   TransactionInstruction,
 } from "@solana/web3.js";
-import { getDescription, getFilesWithMetadata, getImage, getMetadataKey } from "./utils";
-import { useProvider, useWallet } from "../../contexts/walletContext";
-import { TokenRefV0 } from "@wum.bo/spl-wumbo";
+import { getFilesWithMetadata } from "./utils";
+import { useWallet } from "../../contexts/walletContext";
 import { TokenRef } from "../deserializers/spl-wumbo";
-import { useMint } from "../mintState";
-import { TokenBondingV0 } from "@wum.bo/spl-token-bonding";
 import { useState } from "react";
 import {
   prepPayForFilesInstructions,

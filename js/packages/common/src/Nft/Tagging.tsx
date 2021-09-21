@@ -5,7 +5,7 @@ import {
   Transaction,
   sendAndConfirmRawTransaction,
 } from "@solana/web3.js";
-import { useConnection } from "@oyster/common";
+import { useConnection } from "../contexts/connection";
 import { VStack, HStack, Box, Text, Checkbox, Button } from "@chakra-ui/react";
 import { Spinner } from "../";
 // @ts-ignore

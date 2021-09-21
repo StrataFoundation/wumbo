@@ -1,4 +1,4 @@
-import { useConnection } from "@oyster/common";
+import { useConnection } from "../contexts/connection";
 import {
   createNameRegistry,
   getHashedName,

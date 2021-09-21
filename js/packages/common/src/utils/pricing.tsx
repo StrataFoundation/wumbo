@@ -1,6 +1,6 @@
 import { Market } from "@project-serum/serum";
 import { AccountInfo, Connection, PublicKey } from "@solana/web3.js";
-import BN from "bn.js";
+import { useConnection } from "../contexts/connection";
 import React, { useContext, useEffect, useMemo, useState } from "react";
 import {
   SERUM_PROGRAM_ID,
@@ -18,7 +18,7 @@ import { useAccount } from "./account";
 import { useMint } from "./mintState";
 import { useAssociatedAccount } from "./walletState";
 import { useWallet } from "../contexts/walletContext";
-import { TokenAccountParser, useConnection } from "@oyster/common";
+import { TokenAccountParser } from "@oyster/common";
 import { useAsync } from "react-async-hook";
 import { useTwitterTokenRef } from "./tokenRef";
 import { Curve as DeserializeCurve, TokenBonding } from "./deserializers/spl-token-bonding";
@@ -142,11 +142,11 @@ export interface PricingState {
   curve?: Curve
 }
 export function useBondingPricing(tokenBonding: PublicKey | undefined): PricingState {
+  const { info: bonding, loading: bondingLoading  } = useAccount(tokenBonding, TokenBonding);
+  const { info: curve, loading: curveLoading } = useAccount(bonding?.curve, DeserializeCurve, true);
   const [state, setState] = useState<PricingState>({
-    loading: true
+    loading: bondingLoading || curveLoading
   });
-  const { info: bonding } = useAccount(tokenBonding, TokenBonding);
-  const { info: curve } = useAccount(bonding?.curve, DeserializeCurve, true);
 
   const base = useMint(bonding?.baseMint);
   const target = useMint(bonding?.targetMint);
@@ -156,8 +156,10 @@ export function useBondingPricing(tokenBonding: PublicKey | undefined): PricingS
         loading: false,
         curve: fromCurve(curve, base, target)
       });
+    } else {
+      setState({ loading: bondingLoading || curveLoading })
     }
-  }, [curve, base, target, bonding]);
+  }, [curve, base, target, bonding, bondingLoading, curveLoading]);
 
   return state;
 }
@@ -187,8 +189,6 @@ export const UsdWumboPriceProvider = ({ children = undefined as any }) => {
   const { data: { totalWumLocked } = {} } = useQuery<{ totalWumLocked: number | undefined }>(GET_TOTAL_WUM_LOCKED, {})
   const baseStorageAmount = baseStorage && solMint ? amountAsNum(baseStorage.amount, solMint) : 0
   const bwumPrice = (baseStorageAmount / (totalWumLocked || 0)) * (solPrice || 0)
-
-  console.log(baseStorageAmount);
 
   return (
     <UsdWumboPriceContext.Provider value={bwumPrice}>

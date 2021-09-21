@@ -52,7 +52,9 @@ export class AccountFetchCache {
       options?: SendOptions
     ) {
       const result = await oldSendTransaction(transaction, signers, options);
-      self.requeryMissing(transaction.instructions)
+      this.confirmTransaction(result, 'finalized').then(() => 
+        self.requeryMissing(transaction.instructions)
+      ).catch(console.error);
 
       return result;
     }
@@ -73,14 +75,13 @@ export class AccountFetchCache {
     const affectedAccounts = writeableAccounts.filter(acct => this.missingAcccounts.has(acct));
     await Promise.all(affectedAccounts.map(async account => {
       const parser = this.missingAcccounts.get(account);
-      const result = await this.addToBatch(new PublicKey(account))
-      this.onAccountChange(new PublicKey(account), parser, result);
+      await this.search(new PublicKey(account), parser, this.statics.has(account), true)
     }))
   }
 
   async fetchMissing() {
     try {
-      await Promise.all([...this.missingAcccounts].map(([account, _]) => this.search(new PublicKey(account), this.missingAcccounts.get(account))))
+      await Promise.all([...this.missingAcccounts].map(([account, _]) => this.search(new PublicKey(account), this.missingAcccounts.get(account), this.statics.has(account), true)))
     } catch(e) {
       // This happens in an interval, so just log errors
       console.error(e);
@@ -99,7 +100,6 @@ export class AccountFetchCache {
       const { keys, array } = await getMultipleAccounts(this.connection, [...currentBatch], this.commitment)
       keys.forEach((key, index) => {
         this.pendingCallbacks.get(key)!(array[index], null)
-        this.pendingCallbacks.delete(key);
       })
   
       return { keys, array };
@@ -123,10 +123,10 @@ export class AccountFetchCache {
 
     const promise = new Promise<AccountInfo<Buffer>>((resolve, reject) => {
       this.pendingCallbacks.set(idStr, (info, err) => {
+        this.pendingCallbacks.delete(idStr);
         if (err) {
           return reject(err)
         }
-
         resolve(info!)
       });
     });
@@ -145,7 +145,8 @@ export class AccountFetchCache {
     parser: AccountParser<T> = (pubkey, account) => ({
       pubkey, account
     }),
-    isStatic: Boolean = false // optimization, set if the data will never change
+    isStatic: Boolean = false, // optimization, set if the data will never change
+    forceRequery = false,
   ): Promise<ParsedAccountBase<T> | undefined> {
     let id: PublicKey;
     if (typeof pubKey === 'string') {
@@ -159,9 +160,9 @@ export class AccountFetchCache {
       this.statics.add(address)
     }
     
-    let account = this.genericCache.get(address) as ParsedAccountBase<T>;
-    if (account) {
-      return account;
+    if (!forceRequery && this.genericCache.has(address)) {
+      const result = this.genericCache.get(address);
+      return result == null ? undefined : result as ParsedAccountBase<T> | undefined;
     }
 
     const existingQuery = this.pendingCalls.get(address) as Promise<ParsedAccountBase<T>>;
@@ -170,6 +171,8 @@ export class AccountFetchCache {
     }
 
     const query = this.addToBatch(id).then(data => {
+      this.pendingCalls.delete(address);
+
       this.watch(id, parser, !!data);
       if (!data) {
         this.genericCache.set(id.toBase58(), null)
@@ -239,7 +242,6 @@ export class AccountFetchCache {
     }
 
     this.registerParser(id, deserialize);
-    this.pendingCalls.delete(address);
     const account = deserialize(new PublicKey(address), obj);
     if (!account) {
       return;

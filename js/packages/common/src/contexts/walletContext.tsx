@@ -18,8 +18,8 @@ import {
 import { Wallet, WalletName } from "@solana/wallet-adapter-wallets";
 import { PublicKey, Transaction, TransactionInstruction } from "@solana/web3.js";
 import { useLocalStorage } from "../utils";
+import { useConnection } from "../contexts/connection";
 import { Provider } from "@wum.bo/anchor";
-import { useConnection } from "@oyster/common";
 
 export interface IWalletProviderProps {
   children: ReactNode;

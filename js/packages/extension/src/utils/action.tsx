@@ -1,11 +1,8 @@
 import React, { useState, useCallback } from "react";
-import { useConnection } from "@oyster/common";
 import { PublicKey, Transaction, sendAndConfirmRawTransaction } from "@solana/web3.js";
 import { WalletNotConnectedError } from "@solana/wallet-adapter-base";
 import {
-  SPL_ASSOCIATED_TOKEN_ACCOUNT_PROGRAM_ID,
-  TOKEN_BONDING_PROGRAM_ID,
-  TOKEN_PROGRAM_ID,
+  useConnection,
   usePrograms,
   useWallet,
 } from "wumbo-common";

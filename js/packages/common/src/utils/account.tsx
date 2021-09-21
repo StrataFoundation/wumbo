@@ -1,10 +1,12 @@
 import { AccountInfo, Commitment, Connection, PublicKey } from "@solana/web3.js";
-import { TokenAccount, useConnection, ParsedAccountBase, TokenAccountParser } from "@oyster/common";
+import { useConnection } from "../contexts/connection";
+import { TokenAccount, ParsedAccountBase, TokenAccountParser } from "@oyster/common";
 import React, { useState, useEffect, useContext, useMemo } from "react";
 import { useAsync } from "react-async-hook";
 import { TOKEN_PROGRAM_ID } from "@solana/spl-token";
 import { AccountFetchCache, AccountParser } from "./accountFetchCache/accountFetchCache";
 import { truthy } from "./truthy";
+import { DEFAULT_COMMITMENT } from "../constants/globals";
 
 export interface UseAccountState<T> {
   loading: boolean;
@@ -23,14 +25,12 @@ export function useAccountFetchCache(): AccountFetchCache {
   return useContext(AccountCacheContext)!;
 }
 
-const DEFAULT_COMMITMENT = "processed";
-
 export const AccountCacheContextProvider: React.FC = ({ children }) => {
   const connection = useConnection();
   const cache = React.useMemo(() => {
     return new AccountFetchCache({
       connection,
-      delay: 250,
+      delay: 500,
       commitment: DEFAULT_COMMITMENT
     })
   }, [connection])
@@ -73,6 +73,8 @@ export function useAccount<T>(
   isStatic: Boolean = false // Set if the accounts data will never change, optimisation to lower websocket usage.
 ): UseAccountState<T> {
   const cache = useAccountFetchCache();
+  // @ts-ignore for helping to debug
+  window.cache = cache;
   const [state, setState] = useState<UseAccountState<T>>({
     loading: true,
   });
@@ -93,6 +95,7 @@ export function useAccount<T>(
 
   useEffect(() => {
     if (!id) {
+      setState({ loading: false })
       return;
     }
 

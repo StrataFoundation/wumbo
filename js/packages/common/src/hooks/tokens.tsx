@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useConnection } from "@oyster/common";
+import { useConnection } from "../contexts/connection";
 import { PublicKey, RpcResponseAndContext, TokenAccountBalancePair } from "@solana/web3.js";
 
 // wouldb eventually like to collocate all token related hooks here

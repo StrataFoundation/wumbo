@@ -38,6 +38,6 @@
       "all_frames": true
     }
   ],
-  "web_accessible_resources": ["wallet_proxy.js", "https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js"],
+  "web_accessible_resources": ["wallet_proxy.js"],
   "permissions": ["<all_urls>", "tabs"]
 }
