@@ -188,8 +188,6 @@ export const UsdWumboPriceProvider = ({ children = undefined as any }) => {
   const baseStorageAmount = baseStorage && solMint ? amountAsNum(baseStorage.amount, solMint) : 0
   const bwumPrice = (baseStorageAmount / (totalWumLocked || 0)) * (solPrice || 0)
 
-  console.log(baseStorageAmount);
-
   return (
     <UsdWumboPriceContext.Provider value={bwumPrice}>
       {children}
