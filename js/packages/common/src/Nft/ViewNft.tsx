@@ -61,9 +61,6 @@ export const ViewNftRaw = React.memo(
       if (!taggingMode) setIsExpanded(true);
     };
 
-    // TODO expand logic
-
-    // TODO add redirect logic to site wallet
     /* const { connected } = useWallet(); */
 
     /* if (!connected && taggingMode) {
@@ -99,10 +96,10 @@ export const ViewNftRaw = React.memo(
             <IconButton
               margin="0px"
               position="absolute"
+              colorScheme="purple"
               top={0}
               right={2}
               rounded="full"
-              colorScheme="purple"
               aria-label="NFT Action"
               size="md"
               fontSize={20}

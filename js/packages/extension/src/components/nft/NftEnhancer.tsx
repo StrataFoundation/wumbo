@@ -1,16 +1,54 @@
-import React, { Fragment } from "react";
-import { FloatPortal, pxToNum } from "wumbo-common";
+import React, { Fragment, useState } from "react";
+import ReactShadow from "react-shadow/emotion";
+import { Box } from "@chakra-ui/react";
+import {
+  FloatPortal,
+  pxToNum,
+  NftBadgeIcon,
+  NftBadgeHoverIcon,
+} from "wumbo-common";
 import { useNfts } from "../../utils/nftSpotter";
-import { InformationCircleIcon } from "@heroicons/react/solid";
 import { useDrawer } from "@/contexts/drawerContext";
+import { ThemeProvider } from "@/contexts/themeContext";
 import { useHistory } from "react-router-dom";
 import { nftPath } from "@/constants/routes";
 import { PublicKey } from "@solana/web3.js";
 
-export const NftEnhancer: React.FC = () => {
-  const nfts = useNfts();
+const NftBadge = ({
+  mintKey,
+  dimension,
+}: {
+  mintKey: string;
+  dimension: any;
+}) => {
+  const [isHovering, setIsHovering] = useState(false);
   const { toggleDrawer } = useDrawer();
   const history = useHistory();
+
+  return (
+    <Box
+      position="absolute"
+      bottom="0"
+      right="0"
+      pointerEvents="auto"
+      _hover={{ cursor: "pointer" }}
+      onClick={(e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        toggleDrawer({ isOpen: true });
+        history.push(nftPath(new PublicKey(mintKey)));
+      }}
+      onMouseEnter={() => setIsHovering(true)}
+      onMouseLeave={() => setIsHovering(false)}
+    >
+      {!isHovering && <NftBadgeIcon width={dimension} height={dimension} />}
+      {isHovering && <NftBadgeHoverIcon width={dimension} height={dimension} />}
+    </Box>
+  );
+};
+
+export const NftEnhancer: React.FC = () => {
+  const nfts = useNfts();
 
   if (nfts) {
     return (
@@ -22,19 +60,16 @@ export const NftEnhancer: React.FC = () => {
             30
           );
           return (
-            <FloatPortal key={nft.img.id} container={nft.img} clearance={{ top: 1, right: 1 }}>
-              <div className="absolute -top-0.5 -right-0.5 pointer-evnets-auto">
-                <InformationCircleIcon
-                  style={{ height: dimension, width: dimension }}
-                  className="opacity-80 hover:opacity-100 hover:cursor-pointer text-yellow-400 shadow-lg "
-                  onClick={(e) => {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    toggleDrawer({ isOpen: true });
-                    history.push(nftPath(new PublicKey(nft.mintKey)));
-                  }}
-                />
-              </div>
+            <FloatPortal
+              key={nft.img.id}
+              container={nft.img}
+              clearance={{ top: 1, right: 1 }}
+            >
+              <ReactShadow.div>
+                <ThemeProvider>
+                  <NftBadge mintKey={nft.mintKey} dimension={dimension} />
+                </ThemeProvider>
+              </ReactShadow.div>
             </FloatPortal>
           );
         })}
