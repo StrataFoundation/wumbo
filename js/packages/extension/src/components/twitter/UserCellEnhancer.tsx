@@ -1,9 +1,7 @@
 import React, { Fragment } from "react";
 import ReactShadow from "react-shadow/emotion";
 import { Box } from "@chakra-ui/react";
-import { ThemeProvider } from "@/contexts/themeContext";
-
-import { AppendChildPortal } from "wumbo-common";
+import { AppendChildPortal, ThemeProvider } from "wumbo-common";
 import { useUserCells } from "../../utils/twitterSpotter";
 import { MainButton } from "../MainButton";
 

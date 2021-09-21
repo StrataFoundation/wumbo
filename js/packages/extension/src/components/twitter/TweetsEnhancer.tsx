@@ -1,9 +1,8 @@
 import React, { Fragment } from "react";
 import ReactShadow from "react-shadow/emotion";
 import { Box } from "@chakra-ui/react";
-import { ThemeProvider } from "@/contexts/themeContext";
 
-import { AppendChildPortal } from "wumbo-common";
+import { AppendChildPortal, ThemeProvider } from "wumbo-common";
 import { useTweets } from "../../utils/twitterSpotter";
 import { MainButton } from "../MainButton";
 import { ReplyTokens } from "../ReplyTokens";

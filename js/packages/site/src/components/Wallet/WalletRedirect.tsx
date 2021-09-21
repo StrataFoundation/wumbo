@@ -8,7 +8,7 @@ export default React.memo(() => {
   const { connected } = useWallet();
 
   const redirectUri =
-    routes.wallet.path + `?redirect=${location.pathname}${location.search}`;
+    routes.manageWallet.path + `?redirect=${location.pathname}${location.search}`;
 
   if (!connected) {
     return <Redirect to={redirectUri} />;
