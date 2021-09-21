@@ -1,9 +1,7 @@
 import { useState } from "react";
 import { useAsync, useAsyncCallback } from "react-async-hook";
 import { TokenRef, WumboInstance } from "./deserializers/spl-wumbo";
-import {
-  useConnection,
-} from "@oyster/common";
+import { useConnection } from "../contexts/connection";
 import { useWallet } from "../contexts/walletContext";
 import {
   createTestTld,

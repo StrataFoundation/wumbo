@@ -3,7 +3,6 @@ import {
   Edition,
   MasterEditionV2,
   MasterEditionV1,
-  useConnection,
   getMetadata,
   getEdition,
   decodeEdition,
@@ -13,6 +12,7 @@ import {
   MetadataKey,
   IMetadataExtension,
 } from "@oyster/common";
+import { useConnection } from "../../contexts/connection";
 import { AccountInfo } from "@solana/spl-token";
 import { Connection, PublicKey } from "@solana/web3.js";
 import { useAsync, UseAsyncReturn } from "react-async-hook";

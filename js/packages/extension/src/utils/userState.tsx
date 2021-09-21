@@ -40,11 +40,11 @@ export interface UserInfoState {
 }
 export const useUserInfo = (name: string): UserInfoState => {
   const { info: creator, loading } = useTwitterTokenRef(name);
-  const { info: tokenBonding } = useAccount(
+  const { info: tokenBonding, loading: bondingLoading } = useAccount(
     creator?.tokenBonding,
     TokenBonding
   );
-  const { info: curve } = useAccount(
+  const { info: curve, loading: curveLoading } = useAccount(
     tokenBonding?.curve,
     Curve,
     true
@@ -54,7 +54,7 @@ export const useUserInfo = (name: string): UserInfoState => {
   const [userInfo, setUserInfo] = useState<UserInfoState>({
     loading: true,
   });
-  const { curve: bondingCurve } = useBondingPricing(creator?.tokenBonding);
+  const { curve: bondingCurve, loading: pricingLoading } = useBondingPricing(creator?.tokenBonding);
   const current = bondingCurve?.current() || 0;
   
   useEffect(() => {
@@ -71,10 +71,10 @@ export const useUserInfo = (name: string): UserInfoState => {
         },
         loading: false,
       });
-    } else if (!loading) {
-      setUserInfo({ loading: false });
+    } else {
+      setUserInfo({ loading: loading || bondingLoading || curveLoading || pricingLoading });
     }
-  }, [current, curve, tokenBonding, mint, creator, loading]);
+  }, [current, curve, tokenBonding, mint, creator, loading, bondingLoading, curveLoading, pricingLoading]);
 
   return userInfo;
 };

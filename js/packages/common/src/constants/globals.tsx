@@ -4,6 +4,7 @@ import {
   TOKEN_PROGRAM_ID as SPL_TOKEN_PROGRAM_ID,
 } from "@solana/spl-token";
 
+export const DEFAULT_COMMITMENT = "processed";
 export const IS_DEV = true;
 export const DEV_TWITTER_TLD = "WumboDevTwitter1";
 const key = [243,99,226,76,228,180,49,28,35,61,133,124,225,80,78,147,2,107,58,142,6,245,23,211,113,62,255,181,222,50,4,23,51,146,66,205,166,190,240,181,45,146,254,237,136,217,114,62,55,249,200,102,79,120,51,44,187,84,64,129,102,120,70,131]
@@ -46,7 +47,7 @@ export const TOKEN_BONDING_PROGRAM_ID = new PublicKey(
   "4K8fnycnTESeyad4DqfXPF8TbkuyscPK4EjAwY35emyW"
 );
 // export const SOLANA_API_URL = "https://api.devnet.solana.com";
-export const SOLANA_API_URL = "https://wumbo.devnet.rpcpool.com/";
+export const SOLANA_API_URL = "https://psytrbhymqlkfrhudd.dev.genesysgo.net:8899/";
 
 export const SERUM_PROGRAM_ID = new PublicKey(
   "9xQeWvG816bUx9EPjHmaT23yvVM2ZWbrrpZb9PusVFin"

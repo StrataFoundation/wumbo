@@ -1,9 +1,9 @@
 import { AccountInfo, Connection, PublicKey } from "@solana/web3.js";
 import { useEffect, useState } from "react";
 import { MintInfo, MintLayout, u64 } from "@solana/spl-token";
-import { useConnection } from "@oyster/common";
 import { SOL_TOKEN } from "../constants/globals";
 import { Numberu64 } from "@bonfida/spl-name-service";
+import { useConnection } from "../contexts/connection";
 
 export class Mint {
   static fromAccount(account: AccountInfo<Buffer>): MintInfo {

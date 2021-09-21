@@ -1,8 +1,8 @@
+import "../../bufferFill";
 import React from "react";
 import ReactDOM from "react-dom";
 import ReactShadow from "react-shadow/emotion";
 import App from "../../components/App";
-import "../../bufferFill";
 
 const appMountElem = document.createElement("div");
 appMountElem.setAttribute("id", "WUM");

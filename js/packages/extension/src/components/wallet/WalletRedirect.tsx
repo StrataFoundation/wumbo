@@ -11,10 +11,10 @@ export default React.memo(() => {
   useEffect(() => {
     if (!wallet && name && [WalletName.Phantom, WalletName.Solflare, WalletName.Torus].includes(name)) {
       select(name)
-    } else if (wallet && !name) {
+    } else if (wallet && wallet.name != name) {
       setName(wallet.name)
     }
-  }, [name, wallet, ready])
+  }, [name, wallet])
 
   const redirectUri = routes.wallet.path + `?redirect=${location.pathname}${location.search}`;
 
