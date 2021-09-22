@@ -97,10 +97,12 @@ export function useAccount<T>(
     if (!id) {
       setState({ loading: false })
       return;
+    } else {
+      setState({ loading: true })
     }
 
     cache
-      .search(id, parsedAccountBaseParser, isStatic)
+      .searchAndWatch(id, parsedAccountBaseParser, isStatic)
       .then((acc) => {
         if (acc) {
           setState({

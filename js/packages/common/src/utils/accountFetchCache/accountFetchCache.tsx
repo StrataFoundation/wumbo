@@ -139,6 +139,30 @@ export class AccountFetchCache {
     await this.fetchBatch();
   }
 
+  async searchAndWatch<T>(
+    pubKey: string | PublicKey,
+    parser: AccountParser<T> = (pubkey, account) => ({
+      pubkey, account
+    }),
+    isStatic: Boolean = false, // optimization, set if the data will never change
+    forceRequery = false,
+  ): Promise<ParsedAccountBase<T> | undefined> {
+    let id: PublicKey;
+    if (typeof pubKey === 'string') {
+      id = new PublicKey(pubKey);
+    } else {
+      id = pubKey;
+    }
+    const data = await this.search(pubKey, parser, isStatic, forceRequery);
+    this.watch(id, parser, !!data);
+    this.genericCache.set(id.toBase58(), data || null);
+    
+    if (!data) {
+      this.genericCache.set(id.toBase58(), null)
+      return undefined;
+    }
+  }
+
   // The same as query, except swallows errors and returns undefined.
   async search<T>(
     pubKey: string | PublicKey,
@@ -175,17 +199,23 @@ export class AccountFetchCache {
     const query = this.addToBatch(id).then(data => {
       this.pendingCalls.delete(address);
 
-      this.watch(id, parser, !!data);
       if (!data) {
-        this.genericCache.set(id.toBase58(), null)
         return undefined;
       }
 
-      return this.add(id, data, parser) || {
+      const result = this.add(id, data, parser) || {
         pubkey: id,
         account: data,
         info: undefined
       };
+
+      // Only set the cache for defined static accounts. Static accounts can change if they go from nonexistant to existant.
+      // Rely on searchAndWatch to set the generic cache for everything else.
+      if (isStatic && result.info) {
+        this.genericCache.set(address, result);
+      }
+
+      return result;
     });
     this.pendingCalls.set(address, query as any);
 
@@ -234,8 +264,7 @@ export class AccountFetchCache {
   add<T>(
     id: PublicKey | string,
     obj: AccountInfo<Buffer>,
-    parser?: AccountParser<T>,
-    isActive?: boolean | undefined | ((parsed: any) => boolean),
+    parser?: AccountParser<T>
   ): ParsedAccountBase<T> | undefined {
     const address = typeof id === 'string' ? id : id?.toBase58();
     const deserialize = parser ? parser : this.keyToAccountParser.get(address) as AccountParser<T> | undefined;
@@ -251,13 +280,9 @@ export class AccountFetchCache {
       return;
     }
 
-    if (isActive === undefined) isActive = true;
-    else if (isActive instanceof Function) isActive = isActive(account);
-
     const isNew = !this.genericCache.has(address);
 
-    this.genericCache.set(address, account);
-    this.emitter.raiseCacheUpdated(address, isNew, deserialize, isActive);
+    this.emitter.raiseCacheUpdated(address, isNew, deserialize);
     return account;
   }
 

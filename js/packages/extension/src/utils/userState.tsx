@@ -56,7 +56,7 @@ export const useUserInfo = (name: string): UserInfoState => {
   });
   const { curve: bondingCurve, loading: pricingLoading } = useBondingPricing(creator?.tokenBonding);
   const current = bondingCurve?.current() || 0;
-  
+
   useEffect(() => {
     if (curve && tokenBonding && mint && creator) {
       setUserInfo({
@@ -72,7 +72,7 @@ export const useUserInfo = (name: string): UserInfoState => {
         loading: false,
       });
     } else {
-      setUserInfo({ loading: loading || bondingLoading || curveLoading || pricingLoading });
+      setUserInfo({ loading: (loading) || (creator && !curve && !tokenBonding && !mint) });
     }
   }, [current, curve, tokenBonding, mint, creator, loading, bondingLoading, curveLoading, pricingLoading]);
 
