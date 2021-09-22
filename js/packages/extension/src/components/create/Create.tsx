@@ -53,7 +53,7 @@ export const Create = () => {
           ) : (
             <Button
               as={Link}
-              to={routes.wallet.path + `?redirect=${currentPath}`}
+              to={routes.manageWallet.path + `?redirect=${currentPath}`}
               size="md"
               w="full"
               colorScheme="indigo"

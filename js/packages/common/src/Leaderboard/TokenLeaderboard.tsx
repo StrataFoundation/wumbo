@@ -118,7 +118,7 @@ function useAccountsPagination(
   mintKey: PublicKey | undefined
 ): IAccountsPagination {
   const [startIndex, setStartIndex] = useState<number>(0);
-  const [stopIndex, setStopIndex] = useState<number>(5);
+  const [stopIndex, setStopIndex] = useState<number>(3);
 
   const { loading, data: { topHolders: accounts } = {} } = useQuery<{
     topHolders: { publicKey: string }[];

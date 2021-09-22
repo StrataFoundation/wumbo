@@ -121,7 +121,7 @@ export function useAccount<T>(
 
     const dispose = cache.emitter.onCache((e) => {
       const event = e;
-      if (event.id === id) {
+      if (event.id === id && !event.isNew) {
         cache.query(id, parsedAccountBaseParser).then((acc) => {
           setState({
             loading: false,
