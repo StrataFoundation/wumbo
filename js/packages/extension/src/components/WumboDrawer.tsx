@@ -4,7 +4,7 @@ import startCase from "lodash/startCase";
 import {
   Flex,
   Box,
-  Fade,
+  Slide,
   Text,
   IconButton,
   Button,
@@ -25,36 +25,59 @@ import {
   WUM_BONDING,
 } from "wumbo-common";
 import { useHistoryList } from "@/utils/history";
+import Logo from "../../public/assets/img/logo.svg";
 
 export const WumboDrawer = (props: { children: ReactNode }) => {
   const { isOpen, toggleDrawer } = useDrawer();
-
+  const tab = <Box
+    bg="indigo.500"
+    w="38px"
+    h="38px"
+    backgroundImage="linear-gradient(49deg, #2323ff -12%, #4f51ff 34%, #a53ef4 98%)"
+    roundedTopLeft="lg"
+    roundedBottomLeft="lg"
+    shaddow="md"
+    onClick={() => toggleDrawer({ isOpen: !isOpen })}
+    _hover={{ cursor: "pointer" }}
+  >
+    <Icon h="38px" w="38px" as={Logo} />
+  </Box>
+  
   return (
     <Fragment>
-      {isOpen && (
+      { isOpen && <WalletAutoReconnect /> }
+      {!isOpen && <Box
+        pos="fixed"
+        right="0"
+        style={{ top: "calc(50% - 246px)" }}
+      >
+        {tab}
+      </Box> }
+      <Slide direction="right" in={isOpen} style={{ zIndex: 99999 }}>
         <Box
-          w="345px"
+          // w="345px"
           pos="fixed"
           right="0"
           style={{ top: "calc(50% - 280px)" }}
+          w="345px"
+          h="560px"
+          bg="white"
+          d="flex"
+          flexDir="column"
+          roundedTopLeft="lg"
+          roundedBottomLeft="lg"
+          shadow="md"
         >
-          <WalletAutoReconnect />
-          <Fade in={true} style={{ zIndex: 99999 }}>
-            <Box
-              w="345px"
-              h="560px"
-              bg="white"
-              d="flex"
-              flexDir="column"
-              roundedTopLeft="lg"
-              roundedBottomLeft="lg"
-              shadow="md"
-            >
-              {props.children}
-            </Box>
-          </Fade>
+          {props.children}
         </Box>
-      )}
+        <Box
+          pos="fixed"
+          right="345px"
+          style={{ top: "calc(50% - 246px)" }}
+        >
+          {tab}
+        </Box>
+      </Slide>
     </Fragment>
   );
 };

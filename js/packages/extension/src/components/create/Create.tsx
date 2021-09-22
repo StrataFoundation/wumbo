@@ -44,7 +44,7 @@ export const Create = () => {
             <Text fontWeight="bold">
               You will be the first to mint & own this person's token!
             </Text>{" "}
-            It will remain unverified until this person verifies it. Should the
+            It will remain unclaimed until this person claims it. Should the
             person opt out, no new tokens may be purchased and exisiting tokens
             may still be sold.
           </Text>
