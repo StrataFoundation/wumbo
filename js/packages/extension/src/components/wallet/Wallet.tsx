@@ -1,29 +1,24 @@
+import { Box } from "@chakra-ui/react";
 import React, { Fragment, useEffect } from "react";
+import { viewProfilePath, tradePath } from "@/constants/routes";
 import { useHistory } from "react-router-dom";
-import { useWallet, useQuery, WalletSelect, usePrevious } from "wumbo-common";
+import { useFtxPayLink, Wallet as CommonWallet, WUM_BONDING } from "wumbo-common";
 import { WumboDrawer } from "../WumboDrawer";
 
 export const Wallet = () => {
-  const history = useHistory();
-  const query = useQuery();
-  const { connected } = useWallet();
-  const prevConnected = usePrevious(connected);
-
-  useEffect(() => {
-    if (connected && !prevConnected) {
-      const redirect = query.get("redirect");
-      if (redirect) {
-        console.log(`Redirecting to ${redirect}`);
-        history.replace(redirect);
-      }
-    }
-  }, [connected, prevConnected]);
+  const solLink = useFtxPayLink();
 
   return (
     <Fragment>
       <WumboDrawer.Header title="Wallet" />
       <WumboDrawer.Content>
-        <WalletSelect />
+        <Box padding={4}>
+          <CommonWallet 
+            solLink={solLink}        
+            wumLink={tradePath(WUM_BONDING)}
+            getTokenLink={(t) => t.tokenRef ? viewProfilePath(t.tokenRef.publicKey) : ""}
+          />
+        </Box>
       </WumboDrawer.Content>
       <WumboDrawer.Nav />
     </Fragment>

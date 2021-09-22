@@ -11,8 +11,8 @@ import { NftEnhancer } from "./nft/NftEnhancer";
 import { Create } from "./create/Create";
 import { Customize } from "./customize/Customize";
 import { TradeRoute } from "./trade/Trade";
-import { MyCoins } from "./my-coins/MyCoins";
 import { Wallet } from "./wallet/Wallet";
+import { ManageWallet } from "./wallet/ManageWallet";
 import { ViewNft } from "./nft/ViewNft";
 import { TagNft } from "./nft/TagNft";
 import { Profile } from "./profile/Profile";
@@ -34,8 +34,8 @@ const App: FC = () => (
           <Route path={routes.claim.path} component={Claim} />
           <Route path={routes.customize.path} component={Customize} />
           <Route path={routes.trade.path} component={TradeRoute} />
-          <Route path={routes.wallet.path} component={MyCoins} />
-          <Route path={routes.manageWallet.path} component={Wallet} />
+          <Route path={routes.wallet.path} component={Wallet} />
+          <Route path={routes.manageWallet.path} component={ManageWallet} />
           <Route path={routes.viewProfile.path} component={Profile} />
           <Route path={routes.viewNft.path} component={ViewNft} />
           <Route path={routes.tagNft.path} component={TagNft} />

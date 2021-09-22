@@ -234,10 +234,6 @@ const WalletProvider: FC<IWalletProviderProps> = ({
           ? await (adapter as any)?.readyAsync
           : !!adapter?.ready;
 
-        if (!ready && wallet?.name === name) {
-          window.open(wallet!.url, "_blank");
-        }
-
         if (ready && wallet?.name === name) {
           setConnecting(true);
           try {

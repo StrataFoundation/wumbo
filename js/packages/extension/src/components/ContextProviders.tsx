@@ -9,7 +9,8 @@ import {
   AccountCacheContextProvider,
   wumboApi,
   ErrorHandlingContext,
-  ThemeProvider
+  ThemeProvider,
+  SolPriceProvider
 } from "wumbo-common";
 import { ApolloProvider } from "@apollo/client";
 import { DrawerProvider } from "@/contexts/drawerContext";
@@ -74,11 +75,13 @@ export const ContextProviders: FC = ({ children }) => {
             <EndpointSetter>
               <AccountsProvider>
                 <WalletProvider wallets={alteredWallets} onError={onError}>
-                  <UsdWumboPriceProvider>
-                    <DrawerProvider>
-                      <ThemeProvider>{children}</ThemeProvider>
-                    </DrawerProvider>
-                  </UsdWumboPriceProvider>
+                  <SolPriceProvider>
+                    <UsdWumboPriceProvider>
+                      <DrawerProvider>
+                        <ThemeProvider>{children}</ThemeProvider>
+                      </DrawerProvider>
+                    </UsdWumboPriceProvider>
+                  </SolPriceProvider>
                 </WalletProvider>
               </AccountsProvider>
             </EndpointSetter>

@@ -33,6 +33,9 @@ import {
   getImage,
   getMetadataKey,
 } from "./utils";
+import { getReverseTokenRefKey, getTokenRefKeyFromOwner, useClaimedTokenRef } from "../../utils/tokenRef";
+import { ITokenRef, TokenRef } from "../../utils/deserializers";
+import { TokenRefV0 } from "@wum.bo/spl-wumbo";
 
 export interface ITokenWithMeta {
   metadataKey?: PublicKey;
@@ -46,6 +49,7 @@ export interface ITokenWithMeta {
 
 export interface ITokenWithMetaAndAccount extends ITokenWithMeta {
   publicKey?: PublicKey;
+  tokenRef?: ITokenRef;
   account?: AccountInfo;
 }
 
@@ -57,8 +61,12 @@ export function getUserTokensWithMeta(
   return Promise.all(
     (tokenAccounts || []).map(async ({ pubkey, info }) => {
       const metadataKey = await getMetadata(info.mint);
+      const reverseTokenRefKey = await getReverseTokenRefKey(info.mint)
+      const { info: tokenRef } = (await cache.search(reverseTokenRefKey, (pubkey, account) => ({ pubkey, account, info: TokenRef(pubkey, account) }), true) || {});
+
       return {
         ...(await getTokenMetadata(cache, metadataKey)),
+        tokenRef,
         publicKey: pubkey,
         account: info,
       };
@@ -179,8 +187,9 @@ export function useTokenMetadata(
     loading: dataLoading,
     error: dataError,
   } = useAsync(getArweaveMetadata, [metadata?.data.uri]);
-
+  const { info: tokenRef } = useClaimedTokenRef(wallet.publicKey || undefined);
   return {
+    tokenRef,
     loading: Boolean(token && (loading || accountLoading || dataLoading)),
     error: error || dataError,
     metadata,

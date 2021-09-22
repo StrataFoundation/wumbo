@@ -1,14 +1,23 @@
 import React, { useEffect } from "react";
+import { profilePath } from "../../constants/routes";
 import AppContainer from "../common/AppContainer";
 import { useHistory } from "react-router-dom";
-import { Wallet } from "wumbo-common";
+import { useFtxPayLink, Wallet } from "wumbo-common";
 import WalletRedirect from "./WalletRedirect";
+import { Box } from "@chakra-ui/react";
 
 export default React.memo(() => {
+  const solLink = useFtxPayLink();
   return (
     <AppContainer>
       <WalletRedirect />
-      <Wallet />
+      <Box p={4}>
+        <Wallet
+          getTokenLink={(t) => t.tokenRef?.publicKey ? profilePath(t.tokenRef?.publicKey) : ""}
+          wumLink={""}
+          solLink={solLink}
+        />
+      </Box>
     </AppContainer>
   );
 });
