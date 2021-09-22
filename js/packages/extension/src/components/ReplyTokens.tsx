@@ -10,7 +10,17 @@ import {
   AvatarProps,
   useTwitterTokenRef,
   useOwnedAmountForOwnerAndHandle,
+  getTwitterHandle,
+  getTwitterClaimedTokenRefKey,
+  getTwitterUnclaimedTokenRefKey,
+  truthy,
+  useConnection,
+  useAccountFetchCache,
+  handleErrors,
 } from "wumbo-common";
+import { AccountFetchCache } from "@/../../common/dist/lib/utils/accountFetchCache/accountFetchCache";
+import { getTwitterRegistryKey } from "@bonfida/spl-name-service";
+import { useAsync } from "react-async-hook";
 
 const humanizeAmount = (amount: number) => {
   if (amount >= 1) return amount.toFixed(0);
@@ -83,6 +93,25 @@ interface IReplyTokensProps extends Pick<AvatarProps, "size"> {
   mentions: string[];
 }
 
+async function getMentionsWithTokens(cache: AccountFetchCache, mentions: string[]): Promise<string[]> {
+  return (await Promise.all(mentions.map(async mention => {
+    const handle = await getTwitterHandle(cache.connection, mention)
+    if (handle) {
+      const claimed = await getTwitterClaimedTokenRefKey(cache.connection, mention)
+      const unclaimed = await getTwitterUnclaimedTokenRefKey(mention);
+      const claimedRef = await cache.search(claimed, undefined, true);
+      if (claimedRef) {
+        return mention
+      }
+
+      const unclaimedRef = await cache.search(unclaimed, undefined, true);
+      if (unclaimedRef) {
+        return mention
+      }
+    }
+  }))).filter(truthy)
+}
+
 export const ReplyTokens = ({
   creatorName,
   mentions,
@@ -94,7 +123,13 @@ export const ReplyTokens = ({
   const sanitizedMentions = [
     ...new Set(mentions.map((mention) => mention.replace(/[@ ]/g, ""))),
   ];
+  const cache = useAccountFetchCache();
+  const { result: relevantMentions, error } = useAsync(getMentionsWithTokens, [cache, mentions])
+  handleErrors(error)
 
+  if (relevantMentions?.length > 0) {
+    debugger;
+  }
   const nullState =
     (!loading && !tokenRef) || loading || !tokenRef || !tokenRef.isClaimed;
 
