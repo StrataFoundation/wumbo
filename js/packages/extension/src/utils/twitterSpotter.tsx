@@ -142,7 +142,8 @@ export const useTweets = (): IParsedTweet[] | null => {
 
                 if (mentions?.length) {
                   mentions = sanitizeMentions(mentions);
-                  replyTokensTarget = tweet.firstChild;
+                  const lastHref = tweet.querySelector(`a[href="/${mentions[0]}"]`);
+                  replyTokensTarget = lastHref.parentElement;
                 }
               }
 
