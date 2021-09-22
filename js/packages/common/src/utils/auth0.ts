@@ -22,7 +22,7 @@ function makeId(length: number): string {
 }
 export function useClaimLink({ handle, newTab = false}: { handle: string, newTab?: boolean }): { redirectUri: string,  claim: () => Window | null } {
   const setAuth0State = useLocalStorageState("auth0-state")[1];
-  const redirectUri = `http://localhost:3000/claim?name=${handle}`;
+  const redirectUri = `https://wum.bo/claim?name=${handle}`;
   const claim = () => {
     const state = makeId(6);
   

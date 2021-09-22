@@ -53,7 +53,7 @@ export const WumboDrawer = (props: { children: ReactNode }) => {
       >
         {tab}
       </Box> }
-      <Slide direction="right" in={isOpen} style={{ zIndex: 99999 }}>
+      <Slide direction="right" in={isOpen} style={{ width: "345px", zIndex: 99999 }}>
         <Box
           // w="345px"
           pos="fixed"

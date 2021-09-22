@@ -2,7 +2,7 @@
   "manifest_version": 2,
   "name": "Wum.bo",
   "description": "Wum.bo Creator Coins",
-  "version": "1.0",
+  "version": "1.0.2",
   "browser_action": {
     "default_title": "Wum.bo",
     "default_icon": {
@@ -32,7 +32,7 @@
       "all_frames": true
     },
     {
-      "matches": ["http://localhost:3000/claim*"],
+      "matches": ["https://wum.bo/claim*"],
       "js": ["oauth.js"],
       "run_at": "document_start",
       "all_frames": true
