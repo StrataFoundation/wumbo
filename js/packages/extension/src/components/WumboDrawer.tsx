@@ -24,6 +24,7 @@ import {
   Spinner,
   WUM_BONDING,
 } from "wumbo-common";
+import { useHistoryList } from "@/utils/history";
 
 export const WumboDrawer = (props: { children: ReactNode }) => {
   const { isOpen, toggleDrawer } = useDrawer();
@@ -72,7 +73,9 @@ WumboDrawer.Header = (props: HeaderProps) => {
   const { toggleDrawer } = useDrawer();
   const hasTitle = !!(props as HeaderNoChildren).title;
   const { connected } = useWallet();
+  const historyList = useHistoryList();
   const history = useHistory();
+  
 
   return (
     <Box
@@ -83,21 +86,27 @@ WumboDrawer.Header = (props: HeaderProps) => {
     >
       <Box d="flex" alignItems="center" justifyContent="space-between">
         <Flex w="full" alignItems="center">
-          {history.length > 1 && (
-            <Box
-              _hover={{ cursor: "pointer" }}
-              onClick={() => history.goBack()}
+          {historyList.length > 1 && (
+            <Link
+               // This should look and behave like a link, but it actually needs to pop things off from the history stack.
+               onClick={(e) => {
+                e.preventDefault();
+                history.goBack()
+               }} 
+               to={historyList[historyList.length - 2]}
             >
-              <Icon
-                mr={2}
-                w={5}
-                h={5}
-                as={IoMdArrowRoundBack}
-                fontSize="lg"
-                fontWeight="medium"
-                color="indigo.500"
-              />
-            </Box>
+              <Box>
+                <Icon
+                  mr={2}
+                  w={5}
+                  h={5}
+                  as={IoMdArrowRoundBack}
+                  fontSize="lg"
+                  fontWeight="medium"
+                  color="indigo.500"
+                />
+              </Box>
+            </Link>
           )}
           {hasTitle && (
             <Text fontSize="lg" fontWeight="medium" color="indigo.500">
@@ -185,23 +194,29 @@ WumboDrawer.Nav = () => {
             path,
             Icon: RouteIcon,
             isDrawerNav,
+            exact
           } = routes[route as keyof IRoutes];
 
           // Fill paths with params in
           let filledPath = path;
-          if (path.endsWith(":tokenBondingKey")) {
-            filledPath = `${path.replace(
+          if (path.endsWith(":tokenBondingKey") || path.endsWith(":tokenRefKey")) {
+            const replacedKeys = path.replace(
               ":tokenBondingKey",
               creatorInfo?.tokenBonding?.publicKey?.toBase58() ||
                 WUM_BONDING.toBase58()
-            )}${creatorInfo ? "?name=" + creatorInfo.name : ""}`;
+            ).replace(
+              ":tokenRefKey", 
+              creatorInfo?.tokenRef?.publicKey.toBase58() || ""
+            );
+            filledPath = `${replacedKeys}${creatorInfo ? "?name=" + creatorInfo.name : ""}`;
           }
 
           if (isDrawerNav && Icon) {
             return (
               <Route
                 key={path}
-                path={filledPath}
+                path={path}
+                exact={exact}
                 children={({ match }) => (
                   <Button
                     as={NavLink}

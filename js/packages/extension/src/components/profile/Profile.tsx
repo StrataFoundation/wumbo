@@ -7,6 +7,8 @@ import {
   useWallet,
   Profile as CommonProfile,
   useClaimedTokenRefKey,
+  useTokenMetadata,
+  handleErrors,
 } from "wumbo-common";
 import { WumboDrawer } from "../WumboDrawer";
 import {
@@ -27,6 +29,13 @@ export const Profile = () => {
     : undefined;
   const tokenRefKey = passedTokenRefKey || walletTokenRefKey;
   const { info: tokenRef, loading } = useAccount(tokenRefKey, TokenRef, true);
+  const ownerWalletKey = tokenRef?.owner as PublicKey | undefined;
+  const {
+    metadata,
+    loading: loadingMetadata,
+    error: tokenMetadataError,
+  } = useTokenMetadata(tokenRef?.mint);
+  handleErrors(tokenMetadataError);
 
   const history = useHistory();
 
@@ -34,7 +43,7 @@ export const Profile = () => {
     return <WalletRedirect />;
   }
 
-  if (loading) {
+  if (loading || loadingMetadata) {
     return <WumboDrawer.Loading />;
   }
 
@@ -52,7 +61,7 @@ export const Profile = () => {
 
   return (
     <Fragment>
-      <WumboDrawer.Header title="Profile" />
+      <WumboDrawer.Header title={metadata?.data.name || "View Profile"} />
       <WumboDrawer.Content>
         <CommonProfile
           editPath={routes.editProfile.path}
