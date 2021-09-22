@@ -13,16 +13,48 @@ import { useAccount, useAccountFetchCache } from "./account";
 import {
   WUMBO_INSTANCE_KEY,
 } from "../constants/globals";
-import { PublicKey } from "@solana/web3.js";
+import { Connection, PublicKey } from "@solana/web3.js";
 import { getTwitterRegistryKey, getTwitterRegistry } from "../utils";
 import { usePrograms } from "./programs";
 import { getTwitterClaimedTokenRefKey, getTwitterUnclaimedTokenRefKey } from "./tokenRef";
+import { WalletAdapter } from "@solana/wallet-adapter-base";
 
 interface ClaimTransactionState {
   awaitingApproval: boolean;
   claiming: boolean;
   error: Error | undefined;
   claim: (twitterHandle: string) => Promise<void>;
+}
+export async function claimTwitterHandle({
+  redirectUri,
+  code,
+  twitterHandle,
+  adapter,
+  connection
+}: {
+  redirectUri: string;
+  code: string;
+  twitterHandle: string;
+  adapter?: WalletAdapter;
+  connection: Connection;
+}): Promise<void> {
+  if (adapter) {
+    await createTestTld(connection, adapter);
+    const instructions = await claimTwitterTransactionInstructions(connection, {
+      owner: adapter.publicKey!,
+      twitterHandle,
+    });
+    if (instructions) {
+      await postTwitterRegistrarRequest(
+        connection,
+        instructions,
+        adapter,
+        code!,
+        redirectUri!,
+        twitterHandle
+      );
+    }
+  }
 }
 export function useClaimTwitterHandle({
   redirectUri,
@@ -32,37 +64,20 @@ export function useClaimTwitterHandle({
   code: string;
 }): ClaimTransactionState {
   const connection = useConnection();
-  const { adapter } = useWallet();
-  const [claiming, setClaiming] = useState<boolean>(false);
-  async function exec(twitterHandle: string) {
-    try {
-      setClaiming(true);
-
-      if (adapter) {
-        await createTestTld(connection, adapter);
-        const instructions = await claimTwitterTransactionInstructions(connection, {
-          owner: adapter.publicKey!,
-          twitterHandle,
-        });
-        if (instructions) {
-          await postTwitterRegistrarRequest(
-            connection,
-            instructions,
-            adapter,
-            code!,
-            redirectUri!,
-            twitterHandle
-          );
-        }
-      }
-    } finally {
-      setClaiming(false);
-    }
+  const { adapter, awaitingApproval } = useWallet();
+  function exec(twitterHandle: string) {
+    return claimTwitterHandle({
+      redirectUri,
+      code,
+      twitterHandle,
+      adapter,
+      connection
+    })
   }
-  const { execute, loading, error } = useAsyncCallback(exec);
+  const { loading: claiming, execute, error } = useAsyncCallback(exec);
 
   return {
-    awaitingApproval: loading && !claiming,
+    awaitingApproval,
     claiming,
     error,
     claim: execute,
