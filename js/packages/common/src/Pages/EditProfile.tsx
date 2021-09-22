@@ -1,9 +1,16 @@
 import React, { useEffect, useState } from "react";
 import { PublicKey } from "@solana/web3.js";
-import { useParams } from "react-router-dom";
-import { SubmitHandler, useForm } from "react-hook-form";
-import { TokenBondingV0 } from "@wum.bo/spl-token-bonding";
-import { useReverseTwitter } from "../utils/twitter";
+import { useForm } from "react-hook-form";
+import {
+  VStack,
+  HStack,
+  FormControl,
+  Input,
+  FormHelperText,
+  FormLabel,
+  Text,
+  Button,
+} from "@chakra-ui/react";
 import { useClaimedTokenRef } from "../utils/tokenRef";
 import {
   SetMetadataArgs,
@@ -13,9 +20,7 @@ import {
 import { useAccount } from "../utils/account";
 import { TokenPill } from "../TokenPill";
 import { Avatar } from "../Avatar";
-import { Button } from "../Button";
 import { Alert } from "../Alert";
-import { Spinner } from "../Spinner";
 import { TokenBonding } from "../utils/deserializers/spl-token-bonding";
 import { handleErrors, useWallet } from "../contexts";
 
@@ -98,8 +103,8 @@ export const EditProfile = React.memo(
     // const { ticker, founderRewardsPercent, image } = watch()
     return (
       <form onSubmit={handleSubmit(handleOnSubmit)}>
-        <div>
-          <span className="text-md mb-2">Preview</span>
+        <VStack w="full" spacing={6} padding={4} alignItems="start">
+          <Text fontSize="lg">Preview</Text>
           {tokenRef && tokenBonding && (
             <TokenPill
               name={name}
@@ -108,130 +113,94 @@ export const EditProfile = React.memo(
               tokenBonding={tokenBonding}
             />
           )}
-        </div>
-        <div className="mt-3">
-          <span className="text-md">Settings</span>
-          <div className="px-2 py-2 space-y-6">
-            <div>
-              <label className="block text-sm font-medium text-gray-700">
-                Photo
-              </label>
-              <div className="mt-1 flex items-center">
-                {avatar}
-                <button
-                  type="button"
-                  // Programatically click the hidden file input element
-                  // when the Button component is clicked
-                  onClick={() => hiddenFileInput.current!.click()}
-                  className="ml-3 bg-white py-2 px-3 border border-gray-300 rounded-md shadow-sm text-sm leading-4 font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-                >
-                  Choose
-                </button>
-                <input
-                  accept=".png,.jpg"
-                  id="image"
-                  type="file"
-                  onChange={handleImageChange}
-                  ref={hiddenFileInput}
-                  style={{ display: "none" }}
-                />
-              </div>
-            </div>
-            <div>
-              <label
-                htmlFor="name"
-                className="block text-sm font-medium text-gray-700"
+          <Text fontSize="lg">Settings</Text>
+          <FormControl id="photo">
+            <FormLabel>Photo</FormLabel>
+            <HStack w="full" spacing={4}>
+              {avatar}
+              <Button
+                size="md"
+                colorScheme="gray"
+                variant="outline"
+                onClick={() => hiddenFileInput.current!.click()}
               >
-                Name
-              </label>
-              <div className="mt-1">
-                <input
-                  required
-                  {...register("name")}
-                  className="p-2 shadow-sm mt-1 block w-full sm:text-sm border border-gray-300 rounded-md"
-                  placeholder="My Awesome Coin"
-                  defaultValue={""}
-                />
-              </div>
-              <p className="mt-2 text-sm text-gray-500">
-                The name for your token.
-              </p>
-            </div>
-            <div>
-              <label
-                htmlFor="ticker"
-                className="block text-sm font-medium text-gray-700"
-              >
-                Symbol
-              </label>
-              <div className="mt-1">
-                <input
-                  required
-                  {...register("symbol")}
-                  className="p-2 shadow-sm mt-1 block w-full sm:text-sm border border-gray-300 rounded-md"
-                  placeholder="NXX2"
-                  defaultValue={""}
-                />
-              </div>
-              <p className="mt-2 text-sm text-gray-500">
-                The short name for your token. For example, WUM is the token of
-                Wum.bo.
-              </p>
-            </div>
-
-            <div>
-              <label
-                htmlFor="founderRewardsPercent"
-                className="block text-sm font-medium text-gray-700"
-              >
-                Royalties
-              </label>
-              <div className="mt-1">
-                <input
-                  title="Royalties editing is disabled for beta"
-                  disabled
-                  required
-                  {...register("founderRewardsPercent")}
-                  className="shadow-sm mt-1 block w-full sm:text-sm border border-gray-300 rounded-md"
-                  type="number"
-                  min={0}
-                  step={0.1}
-                  placeholder="5"
-                  defaultValue={""}
-                />
-              </div>
-              <p className="mt-2 text-sm text-gray-500">
-                A percentage of coin sales that will be sent to your wallet. We
-                recommend keeping this less than 10%.
-              </p>
-            </div>
-          </div>
+                Choose
+              </Button>
+            </HStack>
+            <input
+              id="image"
+              type="file"
+              accept=".png,.jpg"
+              onChange={handleImageChange}
+              ref={hiddenFileInput}
+              style={{ display: "none" }}
+            />
+          </FormControl>
+          <FormControl id="name" borderColor="gray.200">
+            <FormLabel>Name</FormLabel>
+            <Input
+              required
+              placeholder="My Awesome Coin"
+              defaultValue={""}
+              {...register("name")}
+            />
+            <FormHelperText>The name for your token.</FormHelperText>
+          </FormControl>
+          <FormControl id="symbol" borderColor="gray.200">
+            <FormLabel>Symbol</FormLabel>
+            <Input
+              required
+              placeholder="NXX2"
+              defaultValue={""}
+              {...register("symbol")}
+            />
+            <FormHelperText>
+              The short name for your token. For Example, WUM is the token of
+              Wum.bo.
+            </FormHelperText>
+          </FormControl>
+          <FormControl id="founderRewardsPercent" borderColor="gray.200">
+            <FormLabel>
+              Royalties{" "}
+              <Text fontSize="xs" color="gray.400" fontWeight="normal">
+                (editing is disabled for beta)
+              </Text>
+            </FormLabel>
+            <Input
+              disabled
+              required
+              type="number"
+              min={0}
+              step={0.1}
+              placeholder="5"
+              defaultValue={""}
+              {...register("founderRewardsPercent")}
+            />
+            <FormHelperText>
+              A Percentage of coin sales that will be sent to your wallet. We
+              recommend keep this less than 10%.
+            </FormHelperText>
+          </FormControl>
           {error && <Alert type="error" message={error.toString()} />}
-          <div className="py-3 text-right">
-            <Button
-              block
-              className="mt-2"
-              color="primary"
-              submit
-              disabled={state != "idle"}
-            >
-              {state != "idle" && (
-                <div className="mr-4">
-                  <Spinner size="sm" />
-                </div>
-              )}
-              {!awaitingApproval && (
-                <>
-                  {state === "idle" && "Save"}
-                  {state === "submit-solana" && "Sending to Solana"}
-                  {state === "submit-arweave" && "Uploading to Arweave"}
-                  {state === "gathering-files" && "Gathering Files"}
-                </>
-              )}
-              {awaitingApproval && "Awaiting Approval"}
-            </Button>
-          </div>
-        </div>
+          <Button
+            w="full"
+            colorScheme="indigo"
+            size="lg"
+            isLoading={state != "idle"}
+            type="submit"
+            loadingText={
+              awaitingApproval
+                ? "Awaiting Approval"
+                : state === "submit-solana"
+                ? "Sending to Solana"
+                : state === "submit-arweave"
+                ? "Sending to Arweave"
+                : "Gathering Files"
+            }
+          >
+            Save
+          </Button>
+        </VStack>
       </form>
     );
   }

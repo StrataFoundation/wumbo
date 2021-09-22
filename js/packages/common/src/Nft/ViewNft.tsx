@@ -16,7 +16,7 @@ import { Creator, GetCreatorLink } from "./";
 // @ts-ignore
 import { ExpandedNft } from "./ExpandedNft";
 import { handleErrors } from "../contexts";
-import { NftSmallView } from "./NftSmallView"
+import { NftSmallView } from "./NftSmallView";
 import { Link } from "react-router-dom";
 
 const displayNames = {
@@ -43,7 +43,7 @@ export const ViewNftRaw = React.memo(
     token,
     owner,
     getCreatorLink,
-    tagNftPath
+    tagNftPath,
   }: {
     token: ITokenWithMeta;
     owner: PublicKey | undefined;
@@ -53,9 +53,6 @@ export const ViewNftRaw = React.memo(
     const portalRef = useRef() as React.MutableRefObject<HTMLInputElement>;
     const [isExpanded, setIsExpanded] = useState<boolean>(false);
 
-    // TODO expand logic
-
-    // TODO add redirect logic to site wallet
     /* const { connected } = useWallet(); */
 
     /* if (!connected && taggingMode) {
@@ -151,13 +148,8 @@ export const ViewNftRaw = React.memo(
                 </>
               )}
               {token.image && token.metadataKey && tagNftPath && (
-                <Link
-                 to={tagNftPath}
-                >
-                  <Button
-                    size="md"
-                    colorScheme="indigo"
-                  >
+                <Link to={tagNftPath}>
+                  <Button size="md" colorScheme="indigo">
                     Tag
                   </Button>
                 </Link>

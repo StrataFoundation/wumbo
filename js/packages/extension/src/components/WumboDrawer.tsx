@@ -1,26 +1,42 @@
 import React, { Fragment, ReactNode } from "react";
 import { Route, NavLink, Link, useHistory } from "react-router-dom";
 import startCase from "lodash/startCase";
-import { Flex, Box, Fade, Text, IconButton, Button, Icon } from "@chakra-ui/react";
+import {
+  Flex,
+  Box,
+  Fade,
+  Text,
+  IconButton,
+  Button,
+  Icon,
+} from "@chakra-ui/react";
 import { HiOutlineX } from "react-icons/hi";
 import { IoMdArrowRoundBack } from "react-icons/io";
 import { BiRadioCircleMarked } from "react-icons/bi";
 import { RiWallet3Line } from "react-icons/ri";
 import { Toaster } from "react-hot-toast";
-import { Transition } from "@headlessui/react";
 import { useDrawer } from "@/contexts/drawerContext";
 import { routes, IRoutes } from "@/constants/routes";
 import { useUserInfo } from "@/utils/userState";
-import { WalletAutoReconnect, useWallet, Spinner, WUM_BONDING } from "wumbo-common";
+import {
+  WalletAutoReconnect,
+  useWallet,
+  Spinner,
+  WUM_BONDING,
+} from "wumbo-common";
 
 export const WumboDrawer = (props: { children: ReactNode }) => {
   const { isOpen, toggleDrawer } = useDrawer();
 
-  // TODO center on screen
   return (
     <Fragment>
       {isOpen && (
-        <Box w="345px" pos="fixed" right="0" top="20">
+        <Box
+          w="345px"
+          pos="fixed"
+          right="0"
+          style={{ top: "calc(50% - 280px)" }}
+        >
           <WalletAutoReconnect />
           <Fade in={true} style={{ zIndex: 99999 }}>
             <Box
@@ -67,22 +83,22 @@ WumboDrawer.Header = (props: HeaderProps) => {
     >
       <Box d="flex" alignItems="center" justifyContent="space-between">
         <Flex w="full" alignItems="center">
-          { history.length > 1 && 
-          <Box
-            _hover={{cursor: "pointer"}}
-            onClick={() => history.goBack()}
-          >
-            <Icon
-              mr={2}
-              w={5}
-              h={5}
-              as={IoMdArrowRoundBack}
-              fontSize="lg"
-              fontWeight="medium"
-              color="indigo.500"
-            />
-          </Box>
-          }
+          {history.length > 1 && (
+            <Box
+              _hover={{ cursor: "pointer" }}
+              onClick={() => history.goBack()}
+            >
+              <Icon
+                mr={2}
+                w={5}
+                h={5}
+                as={IoMdArrowRoundBack}
+                fontSize="lg"
+                fontWeight="medium"
+                color="indigo.500"
+              />
+            </Box>
+          )}
           {hasTitle && (
             <Text fontSize="lg" fontWeight="medium" color="indigo.500">
               {(props as HeaderNoChildren).title}
@@ -92,9 +108,7 @@ WumboDrawer.Header = (props: HeaderProps) => {
         </Flex>
         <Flex alignItems="center">
           <Box pr={2}>
-            <Link
-              to={routes.manageWallet.path}
-            >
+            <Link to={routes.manageWallet.path}>
               <Box position="relative">
                 <Icon as={RiWallet3Line} />
                 <Icon
@@ -119,7 +133,6 @@ WumboDrawer.Header = (props: HeaderProps) => {
         >
           <Icon as={HiOutlineX} w={5} h={5} />
         </Box>
-        
       </Box>
     </Box>
   );
@@ -138,65 +151,78 @@ WumboDrawer.Nav = () => {
   const { userInfo: creatorInfo, loading } = creatorInfoState;
 
   return (
-    <Box
-      d="flex"
-      justifyContent="space-around"
-      pt="4px"
-      px="4px"
-      borderTop="1px"
-      borderColor="gray.200"
-      fontFamily="body"
-    >
-      {Object.keys(routes).map((route) => {
-        const {
-          path,
-          Icon: RouteIcon,
-          isDrawerNav,
-        } = routes[route as keyof IRoutes];
+    <Box w="full" position="relative">
+      <Toaster
+        position="bottom-center"
+        containerStyle={{
+          position: "relative",
+          top: 0,
+          bottom: 0,
+          right: 0,
+          left: 0,
+          pointerEvents: "auto",
+        }}
+      />
+      <Box
+        d="flex"
+        justifyContent="space-around"
+        pt="4px"
+        px="4px"
+        borderTop="1px"
+        borderColor="gray.200"
+        fontFamily="body"
+      >
+        {Object.keys(routes).map((route) => {
+          const {
+            path,
+            Icon: RouteIcon,
+            isDrawerNav,
+          } = routes[route as keyof IRoutes];
 
-        // Fill paths with params in
-        let filledPath = path;
-        if (path.endsWith(":tokenBondingKey")) {
-          filledPath = `${path.replace(
-            ":tokenBondingKey",
-            creatorInfo?.tokenBonding?.publicKey?.toBase58() ||
-              WUM_BONDING.toBase58()
-          )}${creatorInfo ? "?name=" + creatorInfo.name : ""}`;
-        }
+          // Fill paths with params in
+          let filledPath = path;
+          if (path.endsWith(":tokenBondingKey")) {
+            filledPath = `${path.replace(
+              ":tokenBondingKey",
+              creatorInfo?.tokenBonding?.publicKey?.toBase58() ||
+                WUM_BONDING.toBase58()
+            )}${creatorInfo ? "?name=" + creatorInfo.name : ""}`;
+          }
 
-        if (isDrawerNav && Icon) {
-          return (
-            <Route
-              key={path}
-              path={filledPath}
-              children={({ match }) => (
-                <Button
-                  as={NavLink}
-                  to={filledPath}
-                  d="inline-flex"
-                  flexDir="column"
-                  variant="unstyled"
-                  justifyContent="center"
-                  alignItems="center"
-                  color={match ? "indigo.500" : "gray.600"}
-                  fontWeight="medium"
-                  p="4px"
-                  borderBottom="3px"
-                  borderBottomStyle="solid"
-                  borderColor={match ? "indigo.500" : "transparent"}
-                  borderRadius="none"
-                >
-                  {/* @ts-ignore */}
-                  <Icon as={RouteIcon} w={5} h={5} />
-                  <Text fontSize="xs">{startCase(route)}</Text>
-                </Button>
-              )}
-            />
-          );
-        } else {
-          return null;
-        }
-      })}
+          if (isDrawerNav && Icon) {
+            return (
+              <Route
+                key={path}
+                path={filledPath}
+                children={({ match }) => (
+                  <Button
+                    as={NavLink}
+                    to={filledPath}
+                    d="inline-flex"
+                    flexDir="column"
+                    variant="unstyled"
+                    justifyContent="center"
+                    alignItems="center"
+                    color={match ? "indigo.500" : "gray.600"}
+                    fontWeight="medium"
+                    p="4px"
+                    borderBottom="3px"
+                    borderBottomStyle="solid"
+                    borderColor={match ? "indigo.500" : "transparent"}
+                    borderRadius="none"
+                  >
+                    {/* @ts-ignore */}
+                    <Icon as={RouteIcon} w={5} h={5} />
+                    <Text fontSize="xs">{startCase(route)}</Text>
+                  </Button>
+                )}
+              />
+            );
+          } else {
+            return null;
+          }
+        })}
+      </Box>
     </Box>
   );
 };
