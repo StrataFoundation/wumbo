@@ -36,42 +36,16 @@ export const MainButton: FC<Props> = ({
 
   if (!loading && !creatorInfo && wumboInstance) {
     return (
-      <Link to={routes.create.path + `?name=${creatorName}&src=${creatorImg}`}>
-        <Button
-          size="xs"
-          fontFamily="body"
-          colorScheme="indigo"
-          variant="outline"
-          _focus={{ boxShadow: "none" }}
-          onClick={() =>
-            toggleDrawer({
-              isOpen: true,
-              creator: { name: creatorName, img: creatorImg },
-            })
-          }
-          {...btnProps}
-        >
-          Mint
-        </Button>
-      </Link>
-    );
-  }
-
-  if (loading || !creatorInfo || !wumboInstance) {
-    return <Spinner size="sm" {...spinnerProps} />;
-  }
-
-  return (
-    <Link
-      to={`${viewProfilePath(creatorInfo.tokenRef.publicKey)}?name=${
-        creatorInfo.name
-      }`}
-    >
       <Button
+        as={Link}
+        to={routes.create.path + `?name=${creatorName}&src=${creatorImg}`}
         size="xs"
-        colorScheme="green"
-        color="green.800"
         fontFamily="body"
+        colorScheme="indigo"
+        variant="outline"
+        _hover={{ bg: "indigo.900" }}
+        _active={{ bg: "indigo.900" }}
+        _focus={{ boxShadow: "none" }}
         onClick={() =>
           toggleDrawer({
             isOpen: true,
@@ -80,8 +54,34 @@ export const MainButton: FC<Props> = ({
         }
         {...btnProps}
       >
-        ${creatorInfo?.coinPriceUsd.toFixed(2)}
+        Mint
       </Button>
-    </Link>
+    );
+  }
+
+  if (loading || !creatorInfo || !wumboInstance) {
+    return <Spinner size="sm" {...spinnerProps} />;
+  }
+
+  return (
+    <Button
+      as={Link}
+      to={`${viewProfilePath(creatorInfo.tokenRef.publicKey)}?name=${
+        creatorInfo.name
+      }`}
+      size="xs"
+      colorScheme="green"
+      color="green.800"
+      fontFamily="body"
+      onClick={() =>
+        toggleDrawer({
+          isOpen: true,
+          creator: { name: creatorName, img: creatorImg },
+        })
+      }
+      {...btnProps}
+    >
+      ${creatorInfo?.coinPriceUsd.toFixed(2)}
+    </Button>
   );
 };
