@@ -10,6 +10,7 @@ import {
 import { Spinner, useTokenMetadata } from ".";
 import { TokenBondingV0 } from "@wum.bo/spl-token-bonding/dist/lib";
 import { handleErrors } from "./contexts";
+import { ITokenBonding } from "utils";
 
 export interface AvatarProps extends ChakraAvatarProps {
   nameProps?: TextProps;
@@ -26,9 +27,10 @@ export const Avatar = ({
   subTextProps = {},
   showDetails,
   size = "md",
+  ...props
 }: AvatarProps) => (
   <HStack spacing={2} alignItems="center">
-    <ChakraAvatar size={size} src={src} bgColor="indigo.500" />
+    <ChakraAvatar size={size} src={src} bgColor="indigo.500" {...props} />
     {showDetails && (
       <VStack spacing={2}>
         <Text {...nameProps}>{name}</Text>
@@ -39,7 +41,7 @@ export const Avatar = ({
 );
 
 interface MetadataAvatarProps extends AvatarProps {
-  tokenBonding: TokenBondingV0 | undefined;
+  tokenBonding: ITokenBonding | undefined;
 }
 
 export const MetadataAvatar = React.memo(
