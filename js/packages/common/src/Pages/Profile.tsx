@@ -181,14 +181,14 @@ export const Profile = React.memo(
               icon="coin"
               label="Token Rank"
               value={
-                typeof tokenRank != undefined ? (tokenRank! + 1).toString() : ""
+                typeof tokenRank != undefined && tokenRank != null ? (tokenRank! + 1).toString() : ""
               }
             />
             { tokenRef?.isClaimed && <StatCardWithIcon
               icon="wumbo"
               label="WUM Locked"
               value={
-                typeof wumRank != undefined ? (wumRank! + 1).toString() : ""
+                typeof wumRank != undefined && wumRank != null ? (wumRank! + 1).toString() : ""
               }
             /> }
           </VStack>
