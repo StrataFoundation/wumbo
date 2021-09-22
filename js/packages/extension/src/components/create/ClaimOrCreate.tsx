@@ -71,7 +71,7 @@ export default React.memo(() => {
           </Box>
           <Button
             w="full"
-            size="lg"
+            size="md"
             colorScheme="twitter"
             onClick={claim}
             isLoading={loading}

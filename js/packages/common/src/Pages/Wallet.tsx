@@ -19,16 +19,16 @@ const SolLogoIcon = createIcon({
     <path d="M31.1257 28.4874C31.4316 28.1753 31.8464 28 32.2789 28H72.1826C72.9095 28 73.2734 28.8973 72.7592 29.4219L64.8743 37.4648C64.5684 37.7769 64.1536 37.9522 63.7211 37.9522H23.8174C23.0905 37.9522 22.7266 37.0548 23.2408 36.5303L31.1257 28.4874Z" fill="url(#paint2_linear)" />,
     <defs>,
       <linearGradient id="paint0_linear" x1="56.8029" y1="16.975" x2="28.0661" y2="70.6352" gradientUnits="userSpaceOnUse">,
-        <stop stop-color="#00FFA3" />,
-        <stop offset="1" stop-color="#DC1FFF" />,
+        <stop stopColor="#00FFA3" />,
+        <stop offset="1" stopColor="#DC1FFF" />,
       </linearGradient>,
       <linearGradient id="paint1_linear" x1="56.8029" y1="17.0278" x2="28.2797" y2="70.545" gradientUnits="userSpaceOnUse">,
-        <stop stop-color="#00FFA3" />,
-        <stop offset="1" stop-color="#DC1FFF" />,
+        <stop stopColor="#00FFA3" />,
+        <stop offset="1" stopColor="#DC1FFF" />,
       </linearGradient>,
       <linearGradient id="paint2_linear" x1="56.8029" y1="17.0278" x2="28.2797" y2="70.545" gradientUnits="userSpaceOnUse">,
-        <stop stop-color="#00FFA3" />,
-        <stop offset="1" stop-color="#DC1FFF" />,
+        <stop stopColor="#00FFA3" />,
+        <stop offset="1" stopColor="#DC1FFF" />,
       </linearGradient>,
     </defs>
 
@@ -111,7 +111,7 @@ export const Wallet = React.memo(({
         </VStack>
       </Link>
 
-      <VStack onClick={() => window.open(solLink, '_blank')} _hover={{ opacity: "0.5" }} spacing={1} flexDir="column" align="center">
+      <VStack onClick={() => window.open(solLink, '_blank')} _hover={{ opacity: "0.5", cursor: "pointer" }} spacing={1} flexDir="column" align="center">
         <Icon as={SolLogoIcon} w={"48px"} h={"48px"} />
         <HStack align="center" spacing={1}>
           <Icon as={RiCoinLine} w="16px" h="16px" />

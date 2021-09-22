@@ -34,7 +34,7 @@ const PageChevron = ({
 }) => (
   <Flex
     w="full"
-    padding={2}
+    padding={1}
     alignItems="center"
     justifyContent="center"
     color="indigo.600"

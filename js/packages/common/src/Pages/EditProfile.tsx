@@ -88,13 +88,15 @@ export const EditProfile = React.memo(
       if (metadataImage) {
         setImgUrl(metadataImage);
       }
-      console.log(metadata);
-      reset({
-        name: metadata?.data.name,
-        symbol: metadata?.data.symbol,
-        founderRewardsPercent:
-          (tokenBonding?.targetRoyaltyPercentage || 0) / 4294967295,
-      });
+
+      if (state == "idle") {
+        reset({
+          name: metadata?.data.name,
+          symbol: metadata?.data.symbol,
+          founderRewardsPercent:
+            (tokenBonding?.targetRoyaltyPercentage || 0) / 4294967295,
+        });
+      }
     }, [metadata?.data.name, metadata?.data.symbol, metadataImage]);
 
     const avatar = <Avatar src={imgUrl} name={symbol} />;

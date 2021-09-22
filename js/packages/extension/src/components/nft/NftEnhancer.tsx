@@ -24,12 +24,13 @@ const NftBadge = ({
   const [isHovering, setIsHovering] = useState(false);
   const { toggleDrawer } = useDrawer();
   const history = useHistory();
+  const dimensionPx = `${dimension}px`;
 
   return (
     <Box
       position="absolute"
-      bottom="0"
-      right="0"
+      bottom={`-${Math.floor(dimension / 4)}px`}
+      right={`-${Math.floor(dimension / 4)}px`}
       pointerEvents="auto"
       _hover={{ cursor: "pointer" }}
       onClick={(e) => {
@@ -41,8 +42,8 @@ const NftBadge = ({
       onMouseEnter={() => setIsHovering(true)}
       onMouseLeave={() => setIsHovering(false)}
     >
-      {!isHovering && <NftBadgeIcon width={dimension} height={dimension} />}
-      {isHovering && <NftBadgeHoverIcon width={dimension} height={dimension} />}
+      {!isHovering && <NftBadgeIcon width={dimensionPx} height={dimensionPx} />}
+      {isHovering && <NftBadgeHoverIcon width={dimensionPx} height={dimensionPx} />}
     </Box>
   );
 };
@@ -56,7 +57,7 @@ export const NftEnhancer: React.FC = () => {
         {nfts.map((nft) => {
           const imgStyle = getComputedStyle(nft.img);
           const dimension = Math.min(
-            0.3 * Math.max(pxToNum(imgStyle.height), pxToNum(imgStyle.width)),
+            0.4 * Math.max(pxToNum(imgStyle.height), pxToNum(imgStyle.width)),
             30
           );
           return (
@@ -67,7 +68,7 @@ export const NftEnhancer: React.FC = () => {
             >
               <ReactShadow.div>
                 <ThemeProvider>
-                  <NftBadge mintKey={nft.mintKey} dimension={dimension} />
+                  <NftBadge key={nft.img.id} mintKey={nft.mintKey} dimension={dimension} />
                 </ThemeProvider>
               </ReactShadow.div>
             </FloatPortal>

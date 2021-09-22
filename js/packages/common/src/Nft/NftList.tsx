@@ -29,7 +29,7 @@ export const NftListRaw = React.memo(
         {tokens
           .filter((t) => t.masterEdition)
           .map((token) => (
-            <Box height="156px" w="full">
+            <Box key={token.publicKey?.toBase58()} height="156px" w="full">
               <NftCard getLink={getLink} token={token} />
             </Box>
           ))}
