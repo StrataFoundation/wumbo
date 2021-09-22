@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React from "react";
 import {
   HStack,
   Popover,
@@ -132,7 +132,7 @@ export const ReplyTokens = ({
           />
         ))}
       </HStack>
-      <Popover isLazy trigger="hover" placement="bottom">
+      <Popover placement="bottom" trigger="hover">
         <HStack spacing={1} color="gray.500">
           <Text>owns these tokens and</Text>
           <PopoverTrigger>

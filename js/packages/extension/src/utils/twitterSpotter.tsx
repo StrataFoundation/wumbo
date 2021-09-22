@@ -93,11 +93,11 @@ enum Elements {
   TweetMintButton,
 }
 
-function findChildWithDimension(
+const findChildWithDimension = (
   el: Element,
   width: number,
   height: number
-): Element | undefined {
+): Element | undefined => {
   const children = [...el.children];
   const childWithWidth = children.find((c) => {
     const computed = getComputedStyle(c);
@@ -113,7 +113,12 @@ function findChildWithDimension(
   }
 
   return childWithWidth;
-}
+};
+
+const findChildWithText = (el: Element, text: string): Element | undefined => {
+  const els = el.querySelector("*");
+  let found;
+};
 
 export const useTweets = (): IParsedTweet[] | null => {
   const [tweets, setTweets] = useState<IParsedTweet[]>([]);
@@ -140,7 +145,7 @@ export const useTweets = (): IParsedTweet[] | null => {
               const name = nameEl.href.split("/").slice(-1)[0];
               const imgEl = nameEl.querySelector("img");
               let mentions: string[] | null = null;
-              let replyTokensTarget: Element | null = null;
+              let replyTokensTarget: Element | undefined;
 
               if (buttonTarget) {
                 mentions = tweet.parentNode.innerText
@@ -150,7 +155,9 @@ export const useTweets = (): IParsedTweet[] | null => {
 
                 if (mentions?.length) {
                   mentions = sanitizeMentions(mentions);
-                  replyTokensTarget = tweet.firstChild;
+                  replyTokensTarget = tweet.querySelectorAll(
+                    `[href="/${name}"]`
+                  )[1];
                 }
               }
 

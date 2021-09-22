@@ -110,11 +110,11 @@ WumboDrawer.Header = (props: HeaderProps) => {
           <Box pr={2}>
             <Link to={routes.manageWallet.path}>
               <Box position="relative">
-                <Icon 
+                <Icon
                   color="gray.500"
                   _hover={{ color: "gray.600", cursor: "pointer" }}
                   w={5}
-                  h={5} 
+                  h={5}
                   as={RiWallet3Line}
                 />
                 <Icon
