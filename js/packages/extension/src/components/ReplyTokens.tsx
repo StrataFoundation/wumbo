@@ -10,6 +10,8 @@ import {
   AvatarProps,
   useTwitterTokenRef,
   useOwnedAmountForOwnerAndHandle,
+  useUserTokensWithMeta,
+  WUMBO_INSTANCE_KEY,
 } from "wumbo-common";
 
 const humanizeAmount = (amount: number) => {
@@ -33,9 +35,7 @@ const MentionToken = ({ owner, mention, size }: IMentionTokenProps) => {
   const isClaimed = tokenRef?.isClaimed;
   const isLoading = loading || loadingAmount;
   const nullState =
-    (!loading && !tokenRef) ||
-    (!loadingAmount && !amount) ||
-    isLoading ||
+    (!loading && !tokenRef) || (!loadingAmount && !amount) || isLoading;
 
   if (nullState) return null;
 
@@ -91,8 +91,12 @@ export const ReplyTokens = ({
   size = "xs",
 }: IReplyTokensProps) => {
   const { info: tokenRef, loading } = useTwitterTokenRef(creatorName);
-  const [refEl, setRefEl] = useState<HTMLButtonElement | null>(null);
-  const [popperEl, setPopperEl] = useState<HTMLDivElement | null>(null);
+  const { result: tokens, loading: loadingTokens } = useUserTokensWithMeta(
+    tokenRef?.owner as PublicKey
+  );
+
+  const isLoading = loading || loadingTokens;
+
   const sanitizedMentions = [
     ...new Set(mentions.map((mention) => mention.replace(/[@ ]/g, ""))),
   ];
