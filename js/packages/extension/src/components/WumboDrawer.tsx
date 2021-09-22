@@ -1,4 +1,4 @@
-import React, { Fragment, ReactNode } from "react";
+import React, { useRef, Fragment, ReactNode, useContext } from "react";
 import { Route, NavLink, Link, useHistory } from "react-router-dom";
 import startCase from "lodash/startCase";
 import {
@@ -27,7 +27,14 @@ import {
 import { useHistoryList } from "@/utils/history";
 import Logo from "../../public/assets/img/logo.svg";
 
+export const OutsideOfDrawerRef = React.createContext<React.MutableRefObject<HTMLInputElement> | null>(null);
+
+export const useOutsideOfDrawerRef = (): React.RefObject<unknown> => {
+  return useContext(OutsideOfDrawerRef)!
+}
+
 export const WumboDrawer = (props: { children: ReactNode }) => {
+  const outsideOfDrawerRef = useRef() as React.MutableRefObject<HTMLInputElement>;
   const { isOpen, toggleDrawer } = useDrawer();
   const tab = <Box
     bg="indigo.500"
@@ -52,32 +59,36 @@ export const WumboDrawer = (props: { children: ReactNode }) => {
         style={{ top: "calc(50% - 246px)" }}
       >
         {tab}
-      </Box> }
-      <Slide direction="right" in={isOpen} style={{ width: "345px", zIndex: 99999 }}>
-        <Box
-          // w="345px"
-          pos="fixed"
-          right="0"
-          style={{ top: "calc(50% - 280px)" }}
-          w="345px"
-          h="560px"
-          bg="white"
-          d="flex"
-          flexDir="column"
-          roundedTopLeft="lg"
-          roundedBottomLeft="lg"
-          shadow="md"
-        >
-          {props.children}
-        </Box>
-        <Box
-          pos="fixed"
-          right="345px"
-          style={{ top: "calc(50% - 246px)" }}
-        >
-          {tab}
-        </Box>
-      </Slide>
+      </Box>}
+      <Box ref={outsideOfDrawerRef} zIndex={200} />
+
+      <OutsideOfDrawerRef.Provider value={outsideOfDrawerRef}>
+        <Slide direction="right" in={isOpen} style={{ width: "345px", zIndex: 100 }}>
+          <Box
+            // w="345px"
+            pos="fixed"
+            right="0"
+            style={{ top: "calc(50% - 280px)" }}
+            w="345px"
+            h="560px"
+            bg="white"
+            d="flex"
+            flexDir="column"
+            roundedTopLeft="lg"
+            roundedBottomLeft="lg"
+            shadow="md"
+          >
+            {props.children}
+          </Box>
+          <Box
+            pos="fixed"
+            right="345px"
+            style={{ top: "calc(50% - 246px)" }}
+          >
+            {tab}
+          </Box>
+        </Slide>
+      </OutsideOfDrawerRef.Provider>
     </Fragment>
   );
 };

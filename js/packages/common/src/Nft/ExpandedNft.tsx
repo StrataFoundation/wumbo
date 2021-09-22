@@ -26,6 +26,8 @@ export const ExpandedNft = ({
     size="full"
     isOpen={isExpanded}
     portalProps={portalProps}
+    onOverlayClick={() => setIsExpanded(false)}
+    onEsc={() => setIsExpanded(false)}
   >
     <ModalOverlay />
     <ModalContent bgColor="transparent">

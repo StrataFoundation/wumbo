@@ -44,14 +44,17 @@ export const ViewNftRaw = React.memo(
     owner,
     getCreatorLink,
     tagNftPath,
+    modalRef
   }: {
     token: ITokenWithMeta;
     owner: PublicKey | undefined;
     getCreatorLink: GetCreatorLink;
     tagNftPath?: string;
+    modalRef?: React.MutableRefObject<HTMLInputElement>;
   }) => {
-    const portalRef = useRef() as React.MutableRefObject<HTMLInputElement>;
     const [isExpanded, setIsExpanded] = useState<boolean>(false);
+
+    console.log(modalRef);
 
     /* const { connected } = useWallet(); */
 
@@ -172,14 +175,13 @@ export const ViewNftRaw = React.memo(
           </VStack>
         </VStack>
         <ExpandedNft
-          isExpanded={isExpanded}
-          setIsExpanded={setIsExpanded}
-          tokenData={token}
-          portalProps={{
-            containerRef: portalRef,
-          }}
+            isExpanded={isExpanded}
+            setIsExpanded={setIsExpanded}
+            tokenData={token}
+            portalProps={{
+              containerRef: modalRef
+            }}
         />
-        <Box ref={portalRef} />
       </>
     );
   }
@@ -191,11 +193,13 @@ export const ViewNft = React.memo(
     owner,
     getCreatorLink,
     tagNftPath,
+    modalRef,
   }: {
     token?: PublicKey;
     owner: PublicKey | undefined;
     getCreatorLink: GetCreatorLink;
     tagNftPath?: string;
+    modalRef?: React.MutableRefObject<HTMLInputElement>;
   }) => {
     const tokenWithMeta = useTokenMetadata(token);
     handleErrors(tokenWithMeta.error);
@@ -206,6 +210,7 @@ export const ViewNft = React.memo(
         owner={owner}
         getCreatorLink={getCreatorLink}
         tagNftPath={tagNftPath}
+        modalRef={modalRef}
       />
     );
   }

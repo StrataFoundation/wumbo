@@ -6,7 +6,7 @@ import {
   handleErrors
 } from "wumbo-common";
 import React, { Fragment, useMemo } from "react";
-import { WumboDrawer } from "../WumboDrawer";
+import { useOutsideOfDrawerRef, WumboDrawer } from "../WumboDrawer";
 import { useParams } from "react-router-dom";
 import { viewProfilePath, tagNftPath } from "@/constants/routes";
 import { PublicKey } from "@solana/web3.js";
@@ -18,6 +18,8 @@ export const ViewNft: React.FC = () => {
     () => (params.mint ? new PublicKey(params.mint) : undefined),
     [params.mint]
   );
+
+  const modalRef = useOutsideOfDrawerRef();
 
   const { loading: loading1, metadata } = useTokenMetadata(token);
   const { loading: loading2, result: res2, error: err2 } = useTokenLargestAccounts(token);
@@ -34,6 +36,7 @@ export const ViewNft: React.FC = () => {
       <WumboDrawer.Header title={metadata?.data.name || "View NFT"} />
       <WumboDrawer.Content>
         <CommonViewNft
+          modalRef={modalRef}
           tagNftPath={token ? tagNftPath(token) : undefined}
           token={token}
           owner={info?.info?.owner}
