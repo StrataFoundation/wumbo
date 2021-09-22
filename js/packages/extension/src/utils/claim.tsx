@@ -1,13 +1,16 @@
 import { useEffect, useState } from "react";
 import { claimPath, routes } from "@/constants/routes";
 import { useHistory  } from "react-router";
-import { IClaimFlowOutput, useClaimLink, useCreateOrClaimCoin, useReverseTwitter, useWallet } from "wumbo-common";
+import { useConnection, IClaimFlowOutput, useClaimLink, useClaimTwitterHandle, useCreateOrClaimCoin, useReverseTwitter, useWallet, claimTwitterHandle } from "wumbo-common";
+import { useAsyncCallback } from "react-async-hook";
+
+let claimWindow: Window | undefined;
 
 export function useClaimFlow(name?: string | null): IClaimFlowOutput {
   const history = useHistory();
-  const { claim, redirectUri } = useClaimLink({ handle: `${name}` });
-  const [claimWindow, setClaimWindow] = useState<Window>();
-  const { publicKey } = useWallet();
+  const { claim, redirectUri } = useClaimLink({ handle: `${name}`, newTab: true });
+  const connection = useConnection();
+  const { publicKey, adapter } = useWallet();
   const { handle: ownerTwitterHandle, error: reverseTwitterError } = useReverseTwitter(publicKey || undefined);
   const {
     create,
@@ -15,34 +18,44 @@ export function useClaimFlow(name?: string | null): IClaimFlowOutput {
     creating,
     awaitingApproval: createAwaitingApproval,
   } = useCreateOrClaimCoin();
-
-  useEffect(() => {
-    const fn = (msg: any, _: any, sendResponse: any) => {
-      if (msg.type == "CLAIM") {
-        claimWindow?.close();
-        history.push(claimPath({ ...msg.data, redirectUri }));
+  
+  async function createTwitter() {
+    claimWindow = claim() || undefined;
+    const oauthResult = await new Promise<any>((resolve, reject) => {
+      const fn = (msg: any, _: any, sendResponse: any) => {
+        if (msg.type == "CLAIM") {
+          claimWindow?.close();
+          resolve(msg.data);
+          chrome.runtime.onMessage.removeListener(fn);
+        }
+    
+        sendResponse();
       }
+      chrome.runtime.onMessage.addListener(fn);
+    })
+    await claimTwitterHandle({
+      connection,
+      adapter,
+      redirectUri,
+      ...oauthResult,
+      twitterHandle: name
+    })
+  }
   
-      sendResponse();
-      return true;
-    }
-    chrome.runtime.onMessage.addListener(fn);
-    () => chrome.runtime.onMessage.removeListener(fn);
-  }, [])
-  
-  const smartClaim = () => {
+  const smartClaim = async () => {
     if (!ownerTwitterHandle) {
-      setClaimWindow(claim() || undefined)
-    } else {
-      name && create(name).then(() => {
-        history.push(routes.editProfile.path)
-      })
+      await createTwitter();
     }
+
+    name && await create(name);
+    history.push(routes.editProfile.path);
   }
 
+  const { loading, execute, error} = useAsyncCallback(smartClaim);
+
   return {
-    claim: smartClaim,
-    loading: creating,
-    error: createCoinError || reverseTwitterError
+    claim: execute,
+    loading: creating || loading,
+    error: error || createCoinError || reverseTwitterError
   }
 }

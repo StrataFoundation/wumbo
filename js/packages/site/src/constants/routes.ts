@@ -28,7 +28,7 @@ export function editProfile(ownerWalletKey: PublicKey): string {
 }
 
 const routes: IRoutes = {
-  claim: { path: "/claim" },
+  claim: { path: "/claimSite" },
   manageWallet: { path: "/manage-wallet" },
   wallet: { path: "/wallet" },
   viewProfile: { path: "/profile/view/:tokenRefKey" },

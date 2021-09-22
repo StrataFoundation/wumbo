@@ -37,14 +37,14 @@ async function sendTransaction(
 ): Promise<string> {
   const transaction = new Transaction({
     feePayer: wallet.publicKey || undefined,
-    recentBlockhash: (await connection.getRecentBlockhash()).blockhash,
+    recentBlockhash: (await connection.getRecentBlockhash('finalized')).blockhash,
   });
   transaction.instructions = instructions;
 
   extraSigners && transaction.partialSign(...extraSigners);
   const signed = await wallet.signTransaction(transaction);
 
-  return sendAndConfirmRawTransaction(connection, signed.serialize());
+  return sendAndConfirmRawTransaction(connection, signed.serialize(), { commitment: 'finalized' });
 }
 
 export async function createTestTld(connection: Connection, wallet: WalletAdapter) {
@@ -166,7 +166,7 @@ export async function claimTwitterTransactionInstructions(
   { owner, twitterHandle }: ClaimArgs
 ) {
   const nameRegistryItem = await getTwitterHandle(connection, twitterHandle);
-  console.log()
+
   if (nameRegistryItem) {
     if (nameRegistryItem.owner.toBase58() != owner.toBase58()) {
       throw new Error(`Twitter handle is already registered to wallet ${nameRegistryItem.owner}`);

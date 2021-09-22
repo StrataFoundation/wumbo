@@ -123,8 +123,9 @@ export const Profile = React.memo(
     if (!handle) {
       handle = query.get("name") || undefined;
     }
-    const { claim, loading: claiming } = useClaimFlow(handle);
+    const { claim, loading: claiming, error: claimError } = useClaimFlow(handle);
     handleErrors(
+      claimError,
       error,
       reverseTwitterError,
       reverseTwitterError2,
