@@ -160,7 +160,8 @@ const WalletProvider: FC<IWalletProviderProps> = ({
 
       setAwaitingApproval(true);
       try {
-        return await adapter!.signTransaction(transaction);
+        // @ts-ignore
+        return await adapter!.originalSignTransaction(transaction);
       } catch (error) {
         onError(error);
         throw error;
@@ -181,7 +182,8 @@ const WalletProvider: FC<IWalletProviderProps> = ({
 
       setAwaitingApproval(true);
       try {
-        return await adapter!.signAllTransactions(transactions);
+        // @ts-ignore
+        return await adapter!.originalSignAllTransactions(transactions);
       } catch (error) {
         onError(error);
         throw error;
@@ -191,6 +193,19 @@ const WalletProvider: FC<IWalletProviderProps> = ({
     },
     [adapter, onError, connected]
   );
+
+  // Wrap the adapter sign transaction so we can get nice awaiting approval messages
+  useEffect(() => {
+    if (adapter) {
+      // @ts-ignore
+      adapter.originalSignTransaction = adapter.originalSignTransaction || adapter.signTransaction.bind(adapter);
+      adapter.signTransaction = signTransaction;
+
+      // @ts-ignore
+      adapter.originalSignAllTransactions = adapter.originalSignAllTransactions || adapter.signAllTransactions.bind(adapter);
+      adapter.signAllTransactions = signAllTransactions;
+    }
+  }, [adapter, signTransaction, signAllTransactions])
 
   // Reset state and set the wallet, adapter, and ready state when the name changes
   useEffect(() => {

@@ -89,7 +89,7 @@ export const Profile = React.memo(
       loading: loadingMetadata,
       error: tokenMetadataError,
     } = useTokenMetadata(tokenBonding?.targetMint);
-    const { publicKey } = useWallet();
+    const { publicKey, awaitingApproval } = useWallet();
     const myTokenRefKey = useClaimedTokenRefKey(publicKey || undefined);
     const { handle: walletTwitterHandle, error: reverseTwitterError } =
       useReverseTwitter(publicKey || undefined);
@@ -210,7 +210,7 @@ export const Profile = React.memo(
                 variant="outline"
                 onClick={claim}
                 isLoading={claiming}
-                loadingText="Claiming"
+                loadingText={awaitingApproval ? "Awaiting Approval" : "Claiming"}
               >
                 Claim
               </Button>
