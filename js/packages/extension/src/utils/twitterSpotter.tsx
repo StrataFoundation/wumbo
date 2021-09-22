@@ -23,7 +23,9 @@ export const useProfile = (): IParsedProfile | null => {
       "userActions",
       "UserProfileHeader_Items",
       "UserDescription",
-    ].some((dataTestId) => !!document.querySelector(`[data-testid=${dataTestId}]`));
+    ].some(
+      (dataTestId) => !!document.querySelector(`[data-testid=${dataTestId}]`)
+    );
 
     if (dataTestMatches) {
       // High chance the page is profile
@@ -87,17 +89,21 @@ enum Elements {
   TweetMintButton,
 }
 
-function findChildWithDimension(el: Element, width: number, height: number): Element | undefined {
-  const children =  [...el.children];
-  const childWithWidth = children.find(c => {
+function findChildWithDimension(
+  el: Element,
+  width: number,
+  height: number
+): Element | undefined {
+  const children = [...el.children];
+  const childWithWidth = children.find((c) => {
     const computed = getComputedStyle(c);
-    return computed.width == `${width}px` && computed.height == `${height}px`
+    return computed.width == `${width}px` && computed.height == `${height}px`;
   });
   if (!childWithWidth) {
     for (const child of children) {
       const found = findChildWithDimension(child, width, height);
       if (found) {
-        return found
+        return found;
       }
     }
   }
@@ -115,13 +121,15 @@ export const useTweets = (): IParsedTweet[] | null => {
     };
 
     const getTwets = () => {
-      const tweets = getElementsBySelector('[data-testid="tweet"]').filter(notCached);
+      const tweets = getElementsBySelector('[data-testid="tweet"]').filter(
+        notCached
+      );
       if (tweets.length > 0) {
         tweets.forEach((t) => cache.add(t));
 
         const parsedTweets = tweets.reduce(
           (acc: any, tweet: any, index: number): IParsedTweet[] => {
-            const buttonTarget = findChildWithDimension(tweet, 48, 48)!
+            const buttonTarget = findChildWithDimension(tweet, 48, 48)!;
             const nameEl = buttonTarget.querySelector("a");
 
             if (nameEl) {
@@ -137,11 +145,7 @@ export const useTweets = (): IParsedTweet[] | null => {
                   .match(twitterMentionRegex);
 
                 if (mentions?.length) {
-                  replyTokensTarget =
-                    tweet.children[1]?.children[1]?.lastChild?.previousSibling ||
-                    tweet.parentNode.lastElementChild.children[
-                      tweet.parentNode.lastElementChild.childNodes.length - 4
-                    ];
+                  replyTokensTarget = tweet.firstChild;
                 }
               }
 
@@ -190,7 +194,8 @@ export const useUserCells = (): IParsedUserCell[] | null => {
         if (nameEl) {
           const name = nameEl.href.split("/").slice(-1)[0];
           const imgEl = nameEl.querySelector("img");
-          const buttonTarget = cell.querySelector('[data-testid$="follow"')?.parentNode || null;
+          const buttonTarget =
+            cell.querySelector('[data-testid$="follow"')?.parentNode || null;
 
           return [
             ...acc,

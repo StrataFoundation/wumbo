@@ -1,12 +1,13 @@
 import React, { useEffect, useState } from "react";
-import { createPortal } from "react-dom";
+import { HStack, Avatar } from "@chakra-ui/react";
+/* import { createPortal } from "react-dom"; */
 import { PublicKey } from "@solana/web3.js";
-import { Popover } from "@headlessui/react";
-import { usePopper } from "react-popper";
-import useResizeAware from "react-resize-aware";
+/* import { Popover } from "@headlessui/react"; */
+/* import { usePopper } from "react-popper"; */
+/* import useResizeAware from "react-resize-aware"; */
 import {
-  Avatar,
-  IAvatarProps,
+  MetadataAvatar,
+  AvatarProps,
   useTwitterTokenRef,
   useOwnedAmountForOwnerAndHandle,
 } from "wumbo-common";
@@ -17,23 +18,31 @@ const humanizeAmount = (amount: number) => {
   if (amount < 1) return amount.toFixed(2);
 };
 
-interface IMentionTokenProps extends Pick<IAvatarProps, "size"> {
+interface IMentionTokenProps extends Pick<AvatarProps, "size"> {
   owner?: PublicKey;
   mention: string;
 }
 
 const MentionToken = ({ owner, mention, size }: IMentionTokenProps) => {
   const { info: tokenRef, loading } = useTwitterTokenRef(mention);
-  const isClaimed = tokenRef?.is_claimed;
-  const isLoading = loading;
-  const nullState = (!loading && !tokenRef) || isLoading;
+  const { amount, loading: loadingAmount } = useOwnedAmountForOwnerAndHandle(
+    owner,
+    mention
+  );
+
+  const isClaimed = tokenRef?.isClaimed;
+  const isLoading = loading || loadingAmount;
+  const nullState =
+    (!loading && !tokenRef) || (!loadingAmount && !amount) || isLoading;
 
   if (nullState) return null;
 
   return (
-    <div className="flex items-center inline-block rounded-full ring-2 ring-black">
-      <Avatar name={(isClaimed && mention) || "UNCLAIMED"} size={size} />
-    </div>
+    <MetadataAvatar
+      tokenBonding={tokenRef!.tokenBonding}
+      name={tokenRef!.name as string}
+      size={size}
+    />
   );
 };
 
@@ -48,7 +57,7 @@ const PopoverToken = ({ owner, mention }: IPopoverTokenProps) => {
     owner,
     mention
   );
-  const isClaimed = tokenRef?.is_claimed;
+  const isClaimed = tokenRef?.isClaimed;
   const isLoading = loading || loadingAmount;
   const nullState =
     (!loading && !tokenRef) || (!loadingAmount && !amount) || isLoading;
@@ -57,11 +66,10 @@ const PopoverToken = ({ owner, mention }: IPopoverTokenProps) => {
 
   return (
     <div className="flex justify-between bg-gray-100 p-2 rounded-lg space-x-4">
-      <Avatar
-        name={(isClaimed && mention) || "UNCLAIMED"}
-        subText={`@${mention}`}
+      <MetadataAvatar
+        tokenBonding={tokenRef!.tokenBonding}
+        name={tokenRef!.name as string}
         size="xs"
-        showDetails
       />
       <span className="ml-8 font-medium text-gray-700">
         {humanizeAmount(amount!)}
@@ -70,7 +78,7 @@ const PopoverToken = ({ owner, mention }: IPopoverTokenProps) => {
   );
 };
 
-interface IReplyTokensProps extends Pick<IAvatarProps, "size"> {
+interface IReplyTokensProps extends Pick<AvatarProps, "size"> {
   creatorName: string;
   mentions: string[];
 }
@@ -78,68 +86,30 @@ interface IReplyTokensProps extends Pick<IAvatarProps, "size"> {
 export const ReplyTokens = ({
   creatorName,
   mentions,
-  size = "xxs",
+  size = "xs",
 }: IReplyTokensProps) => {
   const { info: tokenRef, loading } = useTwitterTokenRef(creatorName);
-  const [refEl, setRefEl] = useState<HTMLButtonElement | null>(null);
-  const [popperEl, setPopperEl] = useState<HTMLDivElement | null>(null);
-  const [resizeListener, sizes] = useResizeAware();
-  const { styles, attributes, forceUpdate } = usePopper(refEl, popperEl);
-
-  useEffect(() => {
-    // addjust the position of popover
-    // on content load
-    if (forceUpdate) {
-      forceUpdate();
-    }
-  }, [sizes.width, sizes.height, forceUpdate]);
-
-  const sanitizedMentions = [...new Set(mentions.map((mention) =>
-    mention.replace(/[@ ]/g, "")
-  ))];
+  /* const [refEl, setRefEl] = useState<HTMLButtonElement | null>(null);
+   * const [popperEl, setPopperEl] = useState<HTMLDivElement | null>(null); */
+  const sanitizedMentions = [
+    ...new Set(mentions.map((mention) => mention.replace(/[@ ]/g, ""))),
+  ];
 
   const nullState =
-    (!loading && !tokenRef) || loading || !tokenRef || !tokenRef.is_claimed;
+    (!loading && !tokenRef) || loading || !tokenRef || !tokenRef.isClaimed;
 
   if (nullState) return null;
 
   return (
-    <Popover className="flex items-center text-white text-xs mt-2">
-      <Popover.Button className="flex items-center space-x-2" ref={setRefEl}>
-        <div className="flex -space-x-1 overflow-hidden">
-          {sanitizedMentions.map((mention) => (
-            <MentionToken
-              key={`mention${mention}`}
-              owner={tokenRef?.owner}
-              mention={mention}
-              size={size}
-            />
-          ))}
-        </div>
-      </Popover.Button>
-
-      {createPortal(
-        <Popover.Panel
-          ref={setPopperEl}
-          style={styles.popper}
-          {...attributes.popper}
-        >
-          <div
-            className="flex flex-col justify-center gap-x-2 gap-y-2 bg-white rounded-lg mt-4 p-2"
-            style={{ minWidth: 200 }}
-          >
-            {resizeListener}
-            {sanitizedMentions.map((mention) => (
-              <PopoverToken
-                key={`popover${mention}`}
-                owner={tokenRef?.owner}
-                mention={mention}
-              />
-            ))}
-          </div>
-        </Popover.Panel>,
-        document.body
-      )}
-    </Popover>
+    <HStack spacing={-2}>
+      {sanitizedMentions.map((mention) => (
+        <MentionToken
+          key={mention}
+          mention={mention}
+          owner={tokenRef?.owner as PublicKey}
+          size={size}
+        />
+      ))}
+    </HStack>
   );
 };

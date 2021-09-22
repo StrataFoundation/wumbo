@@ -40,6 +40,7 @@ export const TweetsEnhancer = () => {
             mentions={tweet.mentions || []}
           />
         ) : null;
+
         if (buttonEl) {
           return (
             <Fragment key={getElementId(tweet.buttonTarget)}>
@@ -57,9 +58,7 @@ export const TweetsEnhancer = () => {
                   container={tweet.replyTokensTarget as Element}
                 >
                   <ReactShadow.div>
-                    <ThemeProvider>
-                      <Box>{replyTokensEl}</Box>
-                    </ThemeProvider>
+                    <ThemeProvider>{replyTokensEl}</ThemeProvider>
                   </ReactShadow.div>
                 </AppendChildPortal>
               )}
