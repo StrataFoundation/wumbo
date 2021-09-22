@@ -122,8 +122,8 @@ WumboDrawer.Header = (props: HeaderProps) => {
                   h={4}
                   fontWeight="bold"
                   position="absolute"
-                  left={-1.5}
-                  bottom={-1.5}
+                  left={-1}
+                  bottom={-1}
                   as={BiRadioCircleMarked}
                   color={connected ? "green.500" : "red.500"}
                 />
