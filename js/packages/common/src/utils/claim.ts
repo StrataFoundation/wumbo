@@ -138,8 +138,7 @@ export function useCreateOrClaimCoin(): CreateState {
           tokenRef: creator!.publicKey,
           owner
         };
-        console.log(owner.toBase58());
-        console.log(splWumboProgram?.wallet.publicKey.toBase58());
+
         if (!creator.isClaimed) {
           await splWumboProgram!.claimSocialToken({
             owner,

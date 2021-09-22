@@ -97,10 +97,12 @@ export function useAccount<T>(
     if (!id) {
       setState({ loading: false })
       return;
+    } else {
+      setState({ loading: true })
     }
 
     cache
-      .search(id, parsedAccountBaseParser, isStatic)
+      .searchAndWatch(id, parsedAccountBaseParser, isStatic)
       .then((acc) => {
         if (acc) {
           setState({
@@ -119,7 +121,7 @@ export function useAccount<T>(
 
     const dispose = cache.emitter.onCache((e) => {
       const event = e;
-      if (event.id === id) {
+      if (event.id === id && !event.isNew) {
         cache.query(id, parsedAccountBaseParser).then((acc) => {
           setState({
             loading: false,

@@ -39,7 +39,7 @@ export interface UserInfoState {
   loading: boolean;
 }
 export const useUserInfo = (name: string): UserInfoState => {
-  const { info: creator, loading } = useTwitterTokenRef(name);
+  const { info: creator, loading, account } = useTwitterTokenRef(name);
   const { info: tokenBonding, loading: bondingLoading } = useAccount(
     creator?.tokenBonding,
     TokenBonding
@@ -56,7 +56,7 @@ export const useUserInfo = (name: string): UserInfoState => {
   });
   const { curve: bondingCurve, loading: pricingLoading } = useBondingPricing(creator?.tokenBonding);
   const current = bondingCurve?.current() || 0;
-  
+
   useEffect(() => {
     if (curve && tokenBonding && mint && creator) {
       setUserInfo({

@@ -89,7 +89,7 @@ export const Profile = React.memo(
       loading: loadingMetadata,
       error: tokenMetadataError,
     } = useTokenMetadata(tokenBonding?.targetMint);
-    const { publicKey } = useWallet();
+    const { publicKey, awaitingApproval } = useWallet();
     const myTokenRefKey = useClaimedTokenRefKey(publicKey || undefined);
     const { handle: walletTwitterHandle, error: reverseTwitterError } =
       useReverseTwitter(publicKey || undefined);
@@ -181,14 +181,14 @@ export const Profile = React.memo(
               icon="coin"
               label="Token Rank"
               value={
-                typeof tokenRank != undefined ? (tokenRank! + 1).toString() : ""
+                typeof tokenRank != undefined && tokenRank != null ? (tokenRank! + 1).toString() : ""
               }
             />
             { tokenRef?.isClaimed && <StatCardWithIcon
               icon="wumbo"
               label="WUM Locked"
               value={
-                typeof wumRank != undefined ? (wumRank! + 1).toString() : ""
+                typeof wumRank != undefined && wumRank != null ? (wumRank! + 1).toString() : ""
               }
             /> }
           </VStack>
@@ -210,7 +210,7 @@ export const Profile = React.memo(
                 variant="outline"
                 onClick={claim}
                 isLoading={claiming}
-                loadingText="Claiming"
+                loadingText={awaitingApproval ? "Awaiting Approval" : "Claiming"}
               >
                 Claim
               </Button>

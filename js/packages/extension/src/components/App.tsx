@@ -21,8 +21,8 @@ import { EditProfileRoute } from "./profile/EditProfile";
 
 const App: FC = () => (
   <Router
-    initialEntries={paths}
-    initialIndex={Object.keys(routes).findIndex((x) => x === "wallet")}
+    initialEntries={[routes.wallet.path]}
+    initialIndex={0}
   >
     <ContextProviders>
       <NftEnhancer />
@@ -32,7 +32,6 @@ const App: FC = () => (
         <Switch>
           <Route path={routes.create.path} component={Create} />
           <Route path={routes.claim.path} component={Claim} />
-          <Route path={routes.customize.path} component={Customize} />
           <Route path={routes.trade.path} component={TradeRoute} />
           <Route path={routes.wallet.path} component={Wallet} />
           <Route path={routes.manageWallet.path} component={ManageWallet} />

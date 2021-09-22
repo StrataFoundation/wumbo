@@ -37,6 +37,8 @@ import {
   ITokenBonding,
   useTokenRefFromBonding,
   handleErrors,
+  useSolOwnedAmount,
+  SOL_TOKEN,
 } from "wumbo-common";
 import { routes, viewProfilePath } from "@/constants/routes";
 import { TokenForm, FormValues } from "./TokenForm";
@@ -135,12 +137,12 @@ export const TradeRoute = () => {
             routes.manageWallet.path +
             `?redirect=${location.pathname}${location.search}`
           }
-          size="sm"
+          size="xs"
           leftIcon={<Icon as={RiWallet3Line} w={5} h={5} />}
           colorScheme="gray"
           rounded="full"
         >
-          Connect Wallet
+          <Text fontSize="xs">Connect Wallet</Text>
         </Button>
       );
     } else if (isTargetWUM) {
@@ -149,12 +151,12 @@ export const TradeRoute = () => {
           as={Link}
           to={{ pathname: ftxPayLink }}
           target="_blank"
-          size="sm"
+          size="xs"
           leftIcon={<Icon as={SolLogo} w={5} h={5} />}
           colorScheme="gray"
           rounded="full"
         >
-          Buy SOL
+          <Text fontSize="xs">Buy SOL</Text>
         </Button>
       );
     } else {
@@ -165,13 +167,15 @@ export const TradeRoute = () => {
             ":tokenBondingKey",
             WUM_BONDING.toBase58()
           )}
-          size="sm"
+          size="xs"
           leftIcon={<Icon as={Logo} w={5} h={5} />}
           colorScheme="indigo"
           rounded="full"
         >
-          {showFiat && "$"}
-          {(showFiat && toFiat(ownedWUM || 0).toFixed(2)) || "Buy WUM"}
+          <Text fontSize="xs">
+            {showFiat && "$"}
+            {(showFiat && toFiat(ownedWUM || 0).toFixed(2)) || "Buy WUM"}
+          </Text>
         </Button>
       );
     }
@@ -217,7 +221,9 @@ export const Trade = ({
   const toFiat = (a: number) => (fiatPrice || 0) * a;
   const fromFiat = (a: number) => a / (fiatPrice || 0);
 
-  const ownedBase = useOwnedAmount(tokenBonding.baseMint);
+  const { amount: ownedSol } = useSolOwnedAmount();
+  const ownedBaseNormal = useOwnedAmount(tokenBonding.baseMint);
+  const ownedBase = tokenBonding.baseMint.equals(SOL_TOKEN) ? ownedSol : ownedBaseNormal;
   const ownedTarget = useOwnedAmount(tokenBonding.targetMint);
   const location = useLocation();
   const { info: tokenRef } = useTokenRefFromBonding(tokenBonding.publicKey);
@@ -328,7 +334,7 @@ export const Trade = ({
               <Flex justifyContent="center" fontSize="xs">
                 You can buy up to{" "}
                 {(
-                  curve?.buyTargetAmount(
+                  curve?.buyWithBaseAmount(
                     ownedBase || 0,
                     tokenBonding.baseRoyaltyPercentage,
                     tokenBonding.targetRoyaltyPercentage

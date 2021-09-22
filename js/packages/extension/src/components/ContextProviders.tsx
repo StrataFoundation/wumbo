@@ -16,8 +16,8 @@ import { ApolloProvider } from "@apollo/client";
 import { DrawerProvider } from "@/contexts/drawerContext";
 import { WalletName } from "@solana/wallet-adapter-wallets";
 import { InjectedWalletAdapter } from "@/utils/wallets";
-import { WalletError } from "@solana/wallet-adapter-base";
 import toast from "react-hot-toast";
+import { HistoryContextProvider } from "../utils/history";
 
 export const ContextProviders: FC = ({ children }) => {
   const alteredWallets = useMemo(
@@ -77,9 +77,11 @@ export const ContextProviders: FC = ({ children }) => {
                 <WalletProvider wallets={alteredWallets} onError={onError}>
                   <SolPriceProvider>
                     <UsdWumboPriceProvider>
-                      <DrawerProvider>
-                        <ThemeProvider>{children}</ThemeProvider>
-                      </DrawerProvider>
+                      <HistoryContextProvider>
+                        <DrawerProvider>
+                          <ThemeProvider>{children}</ThemeProvider>
+                        </DrawerProvider>
+                      </HistoryContextProvider>
                     </UsdWumboPriceProvider>
                   </SolPriceProvider>
                 </WalletProvider>

@@ -1,4 +1,4 @@
-import React, { Fragment } from "react";
+import React, { Fragment, useRef } from "react";
 import ReactShadow from "react-shadow/emotion";
 import { Box } from "@chakra-ui/react";
 
@@ -23,6 +23,7 @@ function getElementId(element: Element | null): string {
 
 export const TweetsEnhancer = () => {
   const tweets = useTweets();
+  const outsideRef = useRef() as React.MutableRefObject<HTMLInputElement>;
 
   if (tweets) {
     const tweetEls = tweets
@@ -36,6 +37,7 @@ export const TweetsEnhancer = () => {
 
         const replyTokensEl = tweet.replyTokensTarget ? (
           <ReplyTokens
+            outsideRef={outsideRef}
             creatorName={tweet.name}
             mentions={tweet.mentions || []}
           />
@@ -70,7 +72,10 @@ export const TweetsEnhancer = () => {
       })
       .filter(Boolean);
 
-    return <Fragment>{tweetEls}</Fragment>;
+    return <Fragment>
+      {tweetEls}
+      <Box ref={outsideRef} />
+    </Fragment>;
   }
 
   return null;

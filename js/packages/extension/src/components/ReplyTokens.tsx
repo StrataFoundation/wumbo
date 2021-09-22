@@ -1,4 +1,5 @@
-import React from "react";
+import React, { MutableRefObject, useEffect, useState } from "react";
+import ReactShadow from "react-shadow/emotion";
 import {
   HStack,
   Popover,
@@ -7,9 +8,11 @@ import {
   PopoverContent,
   PopoverBody,
   Text,
+  Portal,
 } from "@chakra-ui/react";
 import { PublicKey } from "@solana/web3.js";
 import {
+  ThemeProvider,
   MetadataAvatar,
   AvatarProps,
   useTwitterTokenRef,
@@ -62,6 +65,7 @@ const MentionToken = ({ owner, mention, size }: IMentionTokenProps) => {
 interface IReplyTokensProps extends Pick<AvatarProps, "size"> {
   creatorName: string;
   mentions: string[];
+  outsideRef: React.MutableRefObject<HTMLInputElement>;
 }
 
 const getMentionsWithTokens = async (
@@ -102,6 +106,7 @@ export const ReplyTokens = ({
   creatorName,
   mentions,
   size = "xs",
+  outsideRef,
 }: IReplyTokensProps) => {
   const cache = useAccountFetchCache();
   const { info: tokenRef, loading } = useTwitterTokenRef(creatorName);
@@ -132,7 +137,7 @@ export const ReplyTokens = ({
           />
         ))}
       </HStack>
-      <Popover placement="bottom" trigger="hover">
+      <Popover isLazy placement="bottom" trigger="hover">
         <HStack spacing={1} color="gray.500">
           <Text>owns these tokens and</Text>
           <PopoverTrigger>
@@ -142,12 +147,18 @@ export const ReplyTokens = ({
           </PopoverTrigger>
           <Text>too</Text>
         </HStack>
-        <PopoverContent>
-          <PopoverHeader fontWeight="bold">
-            Social Tokens {creatorName} Owns!
-          </PopoverHeader>
-          <PopoverBody>// avatars with name and ownings here</PopoverBody>
-        </PopoverContent>
+        <Portal containerRef={outsideRef}>
+          <ReactShadow.div>
+            <ThemeProvider>
+              <PopoverContent>
+                <PopoverHeader fontWeight="bold">
+                  Social Tokens {creatorName} Owns!
+                </PopoverHeader>
+                <PopoverBody>// avatars with name and ownings here</PopoverBody>
+              </PopoverContent>
+            </ThemeProvider>
+          </ReactShadow.div>
+        </Portal>
       </Popover>
     </HStack>
   );

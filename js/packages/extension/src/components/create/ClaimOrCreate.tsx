@@ -23,7 +23,7 @@ export default React.memo(() => {
   const history = useHistory();
   const { splWumboProgram } = usePrograms();
   const query = useQuery();
-  const { publicKey } = useWallet();
+  const { publicKey, awaitingApproval } = useWallet();
   const { handle: ownerTwitterHandle, error: reverseTwitterError } =
     useReverseTwitter(publicKey || undefined);
 
@@ -58,7 +58,7 @@ export default React.memo(() => {
         colorScheme="indigo"
         onClick={execute}
         isLoading={creationLoading}
-        loadingText="Creating Token"
+        loadingText={awaitingApproval ? "Awaiting Approval" : "Creating Token"}
       >
         Create Token
       </Button>
@@ -75,7 +75,7 @@ export default React.memo(() => {
             colorScheme="twitter"
             onClick={claim}
             isLoading={loading}
-            loadingText="Claiming"
+            loadingText={awaitingApproval ? "Awaiting Approval" : "Claiming"}
           >
             This is me, Claim!
           </Button>

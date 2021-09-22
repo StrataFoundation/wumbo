@@ -1,10 +1,10 @@
-import React, { Fragment, ReactNode } from "react";
+import React, { useRef, Fragment, ReactNode, useContext } from "react";
 import { Route, NavLink, Link, useHistory } from "react-router-dom";
 import startCase from "lodash/startCase";
 import {
   Flex,
   Box,
-  Fade,
+  Slide,
   Text,
   IconButton,
   Button,
@@ -24,36 +24,71 @@ import {
   Spinner,
   WUM_BONDING,
 } from "wumbo-common";
+import { useHistoryList } from "@/utils/history";
+import Logo from "../../public/assets/img/logo.svg";
+
+export const OutsideOfDrawerRef = React.createContext<React.MutableRefObject<HTMLInputElement> | null>(null);
+
+export const useOutsideOfDrawerRef = (): React.RefObject<unknown> => {
+  return useContext(OutsideOfDrawerRef)!
+}
 
 export const WumboDrawer = (props: { children: ReactNode }) => {
+  const outsideOfDrawerRef = useRef() as React.MutableRefObject<HTMLInputElement>;
   const { isOpen, toggleDrawer } = useDrawer();
-
+  const tab = <Box
+    bg="indigo.500"
+    w="38px"
+    h="38px"
+    backgroundImage="linear-gradient(49deg, #2323ff -12%, #4f51ff 34%, #a53ef4 98%)"
+    roundedTopLeft="lg"
+    roundedBottomLeft="lg"
+    shaddow="md"
+    onClick={() => toggleDrawer({ isOpen: !isOpen })}
+    _hover={{ cursor: "pointer" }}
+  >
+    <Icon h="38px" w="38px" as={Logo} />
+  </Box>
+  
   return (
     <Fragment>
-      {isOpen && (
-        <Box
-          w="345px"
-          pos="fixed"
-          right="0"
-          style={{ top: "calc(50% - 280px)" }}
-        >
-          <WalletAutoReconnect />
-          <Fade in={true} style={{ zIndex: 99999 }}>
-            <Box
-              w="345px"
-              h="560px"
-              bg="white"
-              d="flex"
-              flexDir="column"
-              roundedTopLeft="lg"
-              roundedBottomLeft="lg"
-              shadow="md"
-            >
-              {props.children}
-            </Box>
-          </Fade>
-        </Box>
-      )}
+      { isOpen && <WalletAutoReconnect /> }
+      {!isOpen && <Box
+        pos="fixed"
+        right="0"
+        style={{ top: "calc(50% - 246px)" }}
+      >
+        {tab}
+      </Box>}
+      <Box ref={outsideOfDrawerRef} zIndex={200} />
+
+      <OutsideOfDrawerRef.Provider value={outsideOfDrawerRef}>
+        <Slide direction="right" in={isOpen} style={{ width: "345px", zIndex: 100 }}>
+          <Box
+            // w="345px"
+            pos="fixed"
+            right="0"
+            style={{ top: "calc(50% - 280px)" }}
+            w="345px"
+            h="560px"
+            bg="white"
+            d="flex"
+            flexDir="column"
+            roundedTopLeft="lg"
+            roundedBottomLeft="lg"
+            shadow="md"
+          >
+            {props.children}
+          </Box>
+          <Box
+            pos="fixed"
+            right="345px"
+            style={{ top: "calc(50% - 246px)" }}
+          >
+            {tab}
+          </Box>
+        </Slide>
+      </OutsideOfDrawerRef.Provider>
     </Fragment>
   );
 };
@@ -72,7 +107,9 @@ WumboDrawer.Header = (props: HeaderProps) => {
   const { toggleDrawer } = useDrawer();
   const hasTitle = !!(props as HeaderNoChildren).title;
   const { connected } = useWallet();
+  const historyList = useHistoryList();
   const history = useHistory();
+  
 
   return (
     <Box
@@ -83,21 +120,27 @@ WumboDrawer.Header = (props: HeaderProps) => {
     >
       <Box d="flex" alignItems="center" justifyContent="space-between">
         <Flex w="full" alignItems="center">
-          {history.length > 1 && (
-            <Box
-              _hover={{ cursor: "pointer" }}
-              onClick={() => history.goBack()}
+          {historyList.length > 1 && (
+            <Link
+               // This should look and behave like a link, but it actually needs to pop things off from the history stack.
+               onClick={(e) => {
+                e.preventDefault();
+                history.goBack()
+               }} 
+               to={historyList[historyList.length - 2]}
             >
-              <Icon
-                mr={2}
-                w={5}
-                h={5}
-                as={IoMdArrowRoundBack}
-                fontSize="lg"
-                fontWeight="medium"
-                color="indigo.500"
-              />
-            </Box>
+              <Box>
+                <Icon
+                  mr={2}
+                  w={5}
+                  h={5}
+                  as={IoMdArrowRoundBack}
+                  fontSize="lg"
+                  fontWeight="medium"
+                  color="indigo.500"
+                />
+              </Box>
+            </Link>
           )}
           {hasTitle && (
             <Text fontSize="lg" fontWeight="medium" color="indigo.500">
@@ -122,8 +165,8 @@ WumboDrawer.Header = (props: HeaderProps) => {
                   h={4}
                   fontWeight="bold"
                   position="absolute"
-                  left={-1.5}
-                  bottom={-1.5}
+                  left={-1}
+                  bottom={-1}
                   as={BiRadioCircleMarked}
                   color={connected ? "green.500" : "red.500"}
                 />
@@ -185,23 +228,29 @@ WumboDrawer.Nav = () => {
             path,
             Icon: RouteIcon,
             isDrawerNav,
+            exact
           } = routes[route as keyof IRoutes];
 
           // Fill paths with params in
           let filledPath = path;
-          if (path.endsWith(":tokenBondingKey")) {
-            filledPath = `${path.replace(
+          if (path.endsWith(":tokenBondingKey") || path.endsWith(":tokenRefKey")) {
+            const replacedKeys = path.replace(
               ":tokenBondingKey",
               creatorInfo?.tokenBonding?.publicKey?.toBase58() ||
                 WUM_BONDING.toBase58()
-            )}${creatorInfo ? "?name=" + creatorInfo.name : ""}`;
+            ).replace(
+              ":tokenRefKey", 
+              creatorInfo?.tokenRef?.publicKey.toBase58() || ""
+            );
+            filledPath = `${replacedKeys}${creatorInfo ? "?name=" + creatorInfo.name : ""}`;
           }
 
           if (isDrawerNav && Icon) {
             return (
               <Route
                 key={path}
-                path={filledPath}
+                path={path}
+                exact={exact}
                 children={({ match }) => (
                   <Button
                     as={NavLink}

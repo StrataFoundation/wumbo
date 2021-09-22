@@ -93,11 +93,11 @@ enum Elements {
   TweetMintButton,
 }
 
-const findChildWithDimension = (
+function findChildWithDimension(
   el: Element,
   width: number,
   height: number
-): Element | undefined => {
+): Element | undefined {
   const children = [...el.children];
   const childWithWidth = children.find((c) => {
     const computed = getComputedStyle(c);
@@ -113,12 +113,7 @@ const findChildWithDimension = (
   }
 
   return childWithWidth;
-};
-
-const findChildWithText = (el: Element, text: string): Element | undefined => {
-  const els = el.querySelector("*");
-  let found;
-};
+}
 
 export const useTweets = (): IParsedTweet[] | null => {
   const [tweets, setTweets] = useState<IParsedTweet[]>([]);
@@ -138,7 +133,8 @@ export const useTweets = (): IParsedTweet[] | null => {
 
         const parsedTweets = tweets.reduce(
           (acc: any, tweet: any, index: number): IParsedTweet[] => {
-            const buttonTarget = findChildWithDimension(tweet, 48, 48)!;
+            const buttonTarget = (findChildWithDimension(tweet, 48, 48) ||
+              findChildWithDimension(tweet, 32, 32))!;
             const nameEl = buttonTarget.querySelector("a");
 
             if (nameEl) {
@@ -155,9 +151,10 @@ export const useTweets = (): IParsedTweet[] | null => {
 
                 if (mentions?.length) {
                   mentions = sanitizeMentions(mentions);
-                  replyTokensTarget = tweet.querySelectorAll(
-                    `[href="/${name}"]`
-                  )[1];
+                  const lastHref = tweet.querySelector(
+                    `a[href="/${mentions[0]}"]`
+                  );
+                  replyTokensTarget = lastHref.parentElement;
                 }
               }
 

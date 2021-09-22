@@ -10,14 +10,14 @@ export async function getNftNameRecordKey(imgUrl: string): Promise<PublicKey> {
 }
 
 export async function getNftMetadataKey(cache: AccountFetchCache, imgUrl: string): Promise<PublicKey | undefined> {
-  const header = await cache.search(await getNftNameRecordKey(imgUrl), (pubkey, account) => {
+  const header = await cache.searchAndWatch(await getNftNameRecordKey(imgUrl), (pubkey, account) => {
     const header: NameRegistryState = deserializeUnchecked(NameRegistryState.schema, NameRegistryState, account.data);
     return {
       pubkey,
       account,
       info: header
     };
-  })
+  }, true)
 
   const tokenMetadata = header && new PublicKey(header.account.data.slice(NameRegistryState.HEADER_LEN, NameRegistryState.HEADER_LEN + 32));
 
@@ -26,7 +26,7 @@ export async function getNftMetadataKey(cache: AccountFetchCache, imgUrl: string
 
 export async function getNftMint(cache: AccountFetchCache, imgUrl: string): Promise<PublicKey | undefined> {
   const metadataKey = await getNftMetadataKey(cache, imgUrl);
-  const metadata = metadataKey && await cache.search(metadataKey, MetadataParser);
+  const metadata = metadataKey && await cache.searchAndWatch(metadataKey, MetadataParser);
   
   return metadata?.info?.mint;
 }

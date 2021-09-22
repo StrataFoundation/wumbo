@@ -6,6 +6,7 @@ type Route = {
   path: string;
   Icon: ReactNode | null;
   isDrawerNav: boolean;
+  exact?: boolean;
 };
 
 export interface IRoutes {
@@ -60,7 +61,7 @@ export const routes: IRoutes = {
   create: { path: "/create", Icon: null, isDrawerNav: false },
   claim: { path: "/claim", Icon: null, isDrawerNav: false },
   customize: { path: "/customize", Icon: null, isDrawerNav: false },
-  profile: { path: "/profile", Icon: RiUserLine, isDrawerNav: true },
+  profile: { path: "/profile", Icon: RiUserLine, isDrawerNav: true, exact: true },
   wallet: { path: "/wallet", Icon: RiWallet3Line, isDrawerNav: true },
   manageWallet: { path: "/manage-wallet", Icon: null, isDrawerNav: false },
   trade: {
