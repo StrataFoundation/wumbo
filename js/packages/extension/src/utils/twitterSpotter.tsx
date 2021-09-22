@@ -12,6 +12,10 @@ interface IParsedProfile {
   avatar?: string;
 }
 
+const sanitizeMentions = (mentions: string[]) => [
+  ...new Set(mentions.map((mention) => mention.replace(/[@ ]/g, ""))),
+];
+
 export const useProfile = (): IParsedProfile | null => {
   const [result, setResult] = useState<IParsedProfile | null>(null);
 
@@ -120,7 +124,7 @@ export const useTweets = (): IParsedTweet[] | null => {
       return !cache.has(el);
     };
 
-    const getTwets = () => {
+    const getTweets = () => {
       const tweets = getElementsBySelector('[data-testid="tweet"]').filter(
         notCached
       );
@@ -145,6 +149,7 @@ export const useTweets = (): IParsedTweet[] | null => {
                   .match(twitterMentionRegex);
 
                 if (mentions?.length) {
+                  mentions = sanitizeMentions(mentions);
                   replyTokensTarget = tweet.firstChild;
                 }
               }
@@ -170,7 +175,7 @@ export const useTweets = (): IParsedTweet[] | null => {
       }
     };
 
-    setInterval(getTwets, 1000);
+    setInterval(getTweets, 1000);
   }, []);
 
   return tweets;
