@@ -122,7 +122,6 @@ export const useTweets = (): IParsedTweet[] | null => {
         const parsedTweets = tweets.reduce(
           (acc: any, tweet: any, index: number): IParsedTweet[] => {
             const buttonTarget = (findChildWithDimension(tweet, 48, 48) || findChildWithDimension(tweet, 32, 32))!
-            console.log("tar", buttonTarget);
             const nameEl = buttonTarget.querySelector("a");
 
             if (nameEl) {
