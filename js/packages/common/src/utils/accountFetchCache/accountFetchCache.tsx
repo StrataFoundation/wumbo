@@ -161,6 +161,8 @@ export class AccountFetchCache {
       this.genericCache.set(id.toBase58(), null)
       return undefined;
     }
+
+    return data;
   }
 
   // The same as query, except swallows errors and returns undefined.

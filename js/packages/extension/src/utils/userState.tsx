@@ -72,7 +72,7 @@ export const useUserInfo = (name: string): UserInfoState => {
         loading: false,
       });
     } else {
-      setUserInfo({ loading: (loading) || (creator && !curve && !tokenBonding && !mint) });
+      setUserInfo({ loading: loading || bondingLoading || curveLoading || pricingLoading });
     }
   }, [current, curve, tokenBonding, mint, creator, loading, bondingLoading, curveLoading, pricingLoading]);
 
