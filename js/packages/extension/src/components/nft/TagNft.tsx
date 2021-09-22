@@ -20,21 +20,20 @@ export const TagNft: React.FC = () => {
     [params.mint]
   );
 
-  const { loading: loading1 } = useTokenMetadata(token);
+  const { loading: loading1, metadata, error: err1 } = useTokenMetadata(token);
   const { loading: loading2, result: res2, error: err2 } = useTokenLargestAccounts(token);
   const { loading: loading3, info } = useAccount(res2?.value[0]?.address, TokenAccountParser);
   const loading = loading1 || loading2 || loading3;
 
-  handleErrors(err2)
+  handleErrors(err1, err2)
 
   if (loading) {
     return <WumboDrawer.Loading />;
   }
 
-
   return (
     <Fragment>
-      <WumboDrawer.Header />
+      <WumboDrawer.Header title={`Tag ${metadata?.data.name}`} />
       <WumboDrawer.Content>
         <WalletRedirect />
         <CommonTagNft

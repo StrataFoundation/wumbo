@@ -58,7 +58,7 @@ export const StatCardWithIcon = ({
       <WumboRankIcon w="16px" h="16px" color="indigo.500" fill="none" />
     )}
     <Flex flexDir="column" flexGrow={1} lineHeight="normal">
-      <Text fontSize="12px">{value}</Text>
+      <Text fontSize="12px">#{value}</Text>
       <Text fontSize="10px" color="gray.500">
         {label}
       </Text>

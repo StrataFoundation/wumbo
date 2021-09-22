@@ -19,7 +19,7 @@ export const ViewNft: React.FC = () => {
     [params.mint]
   );
 
-  const { loading: loading1 } = useTokenMetadata(token);
+  const { loading: loading1, metadata } = useTokenMetadata(token);
   const { loading: loading2, result: res2, error: err2 } = useTokenLargestAccounts(token);
   const { loading: loading3, info } = useAccount(res2?.value[0]?.address, TokenAccountParser);
   const loading = loading1 || loading2 || loading3;
@@ -31,7 +31,7 @@ export const ViewNft: React.FC = () => {
 
   return (
     <Fragment>
-      <WumboDrawer.Header />
+      <WumboDrawer.Header title={metadata?.data.name || "View NFT"} />
       <WumboDrawer.Content>
         <CommonViewNft
           tagNftPath={token ? tagNftPath(token) : undefined}

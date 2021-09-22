@@ -10,9 +10,9 @@ export const LeaderboardNumber = React.memo(
     selected?: boolean;
   }) => (
     <Text
-      fontWeight="semibold"
+      // fontWeight="semibold"
       fontSize="sm"
-      fontColor={selected ? "gray.700" : "gray.400"}
+      color={selected ? "gray.700" : "gray.400"}
       textAlign="center"
     >
       {children}

@@ -1,5 +1,5 @@
 import React, { Fragment } from "react";
-import { Wallet } from "@solana/wallet-adapter-wallets";
+import { Wallet, WalletName } from "@solana/wallet-adapter-wallets";
 import { useWallet } from "../contexts/walletContext";
 import { WALLET_PROVIDERS } from "../constants/walletProviders";
 import { Box, Button, Text, Link, VStack } from "@chakra-ui/react";
@@ -18,11 +18,10 @@ export const WalletSelect = () => {
         </VStack>
       ) : (
         <VStack spacing={4} alignItems="start">
-          <Text fontSize="sm">
-            New to Crypto & dont have an existing wallet?
-            <br />
-            <Link href="https://www.sollet.io" color="indigo.600">
-              Get one here.
+          <Text fontSize="lg">
+            New to Crypto & dont have an existing wallet?&nbsp;
+            <Link href="#" onClick={() => select(WalletName.Torus)} color="indigo.600">
+              Connect with Social.
             </Link>
           </Text>
           {WALLET_PROVIDERS.map((provider: Wallet, idx: number) => (
@@ -43,7 +42,7 @@ export const WalletSelect = () => {
                 </Box>
               }
             >
-              <Text>{provider.name}</Text>
+              <Text fontSize="md">{provider.name}</Text>
             </Button>
           ))}
         </VStack>

@@ -84,12 +84,13 @@ export const TokenForm = ({
               min={0}
               step={0.01}
               placeholder="0.00"
+              pr="1px"
               {...register("fiatAmount")}
               onChange={handleOnFiatChange}
             />
             <span className="mt-px">$</span>
           </Flex>
-          <Flex fontSize="sm">
+          <Flex fontSize="sm" w="full">
             <Input
               required
               variant="unstyled"
@@ -99,6 +100,7 @@ export const TokenForm = ({
               min={0}
               step={0.01}
               placeholder="0"
+              pr="1px"
               {...register("tokenAmount")}
               onChange={handleOnTokenChange}
             />

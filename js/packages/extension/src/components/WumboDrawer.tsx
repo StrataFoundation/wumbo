@@ -106,11 +106,17 @@ WumboDrawer.Header = (props: HeaderProps) => {
           )}
           {!hasTitle && (props as HeaderWithChildren).children}
         </Flex>
-        <Flex alignItems="center">
+        <Flex pl={2} alignItems="center">
           <Box pr={2}>
             <Link to={routes.manageWallet.path}>
               <Box position="relative">
-                <Icon as={RiWallet3Line} />
+                <Icon 
+                  color="gray.500"
+                  _hover={{ color: "gray.600", cursor: "pointer" }}
+                  w={5}
+                  h={5} 
+                  as={RiWallet3Line}
+                />
                 <Icon
                   w={4}
                   h={4}
@@ -127,8 +133,8 @@ WumboDrawer.Header = (props: HeaderProps) => {
         </Flex>
 
         <Box
-          color="gray.400"
-          _hover={{ color: "gray.500", cursor: "pointer" }}
+          color="gray.500"
+          _hover={{ color: "gray.600", cursor: "pointer" }}
           onClick={() => toggleDrawer()}
         >
           <Icon as={HiOutlineX} w={5} h={5} />
@@ -165,12 +171,14 @@ WumboDrawer.Nav = () => {
       />
       <Box
         d="flex"
+        alignItems="center"
         justifyContent="space-around"
         pt="4px"
         px="4px"
         borderTop="1px"
         borderColor="gray.200"
         fontFamily="body"
+        height="56px"
       >
         {Object.keys(routes).map((route) => {
           const {
@@ -205,14 +213,14 @@ WumboDrawer.Nav = () => {
                     alignItems="center"
                     color={match ? "indigo.500" : "gray.600"}
                     fontWeight="medium"
-                    p="4px"
+                    h="full"
                     borderBottom="3px"
                     borderBottomStyle="solid"
                     borderColor={match ? "indigo.500" : "transparent"}
                     borderRadius="none"
                   >
                     {/* @ts-ignore */}
-                    <Icon as={RouteIcon} w={5} h={5} />
+                    <Icon as={RouteIcon} w={6} h={6} />
                     <Text fontSize="xs">{startCase(route)}</Text>
                   </Button>
                 )}
