@@ -288,20 +288,20 @@ export const Trade = ({
       />
       <Tabs isFitted w="full">
         <TabList>
-          <Tab
+          { !tokenBonding.buyFrozen && <Tab
             color="gray.300"
             borderColor="gray.300"
             _selected={{ color: "indigo.500", borderColor: "indigo.500" }}
           >
             Buy
-          </Tab>
-          <Tab
+          </Tab> }
+          { !tokenBonding.sellFrozen && <Tab
             color="gray.300"
             borderColor="gray.300"
             _selected={{ color: "indigo.500", borderColor: "indigo.500" }}
           >
             Sell
-          </Tab>
+          </Tab> }
         </TabList>
 
         <TabPanels>
