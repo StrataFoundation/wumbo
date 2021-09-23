@@ -1,5 +1,5 @@
 import { ReactNode } from "react";
-import { RiUserLine, RiWallet3Line, RiExchangeLine } from "react-icons/ri";
+import { RiUserLine, RiWallet3Line, RiArrowUpDownFill } from "react-icons/ri";
 import { PublicKey } from "@solana/web3.js";
 
 type Route = {
@@ -61,12 +61,17 @@ export const routes: IRoutes = {
   create: { path: "/create", Icon: null, isDrawerNav: false },
   claim: { path: "/claim", Icon: null, isDrawerNav: false },
   customize: { path: "/customize", Icon: null, isDrawerNav: false },
-  profile: { path: "/profile", Icon: RiUserLine, isDrawerNav: true, exact: true },
+  profile: {
+    path: "/profile",
+    Icon: RiUserLine,
+    isDrawerNav: true,
+    exact: true,
+  },
   wallet: { path: "/wallet", Icon: RiWallet3Line, isDrawerNav: true },
   manageWallet: { path: "/manage-wallet", Icon: null, isDrawerNav: false },
   trade: {
     path: "/trade/:tokenBondingKey",
-    Icon: RiExchangeLine,
+    Icon: RiArrowUpDownFill,
     isDrawerNav: true,
   },
   editProfile: { path: "/profile/edit", Icon: null, isDrawerNav: false },
