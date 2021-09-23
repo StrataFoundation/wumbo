@@ -149,12 +149,14 @@ export const useTweets = (): IParsedTweet[] | null => {
                   .join(" ")
                   .match(twitterMentionRegex);
 
+                // first mention is always user, remove it
+                mentions?.shift();
+
                 if (mentions?.length) {
                   mentions = sanitizeMentions(mentions);
-                  const lastHref = tweet.querySelector(
-                    `a[href="/${mentions[0]}"]`
-                  );
-                  replyTokensTarget = lastHref.parentElement;
+                  replyTokensTarget = tweet.querySelectorAll(
+                    `[href="/${name}"]`
+                  )[1].parentNode.parentNode.parentNode.parentNode;
                 }
               }
 
