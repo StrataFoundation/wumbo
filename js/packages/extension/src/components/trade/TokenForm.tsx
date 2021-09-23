@@ -116,7 +116,7 @@ export const TokenForm = ({
             colorScheme="indigo"
             size="md"
             isLoading={awaitingApproval || submitting}
-            loadingText={awaitingApproval ? "Awaiting Approval" : "Buying"}
+            loadingText={awaitingApproval ? "Awaiting Approval" : type === "sell" ? "Selling": "Buying"}
           >
             {type === "sell" ? "Sell" : "Buy"}
           </Button>

@@ -8,6 +8,7 @@ import {
 import { useConnection } from "../contexts/connection";
 import { VStack, HStack, Box, Text, Checkbox, Button } from "@chakra-ui/react";
 import { Spinner } from "../";
+import ReactShadow from "react-shadow/emotion";
 // @ts-ignore
 import compareImages from "resemblejs/compareImages";
 import axios from "axios";
@@ -20,6 +21,8 @@ import {
   getNftNameRecordKey,
   classNames,
 } from "../utils";
+import { ThemeProvider } from "../contexts/themeContext";
+import { FloatPortal } from "../Portals";
 
 interface ITagArgs {
   imgUrls: string[];
@@ -27,9 +30,11 @@ interface ITagArgs {
   feePayer: string;
 }
 
-const getBufferFromUrl = async (url: string): Promise<Blob> => {
-  const response = await axios.get(url, { responseType: "blob" });
-  return response.data;
+const getBufferFromUrl = async (url: string | undefined): Promise<Blob | undefined> => {
+  if (url) {
+    const response = await axios.get(url, { responseType: "blob" });
+    return response.data;
+  }
 };
 
 const tag = async (
@@ -59,48 +64,10 @@ export const TaggableImage = React.memo(
     src: string;
     images: HTMLImageElement[];
   }) => {
-    const [toRemove, setToRemove] = useState<HTMLElement[]>([]);
     const [hovering, setHovering] = useState(false);
-    const removeAll = () => toRemove.forEach((el) => el.remove());
     let sanitizedPercent = (100 - percent).toFixed();
 
-    useEffect(() => {
-      removeAll();
-      const addHovers = (color: string, lines?: boolean) => {
-        setToRemove(
-          images.map((img) => {
-            const div = window.document.createElement("div");
-            const imgRect = img.getBoundingClientRect();
-            div.style.zIndex = "10000";
-            div.style.backgroundColor = color;
-            div.style.opacity = "0.5";
-            div.style.position = "fixed";
-            div.style.top = imgRect.top + "px";
-            div.style.left = imgRect.left + "px";
-            div.style.height = img.height + "px";
-            div.style.width = img.width + "px";
-            lines &&
-              (div.style.background =
-                "repeating-linear-gradient(45deg, #4239B1, #4239B1 2px, #00CE90 2px, #00CE90 20px )");
-            document.body.append(div);
-            return div;
-          })
-        );
-      };
-
-      if (selected) {
-        addHovers("#00CE90", true);
-      } else if (hovering) {
-        addHovers("#4239B1");
-      }
-
-      return () => {
-        removeAll();
-      };
-    }, [selected, hovering]);
-
     const handleSelect = () => {
-      removeAll();
       onSelect();
     };
 
@@ -119,6 +86,45 @@ export const TaggableImage = React.memo(
         onMouseEnter={() => setHovering(true)}
         onMouseLeave={() => setHovering(false)}
       >
+        { selected &&
+          images.map(image =>
+            <FloatPortal
+              container={image}
+              clearance={{}}
+            >
+              <ReactShadow.div>
+                <ThemeProvider>
+                  <Box
+                    backgroundColor="#00CE90"
+                    background="repeating-linear-gradient(45deg, #4239B1, #4239B1 2px, #00CE90 2px, #00CE90 20px )"
+                    opacity={0.5}
+                    width={image.height + "px"}
+                    height={image.height + "px"}
+                  />
+                </ThemeProvider>
+              </ReactShadow.div>
+            </FloatPortal>
+          )
+        }
+        { hovering &&
+          images.map(image =>
+            <FloatPortal
+              container={image}
+              clearance={{}}
+            >
+              <ReactShadow.div>
+                <ThemeProvider>
+                  <Box
+                    backgroundColor="#4239B1"
+                    opacity={0.5}
+                    width={image.height + "px"}
+                    height={image.height + "px"}
+                  />
+                </ThemeProvider>
+              </ReactShadow.div>
+            </FloatPortal>
+          )
+        }
         <Checkbox
           name={src}
           isChecked={selected}
