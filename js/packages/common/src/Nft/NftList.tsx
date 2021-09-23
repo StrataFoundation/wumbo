@@ -1,6 +1,6 @@
 import React from "react";
 import { PublicKey } from "@solana/web3.js";
-import { SimpleGrid, Box } from "@chakra-ui/react";
+import { SimpleGrid, Box, Center } from "@chakra-ui/react";
 import { NftCard } from "./NftCard";
 import { Spinner } from "../Spinner";
 import {
@@ -20,8 +20,25 @@ export const NftListRaw = React.memo(
     getLink: (t: ITokenWithMeta) => string;
     loading?: boolean;
   }) => {
-    if (!tokens || loading) {
+    if (loading) {
       return <Spinner />;
+    }
+
+    if (!tokens?.length) {
+      return (
+        <Box w="full" h="full">
+          <Center
+            padding={4}
+            rounded="lg"
+            fontSize="lg"
+            fontWeight="medium"
+            color="gray.400"
+            bgColor="gray.100"
+          >
+            No tokens found
+          </Center>
+        </Box>
+      );
     }
 
     return (

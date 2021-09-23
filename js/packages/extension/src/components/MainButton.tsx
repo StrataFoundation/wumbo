@@ -1,22 +1,21 @@
 import React, { FC } from "react";
 import { Link } from "react-router-dom";
-import { Button, ButtonProps } from "@chakra-ui/react";
+import { Button, ButtonProps, SpinnerProps } from "@chakra-ui/react";
 import { useUserInfo } from "@/utils/userState";
 import {
   Spinner,
-  ISpinnerProps,
   WUMBO_INSTANCE_KEY,
   WumboInstance,
   useAccount,
 } from "wumbo-common";
 import { useDrawer } from "@/contexts/drawerContext";
-import { routes, tradePath, viewProfilePath } from "@/constants/routes";
+import { routes, viewProfilePath } from "@/constants/routes";
 
 type Props = {
   creatorName: string;
   creatorImg: string;
   btnProps?: ButtonProps;
-  spinnerProps?: ISpinnerProps;
+  spinnerProps?: SpinnerProps;
 };
 
 export const MainButton: FC<Props> = ({

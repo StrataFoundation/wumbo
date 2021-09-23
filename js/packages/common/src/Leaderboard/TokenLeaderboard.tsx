@@ -162,7 +162,20 @@ export const TokenLeaderboard = React.memo(
     }
 
     if (top.accounts?.length === 0) {
-      return <div>No token holders</div>;
+      return (
+        <Box w="full" h="full">
+          <Center
+            padding={4}
+            rounded="lg"
+            fontSize="lg"
+            fontWeight="medium"
+            color="gray.400"
+            bgColor="gray.100"
+          >
+            No token holders
+          </Center>
+        </Box>
+      );
     }
 
     const localLeaderboard = (
