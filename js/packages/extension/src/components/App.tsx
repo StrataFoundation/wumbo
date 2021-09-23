@@ -9,7 +9,6 @@ import { Twitter } from "./twitter/Twitter";
 import { NftEnhancer } from "./nft/NftEnhancer";
 
 import { Create } from "./create/Create";
-import { Customize } from "./customize/Customize";
 import { TradeRoute } from "./trade/Trade";
 import { Wallet } from "./wallet/Wallet";
 import { ManageWallet } from "./wallet/ManageWallet";
@@ -20,10 +19,7 @@ import Claim from "./claim/Claim";
 import { EditProfileRoute } from "./profile/EditProfile";
 
 const App: FC = () => (
-  <Router
-    initialEntries={[routes.wallet.path]}
-    initialIndex={0}
-  >
+  <Router initialEntries={[routes.wallet.path]} initialIndex={0}>
     <ContextProviders>
       <NftEnhancer />
       <Twitter />

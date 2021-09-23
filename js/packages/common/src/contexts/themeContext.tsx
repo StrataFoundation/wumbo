@@ -6,6 +6,9 @@ import {
 } from "@chakra-ui/react";
 
 export const theme = extendTheme({
+  shadows: {
+    outline: "none",
+  },
   components: { Button: { baseStyle: { _focus: { boxShadow: "none" } } } },
   fonts: {
     body: `Avenir,Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol"`,

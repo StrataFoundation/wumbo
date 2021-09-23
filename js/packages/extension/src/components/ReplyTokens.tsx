@@ -2,13 +2,15 @@ import React, { MutableRefObject, useEffect, useState } from "react";
 import ReactShadow from "react-shadow/emotion";
 import {
   HStack,
+  VStack,
+  StackDivider,
   Popover,
   PopoverTrigger,
-  PopoverHeader,
   PopoverContent,
   PopoverBody,
   Text,
   Portal,
+  Flex,
 } from "@chakra-ui/react";
 import { PublicKey } from "@solana/web3.js";
 import {
@@ -21,9 +23,12 @@ import {
   getTwitterClaimedTokenRefKey,
   getTwitterUnclaimedTokenRefKey,
   truthy,
-  useConnection,
   useAccountFetchCache,
   handleErrors,
+  Spinner,
+  useTokenMetadata,
+  TokenBonding,
+  useAccount,
 } from "wumbo-common";
 import { AccountFetchCache } from "@/../../common/dist/lib/utils/accountFetchCache/accountFetchCache";
 import { useAsync } from "react-async-hook";
@@ -40,32 +45,104 @@ interface IMentionTokenProps extends Pick<AvatarProps, "size"> {
 }
 
 const MentionToken = ({ owner, mention, size }: IMentionTokenProps) => {
-  const { info: tokenRef, loading } = useTwitterTokenRef(mention);
-  const { amount, loading: loadingAmount } = useOwnedAmountForOwnerAndHandle(
+  const { info: tokenRef, loading: loading1 } = useTwitterTokenRef(mention);
+  const { loading: loading2, info: token } = useAccount(
+    tokenRef?.tokenBonding,
+    TokenBonding
+  );
+  const { amount, loading: loading3 } = useOwnedAmountForOwnerAndHandle(
     owner,
     mention
   );
 
-  const isClaimed = tokenRef?.isClaimed;
-  const isLoading = loading || loadingAmount;
+  const isLoading = loading1 || loading2 || loading3;
   const nullState =
-    (!loading && !tokenRef) || (!loadingAmount && !amount) || isLoading;
+    (!isLoading && !tokenRef) || (!isLoading && !amount) || isLoading;
 
   if (nullState) return null;
 
   return (
     <MetadataAvatar
-      tokenBonding={tokenRef!.tokenBonding}
+      tokenBonding={token}
       name={tokenRef!.name as string}
       size={size}
     />
   );
 };
 
+interface IPopoverTokenProps {
+  owner?: PublicKey;
+  mention: string;
+}
+
+const PopoverToken = ({ owner, mention }: IPopoverTokenProps) => {
+  const { loading: loading1, info: tokenRef } = useTwitterTokenRef(mention);
+  const { loading: loading2, info: token } = useAccount(
+    tokenRef?.tokenBonding,
+    TokenBonding
+  );
+  const { loading: loading3, metadata } = useTokenMetadata(token?.targetMint);
+  const { loading: loading4, amount } = useOwnedAmountForOwnerAndHandle(
+    owner,
+    mention
+  );
+
+  const isLoading = loading1 || loading2 || loading3 || loading4;
+  const nullState =
+    (!isLoading && !tokenRef) ||
+    (!isLoading && !amount) ||
+    (!isLoading && !metadata) ||
+    isLoading;
+
+  if (nullState) return null;
+
+  return (
+    <HStack padding={2} spacing={2} fontFamily="body">
+      <MetadataAvatar
+        tokenBonding={token}
+        name={tokenRef!.name as string}
+        size="md"
+      />
+      <VStack
+        flexGrow={1}
+        spacing={0}
+        justifyContent="start"
+        alignItems="start"
+        textAlign="left"
+      >
+        <Text fontSize="lg" fontWeight="bold">
+          {metadata?.data.name}
+        </Text>
+        <Text fontSize="xs" fontWeigt="thin">
+          {metadata?.data.symbol}
+        </Text>
+      </VStack>
+      <Flex
+        padding={2}
+        flexDirection="column"
+        rounded="lg"
+        bgColor="gray.200"
+        justifyContent="center"
+        alignItems="center"
+        color="gray.700"
+        minW="58px"
+        minH="60px"
+      >
+        <Text fontSize="lg" fontWeight="bold">
+          {amount?.toFixed(2)}
+        </Text>
+        <Text fontSize="xs" fontWeight="thin">
+          {metadata?.data.symbol}
+        </Text>
+      </Flex>
+    </HStack>
+  );
+};
+
 interface IReplyTokensProps extends Pick<AvatarProps, "size"> {
   creatorName: string;
   mentions: string[];
-  outsideRef: React.MutableRefObject<HTMLInputElement>
+  outsideRef: React.MutableRefObject<HTMLInputElement>;
 }
 
 const getMentionsWithTokens = async (
@@ -97,16 +174,11 @@ const getMentionsWithTokens = async (
   ).filter(truthy);
 };
 
-// take creator and mentions
-// 1) find what mentions have social tokens (done)
-// 2) find of those social tokens if the creator owns them
-// 3) display max 3 then x more with popover
-// 4) all shuld be in popover
 export const ReplyTokens = ({
   creatorName,
   mentions,
   size = "xs",
-  outsideRef
+  outsideRef,
 }: IReplyTokensProps) => {
   const cache = useAccountFetchCache();
   const { info: tokenRef, loading } = useTwitterTokenRef(creatorName);
@@ -118,43 +190,61 @@ export const ReplyTokens = ({
   handleErrors(error);
 
   const isLoading = loading || loadingRelevantMentions;
-
-  console.log("relevantMentions", relevantMentions);
-
-  const nullState = isLoading || !tokenRef || !tokenRef.isClaimed;
+  const nullState =
+    isLoading || !tokenRef || !tokenRef.isClaimed || !relevantMentions?.length;
 
   if (nullState) return null;
 
   return (
-    <HStack fontFamily="body">
-      <Popover isLazy trigger="hover" placement="bottom">
-        <HStack spacing={-2}>
-          {relevantMentions?.map((mention) => (
-            <MentionToken
-              key={mention}
-              mention={mention}
-              owner={tokenRef?.owner as PublicKey}
-              size={size}
-            />
-          ))}
-        </HStack>
+    <HStack
+      fontFamily="body"
+      paddingTop={1}
+      onClick={(e) => {
+        e.preventDefault();
+        e.stopPropagation();
+      }}
+    >
+      <HStack spacing={-2}>
+        {relevantMentions?.map((mention, index) => (
+          <MentionToken
+            key={`${index}${mention}`}
+            mention={mention}
+            owner={tokenRef?.owner as PublicKey}
+            size={size}
+          />
+        ))}
+      </HStack>
+      <Popover placement="bottom" trigger="hover">
         <HStack spacing={1} color="gray.500">
-          <Text>owns these tokens and</Text>
+          <Text>owns these</Text>
+          {relevantMentions!.length > 3 && <Text>tokens and</Text>}
           <PopoverTrigger>
             <Text color="indigo.500" _hover={{ cursor: "pointer" }}>
-              x others
+              {relevantMentions!.length <= 3 && "tokens."}
+              {relevantMentions!.length > 3 &&
+                `${relevantMentions!.length - 3} more`}
             </Text>
           </PopoverTrigger>
-          <Text>too</Text>
+          {relevantMentions!.length > 3 && <Text>too</Text>}
         </HStack>
         <Portal containerRef={outsideRef}>
           <ReactShadow.div>
             <ThemeProvider>
-              <PopoverContent>
-                <PopoverHeader fontWeight="bold">
-                  Social Tokens {creatorName} Owns!
-                </PopoverHeader>
-                <PopoverBody>// avatars with name and ownings here</PopoverBody>
+              <PopoverContent rounded="lg">
+                <PopoverBody>
+                  <VStack
+                    divider={<StackDivider borderColor="gray.200" />}
+                    align="stretch"
+                  >
+                    {relevantMentions?.map((mention) => (
+                      <PopoverToken
+                        key={mention}
+                        mention={mention}
+                        owner={tokenRef?.owner as PublicKey}
+                      />
+                    ))}
+                  </VStack>
+                </PopoverBody>
               </PopoverContent>
             </ThemeProvider>
           </ReactShadow.div>

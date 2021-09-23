@@ -8,7 +8,6 @@ import {
   AvatarProps as ChakraAvatarProps,
 } from "@chakra-ui/react";
 import { Spinner, useTokenMetadata } from ".";
-import { TokenBondingV0 } from "@wum.bo/spl-token-bonding/dist/lib";
 import { handleErrors } from "./contexts";
 import { ITokenBonding } from "utils";
 

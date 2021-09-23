@@ -71,7 +71,7 @@ export const MetadataLeaderboardElement = React.memo(
             {name ? name : wallet.toBase58()}
           </Text>
           {symbol && handle && (
-            <Text fontSize="xxs" fontWeight="semiBold" color="gray.400">
+            <Text fontSize="xs" fontWeight="semiBold" color="gray.400">
               {symbol} | @{handle}
             </Text>
           )}
