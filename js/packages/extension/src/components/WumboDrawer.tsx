@@ -105,13 +105,14 @@ WumboDrawer.Header = (props: HeaderProps) => {
   const history = useHistory();
 
   return (
-    <Box
+    <Flex
       padding={4}
       borderBottom="1px"
       borderColor="gray.200"
       fontFamily="body"
+      minH="61px"
     >
-      <Box d="flex" alignItems="center" justifyContent="space-between">
+      <Flex w="full" alignItems="center" justifyContent="space-between">
         <Flex w="full" alignItems="center">
           {historyList.length > 1 && (
             <Link
@@ -175,8 +176,8 @@ WumboDrawer.Header = (props: HeaderProps) => {
         >
           <Icon as={HiOutlineX} w={5} h={5} />
         </Box>
-      </Box>
-    </Box>
+      </Flex>
+    </Flex>
   );
 };
 

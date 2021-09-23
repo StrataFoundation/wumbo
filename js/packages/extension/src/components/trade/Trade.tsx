@@ -151,7 +151,7 @@ export const TradeRoute = () => {
           as={Link}
           to={{ pathname: ftxPayLink }}
           target="_blank"
-          size="xs"
+          size="sm"
           leftIcon={<Icon as={SolLogo} w={5} h={5} />}
           colorScheme="gray"
           rounded="full"
@@ -167,9 +167,9 @@ export const TradeRoute = () => {
             ":tokenBondingKey",
             WUM_BONDING.toBase58()
           )}
-          size="xs"
+          size="sm"
           leftIcon={<Icon as={Logo} w={5} h={5} />}
-          colorScheme="indigo"
+          colorScheme="gray"
           rounded="full"
         >
           <Text fontSize="xs">
@@ -193,7 +193,7 @@ export const TradeRoute = () => {
       </WumboDrawer.Header>
       <WumboDrawer.Content>
         <Trade
-          baseTicker={isTargetWUM ? "SOL" : (ticker || "")}
+          baseTicker={isTargetWUM ? "SOL" : ticker || ""}
           ticker={ticker || ""}
           name={name}
           tokenBonding={tokenBonding}
@@ -223,7 +223,9 @@ export const Trade = ({
 
   const { amount: ownedSol } = useSolOwnedAmount();
   const ownedBaseNormal = useOwnedAmount(tokenBonding.baseMint);
-  const ownedBase = tokenBonding.baseMint.equals(SOL_TOKEN) ? ownedSol : ownedBaseNormal;
+  const ownedBase = tokenBonding.baseMint.equals(SOL_TOKEN)
+    ? ownedSol
+    : ownedBaseNormal;
   const ownedTarget = useOwnedAmount(tokenBonding.targetMint);
   const location = useLocation();
   const { info: tokenRef } = useTokenRefFromBonding(tokenBonding.publicKey);
@@ -288,20 +290,24 @@ export const Trade = ({
       />
       <Tabs isFitted w="full">
         <TabList>
-          { !tokenBonding.buyFrozen && <Tab
-            color="gray.300"
-            borderColor="gray.300"
-            _selected={{ color: "indigo.500", borderColor: "indigo.500" }}
-          >
-            Buy
-          </Tab> }
-          { !tokenBonding.sellFrozen && <Tab
-            color="gray.300"
-            borderColor="gray.300"
-            _selected={{ color: "indigo.500", borderColor: "indigo.500" }}
-          >
-            Sell
-          </Tab> }
+          {!tokenBonding.buyFrozen && (
+            <Tab
+              color="gray.300"
+              borderColor="gray.300"
+              _selected={{ color: "indigo.500", borderColor: "indigo.500" }}
+            >
+              Buy
+            </Tab>
+          )}
+          {!tokenBonding.sellFrozen && (
+            <Tab
+              color="gray.300"
+              borderColor="gray.300"
+              _selected={{ color: "indigo.500", borderColor: "indigo.500" }}
+            >
+              Sell
+            </Tab>
+          )}
         </TabList>
 
         <TabPanels>
