@@ -113,7 +113,7 @@ const PopoverToken = ({ owner, mention }: IPopoverTokenProps) => {
         <Text fontSize="lg" fontWeight="bold">
           {metadata?.data.name}
         </Text>
-        <Text fontSize="xs" fontWeigt="thin">
+        <Text fontSize="xs" fontWeight="thin">
           {metadata?.data.symbol}
         </Text>
       </VStack>
@@ -125,13 +125,13 @@ const PopoverToken = ({ owner, mention }: IPopoverTokenProps) => {
         justifyContent="center"
         alignItems="center"
         color="gray.700"
-        minW="58px"
-        minH="60px"
+        width="68px"
+        height="60px"
       >
-        <Text fontSize="lg" fontWeight="bold">
+        <Text isTruncated fontSize="lg" fontWeight="bold">
           {amount?.toFixed(2)}
         </Text>
-        <Text fontSize="xs" fontWeight="thin">
+        <Text isTruncated fontSize="xs" fontWeight="thin">
           {metadata?.data.symbol}
         </Text>
       </Flex>

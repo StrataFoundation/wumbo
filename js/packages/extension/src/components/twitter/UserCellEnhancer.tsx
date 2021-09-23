@@ -31,6 +31,7 @@ export const UserCellEnhancer = () => {
             creatorImg={cell.avatar || ""}
             btnProps={{
               size: "md",
+              height: "32px",
               paddingY: "2px",
               borderRadius: "full",
             }}

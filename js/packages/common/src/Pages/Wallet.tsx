@@ -124,13 +124,15 @@ export const Wallet = React.memo(({
       <Spinner size="lg" />
     </Center>}
     {!loading &&
-      tokens?.filter(t => !!t.tokenRef && t.tokenRef.wumbo.equals(WUMBO_INSTANCE_KEY)).map(tokenWithMeta => 
-        <TokenInfo 
-          key={tokenWithMeta.publicKey?.toBase58()}
-          tokenWithMeta={tokenWithMeta} 
-          getTokenLink={getTokenLink}
-        />
-      )
+      tokens?.filter(t => !!t.tokenRef && t.tokenRef.wumbo.equals(WUMBO_INSTANCE_KEY))
+        .sort((a, b) => a.metadata!.data.name.localeCompare(b.metadata!.data.name))
+        .map(tokenWithMeta =>
+          <TokenInfo
+            key={tokenWithMeta.publicKey?.toBase58()}
+            tokenWithMeta={tokenWithMeta}
+            getTokenLink={getTokenLink}
+          />
+        )
     }
   </VStack>
 })
