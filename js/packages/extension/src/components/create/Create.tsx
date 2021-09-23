@@ -3,7 +3,7 @@ import { Link, useLocation } from "react-router-dom";
 import { Box, Button, Avatar, VStack, Text } from "@chakra-ui/react";
 import { WumboDrawer } from "../WumboDrawer";
 import { routes } from "@/constants/routes";
-import { useWallet, useQuery } from "wumbo-common";
+import { useWallet, useQuery, SOL_TOKEN, useSolPrice } from "wumbo-common";
 import ClaimOrCreate from "./ClaimOrCreate";
 
 export const Create = () => {
@@ -11,6 +11,7 @@ export const Create = () => {
   const query = useQuery();
   const { connected, publicKey } = useWallet();
   const currentPath = `${location.pathname}${location.search}`;
+  const solPrice = useSolPrice();
 
   return (
     <Fragment>
@@ -46,7 +47,7 @@ export const Create = () => {
             </Text>{" "}
             It will remain unclaimed until this person claims it. Should the
             person opt out, no new tokens may be purchased and exisiting tokens
-            may still be sold.
+            may still be sold. It costs 0.03 SOL (~${solPrice ? (solPrice * 0.03).toFixed(2) : ""}) to do this.
           </Text>
           {connected && publicKey ? (
             <ClaimOrCreate />
