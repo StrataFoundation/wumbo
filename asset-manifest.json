@@ -1,0 +1,28 @@
+{
+  "files": {
+    "main.css": "/static/css/main.7c8172e1.chunk.css",
+    "main.js": "/static/js/main.923c3b14.chunk.js",
+    "main.js.map": "/static/js/main.923c3b14.chunk.js.map",
+    "runtime-main.js": "/static/js/runtime-main.4d79eff5.js",
+    "runtime-main.js.map": "/static/js/runtime-main.4d79eff5.js.map",
+    "static/js/2.a65ff204.chunk.js": "/static/js/2.a65ff204.chunk.js",
+    "static/js/2.a65ff204.chunk.js.map": "/static/js/2.a65ff204.chunk.js.map",
+    "static/js/3.3b46c2ca.chunk.js": "/static/js/3.3b46c2ca.chunk.js",
+    "static/js/3.3b46c2ca.chunk.js.map": "/static/js/3.3b46c2ca.chunk.js.map",
+    "index.html": "/index.html",
+    "static/css/main.7c8172e1.chunk.css.map": "/static/css/main.7c8172e1.chunk.css.map",
+    "static/js/2.a65ff204.chunk.js.LICENSE.txt": "/static/js/2.a65ff204.chunk.js.LICENSE.txt",
+    "static/media/EnableDevMode.9c58ef1a.webp": "/static/media/EnableDevMode.9c58ef1a.webp",
+    "static/media/LoadUnpacked.7f431b20.webp": "/static/media/LoadUnpacked.7f431b20.webp",
+    "static/media/virtual:windi.css": "/static/media/beta-splash@2x.fc5ef1ce.png",
+    "static/media/discord-black.fcb1b31f.png": "/static/media/discord-black.fcb1b31f.png",
+    "static/media/logo.221ecac9.svg": "/static/media/logo.221ecac9.svg",
+    "static/media/twitter-black.5b0327d2.png": "/static/media/twitter-black.5b0327d2.png"
+  },
+  "entrypoints": [
+    "static/js/runtime-main.4d79eff5.js",
+    "static/js/2.a65ff204.chunk.js",
+    "static/css/main.7c8172e1.chunk.css",
+    "static/js/main.923c3b14.chunk.js"
+  ]
+}
