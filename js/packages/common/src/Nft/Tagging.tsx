@@ -282,7 +282,7 @@ export const TaggableImages = ({
                   const mismatchPercent = +(
                     await compareImages(img1, img2, { scaleToSameSize: true })
                   ).misMatchPercentage;
-                  if (mismatchPercent <= 25) {
+                  if (mismatchPercent <= 60) {
                     return [
                       img2Src,
                       {
@@ -371,7 +371,7 @@ export const TaggableImages = ({
         isLoading={executing}
         loadingText={awaitingApproval ? "Awaiting Approval" : "Tagging"}
       >
-        Tag
+        {loading ? "Searching..." : "Tag"}
       </Button>
     </VStack>
   );

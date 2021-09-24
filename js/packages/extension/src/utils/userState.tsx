@@ -57,12 +57,14 @@ export const useUserInfo = (name: string): UserInfoState => {
 
   const current = bondingCurve?.current() || 0;
 
+
   useEffect(() => {
     const loading = loading1 || loading2 || loading3 || loading4;
-
-    if (!loading) setIsLoading(false);
+    if (loading != isLoading) setIsLoading(loading)
+    console.log(name, loading1, loading2, loading3, loading4)
 
     if (curve && tokenBonding && mint && creator) {
+      // @ts-ignore
       setResult({
         name,
         tokenRef: creator,

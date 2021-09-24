@@ -6,7 +6,7 @@ import {
 
 export const DEFAULT_COMMITMENT = "processed";
 export const IS_DEV = process.env.REACT_APP_IS_DEV === "true";
-export const DEV_TWITTER_TLD = "WumboDevTwitter1";
+export const DEV_TWITTER_TLD = "WumboDevTwitter8";
 export const TWITTER_TLD = new PublicKey(process.env.REACT_APP_TWITTER_TLD!);
 export const TWITTER_VERIFIER = new PublicKey(process.env.REACT_APP_TWITTER_VERIFIER!);
 const key = [243,99,226,76,228,180,49,28,35,61,133,124,225,80,78,147,2,107,58,142,6,245,23,211,113,62,255,181,222,50,4,23,51,146,66,205,166,190,240,181,45,146,254,237,136,217,114,62,55,249,200,102,79,120,51,44,187,84,64,129,102,120,70,131]

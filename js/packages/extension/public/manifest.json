@@ -2,7 +2,7 @@
   "manifest_version": 2,
   "name": "Wum.bo",
   "description": "Wum.bo Creator Coins",
-  "version": "1.0.2",
+  "version": "1.0.4",
   "browser_action": {
     "default_title": "Wum.bo",
     "default_icon": {
@@ -39,5 +39,5 @@
     }
   ],
   "web_accessible_resources": ["wallet_proxy.js"],
-  "permissions": ["<all_urls>", "tabs"]
+  "permissions": ["tabs", "https://wum.bo/claim*", "https://twitter.com/*"]
 }

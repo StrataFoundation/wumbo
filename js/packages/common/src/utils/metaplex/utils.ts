@@ -2,6 +2,7 @@ import {
   Creator,
   findProgramAddress,
   IMetadataExtension,
+  MetadataCategory,
   METADATA_PREFIX,
   programIds,
 } from "@oyster/common";
@@ -20,13 +21,23 @@ const routeCDN = (uri: string) => {
   return result;
 };
 
+export function getImageFromMeta(meta?: any): string | undefined {
+  if(meta?.image) {
+    return meta?.image;
+  } else {
+    const found = (meta?.properties?.files || []).find((f: any) => typeof f !== "string" && f.type === MetadataCategory.Image)?.uri
+    return found
+  }
+}
+
 const imageFromJson = (newUri: string, extended: any) => {
   if (!extended || extended?.properties?.files?.length === 0) {
     return;
   }
 
-  if (extended?.image) {
-    const file = extended.image.startsWith("http")
+  const image = getImageFromMeta(extended)
+  if (image) {
+    const file = image.startsWith("http")
       ? extended.image
       : `${newUri}/${extended.image}`;
     return routeCDN(file);
@@ -60,7 +71,14 @@ export async function getImage(
 ): Promise<string | undefined> {
   if (uri) {
     const newUri = routeCDN(uri);
-    return imageFromJson(newUri, await getArweaveMetadata(uri))
+    const metadata = await getArweaveMetadata(uri);
+    // @ts-ignore
+    if (metadata?.uri) {
+      // @ts-ignore
+      return getImage(metadata?.uri)
+    }
+
+    return imageFromJson(newUri, metadata)
   }
 }
 

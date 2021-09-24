@@ -97,7 +97,7 @@ export const useTwitterTokenRef = (name: string | undefined): UseAccountState<IT
       return claimed;
     }
     return unclaimed;
-  }, [claimed, unclaimed])
+  }, [claimed?.info, unclaimed?.info, claimed.loading, unclaimed.loading])
 
   return result
 };

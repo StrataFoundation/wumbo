@@ -54,8 +54,6 @@ export const ViewNftRaw = React.memo(
   }) => {
     const [isExpanded, setIsExpanded] = useState<boolean>(false);
 
-    console.log(modalRef);
-
     /* const { connected } = useWallet(); */
 
     /* if (!connected && taggingMode) {

@@ -3,16 +3,15 @@ import { Image, ImageProps } from "@chakra-ui/react";
 import { MeshViewer } from "./MeshViewer";
 import { IMetadataExtension, MetadataFile } from "@oyster/common";
 import { Stream, StreamPlayerApi } from "@cloudflare/stream-react";
+import { getImageFromMeta, useIsExtension } from "../utils";
 
 const MeshArtContent = ({
   uri,
-  image,
   animationUrl,
   style,
   files,
 }: {
   uri?: string;
-  image?: string;
   animationUrl?: string;
   style?: React.CSSProperties;
   files?: (MetadataFile | string)[];
@@ -22,7 +21,7 @@ const MeshArtContent = ({
       ? files[0]
       : animationUrl;
 
-  return <MeshViewer image={image} url={renderURL} style={style} />;
+  return <MeshViewer image={uri} url={renderURL} style={style} />;
 };
 
 const VideoArtContent = ({
@@ -31,14 +30,27 @@ const VideoArtContent = ({
   uri,
   animationURL,
   active,
+  className
 }: {
   style?: React.CSSProperties;
   files?: (MetadataFile | string)[];
   uri?: string;
   animationURL?: string;
   active?: boolean;
+  className?: string;
 }) => {
   const [playerApi, setPlayerApi] = useState<StreamPlayerApi>();
+
+  const isExtension = useIsExtension();
+  
+  // Blocked by twitter content policy
+  if (isExtension && window.location.href.includes("twitter")) {
+    return (
+      <a target="_blank" href={`https://wum.bo/${location.pathname}`}>
+        <img className={`${className}`} src={uri} />
+      </a>
+    );
+  }
 
   const playerRef = useCallback(
     (ref) => {
@@ -116,18 +128,20 @@ function getLast<T>(arr: T[]) {
 }
 
 export const Nft: React.FC<{
+  image?: string;
   data: IMetadataExtension;
   meshEnabled?: boolean;
+  videoEnabled?: boolean;
   style?: React.CSSProperties;
   imageProps?: ImageProps;
-}> = ({ data, style, meshEnabled = true, imageProps = {} }) => {
+}> = ({ image, data, style, videoEnabled = true, meshEnabled = true, imageProps = {} }) => {
   const animationURL = data?.animation_url || "";
   const animationUrlExt = new URLSearchParams(
     getLast(animationURL.split("?"))
   ).get("ext");
 
   const category = data?.properties.category;
-  const uri = data?.image;
+  const imageUri = image || getImageFromMeta(data);
 
   if (
     meshEnabled &&
@@ -137,25 +151,24 @@ export const Nft: React.FC<{
   ) {
     return (
       <MeshArtContent
-        image={data?.image}
         style={style}
-        uri={uri}
+        uri={imageUri}
         animationUrl={animationURL}
         files={data?.properties.files}
       />
     );
   }
 
-  if (category === "video") {
+  if (videoEnabled && category === "video") {
     return (
       <VideoArtContent
         files={data?.properties.files}
-        uri={uri}
+        uri={imageUri}
         animationURL={animationURL}
         active={true}
       />
     );
   }
 
-  return <Image src={data?.image} alt={data?.name} {...imageProps} />;
+  return <Image src={imageUri} alt={data?.name} {...imageProps} />;
 };

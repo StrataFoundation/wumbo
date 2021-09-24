@@ -74,47 +74,13 @@ export function useOwnedAmountForOwnerAndHandle(
   owner: PublicKey | undefined,
   handle: string | undefined
 ): { amount: number | undefined; loading: boolean } {
-  const [state, setState] = useState<{
-    amount: number | undefined;
-    loading: boolean;
-  }>({
-    loading: true,
-    amount: 0,
-  });
   const { info: tokenRef, loading: loadingRef } = useTwitterTokenRef(handle);
-  const { info: token, loading: loadingAmount } = useAccount(
-    tokenRef?.tokenBonding,
-    TokenBonding
-  );
-  const { associatedAccount, loading: loadingAssociatedAccount } = useAssociatedAccount(
-    owner,
-    token?.targetMint
-  );
-  const mint = useMint(token?.targetMint);
+  const amount = useUserOwnedAmount(owner, tokenRef?.mint);
 
-  useEffect(() => {
-    if (tokenRef && token && associatedAccount && mint) {
-      setState({
-        loading: false,
-        amount: amountAsNum(associatedAccount.amount, mint),
-      });
-    } else if (!loadingRef && !loadingAmount && !loadingAssociatedAccount) {
-      setState({
-        loading: false,
-        amount: undefined,
-      });
-    }
-  }, [
-    tokenRef,
-    token,
-    associatedAccount,
-    mint,
-    loadingRef,
-    loadingAmount,
-    loadingAssociatedAccount,
-  ]);
-
-  return state;
+  return {
+    loading: loadingRef,
+    amount
+  }
 }
 
 export function useUserOwnedAmount(wallet: PublicKey | undefined, token: PublicKey | undefined): number | undefined {

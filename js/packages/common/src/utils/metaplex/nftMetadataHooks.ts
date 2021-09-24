@@ -31,6 +31,7 @@ import {
   getArweaveMetadata,
   getDescription,
   getImage,
+  getImageFromMeta,
   getMetadataKey,
 } from "./utils";
 import { getReverseTokenRefKey, getTokenRefKeyFromOwner, useClaimedTokenRef } from "../../utils/tokenRef";
@@ -131,7 +132,7 @@ export async function getTokenMetadata(
   const { info: metadata } =
     (await cache.search(metadataKey, MetadataParser, true)) || {};
   const data = await getArweaveMetadata(metadata?.data.uri);
-  const image = data?.image;
+  const image = await getImage(metadata?.data.uri)
   const description = data?.description;
 
   return {
@@ -173,8 +174,7 @@ export function useTokenMetadata(
   } = useAsync(getMetadataKey, [token]);
   const { info: metadata, loading: accountLoading } = useAccount(
     metadataAccountKey,
-    (_, acct) => decodeMetadata(acct.data),
-    true
+    (_, acct) => decodeMetadata(acct.data)
   );
 
   const cache = useAccountFetchCache();
@@ -187,15 +187,21 @@ export function useTokenMetadata(
     loading: dataLoading,
     error: dataError,
   } = useAsync(getArweaveMetadata, [metadata?.data.uri]);
+  const {
+    result: image,
+    loading: imageLoading,
+    error: imageError,
+  } = useAsync(getImage, [metadata?.data.uri]);
+
   const { info: tokenRef } = useClaimedTokenRef(wallet.publicKey || undefined);
   return {
     tokenRef,
-    loading: Boolean(token && (loading || accountLoading || dataLoading)),
-    error: error || dataError,
+    loading: Boolean(token && (loading || accountLoading || dataLoading || imageLoading)),
+    error: error || dataError || imageError,
     metadata,
     metadataKey: metadataAccountKey,
     data,
-    image: data?.image,
+    image: image,
     account: associatedAccount,
     description: data?.description,
     publicKey: metadataAccountKey,

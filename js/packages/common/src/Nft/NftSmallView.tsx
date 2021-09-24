@@ -28,6 +28,7 @@ export const NftSmallView = React.memo(
     >
       {token.data && (
         <Nft
+          image={token.image}
           data={token.data}
           // @ts-ignore
           imageProps={{ w: "110px", m: "auto", rounded: "lg" }}

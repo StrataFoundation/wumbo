@@ -139,7 +139,8 @@ export const Profile = React.memo(
     function isTrophy(t: ITokenWithMeta): boolean {
       return Boolean(
         t.data?.properties?.creators?.some(
-          (c) => c.address == TROPHY_CREATOR.toBase58()
+          // @ts-ignore
+          (c) => c.address == TROPHY_CREATOR.toBase58() && (t.data?.attributes || []).some(attr => attr.trait_type == "is_trophy" && attr.value == "true")
         )
       );
     }

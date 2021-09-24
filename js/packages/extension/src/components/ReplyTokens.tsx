@@ -12,7 +12,8 @@ import {
   Portal,
   Flex,
 } from "@chakra-ui/react";
-import { PublicKey } from "@solana/web3.js";
+import { ASSOCIATED_TOKEN_PROGRAM_ID, Token, TOKEN_PROGRAM_ID } from "@solana/spl-token";
+import { AccountInfo, PublicKey } from "@solana/web3.js";
 import {
   ThemeProvider,
   MetadataAvatar,
@@ -29,9 +30,11 @@ import {
   useTokenMetadata,
   TokenBonding,
   useAccount,
+  TokenRef,
+  AccountFetchCache
 } from "wumbo-common";
-import { AccountFetchCache } from "@/../../common/dist/lib/utils/accountFetchCache/accountFetchCache";
 import { useAsync } from "react-async-hook";
+import { TokenAccountParser } from "@oyster/common";
 
 const humanizeAmount = (amount: number) => {
   if (amount >= 1) return amount.toFixed(0);
@@ -145,10 +148,25 @@ interface IReplyTokensProps extends Pick<AvatarProps, "size"> {
   outsideRef: React.MutableRefObject<HTMLInputElement>;
 }
 
+async function ownsTokensOf(owner: PublicKey, cache: AccountFetchCache, mint: PublicKey): Promise<boolean> {
+  const ata = await Token.getAssociatedTokenAddress(
+    ASSOCIATED_TOKEN_PROGRAM_ID,
+    TOKEN_PROGRAM_ID,
+    mint,
+    owner
+  )
+  const { info: acct } = (await cache.search(ata, TokenAccountParser)) || {}
+  return (acct?.amount.toNumber() || 0) > 0
+}
+
 const getMentionsWithTokens = async (
+  owner: PublicKey | undefined,
   cache: AccountFetchCache,
   mentions: string[]
 ): Promise<string[]> => {
+  if (!owner) {
+    return []
+  }
   return (
     await Promise.all(
       mentions.map(async (mention) => {
@@ -158,15 +176,13 @@ const getMentionsWithTokens = async (
             cache.connection,
             mention
           );
+          const TokenRefParser = (pubkey: PublicKey, account: AccountInfo<Buffer>) => ({ pubkey, account, info: TokenRef(pubkey, account) })
           const unclaimed = await getTwitterUnclaimedTokenRefKey(mention);
-          const claimedRef = await cache.search(claimed, undefined, true);
-          if (claimedRef) {
-            return mention;
-          }
-
-          const unclaimedRef = await cache.search(unclaimed, undefined, true);
-          if (unclaimedRef) {
-            return mention;
+          const claimedRef = await cache.search(claimed, TokenRefParser, true);
+          const unclaimedRef = await cache.search(unclaimed, TokenRefParser, true);
+          let tokenRef = claimedRef || unclaimedRef;
+          if (tokenRef?.info && await ownsTokensOf(owner, cache, tokenRef.info.mint)) {
+            return mention
           }
         }
       })
@@ -186,12 +202,21 @@ export const ReplyTokens = ({
     result: relevantMentions,
     loading: loadingRelevantMentions,
     error,
-  } = useAsync(getMentionsWithTokens, [cache, mentions]);
+  } = useAsync(getMentionsWithTokens, [tokenRef?.owner as PublicKey | undefined, cache, mentions]);
   handleErrors(error);
 
   const isLoading = loading || loadingRelevantMentions;
+  const mentionTokens = relevantMentions?.map((mention, index) => (
+    <MentionToken
+      key={`${index}${mention}`}
+      mention={mention}
+      owner={tokenRef?.owner as PublicKey}
+      size={size}
+    />
+  )).filter(truthy);
+
   const nullState =
-    isLoading || !tokenRef || !tokenRef.isClaimed || !relevantMentions?.length;
+    isLoading || !tokenRef || !tokenRef.isClaimed || !relevantMentions?.length || relevantMentions?.length == 0 || !mentionTokens || mentionTokens?.length == 0;
 
   if (nullState) return null;
 
@@ -205,14 +230,7 @@ export const ReplyTokens = ({
       }}
     >
       <HStack spacing={-2}>
-        {relevantMentions?.map((mention, index) => (
-          <MentionToken
-            key={`${index}${mention}`}
-            mention={mention}
-            owner={tokenRef?.owner as PublicKey}
-            size={size}
-          />
-        ))}
+        {mentionTokens}
       </HStack>
       <Popover placement="bottom" trigger="hover">
         <HStack spacing={1} color="gray.500">

@@ -52,7 +52,7 @@ export class AccountFetchCache {
       options?: SendOptions
     ) {
       const result = await oldSendTransaction(transaction, signers, options);
-      this.confirmTransaction(result, 'confirmed').then(() => 
+      this.confirmTransaction(result, 'finalized').then(() => 
         self.requeryMissing(transaction.instructions)
       ).catch(console.error);
 
@@ -65,7 +65,7 @@ export class AccountFetchCache {
     ) {
       const result = await oldSendRawTransaction(rawTransaction, options);
 
-      this.confirmTransaction(result, 'confirmed').then(() =>
+      this.confirmTransaction(result, 'finalized').then(() =>
         self.requeryMissing(Transaction.from(rawTransaction).instructions)
       ).catch(console.error);
 

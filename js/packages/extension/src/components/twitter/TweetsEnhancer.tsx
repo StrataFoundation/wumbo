@@ -35,7 +35,7 @@ export const TweetsEnhancer = () => {
           />
         ) : null;
 
-        const replyTokensEl = tweet.replyTokensTarget ? (
+        const replyTokensEl = tweet.replyTokensTarget && tweet.mentions && tweet.mentions.length > 0 ? (
           <ReplyTokens
             outsideRef={outsideRef}
             creatorName={tweet.name}
@@ -55,7 +55,7 @@ export const TweetsEnhancer = () => {
                   </ThemeProvider>
                 </ReactShadow.div>
               </AppendChildPortal>
-              {tweet.replyTokensTarget && (
+              {tweet.replyTokensTarget && tweet.mentions && tweet.mentions.length > 0 && (
                 <AppendChildPortal
                   container={tweet.replyTokensTarget as Element}
                 >

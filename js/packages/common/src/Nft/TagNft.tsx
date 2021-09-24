@@ -4,7 +4,7 @@ import {
 } from "@chakra-ui/react";
 import { HiOutlineRefresh } from "react-icons/hi";
 import { PublicKey } from "@solana/web3.js";
-import { ITokenWithMeta, useTokenMetadata } from "../utils";
+import { getImageFromMeta, ITokenWithMeta, useTokenMetadata } from "../utils";
 import { GetCreatorLink, TaggableImages } from "./";
 // @ts-ignore
 import { handleErrors } from "../contexts";
@@ -37,7 +37,7 @@ export const TagNftRaw = React.memo(
             token={token}
           />
           <TaggableImages
-            src={token.image!}
+            src={getImageFromMeta(token)!}
             metadata={token.metadataKey!}
             refreshCounter={refreshCounter}
           />
