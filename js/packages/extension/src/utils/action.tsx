@@ -29,12 +29,12 @@ export const useBuy = (): [
 
       const transaction = new Transaction({
         feePayer: publicKey,
-        recentBlockhash: (await connection.getRecentBlockhash()).blockhash,
+        recentBlockhash: (await connection.getRecentBlockhash('confirmed')).blockhash,
       });
       transaction.add(...instructions)
       signers.length > 0 && transaction.partialSign(...signers)
       const signed = await signTransaction(transaction);
-      const data = await sendAndConfirmRawTransaction(connection, signed.serialize());
+      const data = await sendAndConfirmRawTransaction(connection, signed.serialize(), { commitment: 'confirmed', preflightCommitment: 'confirmed' });
       return data;
     }
   );
@@ -61,14 +61,14 @@ export const useSell = (): [
 
       const transaction = new Transaction({
         feePayer: publicKey,
-        recentBlockhash: (await connection.getRecentBlockhash()).blockhash,
+        recentBlockhash: (await connection.getRecentBlockhash('confirmed')).blockhash,
       });
 
       transaction.add(...instructions);
       signers.length > 0 && transaction.partialSign(...signers)
 
       const signed = await signTransaction(transaction);
-      const data = await sendAndConfirmRawTransaction(connection, signed.serialize());
+      const data = await sendAndConfirmRawTransaction(connection, signed.serialize(), { commitment: 'confirmed', preflightCommitment: 'confirmed' });
       return data;
     }
   );

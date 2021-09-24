@@ -119,10 +119,11 @@ export const TradeRoute = () => {
   const toFiat = (a: number) => (fiatPrice || 0) * a;
   const ftxPayLink = useFtxPayLink();
   const location = useLocation();
+  const { curve } = useBondingPricing(tokenBonding?.publicKey);
 
   handleErrors(tokenInfoError);
 
-  if (!tokenBonding || !name || !icon) {
+  if (!tokenBonding || !name || !icon || !curve) {
     return <WumboDrawer.Loading />;
   }
 
@@ -280,6 +281,7 @@ export const Trade = ({
   return (
     <VStack spacing={4} padding={4}>
       <TokenPill
+        curve={curve}
         tokenBonding={tokenBonding}
         name={name}
         ticker={ticker}

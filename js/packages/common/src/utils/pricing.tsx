@@ -7,7 +7,6 @@ import {
   SOL_TOKEN,
   SOL_TO_USD_MARKET,
   WUM_BONDING,
-  WUM_REWARDS_PERCENTAGE,
   WUM_TOKEN,
 } from "../constants/globals";
 import { Order } from "@project-serum/serum/lib/market";
@@ -144,24 +143,16 @@ export interface PricingState {
 export function useBondingPricing(tokenBonding: PublicKey | undefined): PricingState {
   const { info: bonding, loading: bondingLoading  } = useAccount(tokenBonding, TokenBonding);
   const { info: curve, loading: curveLoading } = useAccount(bonding?.curve, DeserializeCurve, true);
-  const [state, setState] = useState<PricingState>({
-    loading: bondingLoading || curveLoading
-  });
 
   const base = useMint(bonding?.baseMint);
   const target = useMint(bonding?.targetMint);
-  useEffect(() => {
-    if (curve && base && target && bonding) {
-      setState({
-        loading: false,
-        curve: fromCurve(curve, base, target)
-      });
-    } else {
-      setState({ loading: bondingLoading || curveLoading })
-    }
-  }, [curve, base, target, bonding, bondingLoading, curveLoading]);
-
-  return state;
+  const pricing = useMemo(() => curve && base && target && fromCurve(curve, base, target), [curve, base, target])
+  const loading = useMemo(() => curveLoading || bondingLoading, [curveLoading, bondingLoading]);
+  
+  return {
+    curve: pricing,
+    loading
+  };
 }
 
 
@@ -188,7 +179,7 @@ export const UsdWumboPriceProvider = ({ children = undefined as any }) => {
   );
   const { data: { totalWumLocked } = {} } = useQuery<{ totalWumLocked: number | undefined }>(GET_TOTAL_WUM_LOCKED, {})
   const baseStorageAmount = baseStorage && solMint ? amountAsNum(baseStorage.amount, solMint) : 0
-  const bwumPrice = (baseStorageAmount / (totalWumLocked || 0)) * (solPrice || 0)
+  const bwumPrice = (baseStorageAmount / (totalWumLocked || 1)) * (solPrice || 0)
 
   return (
     <UsdWumboPriceContext.Provider value={bwumPrice}>
@@ -241,7 +232,7 @@ export const useMarketPrice = (marketAddress: PublicKey): number | undefined => 
 export function useFiatPrice(token: PublicKey | undefined): number | undefined {
   const wumboPrice = useWumboUsdPrice();
   const solPrice = useSolPrice();
-
+  
   const [price, setPrice] = useState<number>();
 
   useEffect(() => {

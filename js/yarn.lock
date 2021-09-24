@@ -3580,10 +3580,21 @@
     bn.js "^5.1.2"
     buffer-layout "^1.2.0"
 
-"@project-serum/serum@^0.13.21", "@project-serum/serum@^0.13.34":
+"@project-serum/serum@^0.13.21":
   version "0.13.59"
   resolved "https://registry.yarnpkg.com/@project-serum/serum/-/serum-0.13.59.tgz#6a04e36b7ff1de6c636951f487772f766d965abd"
   integrity sha512-ilypihqvhN+Qd62dqfNWRl4DZ5hSKcx9R+GZi1ehXEbzwnQI3rIHCwOpPrerjqckt8XBo7bLlkv/ZD69mNfMlg==
+  dependencies:
+    "@project-serum/anchor" "^0.11.1"
+    "@solana/spl-token" "^0.1.6"
+    "@solana/web3.js" "^1.21.0"
+    bn.js "^5.1.2"
+    buffer-layout "^1.2.0"
+
+"@project-serum/serum@^0.13.52":
+  version "0.13.60"
+  resolved "https://registry.yarnpkg.com/@project-serum/serum/-/serum-0.13.60.tgz#abeb3355ebc1895d685250df5965f688502ebcbb"
+  integrity sha512-fGsp9F0ZAS48YQ2HNy+6CNoifJESFXxVsOLPd9QK1XNV8CTuQoECOnVXxV6s5cKGre8pLNq5hrhi5J6aCGauEQ==
   dependencies:
     "@project-serum/anchor" "^0.11.1"
     "@solana/spl-token" "^0.1.6"
@@ -3599,7 +3610,7 @@
     bs58 "^4.0.1"
     eventemitter3 "^4.0.4"
 
-"@project-serum/sol-wallet-adapter@^0.2.0", "@project-serum/sol-wallet-adapter@^0.2.5":
+"@project-serum/sol-wallet-adapter@^0.2.5":
   version "0.2.5"
   resolved "https://registry.yarnpkg.com/@project-serum/sol-wallet-adapter/-/sol-wallet-adapter-0.2.5.tgz#d949a8cc4d2f74e31e4f0205989703977689c76b"
   integrity sha512-Y0XHe+FXXJ7P8XZtx3luAlatO0ge2LdrZUCmqMSzJf+K+fko+qTYIBSUuWwO7y/O4brIXVReR1mEUvF6QKDF2w==
@@ -3688,7 +3699,14 @@
   dependencies:
     buffer "~6.0.3"
 
-"@solana/spl-token-registry@0.2.176", "@solana/spl-token-registry@^0.2.176":
+"@solana/spl-token-registry@0.2.202":
+  version "0.2.202"
+  resolved "https://registry.yarnpkg.com/@solana/spl-token-registry/-/spl-token-registry-0.2.202.tgz#bf990ffd9bd6aac60ee933b8987173fd50cd1b96"
+  integrity sha512-W0uZ4kO2LFaRAvsvC77Xw8jUw3nCxebowKLh53RGmOmXjUsX1Xtoh+6odRVk2S+N5GkrjUol/3SPHeCEW8bPvw==
+  dependencies:
+    cross-fetch "3.0.6"
+
+"@solana/spl-token-registry@^0.2.176":
   version "0.2.176"
   resolved "https://registry.yarnpkg.com/@solana/spl-token-registry/-/spl-token-registry-0.2.176.tgz#8a9c09463b1250a91a183e21d99936bbf9c35b45"
   integrity sha512-fKmaAox3k8eqE6mkXFidMcWc2xAsDoWefqvwsBOQ42Utj9sdJwXtNMB14CHtPaWAOJWTjgSp/kpd/kn2VGpBAw==
@@ -3885,26 +3903,6 @@
     superstruct "^0.8.3"
     tweetnacl "^1.0.0"
     ws "^7.0.0"
-
-"@solana/web3.js@^1.10.0":
-  version "1.29.0"
-  resolved "https://registry.yarnpkg.com/@solana/web3.js/-/web3.js-1.29.0.tgz#61cb40e2190f13ae8084d20012cb81f8fade78fa"
-  integrity sha512-5427ZZ7l34xdf07EU6e/8IDQ0gr87lMAU+6UHGrlmOp+lhM39rwN6RmRoOiQYailH15TM5pM3YeQO8KZXEOMIA==
-  dependencies:
-    "@babel/runtime" "^7.12.5"
-    "@solana/buffer-layout" "^3.0.0"
-    bn.js "^5.0.0"
-    borsh "^0.4.0"
-    bs58 "^4.0.1"
-    buffer "6.0.1"
-    cross-fetch "^3.1.4"
-    crypto-hash "^1.2.2"
-    jayson "^3.4.4"
-    js-sha3 "^0.8.0"
-    rpc-websockets "^7.4.2"
-    secp256k1 "^4.0.2"
-    superstruct "^0.14.2"
-    tweetnacl "^1.0.0"
 
 "@solana/web3.js@^1.11.0", "@solana/web3.js@^1.12.0", "@solana/web3.js@^1.9.1":
   version "1.21.0"
@@ -5326,54 +5324,54 @@
     snake-case "^3.0.4"
     toml "^3.0.0"
 
-"@wum.bo/spl-token-account-split@^0.0.20":
-  version "0.0.20"
-  resolved "https://registry.yarnpkg.com/@wum.bo/spl-token-account-split/-/spl-token-account-split-0.0.20.tgz#d9e467d0e4bc0eddfce0331643bba89697e6f89d"
-  integrity sha512-o1xMU/JFDz/D0ad+JXS2HovXeRR4a+UzSA1PjqJJ8JYjs7ikOOSh8fqHTjRhCNnbjQGFkjGtHTem9wpGlra1hQ==
+"@wum.bo/spl-token-account-split@^0.1.0":
+  version "0.1.0"
+  resolved "https://registry.yarnpkg.com/@wum.bo/spl-token-account-split/-/spl-token-account-split-0.1.0.tgz#118db20f8c50afcb6efd951e7a27c3d26d7185b6"
+  integrity sha512-7BGRREIYHZHMejqQPU91x1WUsCelGX+YZZkz8/mG2YJF3C57puC0bZkUZDE6hkC0J9agd5kWpxEunO1T/535Pg==
   dependencies:
     "@project-serum/common" "^0.0.1-beta.3"
     "@solana/web3.js" "^1.24.1"
-    "@wum.bo/spl-token-staking" "^0.0.20"
+    "@wum.bo/spl-token-staking" "^0.1.0"
     bn.js "^5.2.0"
 
-"@wum.bo/spl-token-bonding@^0.0.20":
-  version "0.0.20"
-  resolved "https://registry.yarnpkg.com/@wum.bo/spl-token-bonding/-/spl-token-bonding-0.0.20.tgz#e268b5f9175a7306653fe0a838c13392648351f2"
-  integrity sha512-Nb4tBcDe37ekn3uCU6rhCXO1yt1Hl40Ph6ri9mUx5chLO41Lm1IpuAZ3THTrs0wfYUceEZgiKWIap2ELfJEkkw==
+"@wum.bo/spl-token-bonding@^0.1.0":
+  version "0.1.0"
+  resolved "https://registry.yarnpkg.com/@wum.bo/spl-token-bonding/-/spl-token-bonding-0.1.0.tgz#a308b251400bf30c50ce573f54c305579ff4fbb9"
+  integrity sha512-Guu0KJiClrsIVDCsR4n/wZSMpSrO9OPQGfpyPZ9gqmFyApTjubs3e6fDcjMUgvcvM8hkmpHn8iQ6GJY7ENU+eA==
   dependencies:
     "@project-serum/common" "^0.0.1-beta.3"
     "@solana/web3.js" "^1.24.1"
     bn.js "^5.2.0"
     copyfiles "^2.4.1"
 
-"@wum.bo/spl-token-staking@^0.0.20":
-  version "0.0.20"
-  resolved "https://registry.yarnpkg.com/@wum.bo/spl-token-staking/-/spl-token-staking-0.0.20.tgz#3f40a949b75ec57a1c8a82dce1cb335c49c263ae"
-  integrity sha512-y9JB+1UJMmj6s2vxyJvK36Cj7MBwprfK/O91g7yDZI1EyFU7RRjtXAe06TMNB6K7KOvFkdXAx/1ErsFRcBe0VA==
+"@wum.bo/spl-token-staking@^0.1.0":
+  version "0.1.0"
+  resolved "https://registry.yarnpkg.com/@wum.bo/spl-token-staking/-/spl-token-staking-0.1.0.tgz#1a3e6a69663e0de3f8a9f79a00814abb4d5376c7"
+  integrity sha512-DkAH47iZl9Yme1u90OAW5MtcuFNRdUUZWRXY45f3J4z2T0cWzoOJSRBuf346+GPpugzQ6EJCgVfmG8DpiR3DNQ==
   dependencies:
     "@project-serum/common" "^0.0.1-beta.3"
     "@solana/web3.js" "^1.24.1"
     bn.js "^5.2.0"
 
-"@wum.bo/spl-utils@^0.0.20":
-  version "0.0.20"
-  resolved "https://registry.yarnpkg.com/@wum.bo/spl-utils/-/spl-utils-0.0.20.tgz#a2a2b95be46bca5ab5fbc398df4e081b9b29afa8"
-  integrity sha512-mkqcLbzcCBg8T36EtPUMvFnRNcvbUzBEqBhq5IwV1XjrDpzwiMHFlul/w04TmBi7W/x34hfM44ZuFhLtEwYsqQ==
+"@wum.bo/spl-utils@^0.1.0":
+  version "0.1.0"
+  resolved "https://registry.yarnpkg.com/@wum.bo/spl-utils/-/spl-utils-0.1.0.tgz#6dc0cbf76c3f78c538d1fe719fc9c8fc83728646"
+  integrity sha512-k4XRNQ5dEZn8msJIF9MhLWD+PhOkFBR+IW/pEy19eiRAzwmwKL5ASYVOAmH/6KyyIiavMT2fxwWEKzfQts6MOA==
   dependencies:
     bs58 "^4.0.1"
 
-"@wum.bo/spl-wumbo@^0.0.20":
-  version "0.0.20"
-  resolved "https://registry.yarnpkg.com/@wum.bo/spl-wumbo/-/spl-wumbo-0.0.20.tgz#00c7a97e654aab2e396b12a55f4bab6e296147c1"
-  integrity sha512-T7zLsf3YnxojU9MDNp+7SZyIASLkz5RQC/w1k9+6Jcw0vyrvllox9RUsuOGYFc86TwE+E4rkLs7gok/tXVygdg==
+"@wum.bo/spl-wumbo@^0.1.10":
+  version "0.1.10"
+  resolved "https://registry.yarnpkg.com/@wum.bo/spl-wumbo/-/spl-wumbo-0.1.10.tgz#39b62a13d9a1324a786f87068d808a2d356186be"
+  integrity sha512-KF5EitmNK1l7BhqSrBPywKNZCidwkQsQAkklAF0r0RdHvMA7zFVvhHbOQU6UQndXt0eAP9uxtCSYwF5YwuzQxg==
   dependencies:
     "@bonfida/spl-name-service" "^0.1.14"
     "@project-serum/common" "^0.0.1-beta.3"
     "@solana/web3.js" "^1.24.1"
-    "@wum.bo/spl-token-account-split" "^0.0.20"
-    "@wum.bo/spl-token-bonding" "^0.0.20"
-    "@wum.bo/spl-token-staking" "^0.0.20"
-    "@wum.bo/spl-utils" "^0.0.20"
+    "@wum.bo/spl-token-account-split" "^0.1.0"
+    "@wum.bo/spl-token-bonding" "^0.1.0"
+    "@wum.bo/spl-token-staking" "^0.1.0"
+    "@wum.bo/spl-utils" "^0.1.0"
     bn.js "^5.2.0"
     copyfiles "^2.4.1"
 

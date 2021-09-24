@@ -5,10 +5,10 @@ import { SplWumbo, SplWumboIDL, SplWumboIDLJson } from "@wum.bo/spl-wumbo";
 import { SplTokenStaking, SplTokenStakingIDL, SplTokenStakingIDLJson } from "@wum.bo/spl-token-staking";
 import { SplTokenAccountSplit, SplTokenAccountSplitIDL, SplTokenAccountSplitIDLJson } from "@wum.bo/spl-token-account-split";
 
-export const splTokenBondingProgramId = new PublicKey("CJMw4wALbZJswJCxLsYUj2ExGCaEgMAp8JSGjodbxAF4")
-export const splWumboProgramId = new PublicKey("Bn6owcizWtLgeKcVyXVgUgTvbLezCVz9Q7oPdZu5bC1H")
-export const splTokenAccountSplitProgramId = new PublicKey("5DbtwvnZnsAkRWc6q5u4FJ4NLc3cmALV637ybjP4wKzE")
-export const splTokenStakingProgramId = new PublicKey("GEFM3nvcHypYtEZMxLrjuAUKwQjLuRcx1YaWXqa85WCm")
+export const splTokenBondingProgramId = new PublicKey("TBondz6ZwSM5fs4v2GpnVBMuwoncPkFLFR9S422ghhN")
+export const splWumboProgramId = new PublicKey("WumbodN8t7wcDPCY2nGszs4x6HRtL5mJcTR519Qr6m7")
+export const splTokenAccountSplitProgramId = new PublicKey("Sp1it1Djn2NmQvXLPnGM4zAXArxuchvSdytNt5n76Hm")
+export const splTokenStakingProgramId = new PublicKey("TStakXwvzEZiK6PSNpXuNx6wEsKc93NtSaMxmcqG6qP")
 
 export type AnchorPrograms = {
   splTokenBondingProgram?: SplTokenBonding;

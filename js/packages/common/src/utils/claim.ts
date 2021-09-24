@@ -5,19 +5,19 @@ import { useConnection } from "../contexts/connection";
 import { useWallet } from "../contexts/walletContext";
 import {
   createTestTld,
-  claimTwitterTransactionInstructions,
-  postTwitterRegistrarRequest,
   getTld,
 } from "./twitter";
 import { useAccount, useAccountFetchCache } from "./account";
 import {
+  TWITTER_REGISTRAR_SERVER_URL,
   WUMBO_INSTANCE_KEY,
 } from "../constants/globals";
-import { Connection, PublicKey } from "@solana/web3.js";
+import { Connection, PublicKey, sendAndConfirmRawTransaction, Transaction } from "@solana/web3.js";
 import { getTwitterRegistryKey, getTwitterRegistry } from "../utils";
 import { usePrograms } from "./programs";
 import { getTwitterClaimedTokenRefKey, getTwitterUnclaimedTokenRefKey } from "./tokenRef";
 import { WalletAdapter } from "@solana/wallet-adapter-base";
+import axios from "axios";
 
 interface ClaimTransactionState {
   awaitingApproval: boolean;
@@ -40,20 +40,20 @@ export async function claimTwitterHandle({
 }): Promise<void> {
   if (adapter) {
     await createTestTld(connection, adapter);
-    const instructions = await claimTwitterTransactionInstructions(connection, {
-      owner: adapter.publicKey!,
+    const resp = await axios.post(TWITTER_REGISTRAR_SERVER_URL, {
+      redirectUri,
+      code,
       twitterHandle,
+      pubkey: adapter.publicKey?.toBase58()
+    }, {
+      responseType: "json",
     });
-    if (instructions) {
-      await postTwitterRegistrarRequest(
-        connection,
-        instructions,
-        adapter,
-        code!,
-        redirectUri!,
-        twitterHandle
-      );
-    }
+    const tx = Transaction.from(resp.data.data);
+    const signed = await adapter.signTransaction(tx)
+    await sendAndConfirmRawTransaction(connection, signed.serialize(), {
+      commitment: 'confirmed',
+      preflightCommitment: 'confirmed'
+    });
   }
 }
 export function useClaimTwitterHandle({

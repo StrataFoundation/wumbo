@@ -69,6 +69,7 @@ const WalletProvider: FC<IWalletProviderProps> = ({
   const [autoApprove, setAutoApprove] = useState(false);
   const [publicKey, setPublicKey] = useLocalStorage<string | null>("walletPublicKey", null);
   const [awaitingApproval, setAwaitingApproval] = useState<boolean>(false);
+  const publicKeyCls = useMemo(() => publicKey ? new PublicKey(publicKey) : null, [publicKey]);
 
   const walletsByName = useMemo(
     () =>
@@ -269,7 +270,7 @@ const WalletProvider: FC<IWalletProviderProps> = ({
         wallet,
         adapter,
         select,
-        publicKey: publicKey ? new PublicKey(publicKey) : null,
+        publicKey: publicKeyCls,
         ready,
         connecting,
         disconnecting,

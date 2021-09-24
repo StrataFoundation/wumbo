@@ -65,6 +65,21 @@ module.exports = {
     },
   },
   plugins: [
+    new webpack.EnvironmentPlugin([
+      'REACT_APP_NFT_VERIFIER_TLD',
+      'REACT_APP_NFT_VERIFIER',
+      'REACT_APP_TROPHY_CREATOR',
+      'REACT_APP_TWITTER_REGISTRAR_SERVER_URL',
+      'REACT_APP_WUM_BONDING',
+      'REACT_APP_WUM_TOKEN',
+      'REACT_APP_WUMBO_INSTANCE_KEY',
+      'REACT_APP_SOLANA_API_URL',
+      'REACT_APP_IS_DEV',
+      'REACT_APP_TWITTER_TLD',
+      'REACT_APP_TWITTER_VERIFIER',
+      'REACT_APP_NFT_VERIFIER_URL',
+      'REACT_APP_WUMBO_API_URL'
+    ]),
     new NodePolyfillPlugin(),
     new CopyPlugin({
       patterns: [{ from: ".", to: ".", context: "public" }],

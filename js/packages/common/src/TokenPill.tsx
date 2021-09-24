@@ -12,6 +12,7 @@ import { MetadataAvatar } from "./Avatar";
 import { Link, useHistory } from "react-router-dom";
 import { ITokenBonding } from "./utils/deserializers/spl-token-bonding";
 import { handleErrors } from "./contexts";
+import { Curve } from "@wum.bo/spl-token-bonding";
 
 interface TokenPillProps {
   name?: String;
@@ -19,6 +20,7 @@ interface TokenPillProps {
   icon?: React.ReactElement;
   tokenBonding: ITokenBonding;
   detailsPath?: string;
+  curve?: Curve;
 }
 
 interface MetadataTokenPillProps {
@@ -26,9 +28,10 @@ interface MetadataTokenPillProps {
   ticker?: string;
   tokenBonding: ITokenBonding;
   detailsPath?: string;
+  curve?: Curve;
 }
 export const MetadataTokenPill = React.memo(
-  ({ name, ticker, tokenBonding, detailsPath }: MetadataTokenPillProps) => {
+  ({ name, ticker, tokenBonding, detailsPath, curve }: MetadataTokenPillProps) => {
     const { metadata, loading, error } = useTokenMetadata(
       tokenBonding?.targetMint
     );
@@ -43,6 +46,7 @@ export const MetadataTokenPill = React.memo(
 
     return (
       <TokenPill
+        curve={curve}
         name={displayName}
         ticker={displayTicker}
         icon={displayIcon}
@@ -54,11 +58,12 @@ export const MetadataTokenPill = React.memo(
 );
 
 export const TokenPill = React.memo(
-  ({ name, ticker, icon, tokenBonding, detailsPath }: TokenPillProps) => {
-    const { curve } = useBondingPricing(tokenBonding.publicKey);
+  ({ name, ticker, icon, tokenBonding, detailsPath, curve: curvePassed }: TokenPillProps) => {
+    const { curve: curveResolved } = useBondingPricing(tokenBonding.publicKey);
     const fiatPrice = useFiatPrice(tokenBonding.baseMint);
     const toFiat = (a: number) => (fiatPrice || 0) * a;
     const history = useHistory();
+    const curve = curvePassed || curveResolved;
 
     return (
       <Flex
@@ -82,7 +87,7 @@ export const TokenPill = React.memo(
         >
           <Flex justify="space-between" fontSize="lg" fontWeight="medium">
             <span>{name}</span>
-            <span>${toFiat(curve?.current() || 0).toFixed(2) || 0.0}</span>
+            <span>{curve ? ("$" + toFiat(curve!.current() || 0).toFixed(2)) : "Loading"  }</span>
           </Flex>
           <Flex justify="space-between" fontSize="xs">
             <span>{ticker}</span>
