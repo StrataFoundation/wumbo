@@ -74,7 +74,7 @@ export const ContextProviders: FC = ({ children }) => {
           <AccountCacheContextProvider>
             <EndpointSetter>
               <AccountsProvider>
-                <WalletProvider wallets={alteredWallets} onError={onError}>
+                <WalletProvider wallets={alteredWallets} onError={console.error}>
                   <SolPriceProvider>
                     <UsdWumboPriceProvider>
                       <HistoryContextProvider>

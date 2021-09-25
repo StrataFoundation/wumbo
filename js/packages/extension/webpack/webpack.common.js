@@ -66,6 +66,7 @@ module.exports = {
   },
   plugins: [
     new webpack.EnvironmentPlugin([
+      'REACT_APP_SITE_URL',
       'REACT_APP_NFT_VERIFIER_TLD',
       'REACT_APP_NFT_VERIFIER',
       'REACT_APP_TROPHY_CREATOR',

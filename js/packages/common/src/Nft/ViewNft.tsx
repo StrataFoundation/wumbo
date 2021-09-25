@@ -129,7 +129,10 @@ export const ViewNftRaw = React.memo(
                     <Text fontSize="sm" fontWeight="bold" color="gray.900">
                       Created by:
                     </Text>
-                    <Text
+                    <Flex
+                      direction="row"
+                      flexWrap="wrap"
+                      align="start"
                       fontSize="sm"
                       fontWeight="medium"
                       color="gray.500"
@@ -144,7 +147,7 @@ export const ViewNftRaw = React.memo(
                             getCreatorLink={getCreatorLink}
                           />
                         ))}
-                    </Text>
+                    </Flex>
                   </HStack>
                 </>
               )}

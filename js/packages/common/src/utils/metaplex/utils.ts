@@ -1,5 +1,6 @@
 import {
   Creator,
+  Data,
   findProgramAddress,
   IMetadataExtension,
   MetadataCategory,
@@ -55,7 +56,13 @@ export async function getArweaveMetadata(uri: string | undefined): Promise<IMeta
       try {
         // TODO: BL handle concurrent calls to avoid double query
         const result = await fetch(newUri);
-        const data = await result.json();
+        let data = await result.json();
+        if (data.uri) {
+          data = {
+            ...data,
+            ...await getArweaveMetadata(data.uri)
+          }
+        }
         localStorage.setItem(newUri, JSON.stringify(data));
         return data
       } catch(e) {

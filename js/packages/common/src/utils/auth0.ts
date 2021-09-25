@@ -1,5 +1,6 @@
 import { WebAuth } from "auth0-js";
 import { useLocalStorageState } from "@oyster/common";
+import { SITE_URL } from "../constants";
 
 export const auth0Options = {
   domain: process.env.REACT_APP_AUTH0_DOMAIN || 'wumbo.us.auth0.com',
@@ -19,7 +20,7 @@ function makeId(length: number): string {
 }
 export function useClaimLink({ handle, newTab = false}: { handle: string, newTab?: boolean }): { redirectUri: string,  claim: () => Window | null } {
   const setAuth0State = useLocalStorageState("auth0-state")[1];
-  const redirectUri = `https://wum.bo/claim?name=${handle}`;
+  const redirectUri = `${SITE_URL}/claim?name=${handle}`;
   const claim = () => {
     const state = makeId(6);
   

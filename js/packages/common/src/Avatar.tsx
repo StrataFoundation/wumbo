@@ -29,7 +29,7 @@ export const Avatar = ({
   ...props
 }: AvatarProps) => (
   <HStack spacing={2} alignItems="center">
-    <ChakraAvatar size={size} src={src} bgColor="indigo.500" {...props} />
+    <ChakraAvatar size={size} src={src} bgColor="gray.200" {...props} />
     {showDetails && (
       <VStack spacing={2}>
         <Text {...nameProps}>{name}</Text>

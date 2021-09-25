@@ -13,6 +13,7 @@ import {
   Tab,
   TabPanels,
   TabPanel,
+  Link as PlainLink
 } from "@chakra-ui/react";
 import { HiOutlinePencilAlt } from "react-icons/hi";
 import { useClaimedTokenRef, useClaimedTokenRefKey } from "../utils/tokenRef";
@@ -145,6 +146,7 @@ export const Profile = React.memo(
       );
     }
 
+    const handleLink = <PlainLink href={`https://twitter.com/${handle}`}>@{handle}</PlainLink> 
     return (
       <VStack spacing={4} padding={4}>
         <HStack spacing={2} w="full" alignItems="start">
@@ -156,7 +158,7 @@ export const Profile = React.memo(
             />
             <HStack spacing={2} alignItems="center">
               <Text fontSize="18px" lineHeight="none">
-                {metadata?.data.name || "@" + handle}
+                {metadata?.data.name || handleLink }
               </Text>
               {myTokenRefKey && walletTokenRef?.publicKey.equals(myTokenRefKey) && (
                 <Link to={editPath}>
@@ -170,11 +172,14 @@ export const Profile = React.memo(
                 </Link>
               )}
             </HStack>
-            <Text fontSize="14px">
-              {metadata
-                ? `${metadata.data.symbol} | @${handle}`
-                : `UNCLAIMED | @${handle}`}
-            </Text>
+            {metadata && <Text fontSize="14px">
+              {metadata.data.symbol} |&nbsp;{handleLink}
+            </Text>}
+            {!metadata &&
+              <Text fontSize="14px">
+                UNCLAIMED |&nbsp;{handleLink}
+              </Text>
+            }
           </VStack>
           <Spacer />
           <VStack spacing={2}>

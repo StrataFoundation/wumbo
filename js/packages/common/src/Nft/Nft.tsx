@@ -4,33 +4,37 @@ import { MeshViewer } from "./MeshViewer";
 import { IMetadataExtension, MetadataFile } from "@oyster/common";
 import { Stream, StreamPlayerApi } from "@cloudflare/stream-react";
 import { getImageFromMeta, useIsExtension } from "../utils";
+import { useLocation } from "react-router-dom";
+import { SITE_URL } from "../constants";
 
 const MeshArtContent = ({
   uri,
   animationUrl,
   style,
   files,
+  image
 }: {
   uri?: string;
   animationUrl?: string;
   style?: React.CSSProperties;
   files?: (MetadataFile | string)[];
+  image?: React.ReactElement;
 }) => {
   const renderURL =
     files && files.length > 0 && typeof files[0] === "string"
       ? files[0]
       : animationUrl;
 
-  return <MeshViewer image={uri} url={renderURL} style={style} />;
+  return <MeshViewer image={image} url={renderURL} style={style} />;
 };
 
 const VideoArtContent = ({
   style,
   files,
-  uri,
+  image,
   animationURL,
   active,
-  className
+  uri
 }: {
   style?: React.CSSProperties;
   files?: (MetadataFile | string)[];
@@ -38,16 +42,18 @@ const VideoArtContent = ({
   animationURL?: string;
   active?: boolean;
   className?: string;
+  image?: React.ReactElement;
 }) => {
   const [playerApi, setPlayerApi] = useState<StreamPlayerApi>();
+  const location = useLocation();
 
   const isExtension = useIsExtension();
-  
+
   // Blocked by twitter content policy
   if (isExtension && window.location.href.includes("twitter")) {
     return (
-      <a target="_blank" href={`https://wum.bo/${location.pathname}`}>
-        <img className={`${className}`} src={uri} />
+      <a target="_blank" href={`${SITE_URL}/#${location.pathname}`}>
+        { image }
       </a>
     );
   }
@@ -142,6 +148,7 @@ export const Nft: React.FC<{
 
   const category = data?.properties.category;
   const imageUri = image || getImageFromMeta(data);
+  const imageComponent = <Image src={imageUri} alt={data?.name} {...imageProps} />;
 
   if (
     meshEnabled &&
@@ -151,6 +158,7 @@ export const Nft: React.FC<{
   ) {
     return (
       <MeshArtContent
+        image={imageComponent}
         style={style}
         uri={imageUri}
         animationUrl={animationURL}
@@ -162,6 +170,7 @@ export const Nft: React.FC<{
   if (videoEnabled && category === "video") {
     return (
       <VideoArtContent
+        image={imageComponent}
         files={data?.properties.files}
         uri={imageUri}
         animationURL={animationURL}
@@ -170,5 +179,5 @@ export const Nft: React.FC<{
     );
   }
 
-  return <Image src={imageUri} alt={data?.name} {...imageProps} />;
+  return imageComponent;
 };
