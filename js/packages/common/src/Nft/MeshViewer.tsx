@@ -1,14 +1,16 @@
 import React, { useRef } from "react";
 import "@webcomponents/custom-elements";
 import { useIsExtension } from "../utils";
+import { Image, ImageProps } from "@chakra-ui/react";
 import { Link, useLocation } from "react-router-dom";
+import { SITE_URL } from "../constants";
 
 type MeshViewerProps = {
   className?: string;
   url?: string;
-  image?: string;
   style?: React.CSSProperties;
   onError?: () => void;
+  image?: React.ReactElement;
 };
 
 export function MeshViewer(props: MeshViewerProps) {
@@ -17,8 +19,8 @@ export function MeshViewer(props: MeshViewerProps) {
 
   if (isExtension) {
     return (
-      <a target="_blank" href={`https://wum.bo/${location.pathname}`}>
-        <img className={`${props.className}`} src={props.image} />
+      <a target="_blank" href={`${SITE_URL}/#${location.pathname}`}>
+        { props.image }
       </a>
     );
   }

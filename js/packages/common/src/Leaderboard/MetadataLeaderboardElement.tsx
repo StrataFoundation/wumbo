@@ -1,38 +1,90 @@
-import { amountAsNum, useAccount, useClaimedTokenRef, useClaimedTokenRefKey, useMint, useSocialTokenMetadata, useTokenMetadata, useTwitterTokenRef } from '../utils';
-import React from 'react';
+import {
+  amountAsNum,
+  useAccount,
+  useClaimedTokenRef,
+  useClaimedTokenRefKey,
+  useMint,
+  useOwnedAmount,
+  useSocialTokenMetadata,
+  useTokenMetadata,
+  useTwitterTokenRef,
+  useUserOwnedAmount,
+} from "../utils";
+import React from "react";
 import { AccountInfo as TokenAccountInfo, Token } from "@solana/spl-token";
-import { Spinner } from '../Spinner';
-import { Avatar } from '..';
-import { useReverseTwitter } from '../utils/twitter';
-import { PublicKey } from '@solana/web3.js';
+import { Flex, Box, Text } from "@chakra-ui/react";
+import { Spinner } from "../Spinner";
+import { Avatar } from "..";
+import { useReverseTwitter } from "../utils/twitter";
+import { PublicKey } from "@solana/web3.js";
+import { handleErrors } from "../contexts";
 
-export const MetadataLeaderboardElement = React.memo(({ account, onClick }: { onClick?: (tokenRefKey: PublicKey) => void, account: TokenAccountInfo }) => {
-  const { loading, image, metadata, error } = useSocialTokenMetadata(account.owner);
-  if (error) {
-    console.error(error);
+export const MetadataLeaderboardElement = React.memo(
+  ({
+    mint,
+    wallet,
+    onClick,
+  }: {
+    onClick?: (tokenRefKey: PublicKey) => void;
+    wallet: PublicKey;
+    mint: PublicKey;
+  }) => {
+    const { loading, image, metadata, error } = useSocialTokenMetadata(wallet);
+    handleErrors(error);
+    const amount = useUserOwnedAmount(wallet, mint);
+
+    const tokenRefKey = useClaimedTokenRefKey(wallet);
+
+    const { handle, error: reverseTwitterError } = useReverseTwitter(wallet);
+    handleErrors(error, reverseTwitterError);
+
+    if (loading) {
+      return <Spinner />;
+    }
+
+    const { name, symbol } = (metadata || {}).data || {};
+
+    return (
+      <Flex
+        flexDirection="row"
+        flexGrow={1}
+        alignItems="center"
+        paddingRight={4}
+        onClick={() => onClick && tokenRefKey && onClick(tokenRefKey)}
+      >
+        <Box paddingY={2} paddingRight={4} paddingLeft={1}>
+          {image && <Avatar size="xs" src={image} name={name} />}
+        </Box>
+        <Flex
+          flexGrow={1}
+          flexDirection="column"
+          minH={8}
+          justifyContent="center"
+        >
+          <Text
+            maxW="140px"
+            fontSize="sm"
+            color="gray.700"
+            overflow="hidden"
+            isTruncated
+          >
+            {name ? name : wallet.toBase58()}
+          </Text>
+          {symbol && handle && (
+            <Text isTruncated fontSize="xs" fontWeight="semiBold" color="gray.400">
+              {symbol} | @{handle}
+            </Text>
+          )}
+        </Flex>
+        <Flex
+          alignItems="center"
+          fontSize="sm"
+          fontWeight="semibold"
+          color="gray.400"
+        >
+          {amount?.toFixed(2)}
+        </Flex>
+      </Flex>
+    );
   }
-
-  const tokenRefKey = useClaimedTokenRefKey(account.owner)
-  
-  const mint = useMint(account.mint);
-  const { handle } = useReverseTwitter(account.owner);
-
-  if (loading || !mint) {
-    return <Spinner />
-  }
-
-  const { name, symbol } = (metadata || {}).data || {};
-
-  return <div onClick={() => onClick && tokenRefKey && onClick(tokenRefKey)} className="hover:cursor-pointer flex flex-row flex-grow items-center pr-4">
-    <div className="py-2 pr-4 pl-1">
-      { image && <Avatar size="xs" token imgSrc={image} name={name} /> }
-    </div>
-    <div className="flex-grow flex flex-col min-h-8 justify-center">
-      <span style={{ maxWidth: "140px" }} className="text-sm text-gray-700 overflow-ellipsis overflow-hidden">{ name ? name : account.owner.toBase58() }</span>
-      { symbol && handle && <span className="text-xxs font-semibold text-gray-400">{ symbol } | @{ handle }</span> }
-    </div>
-    <div className="flex items-center text-sm font-semibold text-gray-400">
-      { amountAsNum(account.amount, mint).toFixed(2) }
-    </div>
-  </div>
-})
+);

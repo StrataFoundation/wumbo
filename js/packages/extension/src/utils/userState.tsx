@@ -1,22 +1,15 @@
 import { useEffect, useState } from "react";
-import { getHashedName, getNameAccountKey } from "@bonfida/spl-name-service";
 import {
-  WUMBO_INSTANCE_KEY,
   Curve,
   ICurve,
   TokenBonding,
-  ITokenBonding,
   ITokenRef,
-  TokenRef,
-  TWITTER_ROOT_PARENT_REGISTRY_KEY,
   useBondingPricing,
   useWumboUsdPrice,
   useAccount,
-  UseAccountState,
   useMint,
   useTwitterTokenRef,
 } from "wumbo-common";
-import { AccountInfo, PublicKey } from "@solana/web3.js";
 import { MintInfo } from "@solana/spl-token";
 import { TokenBondingV0 } from "@wum.bo/spl-token-bonding";
 
@@ -38,42 +31,62 @@ export interface UserInfoState {
   userInfo?: UserInfo;
   loading: boolean;
 }
+
 export const useUserInfo = (name: string): UserInfoState => {
-  const { info: creator, loading } = useTwitterTokenRef(name);
-  const { info: tokenBonding } = useAccount(
+  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [result, setResult] = useState<UserInfo | undefined>();
+  const { info: creator, loading: loading1 } = useTwitterTokenRef(name);
+
+  const { info: tokenBonding, loading: loading2 } = useAccount(
     creator?.tokenBonding,
     TokenBonding
   );
-  const { info: curve } = useAccount(
+
+  const { info: curve, loading: loading3 } = useAccount(
     tokenBonding?.curve,
-    Curve
+    Curve,
+    true
   );
+
   const mint = useMint(creator && tokenBonding?.targetMint);
   const wumboUsdPrice = useWumboUsdPrice();
-  const [userInfo, setUserInfo] = useState<UserInfoState>({
-    loading: true,
-  });
-  const { curve: bondingCurve } = useBondingPricing(creator?.tokenBonding);
-  const current = bondingCurve?.current() || 0;
-  
-  useEffect(() => {
-    if (curve && tokenBonding && mint && creator) {
-      setUserInfo({
-        userInfo: {
-          name,
-          tokenRef: creator,
-          mint,
-          tokenBonding,
-          curve,
-          coinPrice: current,
-          coinPriceUsd: current * (wumboUsdPrice || 0),
-        },
-        loading: false,
-      });
-    } else if (!loading) {
-      setUserInfo({ loading: false });
-    }
-  }, [current, curve, tokenBonding, mint, creator, loading]);
 
-  return userInfo;
+  const { curve: bondingCurve, loading: loading4 } = useBondingPricing(
+    creator?.tokenBonding
+  );
+
+  const current = bondingCurve?.current() || 0;
+
+
+  useEffect(() => {
+    const loading = loading1 || loading2 || loading3 || loading4;
+    if (loading != isLoading) setIsLoading(loading)
+
+    if (curve && tokenBonding && mint && creator) {
+      // @ts-ignore
+      setResult({
+        name,
+        tokenRef: creator,
+        mint,
+        tokenBonding,
+        curve,
+        coinPrice: current,
+        coinPriceUsd: current * (wumboUsdPrice || 0),
+      });
+    }
+  }, [
+    setResult,
+    setIsLoading,
+    current,
+    curve,
+    tokenBonding,
+    mint,
+    creator,
+    loading1,
+    loading2,
+    loading3,
+    loading4,
+  ]);
+
+  return { loading: isLoading, userInfo: result };
 };

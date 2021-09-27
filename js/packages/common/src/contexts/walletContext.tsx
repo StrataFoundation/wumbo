@@ -16,10 +16,10 @@ import {
   WalletNotReadyError,
 } from "@solana/wallet-adapter-base";
 import { Wallet, WalletName } from "@solana/wallet-adapter-wallets";
-import { PublicKey, Transaction } from "@solana/web3.js";
+import { PublicKey, Transaction, TransactionInstruction } from "@solana/web3.js";
 import { useLocalStorage } from "../utils";
+import { useConnection } from "../contexts/connection";
 import { Provider } from "@wum.bo/anchor";
-import { useConnection } from "@oyster/common";
 
 export interface IWalletProviderProps {
   children: ReactNode;
@@ -69,6 +69,7 @@ const WalletProvider: FC<IWalletProviderProps> = ({
   const [autoApprove, setAutoApprove] = useState(false);
   const [publicKey, setPublicKey] = useLocalStorage<string | null>("walletPublicKey", null);
   const [awaitingApproval, setAwaitingApproval] = useState<boolean>(false);
+  const publicKeyCls = useMemo(() => publicKey ? new PublicKey(publicKey) : null, [publicKey]);
 
   const walletsByName = useMemo(
     () =>
@@ -160,7 +161,8 @@ const WalletProvider: FC<IWalletProviderProps> = ({
 
       setAwaitingApproval(true);
       try {
-        return await adapter!.signTransaction(transaction);
+        // @ts-ignore
+        return await adapter!.originalSignTransaction(transaction);
       } catch (error) {
         onError(error);
         throw error;
@@ -181,7 +183,8 @@ const WalletProvider: FC<IWalletProviderProps> = ({
 
       setAwaitingApproval(true);
       try {
-        return await adapter!.signAllTransactions(transactions);
+        // @ts-ignore
+        return await adapter!.originalSignAllTransactions(transactions);
       } catch (error) {
         onError(error);
         throw error;
@@ -191,6 +194,19 @@ const WalletProvider: FC<IWalletProviderProps> = ({
     },
     [adapter, onError, connected]
   );
+
+  // Wrap the adapter sign transaction so we can get nice awaiting approval messages
+  useEffect(() => {
+    if (adapter) {
+      // @ts-ignore
+      adapter.originalSignTransaction = adapter.originalSignTransaction || adapter.signTransaction.bind(adapter);
+      adapter.signTransaction = signTransaction;
+
+      // @ts-ignore
+      adapter.originalSignAllTransactions = adapter.originalSignAllTransactions || adapter.signAllTransactions.bind(adapter);
+      adapter.signAllTransactions = signAllTransactions;
+    }
+  }, [adapter, signTransaction, signAllTransactions])
 
   // Reset state and set the wallet, adapter, and ready state when the name changes
   useEffect(() => {
@@ -234,10 +250,6 @@ const WalletProvider: FC<IWalletProviderProps> = ({
           ? await (adapter as any)?.readyAsync
           : !!adapter?.ready;
 
-        if (!ready && wallet?.name === name) {
-          window.open(wallet!.url, "_blank");
-        }
-
         if (ready && wallet?.name === name) {
           setConnecting(true);
           try {
@@ -258,7 +270,7 @@ const WalletProvider: FC<IWalletProviderProps> = ({
         wallet,
         adapter,
         select,
-        publicKey: publicKey ? new PublicKey(publicKey) : null,
+        publicKey: publicKeyCls,
         ready,
         connecting,
         disconnecting,

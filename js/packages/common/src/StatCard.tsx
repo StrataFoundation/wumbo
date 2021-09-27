@@ -1,36 +1,67 @@
 import React from "react";
-import coinIcon from "./svgs/stat_coin.svg";
-import wumboIcon from "./svgs/stat_wumbo.svg";
+import {
+  HStack,
+  Flex,
+  FlexProps,
+  Text,
+  Icon,
+  createIcon,
+} from "@chakra-ui/react";
+import { RiCoinLine } from "react-icons/ri";
+import { WumboRankIcon } from "./svgs";
 
-interface IStatCardProps {
+interface IStatCardProps extends FlexProps {
   label: string;
   value?: string;
 }
 
-export const StatCard = ({ label, value }: IStatCardProps) => (
-  <div className="flex flex-col bg-gray-100 p-3 rounded-lg">
-    <span className="text-sm text-gray-500">{label}</span>
-    <span className="text-md">{value}</span>
-  </div>
+export const StatCard = ({ label, value, ...flexProps }: IStatCardProps) => (
+  <Flex
+    flexDir="column"
+    flexGrow={1}
+    w="full"
+    bgColor="gray.100"
+    padding={3}
+    rounded="lg"
+    {...flexProps}
+  >
+    <Text fontSize="xs" color="gray.500">
+      {label}
+    </Text>
+    <Text fontSize="md">{value}</Text>
+  </Flex>
 );
 
 interface IStatCardWithIconProps extends IStatCardProps {
   icon: "coin" | "wumbo";
 }
 
+// TODO: (Bry) Get WUMBOIcon loading
 export const StatCardWithIcon = ({
   label,
   value,
   icon,
+  ...flexProps
 }: IStatCardWithIconProps) => (
-  <div className="flex gap-2 px-2.5 py-2.5 rounded-lg border-2 border-gray-100 items-center justify-center">
-    <div className="w-6">
-      {icon === "coin" && <img className="w-full" src={coinIcon} />}
-      {icon === "wumbo" && <img className="w-full" src={wumboIcon} />}
-    </div>
-    <div className="flex-1 flex flex-col leading-none">
-      <span className="text-md">{value}</span>
-      <span className="text-sm text-gray-500">{label}</span>
-    </div>
-  </div>
+  <HStack
+    w="full"
+    spacing={2}
+    padding={2}
+    rounded="lg"
+    borderWidth="2px"
+    borderColor="gray.100"
+  >
+    {icon === "coin" && (
+      <Icon as={RiCoinLine} w="16px" h="16px" color="yellow.400" />
+    )}
+    {icon === "wumbo" && (
+      <WumboRankIcon w="16px" h="16px" color="indigo.500" fill="none" />
+    )}
+    <Flex flexDir="column" flexGrow={1} lineHeight="normal">
+      <Text fontSize="12px">#{value}</Text>
+      <Text fontSize="10px" color="gray.500">
+        {label}
+      </Text>
+    </Flex>
+  </HStack>
 );

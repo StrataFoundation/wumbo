@@ -1,5 +1,8 @@
-import React, { Fragment } from "react";
-import { AppendChildPortal } from "wumbo-common";
+import React, { Fragment, useRef } from "react";
+import ReactShadow from "react-shadow/emotion";
+import { Box } from "@chakra-ui/react";
+
+import { AppendChildPortal, ThemeProvider } from "wumbo-common";
 import { useTweets } from "../../utils/twitterSpotter";
 import { MainButton } from "../MainButton";
 import { ReplyTokens } from "../ReplyTokens";
@@ -20,26 +23,45 @@ function getElementId(element: Element | null): string {
 
 export const TweetsEnhancer = () => {
   const tweets = useTweets();
+  const outsideRef = useRef() as React.MutableRefObject<HTMLInputElement>;
 
   if (tweets) {
     const tweetEls = tweets
       .map((tweet, tweetIndex) => {
         const buttonEl = tweet.buttonTarget ? (
-          <MainButton creatorName={tweet.name} creatorImg={tweet.avatar || ""} />
+          <MainButton
+            creatorName={tweet.name}
+            creatorImg={tweet.avatar || ""}
+          />
         ) : null;
 
-        const replyTokensEl = tweet.replyTokensTarget ? (
-          <ReplyTokens creatorName={tweet.name} mentions={tweet.mentions || []} />
+        const replyTokensEl = tweet.replyTokensTarget && tweet.mentions && tweet.mentions.length > 0 ? (
+          <ReplyTokens
+            outsideRef={outsideRef}
+            creatorName={tweet.name}
+            mentions={tweet.mentions || []}
+          />
         ) : null;
+
         if (buttonEl) {
           return (
             <Fragment key={getElementId(tweet.buttonTarget)}>
               <AppendChildPortal container={tweet.buttonTarget as Element}>
-                <div className="flex justify-center mt-1.5 pointer-events-auto">{buttonEl}</div>
+                <ReactShadow.div>
+                  <ThemeProvider>
+                    <Box d="flex" justifyContent="center" marginTop="6px">
+                      {buttonEl}
+                    </Box>
+                  </ThemeProvider>
+                </ReactShadow.div>
               </AppendChildPortal>
-              {tweet.replyTokensTarget && (
-                <AppendChildPortal container={tweet.replyTokensTarget as Element}>
-                  {replyTokensEl}
+              {tweet.replyTokensTarget && tweet.mentions && tweet.mentions.length > 0 && (
+                <AppendChildPortal
+                  container={tweet.replyTokensTarget as Element}
+                >
+                  <ReactShadow.div>
+                    <ThemeProvider>{replyTokensEl}</ThemeProvider>
+                  </ReactShadow.div>
                 </AppendChildPortal>
               )}
             </Fragment>
@@ -50,7 +72,10 @@ export const TweetsEnhancer = () => {
       })
       .filter(Boolean);
 
-    return <Fragment>{tweetEls}</Fragment>;
+    return <Fragment>
+      {tweetEls}
+      <Box ref={outsideRef} />
+    </Fragment>;
   }
 
   return null;

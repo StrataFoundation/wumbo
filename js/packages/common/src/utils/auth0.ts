@@ -1,12 +1,10 @@
 import { WebAuth } from "auth0-js";
 import { useLocalStorageState } from "@oyster/common";
+import { SITE_URL } from "../constants";
 
 export const auth0Options = {
-  // domain: process.env.REACT_APP_AUTH0_DOMAIN || 'wumbo.us.auth0.com',
-  // clientID: process.env.REACT_APP_AUTH0_CLIENT_ID || 'GPsjYroOyNKWCScIk2woGZi4kBTGDDTW',
-  domain: process.env.REACT_APP_AUTH0_DOMAIN || "dev-kf1b949a.jp.auth0.com",
-  clientID:
-    process.env.REACT_APP_AUTH0_CLIENT_ID || "QXGtiTg10PLDEkmoSPfCx3UqReu2K3sy",
+  domain: process.env.REACT_APP_AUTH0_DOMAIN || 'wumbo.us.auth0.com',
+  clientID: process.env.REACT_APP_AUTH0_CLIENT_ID || 'GPsjYroOyNKWCScIk2woGZi4kBTGDDTW',
 };
 export const auth0 = new WebAuth(auth0Options);
 
@@ -22,7 +20,7 @@ function makeId(length: number): string {
 }
 export function useClaimLink({ handle, newTab = false}: { handle: string, newTab?: boolean }): { redirectUri: string,  claim: () => Window | null } {
   const setAuth0State = useLocalStorageState("auth0-state")[1];
-  const redirectUri = `http://localhost:3000/claim?name=${handle}`;
+  const redirectUri = `${SITE_URL}/claim?name=${handle}`;
   const claim = () => {
     const state = makeId(6);
   

@@ -1,10 +1,12 @@
 import { AccountInfo, Commitment, Connection, PublicKey } from "@solana/web3.js";
-import { TokenAccount, useConnection, ParsedAccountBase, TokenAccountParser } from "@oyster/common";
+import { useConnection } from "../contexts/connection";
+import { TokenAccount, ParsedAccountBase, TokenAccountParser } from "@oyster/common";
 import React, { useState, useEffect, useContext, useMemo } from "react";
 import { useAsync } from "react-async-hook";
 import { TOKEN_PROGRAM_ID } from "@solana/spl-token";
 import { AccountFetchCache, AccountParser } from "./accountFetchCache/accountFetchCache";
 import { truthy } from "./truthy";
+import { DEFAULT_COMMITMENT } from "../constants/globals";
 
 export interface UseAccountState<T> {
   loading: boolean;
@@ -23,16 +25,17 @@ export function useAccountFetchCache(): AccountFetchCache {
   return useContext(AccountCacheContext)!;
 }
 
-const DEFAULT_COMMITMENT = "processed";
-
 export const AccountCacheContextProvider: React.FC = ({ children }) => {
   const connection = useConnection();
-  const cache = useMemo(() => {
-    const ret = new AccountFetchCache({
+  const cache = React.useMemo(() => {
+    return new AccountFetchCache({
       connection,
-      delay: 250,
+      delay: 500,
       commitment: DEFAULT_COMMITMENT
     })
+  }, [connection])
+
+  useEffect(() => {
     const oldGetAccountInfo = connection.getAccountInfo.bind(connection);
     // Make sure everything in our app is using the cache
     connection.getAccountInfo = function(
@@ -40,11 +43,10 @@ export const AccountCacheContextProvider: React.FC = ({ children }) => {
       commitment?: Commitment,
     ): Promise<AccountInfo<Buffer> | null> {
       if (commitment && commitment != DEFAULT_COMMITMENT) {
-        debugger;
         return oldGetAccountInfo(publicKey, commitment);
       }
 
-      return ret.search(publicKey).then(i => {
+      return cache.search(publicKey).then(i => {
         if (i) {
           return i.account;
         }
@@ -53,7 +55,9 @@ export const AccountCacheContextProvider: React.FC = ({ children }) => {
       })
     }
 
-    return ret;
+    return () => {
+      cache.close();
+    }
   }, [connection]);
 
   return <AccountCacheContext.Provider
@@ -65,9 +69,12 @@ export const AccountCacheContextProvider: React.FC = ({ children }) => {
 
 export function useAccount<T>(
   key: undefined | PublicKey,
-  parser?: TypedAccountParser<T>
+  parser?: TypedAccountParser<T>,
+  isStatic: Boolean = false // Set if the accounts data will never change, optimisation to lower websocket usage.
 ): UseAccountState<T> {
   const cache = useAccountFetchCache();
+  // @ts-ignore for helping to debug
+  window.cache = cache;
   const [state, setState] = useState<UseAccountState<T>>({
     loading: true,
   });
@@ -88,11 +95,14 @@ export function useAccount<T>(
 
   useEffect(() => {
     if (!id) {
+      setState({ loading: false })
       return;
+    } else {
+      setState({ loading: true })
     }
 
     cache
-      .search(id, parsedAccountBaseParser)
+      .searchAndWatch(id, parsedAccountBaseParser, isStatic)
       .then((acc) => {
         if (acc) {
           setState({
@@ -111,7 +121,7 @@ export function useAccount<T>(
 
     const dispose = cache.emitter.onCache((e) => {
       const event = e;
-      if (event.id === id) {
+      if (event.id === id && !event.isNew) {
         cache.query(id, parsedAccountBaseParser).then((acc) => {
           setState({
             loading: false,
@@ -129,8 +139,6 @@ export function useAccount<T>(
   return state;
 }
 
-let currentFetch: Map<string, Promise<TokenAccount[]>> = new Map();
-const precachedOwners = new Map<string, TokenAccount[]>();
 export const getUserTokenAccounts = async (
   connection: Connection,
   owner?: PublicKey,
@@ -140,32 +148,17 @@ export const getUserTokenAccounts = async (
   }
 
   const ownerStr = owner.toBase58();
-  if (precachedOwners.has(ownerStr)) {
-    return precachedOwners.get(ownerStr)!;
-  }
+  // user accounts are updated via ws subscription
+  const accounts = await connection.getTokenAccountsByOwner(owner, {
+    programId: TOKEN_PROGRAM_ID,
+  });
 
-  if (currentFetch.has(ownerStr)) {
-    return currentFetch.get(ownerStr)!;
-  }
+  const tokenAccounts = accounts.value.map(info =>
+    TokenAccountParser(info.pubkey, info.account)
+  ).filter(truthy).filter(t => t.info.amount.toNumber() > 0);
 
-  currentFetch.set(ownerStr, (async () => {
-    // user accounts are updated via ws subscription
-    const accounts = await connection.getTokenAccountsByOwner(owner, {
-      programId: TOKEN_PROGRAM_ID,
-    });
-  
-    const tokenAccounts = accounts.value.map(info =>
-      TokenAccountParser(info.pubkey, info.account)
-    ).filter(truthy);
-  
-    currentFetch.delete(ownerStr);
-    // used for filtering account updates over websocket
-    precachedOwners.set(owner.toBase58(), tokenAccounts);
-  
-    return tokenAccounts;
-  })());
 
-  return currentFetch.get(ownerStr)!;
+  return tokenAccounts;
 };
 
 export function useUserTokenAccounts(owner?: PublicKey) {

@@ -3,7 +3,6 @@ import {
   Edition,
   MasterEditionV2,
   MasterEditionV1,
-  useConnection,
   getMetadata,
   getEdition,
   decodeEdition,
@@ -13,6 +12,7 @@ import {
   MetadataKey,
   IMetadataExtension,
 } from "@oyster/common";
+import { useConnection } from "../../contexts/connection";
 import { AccountInfo } from "@solana/spl-token";
 import { Connection, PublicKey } from "@solana/web3.js";
 import { useAsync, UseAsyncReturn } from "react-async-hook";
@@ -31,8 +31,12 @@ import {
   getArweaveMetadata,
   getDescription,
   getImage,
+  getImageFromMeta,
   getMetadataKey,
 } from "./utils";
+import { getReverseTokenRefKey, getTokenRefKeyFromOwner, useClaimedTokenRef } from "../../utils/tokenRef";
+import { ITokenRef, TokenRef } from "../../utils/deserializers";
+import { TokenRefV0 } from "@wum.bo/spl-wumbo";
 
 export interface ITokenWithMeta {
   metadataKey?: PublicKey;
@@ -46,6 +50,7 @@ export interface ITokenWithMeta {
 
 export interface ITokenWithMetaAndAccount extends ITokenWithMeta {
   publicKey?: PublicKey;
+  tokenRef?: ITokenRef;
   account?: AccountInfo;
 }
 
@@ -57,8 +62,12 @@ export function getUserTokensWithMeta(
   return Promise.all(
     (tokenAccounts || []).map(async ({ pubkey, info }) => {
       const metadataKey = await getMetadata(info.mint);
+      const reverseTokenRefKey = await getReverseTokenRefKey(info.mint)
+      const { info: tokenRef } = (await cache.search(reverseTokenRefKey, (pubkey, account) => ({ pubkey, account, info: TokenRef(pubkey, account) }), true) || {});
+
       return {
         ...(await getTokenMetadata(cache, metadataKey)),
+        tokenRef,
         publicKey: pubkey,
         account: info,
       };
@@ -95,7 +104,7 @@ export async function getEditionInfo(
         account.data[0] == MetadataKey.EditionV1
           ? decodeEdition(account.data)
           : decodeMasterEdition(account.data),
-    }))) || {};
+    }), true)) || {};
 
   if (editionOrMasterEdition instanceof Edition) {
     edition = editionOrMasterEdition;
@@ -104,7 +113,7 @@ export async function getEditionInfo(
         pubkey,
         account,
         info: decodeMasterEdition(account.data),
-      }))) || {};
+      }), true)) || {};
     masterEdition = masterEditionInfo;
   } else {
     masterEdition = editionOrMasterEdition;
@@ -121,9 +130,9 @@ export async function getTokenMetadata(
   metadataKey: PublicKey
 ): Promise<ITokenWithMeta> {
   const { info: metadata } =
-    (await cache.search(metadataKey, MetadataParser)) || {};
+    (await cache.search(metadataKey, MetadataParser, true)) || {};
   const data = await getArweaveMetadata(metadata?.data.uri);
-  const image = data?.image;
+  const image = await getImage(metadata?.data.uri)
   const description = data?.description;
 
   return {
@@ -140,10 +149,14 @@ export function useUserTokensWithMeta(
   owner?: PublicKey
 ): UseAsyncReturn<ITokenWithMetaAndAccount[]> {
   const connection = useConnection();
-  const { result: tokenAccounts } = useUserTokenAccounts(owner);
+  const { result: tokenAccounts, error } = useUserTokenAccounts(owner);
   const cache = useAccountFetchCache();
 
-  return useAsync(getUserTokensWithMeta, [cache, connection, tokenAccounts]);
+  const asyncResult = useAsync(getUserTokensWithMeta, [cache, connection, tokenAccounts]);
+  return {
+    ...asyncResult,
+    error: asyncResult.error || error
+  }
 }
 
 export interface IUseTokenMetadataResult extends ITokenWithMetaAndAccount {
@@ -174,14 +187,21 @@ export function useTokenMetadata(
     loading: dataLoading,
     error: dataError,
   } = useAsync(getArweaveMetadata, [metadata?.data.uri]);
+  const {
+    result: image,
+    loading: imageLoading,
+    error: imageError,
+  } = useAsync(getImage, [metadata?.data.uri]);
 
+  const { info: tokenRef } = useClaimedTokenRef(wallet.publicKey || undefined);
   return {
-    loading: Boolean(token && (loading || accountLoading || dataLoading)),
-    error: error || dataError,
+    tokenRef,
+    loading: Boolean(token && (loading || accountLoading || dataLoading || imageLoading)),
+    error: error || dataError || imageError,
     metadata,
     metadataKey: metadataAccountKey,
     data,
-    image: data?.image,
+    image: image,
     account: associatedAccount,
     description: data?.description,
     publicKey: metadataAccountKey,

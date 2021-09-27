@@ -1,24 +1,23 @@
 import React, { useEffect } from "react";
+import { profilePath } from "../../constants/routes";
 import AppContainer from "../common/AppContainer";
 import { useHistory } from "react-router-dom";
-import { usePrevious, useQuery, useWallet, WalletSelect } from "wumbo-common";
+import { useFtxPayLink, Wallet } from "wumbo-common";
+import WalletRedirect from "./WalletRedirect";
+import { Box } from "@chakra-ui/react";
 
 export default React.memo(() => {
-  const history = useHistory();
-  const query = useQuery();
-  const { connected } = useWallet();
-
-  useEffect(() => {
-    const redirect = query.get("redirect");
-    if (connected && redirect) {
-      console.log(`Redirecting to ${redirect}`);
-      history.push(redirect);
-    }
-  }, [connected, query.get("redirect"), history]);
-
+  const solLink = useFtxPayLink();
   return (
     <AppContainer>
-      <WalletSelect />
+      <WalletRedirect />
+      <Box p={4}>
+        <Wallet
+          getTokenLink={(t) => t.tokenRef?.publicKey ? profilePath(t.tokenRef?.publicKey) : ""}
+          wumLink={""}
+          solLink={solLink}
+        />
+      </Box>
     </AppContainer>
   );
 });

@@ -1,8 +1,9 @@
 import React, { Fragment } from "react";
 import { Link, useLocation } from "react-router-dom";
+import { Box, Button, Avatar, VStack, Text } from "@chakra-ui/react";
 import { WumboDrawer } from "../WumboDrawer";
 import { routes } from "@/constants/routes";
-import { useWallet, useQuery, Avatar, Button } from "wumbo-common";
+import { useWallet, useQuery, SOL_TOKEN, useSolPrice } from "wumbo-common";
 import ClaimOrCreate from "./ClaimOrCreate";
 
 export const Create = () => {
@@ -10,40 +11,58 @@ export const Create = () => {
   const query = useQuery();
   const { connected, publicKey } = useWallet();
   const currentPath = `${location.pathname}${location.search}`;
+  const solPrice = useSolPrice();
 
   return (
     <Fragment>
       <WumboDrawer.Header title="Create Coin" />
       <WumboDrawer.Content>
-        <div className="flex bg-gray-100 p-4 rounded-lg space-x-4">
-          <Avatar name={query.get("name")!} imgSrc={query.get("img")!} token />
-          <div className="flex flex-col flex-grow justify-center text-gray-700">
-            <div className="flex justify-between font-medium">
-              <span>{query.get("name")!}</span>
-              <span>$0.00</span>
-            </div>
-          </div>
-        </div>
-        <div className="flex justify-center mt-4 text-xs">
-          <div className="w-full">
-            <span className="font-bold">
+        <VStack spacing={4} padding={4}>
+          <Box
+            d="flex"
+            w="full"
+            alignItems="center"
+            bg="gray.100"
+            rounded="lg"
+            padding={4}
+          >
+            <Avatar size="md" bg="indigo.500" src={query.get("img")!} />
+            <Box
+              d="flex"
+              flexGrow={1}
+              justifyContent="space-between"
+              marginLeft={4}
+            >
+              <Text fontSize="xl" fontWeight="medium">
+                {query.get("name")!}
+              </Text>
+              <Text fontSize="xl" fontWeight="medium">
+                $0.00
+              </Text>
+            </Box>
+          </Box>
+          <Text w="full" fontSize="small">
+            <Text fontWeight="bold">
               You will be the first to mint & own this person's token!
-            </span>{" "}
-            It will remain unverified until this person verifies it. Should the person opt out, no
-            new tokens may be purchased and exisiting tokens may still be sold.
-          </div>
-        </div>
-        <div className="flex mt-4">
+            </Text>{" "}
+            It will remain unclaimed until this person claims it. Should the
+            person opt out, no new tokens may be purchased and exisiting tokens
+            may still be sold. It costs 0.03 SOL (~${solPrice ? (solPrice * 0.03).toFixed(2) : ""}) to do this.
+          </Text>
           {connected && publicKey ? (
             <ClaimOrCreate />
           ) : (
-            <Link to={routes.wallet.path + `?redirect=${currentPath}`} className="w-full">
-              <Button block color="primary" size="lg">
-                Connect Wallet
-              </Button>
-            </Link>
+            <Button
+              as={Link}
+              to={routes.manageWallet.path + `?redirect=${currentPath}`}
+              size="md"
+              w="full"
+              colorScheme="indigo"
+            >
+              Connect Wallet
+            </Button>
           )}
-        </div>
+        </VStack>
       </WumboDrawer.Content>
       <WumboDrawer.Nav />
     </Fragment>

@@ -56,7 +56,7 @@ export function pxToNum(px: string): number {
 }
 
 // Keep iterating elements until we get to an element that encloses this rect with extra clearance in terms of px
-function clearSpace(node: Element | null, rect: DOMRect, clearance: IClearance): Element | null {
+export function clearSpace(node: Element | null, rect: DOMRect, clearance: IClearance): Element | null {
   if (node == null) {
     return null;
   }

@@ -7,12 +7,18 @@ import {
   WalletProvider,
   Notification,
   AccountCacheContextProvider,
+  wumboApi,
+  ErrorHandlingContext,
+  ThemeProvider,
+  SolPriceProvider
 } from "wumbo-common";
+import { ApolloProvider } from "@apollo/client";
 import { DrawerProvider } from "@/contexts/drawerContext";
 import { WalletName } from "@solana/wallet-adapter-wallets";
 import { InjectedWalletAdapter } from "@/utils/wallets";
-import { WalletError } from "@solana/wallet-adapter-base";
 import toast from "react-hot-toast";
+import { HistoryContextProvider } from "../utils/history";
+import * as Sentry from "@sentry/react";
 
 export const ContextProviders: FC = ({ children }) => {
   const alteredWallets = useMemo(
@@ -26,7 +32,8 @@ export const ContextProviders: FC = ({ children }) => {
         ];
 
         if (injectedWalletNames.includes(wallet.name)) {
-          wallet.adapter = () => new InjectedWalletAdapter({ name: wallet.name });
+          wallet.adapter = () =>
+            new InjectedWalletAdapter({ name: wallet.name });
         }
 
         return wallet;
@@ -35,14 +42,23 @@ export const ContextProviders: FC = ({ children }) => {
   );
 
   const onError = useCallback(
-    (error: WalletError) => {
-      console.log("error log!", error);
+    (error: Error) => {
+      console.error(error);
+      Sentry.captureException(error);
+      const code = (error.message?.match("custom program error: (.*)") ||
+        [])[1];
+      if (code == "0x1") {
+        error = new Error("Insufficient balance.");
+      } else if (code == "0x136") {
+        error = new Error("Purchased more than the cap of 100 bWUM");
+      }
       toast.custom((t) => (
         <Notification
           type="error"
           show={t.visible}
           heading={error.name}
-          message={error.message}
+          // @ts-ignore
+          message={error.message || error.msg || error.toString()}
           onDismiss={() => toast.dismiss(t.id)}
         />
       ));
@@ -52,17 +68,31 @@ export const ContextProviders: FC = ({ children }) => {
 
   return (
     <ConnectionProvider>
-      <AccountCacheContextProvider>
-        <EndpointSetter>
-          <AccountsProvider>
-            <WalletProvider wallets={alteredWallets} onError={onError}>
-              <UsdWumboPriceProvider>
-                <DrawerProvider>{children}</DrawerProvider>
-              </UsdWumboPriceProvider>
-            </WalletProvider>
-          </AccountsProvider>
-        </EndpointSetter>
-      </AccountCacheContextProvider>
+      <ErrorHandlingContext.Provider
+        value={{
+          onError,
+        }}
+      >
+        <ApolloProvider client={wumboApi}>
+          <AccountCacheContextProvider>
+            <EndpointSetter>
+              <AccountsProvider>
+                <WalletProvider wallets={alteredWallets} onError={console.error}>
+                  <SolPriceProvider>
+                    <UsdWumboPriceProvider>
+                      <HistoryContextProvider>
+                        <DrawerProvider>
+                          <ThemeProvider>{children}</ThemeProvider>
+                        </DrawerProvider>
+                      </HistoryContextProvider>
+                    </UsdWumboPriceProvider>
+                  </SolPriceProvider>
+                </WalletProvider>
+              </AccountsProvider>
+            </EndpointSetter>
+          </AccountCacheContextProvider>
+        </ApolloProvider>
+      </ErrorHandlingContext.Provider>
     </ConnectionProvider>
   );
 };

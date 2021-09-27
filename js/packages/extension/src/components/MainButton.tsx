@@ -1,68 +1,50 @@
 import React, { FC } from "react";
 import { Link } from "react-router-dom";
+import { Button, ButtonProps, SpinnerProps } from "@chakra-ui/react";
 import { useUserInfo } from "@/utils/userState";
-import { useAccount } from "wumbo-common";
-import { WUMBO_INSTANCE_KEY, Button, IButtonProps, Spinner, ISpinnerProps, WumboInstance } from "wumbo-common";
-
+import {
+  Spinner,
+  WUMBO_INSTANCE_KEY,
+  WumboInstance,
+  useAccount,
+} from "wumbo-common";
 import { useDrawer } from "@/contexts/drawerContext";
-import { routes, tradePath, viewProfilePath } from "@/constants/routes";
+import { routes, viewProfilePath } from "@/constants/routes";
 
 type Props = {
   creatorName: string;
   creatorImg: string;
-  btnProps?: Exclude<IButtonProps, "onClick">;
-  spinnerProps?: ISpinnerProps;
+  btnProps?: ButtonProps;
+  spinnerProps?: SpinnerProps;
 };
 
 export const MainButton: FC<Props> = ({
   creatorName,
   creatorImg,
-  btnProps,
-  spinnerProps,
+  btnProps = {},
+  spinnerProps = {},
 }: Props) => {
   const { toggleDrawer } = useDrawer();
   const creatorInfoState = useUserInfo(creatorName);
   const { userInfo: creatorInfo, loading } = creatorInfoState;
-  const { info: wumboInstance } = useAccount(WUMBO_INSTANCE_KEY, WumboInstance);
+  const { info: wumboInstance } = useAccount(
+    WUMBO_INSTANCE_KEY,
+    WumboInstance,
+    true
+  );
 
   if (!loading && !creatorInfo && wumboInstance) {
     return (
-      <Link
-        to={routes.create.path + `?name=${creatorName}&src=${creatorImg}`}
-        className="no-underline"
-      >
-        <Button
-          block
-          outline
-          size="xs"
-          color="primary"
-          onClick={() =>
-            toggleDrawer({
-              isOpen: true,
-              creator: { name: creatorName, img: creatorImg },
-            })
-          }
-          {...btnProps}
-        >
-          Mint
-        </Button>
-      </Link>
-    );
-  }
-
-  if (loading || !creatorInfo || !wumboInstance) {
-    return <Spinner {...spinnerProps} />;
-  }
-
-  return (
-    <Link
-      to={`${viewProfilePath(creatorInfo.tokenRef.publicKey)}?name=${creatorInfo.name}`}
-      className="no-underline"
-    >
       <Button
-        block
+        as={Link}
+        to={routes.create.path + `?name=${creatorName}&src=${creatorImg}`}
         size="xs"
-        color="secondary"
+        fontFamily="body"
+        colorScheme="indigo"
+        variant="outline"
+        _hover={{ bg: "indigo.900" }}
+        _active={{ bg: "indigo.900" }}
+        _focus={{ boxShadow: "none" }}
         onClick={() =>
           toggleDrawer({
             isOpen: true,
@@ -71,8 +53,34 @@ export const MainButton: FC<Props> = ({
         }
         {...btnProps}
       >
-        <span className="!text-green-800">${creatorInfo?.coinPriceUsd.toFixed(2)}</span>
+        Mint
       </Button>
-    </Link>
+    );
+  }
+
+  if (loading || !creatorInfo || !wumboInstance) {
+    return <Spinner size="sm" {...spinnerProps} />;
+  }
+
+  return (
+    <Button
+      as={Link}
+      to={`${viewProfilePath(creatorInfo.tokenRef.publicKey)}?name=${
+        creatorInfo.name
+      }`}
+      size="xs"
+      colorScheme="green"
+      color="green.800"
+      fontFamily="body"
+      onClick={() =>
+        toggleDrawer({
+          isOpen: true,
+          creator: { name: creatorName, img: creatorImg },
+        })
+      }
+      {...btnProps}
+    >
+      ${creatorInfo?.coinPriceUsd.toFixed(2)}
+    </Button>
   );
 };

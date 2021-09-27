@@ -1,54 +1,89 @@
-import React, { Fragment, ReactNode } from "react";
-import { NavLink } from "react-router-dom";
+import React, { useRef, Fragment, ReactNode, useContext } from "react";
+import { Route, NavLink, Link, useHistory } from "react-router-dom";
 import startCase from "lodash/startCase";
+import { Flex, Box, Slide, Text, Button, Icon } from "@chakra-ui/react";
+import { HiOutlineX } from "react-icons/hi";
+import { IoMdArrowRoundBack } from "react-icons/io";
+import { BiRadioCircleMarked } from "react-icons/bi";
+import { RiWallet3Line } from "react-icons/ri";
 import { Toaster } from "react-hot-toast";
-import { Transition } from "@headlessui/react";
-import { XIcon } from "@heroicons/react/outline";
 import { useDrawer } from "@/contexts/drawerContext";
 import { routes, IRoutes } from "@/constants/routes";
 import { useUserInfo } from "@/utils/userState";
-import { Spinner, WUM_BONDING } from "wumbo-common";
+import {
+  WalletAutoReconnect,
+  useWallet,
+  Spinner,
+  WUM_BONDING,
+} from "wumbo-common";
+import { useHistoryList } from "@/utils/history";
+import Logo from "../../public/assets/img/logo.svg";
+
+export const OutsideOfDrawerRef =
+  React.createContext<React.MutableRefObject<HTMLInputElement> | null>(null);
+
+export const useOutsideOfDrawerRef = (): React.RefObject<unknown> => {
+  return useContext(OutsideOfDrawerRef)!;
+};
 
 export const WumboDrawer = (props: { children: ReactNode }) => {
-  const { isOpen } = useDrawer();
+  const outsideOfDrawerRef =
+    useRef() as React.MutableRefObject<HTMLInputElement>;
+  const { isOpen, toggleDrawer } = useDrawer();
+  const tab = (
+    <Box
+      bg="indigo.500"
+      w="38px"
+      h="38px"
+      backgroundImage="linear-gradient(49deg, #2323ff -12%, #4f51ff 34%, #a53ef4 98%)"
+      roundedTopLeft="lg"
+      roundedBottomLeft="lg"
+      shaddow="md"
+      onClick={() => toggleDrawer({ isOpen: !isOpen })}
+      _hover={{ cursor: "pointer" }}
+    >
+      <Icon h="38px" w="38px" as={Logo} />
+    </Box>
+  );
 
   return (
-    <div
-      aria-live="assertive"
-      className="fixed inset-0 flex items-end px-4 py-6 pointer-events-none sm:p-6 sm:items-start"
-    >
-      <div className="w-full flex flex-col items-center space-y-4 sm:items-end">
-        <Transition.Root show={isOpen} as={Fragment}>
-          <div className="fixed inset-0 overflow-hidden">
-            {/* TODO: We can customize the 280px here based on where they drag the drawer */}
-            <div
-              style={{ top: "calc(50% - 280px)" }}
-              className="fixed right-0 pl-10 max-w-full flex"
-            >
-              <Transition.Child
-                as={Fragment}
-                enter="transform transition ease-in-out duration-300 sm:duration-500"
-                enterFrom="translate-x-full"
-                enterTo="translate-x-0"
-                leave="transform transition ease-in-out duration-300 sm:duration-500"
-                leaveFrom="translate-x-0"
-                leaveTo="translate-x-full"
-              >
-                <div className="w-screen max-w-340px pointer-events-auto shadow-2xl">
-                  <div className="h-560px w-340px flex flex-col bg-white rounded-l-lg text-black">
-                    {props.children}
-                  </div>
-                  <Toaster
-                    containerClassName="!absolute !bottom-0 !top-auto !left-auto !right-auto !w-full !w-max-340px"
-                    position="bottom-center"
-                  />
-                </div>
-              </Transition.Child>
-            </div>
-          </div>
-        </Transition.Root>
-      </div>
-    </div>
+    <Fragment>
+      {isOpen && <WalletAutoReconnect />}
+      {!isOpen && (
+        <Box pos="fixed" right="0" style={{ top: "calc(50% - 246px)" }}>
+          {tab}
+        </Box>
+      )}
+      <Box ref={outsideOfDrawerRef} zIndex={200} />
+
+      <OutsideOfDrawerRef.Provider value={outsideOfDrawerRef}>
+        <Slide
+          direction="right"
+          in={isOpen}
+          style={{ width: "345px", zIndex: 100 }}
+        >
+          <Box
+            // w="345px"
+            pos="fixed"
+            right="0"
+            style={{ top: "calc(50% - 280px)" }}
+            w="345px"
+            h="560px"
+            bg="white"
+            d="flex"
+            flexDir="column"
+            roundedTopLeft="lg"
+            roundedBottomLeft="lg"
+            shadow="md"
+          >
+            {props.children}
+          </Box>
+          <Box pos="fixed" right="345px" style={{ top: "calc(50% - 246px)" }}>
+            {tab}
+          </Box>
+        </Slide>
+      </OutsideOfDrawerRef.Provider>
+    </Fragment>
   );
 };
 
@@ -65,33 +100,92 @@ type HeaderProps = HeaderNoChildren | HeaderWithChildren;
 WumboDrawer.Header = (props: HeaderProps) => {
   const { toggleDrawer } = useDrawer();
   const hasTitle = !!(props as HeaderNoChildren).title;
+  const { connected } = useWallet();
+  const historyList = useHistoryList();
+  const history = useHistory();
 
   return (
-    <div className="px-4 py-3 border-b-1 border-gray-200">
-      <div className="flex items-start justify-between">
-        <div className="w-full">
+    <Flex
+      padding={4}
+      borderBottom="1px"
+      borderColor="gray.200"
+      fontFamily="body"
+      minH="61px"
+    >
+      <Flex w="full" alignItems="center" justifyContent="space-between">
+        <Flex w="full" alignItems="center">
+          {historyList.length > 1 && (
+            <Link
+              // This should look and behave like a link, but it actually needs to pop things off from the history stack.
+              onClick={(e) => {
+                e.preventDefault();
+                history.goBack();
+              }}
+              to={historyList[historyList.length - 2]}
+            >
+              <Box>
+                <Icon
+                  mr={2}
+                  w={5}
+                  h={5}
+                  as={IoMdArrowRoundBack}
+                  fontSize="lg"
+                  fontWeight="medium"
+                  color="indigo.500"
+                />
+              </Box>
+            </Link>
+          )}
           {hasTitle && (
-            <p className="text-lg font-medium text-indigo-600">
+            <Text fontSize="lg" fontWeight="medium" color="indigo.500">
               {(props as HeaderNoChildren).title}
-            </p>
+            </Text>
           )}
           {!hasTitle && (props as HeaderWithChildren).children}
-        </div>
-        <div className="ml-3 h-7 flex items-center">
-          <button
-            className="bg-white rounded-md text-gray-400 hover:text-gray-500 focus:outline-none"
-            onClick={() => toggleDrawer()}
-          >
-            <XIcon className="h-6 w-6" aria-hidden="true" />
-          </button>
-        </div>
-      </div>
-    </div>
+        </Flex>
+        <Flex pl={2} alignItems="center">
+          <Box pr={2}>
+            <Link to={routes.manageWallet.path}>
+              <Box position="relative">
+                <Icon
+                  color="gray.500"
+                  _hover={{ color: "gray.600", cursor: "pointer" }}
+                  w={5}
+                  h={5}
+                  as={RiWallet3Line}
+                />
+                <Icon
+                  w={4}
+                  h={4}
+                  fontWeight="bold"
+                  position="absolute"
+                  left={-1}
+                  bottom={-1}
+                  as={BiRadioCircleMarked}
+                  color={connected ? "green.500" : "red.500"}
+                />
+              </Box>
+            </Link>
+          </Box>
+        </Flex>
+
+        <Box
+          color="gray.500"
+          _hover={{ color: "gray.600", cursor: "pointer" }}
+          onClick={() => toggleDrawer()}
+        >
+          <Icon as={HiOutlineX} w={5} h={5} />
+        </Box>
+      </Flex>
+    </Flex>
   );
 };
 
+// Minimal Styling, nested comps should style themselves
 WumboDrawer.Content = (props: { children: ReactNode }) => (
-  <div className="mt-4 overflow-y-auto relative flex-1 px-4">{props.children}</div>
+  <Box pos="relative" flexGrow={1} overflowY="auto" fontFamily="body">
+    {props.children}
+  </Box>
 );
 
 WumboDrawer.Nav = () => {
@@ -100,37 +194,94 @@ WumboDrawer.Nav = () => {
   const { userInfo: creatorInfo, loading } = creatorInfoState;
 
   return (
-    <div className="flex flex-row justify-around pt-2 px-2 border-t-1 border-gray-200">
-      {Object.keys(routes).map((route) => {
-        const { path, Icon, isDrawerNav } = routes[route as keyof IRoutes];
+    <Box w="full" position="relative">
+      <Toaster
+        position="bottom-center"
+        containerStyle={{
+          position: "relative",
+          top: 0,
+          bottom: 0,
+          right: 0,
+          left: 0,
+          pointerEvents: "auto",
+        }}
+      />
+      <Box
+        d="flex"
+        alignItems="center"
+        justifyContent="space-around"
+        pt="4px"
+        px="4px"
+        borderTop="1px"
+        borderColor="gray.200"
+        fontFamily="body"
+        height="56px"
+      >
+        {Object.keys(routes).map((route) => {
+          const {
+            path,
+            Icon: RouteIcon,
+            isDrawerNav,
+            exact,
+          } = routes[route as keyof IRoutes];
 
-        // Fill paths with params in
-        let filledPath = path;
-        if (path.endsWith(":tokenBondingKey")) {
-          filledPath = `${path.replace(
-            ":tokenBondingKey",
-            creatorInfo?.tokenBonding?.publicKey?.toBase58() || WUM_BONDING.toBase58()
-          )}${creatorInfo ? "?name=" + creatorInfo.name : ""}`;
-        }
+          // Fill paths with params in
+          let filledPath = path;
+          if (
+            path.endsWith(":tokenBondingKey") ||
+            path.endsWith(":tokenRefKey")
+          ) {
+            const replacedKeys = path
+              .replace(
+                ":tokenBondingKey",
+                creatorInfo?.tokenBonding?.publicKey?.toBase58() ||
+                  WUM_BONDING.toBase58()
+              )
+              .replace(
+                ":tokenRefKey",
+                creatorInfo?.tokenRef?.publicKey.toBase58() || ""
+              );
+            filledPath = `${replacedKeys}${
+              creatorInfo ? "?name=" + creatorInfo.name : ""
+            }`;
+          }
 
-        if (isDrawerNav && Icon) {
-          return (
-            <NavLink
-              to={filledPath}
-              key={path}
-              className="flex flex-col justify-center items-center border-transparent text-gray-500 text-xs font-medium inline-flex items-center px-2 py-2 border-b-3 text-xs font-medium hover:border-gray-300 hover:text-gray-700"
-              activeClassName="!border-indigo-500 !text-indigo-500"
-            >
-              {/* @ts-ignore */}
-              <Icon className="h-5 w-5" />
-              <span>{startCase(route)}</span>
-            </NavLink>
-          );
-        } else {
-          return null;
-        }
-      })}
-    </div>
+          if (isDrawerNav && Icon) {
+            return (
+              <Route
+                key={path}
+                path={path}
+                exact={exact}
+                children={({ match }) => (
+                  <Button
+                    as={NavLink}
+                    to={filledPath}
+                    d="inline-flex"
+                    flexDir="column"
+                    variant="unstyled"
+                    justifyContent="center"
+                    alignItems="center"
+                    color={match ? "indigo.500" : "gray.600"}
+                    fontWeight="medium"
+                    h="full"
+                    borderBottom="3px"
+                    borderBottomStyle="solid"
+                    borderColor={match ? "indigo.500" : "transparent"}
+                    borderRadius="none"
+                  >
+                    {/* @ts-ignore */}
+                    <Icon as={RouteIcon} w={6} h={6} />
+                    <Text fontSize="xs">{startCase(route)}</Text>
+                  </Button>
+                )}
+              />
+            );
+          } else {
+            return null;
+          }
+        })}
+      </Box>
+    </Box>
   );
 };
 
@@ -138,9 +289,9 @@ WumboDrawer.Loading = () => (
   <Fragment>
     <WumboDrawer.Header />
     <WumboDrawer.Content>
-      <div className="flex justify-center items-center h-full">
-        <Spinner size="lg" color="primary" />
-      </div>
+      <Box d="flex" justifyContent="center" alignItems="center" h="full">
+        <Spinner />
+      </Box>
     </WumboDrawer.Content>
   </Fragment>
 );

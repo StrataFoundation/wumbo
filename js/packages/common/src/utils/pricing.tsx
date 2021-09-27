@@ -1,12 +1,12 @@
 import { Market } from "@project-serum/serum";
-import { Connection, PublicKey } from "@solana/web3.js";
+import { AccountInfo, Connection, PublicKey } from "@solana/web3.js";
+import { useConnection } from "../contexts/connection";
 import React, { useContext, useEffect, useMemo, useState } from "react";
 import {
   SERUM_PROGRAM_ID,
   SOL_TOKEN,
   SOL_TO_USD_MARKET,
   WUM_BONDING,
-  WUM_REWARDS_PERCENTAGE,
   WUM_TOKEN,
 } from "../constants/globals";
 import { Order } from "@project-serum/serum/lib/market";
@@ -17,11 +17,12 @@ import { useAccount } from "./account";
 import { useMint } from "./mintState";
 import { useAssociatedAccount } from "./walletState";
 import { useWallet } from "../contexts/walletContext";
-import { useConnection } from "@oyster/common";
+import { TokenAccountParser } from "@oyster/common";
 import { useAsync } from "react-async-hook";
 import { useTwitterTokenRef } from "./tokenRef";
 import { Curve as DeserializeCurve, TokenBonding } from "./deserializers/spl-token-bonding";
 import { Curve, fromCurve } from "@wum.bo/spl-token-bonding";
+import { useQuery, gql } from '@apollo/client';
 
 // TODO: Use actual connection. But this can't happen in dev
 let connection = new Connection("https://api.mainnet-beta.solana.com");
@@ -73,52 +74,17 @@ export function useOwnedAmountForOwnerAndHandle(
   owner: PublicKey | undefined,
   handle: string | undefined
 ): { amount: number | undefined; loading: boolean } {
-  const [state, setState] = useState<{
-    amount: number | undefined;
-    loading: boolean;
-  }>({
-    loading: true,
-    amount: 0,
-  });
   const { info: tokenRef, loading: loadingRef } = useTwitterTokenRef(handle);
-  const { info: token, loading: loadingAmount } = useAccount(
-    tokenRef?.tokenBonding,
-    TokenBonding
-  );
-  const { associatedAccount, loading: loadingAssociatedAccount } = useAssociatedAccount(
-    owner,
-    token?.targetMint
-  );
-  const mint = useMint(token?.targetMint);
+  const amount = useUserOwnedAmount(owner, tokenRef?.mint);
 
-  useEffect(() => {
-    if (tokenRef && token && associatedAccount && mint) {
-      setState({
-        loading: false,
-        amount: amountAsNum(associatedAccount.amount, mint),
-      });
-    } else if (!loadingRef && !loadingAmount && !loadingAssociatedAccount) {
-      setState({
-        loading: false,
-        amount: undefined,
-      });
-    }
-  }, [
-    tokenRef,
-    token,
-    associatedAccount,
-    mint,
-    loadingRef,
-    loadingAmount,
-    loadingAssociatedAccount,
-  ]);
-
-  return state;
+  return {
+    loading: loadingRef,
+    amount
+  }
 }
 
-export function useOwnedAmount(token: PublicKey | undefined): number | undefined {
-  const { adapter } = useWallet();
-  const { associatedAccount } = useAssociatedAccount(adapter?.publicKey, token);
+export function useUserOwnedAmount(wallet: PublicKey | undefined, token: PublicKey | undefined): number | undefined {
+  const { associatedAccount } = useAssociatedAccount(wallet, token);
   const mint = useMint(token);
   const [amount, setAmount] = useState<number>();
 
@@ -131,37 +97,58 @@ export function useOwnedAmount(token: PublicKey | undefined): number | undefined
   return amount && Number(amount);
 }
 
+export function useOwnedAmount(token: PublicKey | undefined): number | undefined {
+  const { publicKey } = useWallet();
+  return useUserOwnedAmount(publicKey || undefined, token);
+}
+
 export interface PricingState {
   loading: boolean;
   curve?: Curve
 }
 export function useBondingPricing(tokenBonding: PublicKey | undefined): PricingState {
-  const [state, setState] = useState<PricingState>({
-    loading: true
-  });
-  const { info: bonding } = useAccount(tokenBonding, TokenBonding);
-  const { info: curve } = useAccount(bonding?.curve, DeserializeCurve);
+  const { info: bonding, loading: bondingLoading  } = useAccount(tokenBonding, TokenBonding);
+  const { info: curve, loading: curveLoading } = useAccount(bonding?.curve, DeserializeCurve, true);
 
   const base = useMint(bonding?.baseMint);
   const target = useMint(bonding?.targetMint);
-  useEffect(() => {
-    if (curve && base && target && bonding) {
-      setState({
-        loading: false,
-        curve: fromCurve(curve, base, target)
-      });
-    }
-  }, [curve, base, target, bonding]);
-
-  return state;
+  const pricing = useMemo(() => curve && base && target && fromCurve(curve, base, target), [curve, base, target])
+  const loading = useMemo(() => curveLoading || bondingLoading, [curveLoading, bondingLoading]);
+  
+  return {
+    curve: pricing,
+    loading
+  };
 }
 
+
+const GET_TOTAL_WUM_LOCKED = gql`
+  query GetTotalWumLocked {
+    totalWumLocked
+  }
+`;
 export const UsdWumboPriceProvider = ({ children = undefined as any }) => {
-  const price = useMarketPrice(SOL_TO_USD_MARKET);
-  const { curve } = useBondingPricing(WUM_BONDING);
+  const solPrice = useMarketPrice(SOL_TO_USD_MARKET);
+
+  // Normal wum price...
+  // const { curve } = useBondingPricing(WUM_BONDING);
+  // const wumPrice = (solPrice || 0) * (curve ? curve.current() : 0);
+
+  // Beta wum price...
+  const solMint = useMint(SOL_TOKEN);
+  const { info: wumBonding } = useAccount(WUM_BONDING, TokenBonding);
+  const { info: baseStorage } = useAccount(
+    wumBonding?.baseStorage,
+    (pubkey: PublicKey, acct: AccountInfo<Buffer>) => {
+      return TokenAccountParser(pubkey, acct)!.info;
+    }
+  );
+  const { data: { totalWumLocked } = {} } = useQuery<{ totalWumLocked: number | undefined }>(GET_TOTAL_WUM_LOCKED, {})
+  const baseStorageAmount = baseStorage && solMint ? amountAsNum(baseStorage.amount, solMint) : 0
+  const bwumPrice = (baseStorageAmount / (totalWumLocked || 1)) * (solPrice || 0)
 
   return (
-    <UsdWumboPriceContext.Provider value={(price || 0) * (curve ? curve.current() : 0)}>
+    <UsdWumboPriceContext.Provider value={bwumPrice}>
       {children}
     </UsdWumboPriceContext.Provider>
   );
@@ -170,6 +157,20 @@ export const UsdWumboPriceProvider = ({ children = undefined as any }) => {
 export const useWumboUsdPrice = () => {
   return useContext(UsdWumboPriceContext);
 };
+
+const SolPriceContext = React.createContext<number | undefined>(undefined);
+export const useSolPrice = () => {
+  return useContext(SolPriceContext)
+}
+
+export const SolPriceProvider: React.FC = ({ children }) => {
+  const price = useMarketPrice(SOL_TO_USD_MARKET);
+  return <SolPriceContext.Provider
+    value={price}
+    >
+      { children }
+    </SolPriceContext.Provider>
+}
 
 export const useMarketPrice = (marketAddress: PublicKey): number | undefined => {
   const [price, setPrice] = useState<number>();
@@ -196,8 +197,8 @@ export const useMarketPrice = (marketAddress: PublicKey): number | undefined => 
 
 export function useFiatPrice(token: PublicKey | undefined): number | undefined {
   const wumboPrice = useWumboUsdPrice();
-  const solPrice = useMarketPrice(SOL_TO_USD_MARKET);
-
+  const solPrice = useSolPrice();
+  
   const [price, setPrice] = useState<number>();
 
   useEffect(() => {

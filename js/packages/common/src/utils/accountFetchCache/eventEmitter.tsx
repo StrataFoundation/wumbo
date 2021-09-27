@@ -5,12 +5,10 @@ export class CacheUpdateEvent {
   id: string;
   parser: any;
   isNew: boolean;
-  isActive: boolean;
-  constructor(id: string, isNew: boolean, parser: any, isActive: boolean) {
+  constructor(id: string, isNew: boolean, parser: any) {
     this.id = id;
     this.parser = parser;
     this.isNew = isNew;
-    this.isActive = isActive;
   }
 }
 
@@ -34,12 +32,11 @@ export class EventEmitter {
   raiseCacheUpdated(
     id: string,
     isNew: boolean,
-    parser: any,
-    isActive: boolean,
+    parser: any
   ) {
     this.emitter.emit(
       CacheUpdateEvent.type,
-      new CacheUpdateEvent(id, isNew, parser, isActive),
+      new CacheUpdateEvent(id, isNew, parser),
     );
   }
 

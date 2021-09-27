@@ -170,7 +170,10 @@ export class InjectedWalletAdapter
             verifySignatures: false,
           }),
         });
-        return Transaction.from(signedTransaction);
+
+        const signed = Transaction.from(signedTransaction);
+        transaction.signatures = signed.signatures;
+        return signed;
       } catch (error) {
         throw new WalletSignatureError(error?.message, error);
       }

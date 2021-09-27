@@ -1,20 +1,22 @@
 import React, { Fragment } from "react";
-import { AppendChildPortal } from "wumbo-common";
+import ReactShadow from "react-shadow/emotion";
+import { Box } from "@chakra-ui/react";
+import { AppendChildPortal, ThemeProvider } from "wumbo-common";
 import { useUserCells } from "../../utils/twitterSpotter";
 import { MainButton } from "../MainButton";
 
 let incrementingId = 0;
 function getElementId(element: HTMLElement | null): string {
   if (!element) {
-    return ""
+    return "";
   }
-  
+
   if (!element.id) {
     incrementingId++;
     element.id = "user_cell_id_" + incrementingId;
   }
 
-  return element.id
+  return element.id;
 }
 
 export const UserCellEnhancer = () => {
@@ -28,9 +30,10 @@ export const UserCellEnhancer = () => {
             creatorName={cell.name}
             creatorImg={cell.avatar || ""}
             btnProps={{
-              className: "!px-4 !py-1.5",
               size: "md",
-              rounded: true,
+              height: "32px",
+              paddingY: "2px",
+              borderRadius: "full",
             }}
           />
         ) : null;
@@ -42,9 +45,18 @@ export const UserCellEnhancer = () => {
           return (
             <Fragment key={cell.name + getElementId(cell.buttonTarget)}>
               <AppendChildPortal container={cell.buttonTarget as Element}>
-                <div className="flex justify-center self-start ml-2">
-                  {buttonEl}
-                </div>
+                <ReactShadow.div>
+                  <ThemeProvider>
+                    <Box
+                      d="flex"
+                      justifyContent="center"
+                      justifySelf="start"
+                      marginLeft="4px"
+                    >
+                      {buttonEl}
+                    </Box>
+                  </ThemeProvider>
+                </ReactShadow.div>
               </AppendChildPortal>
             </Fragment>
           );

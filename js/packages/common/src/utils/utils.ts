@@ -7,7 +7,7 @@ export function classNames(...classes: (false | null | undefined | string)[]) {
 
 export function useIsExtension(): boolean {
   // @ts-ignore
-  return window.isExtension;
+  return !!window.isExtension;
 }
 
 export function usePrevious<T extends unknown>(value: T): T | undefined {

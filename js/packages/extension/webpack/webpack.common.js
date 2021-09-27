@@ -5,7 +5,6 @@ const CopyPlugin = require("copy-webpack-plugin");
 const srcDir = path.join(__dirname, "..", "src");
 const { ESBuildMinifyPlugin } = require("esbuild-loader");
 const TsconfigPathsPlugin = require("tsconfig-paths-webpack-plugin");
-const WindiCSS = require("windicss-webpack-plugin").default;
 
 module.exports = {
   entry: {
@@ -55,9 +54,7 @@ module.exports = {
     ],
   },
   resolve: {
-    fallback: {
-      "fs": false
-    },
+    fallback: { fs: false },
     plugins: [new TsconfigPathsPlugin()],
     extensions: [".ts", ".tsx", ".js"],
     alias: {
@@ -68,8 +65,25 @@ module.exports = {
     },
   },
   plugins: [
+    new webpack.EnvironmentPlugin([
+      'REACT_APP_SITE_URL',
+      'REACT_APP_NFT_VERIFIER_TLD',
+      'REACT_APP_NFT_VERIFIER',
+      'REACT_APP_TROPHY_CREATOR',
+      'REACT_APP_TWITTER_REGISTRAR_SERVER_URL',
+      'REACT_APP_WUM_BONDING',
+      'REACT_APP_WUM_TOKEN',
+      'REACT_APP_WUMBO_INSTANCE_KEY',
+      'REACT_APP_SOLANA_API_URL',
+      'REACT_APP_IS_DEV',
+      'REACT_APP_TWITTER_TLD',
+      'REACT_APP_TWITTER_VERIFIER',
+      'REACT_APP_NFT_VERIFIER_URL',
+      'REACT_APP_WUMBO_API_URL',
+      'REACT_APP_TAGGING_THRESHOLD',
+      'REACT_APP_BASE_SLIPPAGE'
+    ]),
     new NodePolyfillPlugin(),
-    new WindiCSS(),
     new CopyPlugin({
       patterns: [{ from: ".", to: ".", context: "public" }],
       options: {},

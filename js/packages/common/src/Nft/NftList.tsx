@@ -1,8 +1,14 @@
-import { PublicKey } from "@solana/web3.js";
-import { NftCard } from "./NftCard";
 import React from "react";
+import { PublicKey } from "@solana/web3.js";
+import { SimpleGrid, Box, Center } from "@chakra-ui/react";
+import { NftCard } from "./NftCard";
 import { Spinner } from "../Spinner";
-import { ITokenWithMeta, ITokenWithMetaAndAccount, useUserTokensWithMeta } from "../utils";
+import {
+  ITokenWithMeta,
+  ITokenWithMetaAndAccount,
+  useUserTokensWithMeta,
+} from "../utils";
+import { handleErrors } from "../contexts";
 
 export const NftListRaw = React.memo(
   ({
@@ -14,33 +20,51 @@ export const NftListRaw = React.memo(
     getLink: (t: ITokenWithMeta) => string;
     loading?: boolean;
   }) => {
-    if (!tokens || loading) {
+    if (loading) {
       return <Spinner />;
     }
 
+    if (!tokens?.length) {
+      return (
+        <Box w="full" h="full">
+          <Center
+            padding={4}
+            rounded="lg"
+            fontSize="lg"
+            fontWeight="medium"
+            color="gray.400"
+            bgColor="gray.100"
+          >
+            No tokens found
+          </Center>
+        </Box>
+      );
+    }
+
     return (
-      <ul
-        role="list"
-        className="grid grid-cols-3 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3"
-      >
+      <SimpleGrid w="full" minChildWidth="93px" spacing={4}>
         {tokens
           .filter((t) => t.masterEdition)
           .map((token) => (
-            <li
-              key={token.publicKey?.toBase58()}
-              className="col-span-1 flex flex-col text-center rounded-lg border-2 border-gray-100"
-            >
+            <Box key={token.publicKey?.toBase58()} height="156px" w="full">
               <NftCard getLink={getLink} token={token} />
-            </li>
+            </Box>
           ))}
-      </ul>
+      </SimpleGrid>
     );
   }
 );
 
 export const NftList = React.memo(
-  ({ owner, getLink }: { owner?: PublicKey; getLink: (t: ITokenWithMeta) => string }) => {
+  ({
+    owner,
+    getLink,
+  }: {
+    owner?: PublicKey;
+    getLink: (t: ITokenWithMeta) => string;
+  }) => {
     const { result: tokens, loading, error } = useUserTokensWithMeta(owner);
+    handleErrors(error);
     return <NftListRaw getLink={getLink} loading={loading} tokens={tokens} />;
   }
 );

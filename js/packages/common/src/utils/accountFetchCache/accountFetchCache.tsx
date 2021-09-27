@@ -1,4 +1,4 @@
-import { AccountInfo, Connection, PublicKey } from '@solana/web3.js';
+import { AccountInfo, Connection, PublicKey, SendOptions, Signer, Transaction, TransactionInstruction } from '@solana/web3.js';
 import { getMultipleAccounts } from './getMultipleAccounts';
 import { EventEmitter } from './eventEmitter';
 import { Commitment } from '@solana/web3.js';
@@ -23,19 +23,80 @@ export class AccountFetchCache {
   delay: number;
   commitment: Commitment;
   accountChangeListeners = new Map<string, number>();
+  statics = new Set<string>();
+  missingAccounts = new Map<string, AccountParser<unknown> | undefined>();
   genericCache = new Map<string, ParsedAccountBase<unknown> | null>();
-  keyToAccountParser = new Map<string, AccountParser<unknown>>();
+  keyToAccountParser = new Map<string, AccountParser<unknown> | undefined>();
   timeout: NodeJS.Timeout | null = null
   currentBatch = new Set<string>();
   pendingCallbacks = new Map<string, ((info: AccountInfo<Buffer> | null, err: Error | null) => void)>();
   pendingCalls = new Map<string, Promise<ParsedAccountBase<unknown>>>();;
   emitter = new EventEmitter();
 
-  constructor({ connection, chunkSize = DEFAULT_CHUNK_SIZE, delay = DEFAULT_DELAY, commitment }: { connection: Connection, chunkSize?: number, delay?: number, commitment: Commitment }) {
+  missingInterval: NodeJS.Timeout
+
+  constructor({ connection, chunkSize = DEFAULT_CHUNK_SIZE, delay = DEFAULT_DELAY, commitment, missingRefetchDelay = 10000 }: { connection: Connection, chunkSize?: number, delay?: number, commitment: Commitment, missingRefetchDelay?: number }) {
     this.connection = connection;
     this.chunkSize = chunkSize;
     this.delay = delay;
     this.commitment = commitment;
+    this.missingInterval = setInterval(this.fetchMissing.bind(this), missingRefetchDelay);
+
+    const oldSendTransaction = connection.sendTransaction.bind(connection);
+    const oldSendRawTransaction = connection.sendRawTransaction.bind(connection);
+
+    const self = this;
+    connection.sendTransaction = async function overloadedSendTransaction(
+      transaction: Transaction,
+      signers: Array<Signer>,
+      options?: SendOptions
+    ) {
+      const result = await oldSendTransaction(transaction, signers, options);
+      this.confirmTransaction(result, 'finalized').then(() => 
+        self.requeryMissing(transaction.instructions)
+      ).catch(console.error);
+
+      return result;
+    }
+
+    connection.sendRawTransaction = async function overloadedSendRawTransaction(
+      rawTransaction: Buffer | Uint8Array | Array<number>,
+      options?: SendOptions,
+    ) {
+      const result = await oldSendRawTransaction(rawTransaction, options);
+
+      this.confirmTransaction(result, 'finalized').then(() =>
+        self.requeryMissing(Transaction.from(rawTransaction).instructions)
+      ).catch(console.error);
+
+
+      return result;
+    }
+  }
+
+  async requeryMissing(instructions: TransactionInstruction[]) {
+    const writeableAccounts = instructions.flatMap(i => i.keys.filter(k => k.isWritable)).map(a => a.pubkey.toBase58());
+    const affectedAccounts = writeableAccounts.filter(acct => this.missingAccounts.has(acct));
+    await Promise.all(affectedAccounts.map(async account => {
+      const parser = this.missingAccounts.get(account);
+      const found = await this.searchAndWatch(new PublicKey(account), parser, this.statics.has(account), true)
+      if (found) {
+        this.missingAccounts.delete(account);
+      }
+    }))
+  }
+
+  async fetchMissing() {
+    try {
+      await Promise.all([...this.missingAccounts].map(([account, _]) => this.searchAndWatch(new PublicKey(account), this.missingAccounts.get(account), this.statics.has(account), true)))
+    } catch(e) {
+      // This happens in an interval, so just log errors
+      console.error(e);
+    }
+  }
+
+  close() {
+    clearInterval(this.missingInterval);
   }
 
   async fetchBatch() {
@@ -46,7 +107,6 @@ export class AccountFetchCache {
       const { keys, array } = await getMultipleAccounts(this.connection, [...currentBatch], this.commitment)
       keys.forEach((key, index) => {
         this.pendingCallbacks.get(key)!(array[index], null)
-        this.pendingCallbacks.delete(key);
       })
   
       return { keys, array };
@@ -70,10 +130,10 @@ export class AccountFetchCache {
 
     const promise = new Promise<AccountInfo<Buffer>>((resolve, reject) => {
       this.pendingCallbacks.set(idStr, (info, err) => {
+        this.pendingCallbacks.delete(idStr);
         if (err) {
           return reject(err)
         }
-
         resolve(info!)
       });
     });
@@ -86,12 +146,47 @@ export class AccountFetchCache {
     await this.fetchBatch();
   }
 
+  async searchAndWatch<T>(
+    pubKey: string | PublicKey,
+    parser?: AccountParser<T> | undefined,
+    isStatic: Boolean = false, // optimization, set if the data will never change
+    forceRequery = false,
+  ): Promise<ParsedAccountBase<T> | undefined> {
+    let id: PublicKey;
+    if (typeof pubKey === 'string') {
+      id = new PublicKey(pubKey);
+    } else {
+      id = pubKey;
+    }
+    const address = id.toBase58();
+
+    const data = await this.search(pubKey, parser, isStatic, forceRequery);
+    this.watch(id, parser, !!data);
+    const cacheEntry = this.genericCache.get(address)
+    if (!this.genericCache.has(address) || cacheEntry != data) {
+      this.updateCache<T>(address, data || null)
+    }
+
+    return data;
+  }
+
+  async updateCache<T>(id: string, data: ParsedAccountBase<T> | null) {
+    const isNew = !this.genericCache.has(id);
+    this.genericCache.set(id, data || null);
+
+    this.emitter.raiseCacheUpdated(id, isNew, this.keyToAccountParser.get(id));
+  }
+
+  static defaultParser: AccountParser<any> = (pubkey, account) => ({
+    pubkey, account
+  });
+
   // The same as query, except swallows errors and returns undefined.
   async search<T>(
     pubKey: string | PublicKey,
-    parser: AccountParser<T> = (pubkey, account) => ({
-      pubkey, account
-    })
+    parser?: AccountParser<T> | undefined,
+    isStatic: Boolean = false, // optimization, set if the data will never change
+    forceRequery = false,
   ): Promise<ParsedAccountBase<T> | undefined> {
     let id: PublicKey;
     if (typeof pubKey === 'string') {
@@ -101,30 +196,40 @@ export class AccountFetchCache {
     }
 
     const address = id.toBase58();
-
-    let account = this.genericCache.get(address) as ParsedAccountBase<T>;
-    if (account) {
-      return account;
+    if (isStatic) {
+      this.statics.add(address)
+    } else if (this.statics.has(address)) {
+      this.statics.delete(address) // If trying to use this as not static, need to rm it from the statics list.
+    }
+    
+    if (!forceRequery && this.genericCache.has(address)) {
+      const result = this.genericCache.get(address);
+      return result == null ? undefined : result as ParsedAccountBase<T> | undefined;
     }
 
     const existingQuery = this.pendingCalls.get(address) as Promise<ParsedAccountBase<T>>;
     if (existingQuery) {
       return existingQuery;
     }
-
-    this.watch(id, parser);
-
     const query = this.addToBatch(id).then(data => {
+      this.pendingCalls.delete(address);
       if (!data) {
-        this.genericCache.set(id.toBase58(), null)
         return undefined;
       }
 
-      return this.add(id, data, parser) || {
+      const result = this.getParsed(id, data, parser) || {
         pubkey: id,
         account: data,
         info: undefined
       };
+
+      // Only set the cache for defined static accounts. Static accounts can change if they go from nonexistant to existant.
+      // Rely on searchAndWatch to set the generic cache for everything else.
+      if (isStatic && result.info) {
+        this.updateCache(address, result)
+      }
+
+      return result;
     });
     this.pendingCalls.set(address, query as any);
 
@@ -132,14 +237,27 @@ export class AccountFetchCache {
   }
 
   onAccountChange<T>(key: PublicKey, parser: AccountParser<T> | undefined, account: AccountInfo<Buffer>) {
-    this.add(key, account, parser)
+    const parsed = this.getParsed(key, account, parser);
+    const address = key.toBase58();
+    this.updateCache(address, parsed || null);
   }
 
-  watch<T>(id: PublicKey, parser?: AccountParser<T>): void {
-    this.accountChangeListeners.set(
-      id.toBase58(),
-      this.connection.onAccountChange(id, this.onAccountChange.bind(this, id, parser), this.commitment)
-    );
+  watch<T>(id: PublicKey, parser?: AccountParser<T> | undefined, exists: Boolean = true): void {
+    const address = id.toBase58()
+    const isStatic = this.statics.has(address)
+
+    if (exists && !isStatic) { // Only websocket watch accounts that exist
+      // Don't recreate listeners
+      if (!this.accountChangeListeners.has(address)) {
+        console.log(`Watching ${address}`);
+        this.accountChangeListeners.set(
+          address,
+          this.connection.onAccountChange(id, (account) => this.onAccountChange(id, undefined, account), this.commitment)
+        );
+      }
+    } else if (!exists) { // Poll accounts that don't exist
+      this.missingAccounts.set(address, parser || this.missingAccounts.get(address));
+    }
   }
 
   async query<T>(
@@ -154,34 +272,19 @@ export class AccountFetchCache {
     return ret;
   }
 
-  add<T>(
+  getParsed<T>(
     id: PublicKey | string,
     obj: AccountInfo<Buffer>,
-    parser?: AccountParser<T>,
-    isActive?: boolean | undefined | ((parsed: any) => boolean),
+    parser?: AccountParser<T>
   ): ParsedAccountBase<T> | undefined {
     const address = typeof id === 'string' ? id : id?.toBase58();
-    const deserialize = parser ? parser : this.keyToAccountParser.get(address) as AccountParser<T> | undefined;
-    if (!deserialize) {
-      throw new Error(
-        'Deserializer needs to be registered or passed as a parameter',
-      );
-    }
-
-    this.registerParser(id, deserialize);
-    this.pendingCalls.delete(address);
+    this.registerParser(id, parser);
+    const deserialize = (this.keyToAccountParser.get(address) || AccountFetchCache.defaultParser) as AccountParser<T>;
     const account = deserialize(new PublicKey(address), obj);
     if (!account) {
       return;
     }
 
-    if (isActive === undefined) isActive = true;
-    else if (isActive instanceof Function) isActive = isActive(account);
-
-    const isNew = !this.genericCache.has(address);
-
-    this.genericCache.set(address, account);
-    this.emitter.raiseCacheUpdated(address, isNew, deserialize, isActive);
     return account;
   }
 
@@ -229,10 +332,12 @@ export class AccountFetchCache {
     return result;
   }
 
-  registerParser<T>(pubkey: PublicKey | string, parser: AccountParser<T>) {
+  registerParser<T>(pubkey: PublicKey | string, parser: AccountParser<T> | undefined) {
     if (pubkey) {
       const address = typeof pubkey === 'string' ? pubkey : pubkey?.toBase58();
-      this.keyToAccountParser.set(address, parser);
+      if (parser && !this.keyToAccountParser.has(address)) {
+        this.keyToAccountParser.set(address, parser);
+      }
     }
 
     return pubkey;

@@ -9,6 +9,7 @@ import { AccountFetchCache } from "@/../../common/dist/lib/utils/accountFetchCac
 interface INft {
   img: HTMLImageElement;
   mintKey: string;
+  observer: MutationObserver
 }
 
 
@@ -28,6 +29,8 @@ export const useNfts = (): INft[] | null => {
 
   useEffect(() => {
     let timeout: NodeJS.Timeout | null = null;
+
+    
     const getNfts = async () => {
       timeout && clearTimeout(timeout)
 
@@ -44,10 +47,22 @@ export const useNfts = (): INft[] | null => {
                 img.id = "nft_id_" + incrementingId;
               }
 
+              const observer = new MutationObserver(function(changes) {
+                if (changes.some(change => change.attributeName?.includes("src"))) {
+                  img.className = img.className.replace("nft-tagged", "");
+                  setNfts((nfts) => {
+                    observer.disconnect()
+                    return nfts.filter(nft => nft.img != img);
+                  })
+                }
+              });
+              observer.observe(img, { attributeFilter: ["src"] })
+
               return {
                 img,
                 // Have to use a string so that isEqual doesn't fail
-                mintKey
+                mintKey,
+                observer
               }
             }
 
@@ -64,6 +79,8 @@ export const useNfts = (): INft[] | null => {
 
       // Ensure only one running at a time by continually clearing and setting timeout
       timeout = setTimeout(getNfts, 1000)
+
+      return () => nfts.forEach(nft => nft.observer.disconnect());
     }
 
     timeout && clearTimeout(timeout)

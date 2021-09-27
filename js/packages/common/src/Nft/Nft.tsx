@@ -1,54 +1,62 @@
 import React, { useCallback, useEffect, useState } from "react";
+import { Image, ImageProps } from "@chakra-ui/react";
 import { MeshViewer } from "./MeshViewer";
 import { IMetadataExtension, MetadataFile } from "@oyster/common";
 import { Stream, StreamPlayerApi } from "@cloudflare/stream-react";
+import { getImageFromMeta, useIsExtension } from "../utils";
+import { useLocation } from "react-router-dom";
+import { SITE_URL } from "../constants";
 
 const MeshArtContent = ({
   uri,
-  image,
   animationUrl,
-  className,
   style,
   files,
+  image
 }: {
   uri?: string;
-  image?: string;
   animationUrl?: string;
-  className?: string;
   style?: React.CSSProperties;
   files?: (MetadataFile | string)[];
+  image?: React.ReactElement;
 }) => {
   const renderURL =
     files && files.length > 0 && typeof files[0] === "string"
       ? files[0]
       : animationUrl;
 
-  return (
-    <MeshViewer
-      image={image}
-      url={renderURL}
-      className={className}
-      style={style}
-    />
-  );
+  return <MeshViewer image={image} url={renderURL} style={style} />;
 };
 
 const VideoArtContent = ({
-  className,
   style,
   files,
-  uri,
+  image,
   animationURL,
   active,
+  uri
 }: {
-  className?: string;
   style?: React.CSSProperties;
   files?: (MetadataFile | string)[];
   uri?: string;
   animationURL?: string;
   active?: boolean;
+  className?: string;
+  image?: React.ReactElement;
 }) => {
   const [playerApi, setPlayerApi] = useState<StreamPlayerApi>();
+  const location = useLocation();
+
+  const isExtension = useIsExtension();
+
+  // Blocked by twitter content policy
+  if (isExtension && window.location.href.includes("twitter")) {
+    return (
+      <a target="_blank" href={`${SITE_URL}/#${location.pathname}`}>
+        { image }
+      </a>
+    );
+  }
 
   const playerRef = useCallback(
     (ref) => {
@@ -75,25 +83,22 @@ const VideoArtContent = ({
   const content =
     likelyVideo &&
     likelyVideo.startsWith("https://watch.videodelivery.net/") ? (
-      <div className={`${className} square`}>
-        <Stream
-          streamRef={(e: any) => playerRef(e)}
-          src={likelyVideo.replace("https://watch.videodelivery.net/", "")}
-          loop={true}
-          height={600}
-          width={600}
-          controls={false}
-          videoDimensions={{
-            videoHeight: 700,
-            videoWidth: 400,
-          }}
-          autoplay={true}
-          muted={true}
-        />
-      </div>
+      <Stream
+        streamRef={(e: any) => playerRef(e)}
+        src={likelyVideo.replace("https://watch.videodelivery.net/", "")}
+        loop={true}
+        height={600}
+        width={600}
+        controls={false}
+        videoDimensions={{
+          videoHeight: 700,
+          videoWidth: 400,
+        }}
+        autoplay={true}
+        muted={true}
+      />
     ) : (
       <video
-        className={className}
         playsInline={true}
         autoPlay={true}
         muted={true}
@@ -129,18 +134,21 @@ function getLast<T>(arr: T[]) {
 }
 
 export const Nft: React.FC<{
+  image?: string;
   data: IMetadataExtension;
-  className?: string;
   meshEnabled?: boolean;
+  videoEnabled?: boolean;
   style?: React.CSSProperties;
-}> = ({ data, className, style, meshEnabled = true }) => {
+  imageProps?: ImageProps;
+}> = ({ image, data, style, videoEnabled = true, meshEnabled = true, imageProps = {} }) => {
   const animationURL = data?.animation_url || "";
   const animationUrlExt = new URLSearchParams(
     getLast(animationURL.split("?"))
   ).get("ext");
 
   const category = data?.properties.category;
-  const uri = data?.image;
+  const imageUri = image || getImageFromMeta(data);
+  const imageComponent = <Image src={imageUri} alt={data?.name} {...imageProps} />;
 
   if (
     meshEnabled &&
@@ -150,27 +158,26 @@ export const Nft: React.FC<{
   ) {
     return (
       <MeshArtContent
-        image={data?.image}
+        image={imageComponent}
         style={style}
-        className={className}
-        uri={uri}
+        uri={imageUri}
         animationUrl={animationURL}
         files={data?.properties.files}
       />
     );
   }
 
-  if (category === "video") {
+  if (videoEnabled && category === "video") {
     return (
       <VideoArtContent
-        className={className}
+        image={imageComponent}
         files={data?.properties.files}
-        uri={uri}
+        uri={imageUri}
         animationURL={animationURL}
         active={true}
       />
     );
   }
 
-  return <img className={`${className}`} src={data?.image} alt={data?.name} />;
+  return imageComponent;
 };

@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import isEqual from "lodash/isEqual";
 import { useInterval } from "wumbo-common";
 import { getElementsBySelector } from "./elements";
+import * as Sentry from "@sentry/react";
 
 const twitterMentionRegex =
   /(?:^|[^a-zA-Z0-9_@＠])(@|＠)(?!\.)([a-zA-Z0-9_\.]{1,15})(?:\b(?!@)|$)/g;
@@ -11,6 +12,10 @@ interface IParsedProfile {
   buttonTarget: HTMLElement | null;
   avatar?: string;
 }
+
+const sanitizeMentions = (mentions: string[]) => [
+  ...new Set(mentions.map((mention) => mention.replace(/[@ ]/g, ""))),
+];
 
 export const useProfile = (): IParsedProfile | null => {
   const [result, setResult] = useState<IParsedProfile | null>(null);
@@ -23,7 +28,9 @@ export const useProfile = (): IParsedProfile | null => {
       "userActions",
       "UserProfileHeader_Items",
       "UserDescription",
-    ].some((dataTestId) => !!document.querySelector(`[data-testid=${dataTestId}]`));
+    ].some(
+      (dataTestId) => !!document.querySelector(`[data-testid=${dataTestId}]`)
+    );
 
     if (dataTestMatches) {
       // High chance the page is profile
@@ -87,27 +94,27 @@ enum Elements {
   TweetMintButton,
 }
 
-const findButtonTarget = (nameEl: HTMLElement) => {
-  const traverseUp = (el: HTMLElement | null): HTMLElement | null => {
-    if (!el) return null;
-    // traverase upwards until the parent has a sibling.
-    // we found the two columns that make up a tweet
-    // the first holding the profile img
-    if (el.parentElement!.nextSibling) return el.parentElement;
-    return traverseUp(el.parentElement);
-  };
+function findChildWithDimension(
+  el: Element,
+  width: number,
+  height: number
+): Element | undefined {
+  const children = [...el.children];
+  const childWithWidth = children.find((c) => {
+    const computed = getComputedStyle(c);
+    return computed.width == `${width}px` && computed.height == `${height}px`;
+  });
+  if (!childWithWidth) {
+    for (const child of children) {
+      const found = findChildWithDimension(child, width, height);
+      if (found) {
+        return found;
+      }
+    }
+  }
 
-  return traverseUp(nameEl);
-};
-
-// TODO: (Bry) Figure out better way
-const findTweetChildren = (tweet: Element): HTMLCollection | null => {
-  // go down until we find multiple children
-  // this is usualy the main content of the tweet
-  if (!tweet.children.length) return null;
-  if (tweet.children.length > 1) return tweet.children;
-  return findTweetChildren(tweet.children[0]);
-};
+  return childWithWidth;
+}
 
 export const useTweets = (): IParsedTweet[] | null => {
   const [tweets, setTweets] = useState<IParsedTweet[]>([]);
@@ -118,54 +125,52 @@ export const useTweets = (): IParsedTweet[] | null => {
       return !cache.has(el);
     };
 
-    const getTwets = () => {
-      const tweets = getElementsBySelector('[data-testid="tweet"]').filter(notCached);
+    const getTweets = () => {
+      const tweets = getElementsBySelector('[data-testid="tweet"]').filter(
+        notCached
+      );
       if (tweets.length > 0) {
-        tweets.forEach((t) => cache.add(t));
-
         const parsedTweets = tweets.reduce(
           (acc: any, tweet: any, index: number): IParsedTweet[] => {
-            const tweetChildren = findTweetChildren(tweet);
-            let nameEl;
+            const buttonTarget = (findChildWithDimension(tweet, 48, 48) ||
+              findChildWithDimension(tweet, 32, 32));
+            if (buttonTarget) {
+              const nameEl = buttonTarget.querySelector("a");
 
-            if (!tweetChildren) {
-              nameEl = tweet.querySelector("a");
-            } else {
-              nameEl = tweetChildren[1].querySelector("a");
-            }
+              if (nameEl) {
+                cache.add(tweet)
+                
+                const name = nameEl.href.split("/").slice(-1)[0];
+                const imgEl = nameEl.querySelector("img");
+                let mentions: string[] | null = null;
+                let replyTokensTarget: Element | undefined;
 
-            if (nameEl) {
-              const name = nameEl.href.split("/").slice(-1)[0];
-              const imgEl = nameEl.querySelector("img");
-              const buttonTarget = findButtonTarget(nameEl);
-              let mentions: string[] | null = null;
-              let replyTokensTarget: Element | null = null;
-
-              if (buttonTarget) {
                 mentions = tweet.parentNode.innerText
                   .split("\n")
                   .join(" ")
                   .match(twitterMentionRegex);
 
-                if (mentions?.length) {
-                  replyTokensTarget =
-                    tweet.children[1]?.children[1]?.lastChild?.previousSibling ||
-                    tweet.parentNode.lastElementChild.children[
-                      tweet.parentNode.lastElementChild.childNodes.length - 4
-                    ];
-                }
-              }
+                // first mention is always user, remove it
+                mentions?.shift();
 
-              return [
-                ...acc,
-                {
-                  name,
-                  avatar: imgEl?.src,
-                  buttonTarget,
-                  mentions,
-                  replyTokensTarget,
-                },
-              ];
+                if (mentions?.length) {
+                  mentions = sanitizeMentions(mentions);
+                  replyTokensTarget = tweet.querySelectorAll(
+                    `[href="/${name}"]`
+                  )[1].parentNode.parentNode.parentNode.parentNode;
+                }
+
+                return [
+                  ...acc,
+                  {
+                    name,
+                    avatar: imgEl?.src,
+                    buttonTarget,
+                    mentions,
+                    replyTokensTarget,
+                  },
+                ];
+              }
             }
 
             return acc;
@@ -177,7 +182,7 @@ export const useTweets = (): IParsedTweet[] | null => {
       }
     };
 
-    setInterval(getTwets, 1000);
+    setInterval(getTweets, 1000);
   }, []);
 
   return tweets;
@@ -201,7 +206,8 @@ export const useUserCells = (): IParsedUserCell[] | null => {
         if (nameEl) {
           const name = nameEl.href.split("/").slice(-1)[0];
           const imgEl = nameEl.querySelector("img");
-          const buttonTarget = cell.querySelector('[data-testid$="follow"')?.parentNode || null;
+          const buttonTarget =
+            cell.querySelector('[data-testid$="follow"')?.parentNode || null;
 
           return [
             ...acc,
