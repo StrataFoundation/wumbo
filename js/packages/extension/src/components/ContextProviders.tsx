@@ -45,6 +45,10 @@ export const ContextProviders: FC = ({ children }) => {
     (error: Error) => {
       console.error(error);
       Sentry.captureException(error);
+      if (error.message?.includes("Attempt to debit an account but found no record of a prior credit.")) {
+        error = new Error("Not enough SOL to perform this action");
+      }
+
       const code = (error.message?.match("custom program error: (.*)") ||
         [])[1];
       if (code == "0x1") {
