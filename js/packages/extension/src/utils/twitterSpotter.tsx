@@ -7,10 +7,12 @@ import * as Sentry from "@sentry/react";
 const twitterMentionRegex =
   /(?:^|[^a-zA-Z0-9_@＠])(@|＠)(?!\.)([a-zA-Z0-9_\.]{1,15})(?:\b(?!@)|$)/g;
 
+type ProfileType = 'mine' | 'other' | undefined;
 interface IParsedProfile {
   name: string;
   buttonTarget: HTMLElement | null;
   avatar?: string;
+  type: ProfileType
 }
 
 const sanitizeMentions = (mentions: string[]) => [
@@ -35,27 +37,39 @@ export const useProfile = (): IParsedProfile | null => {
     if (dataTestMatches) {
       // High chance the page is profile
       const userActions = document.querySelector('[data-testid="userActions"]');
-      const profile = userActions?.parentNode?.parentNode;
+      const settings = document.querySelector('a[href="/settings/profile"]');
+      const profile = (userActions || settings)?.parentNode?.parentNode;
+      const nameEl = profile?.querySelector("a");
+      const name = nameEl?.href.split("/").slice(-2)[0];
+      const imgEl = nameEl?.querySelector("img");
 
-      if (userActions && profile) {
+      if (userActions && profile && nameEl && name) {
         const buttonTarget = userActions.parentNode;
-        const nameEl = profile.querySelector("a");
 
-        if (nameEl && buttonTarget) {
-          const name = nameEl.href.split("/").slice(-2)[0];
-          const imgEl = nameEl.querySelector("img");
-
+        if (buttonTarget) {
           newResult = {
             name,
             avatar: imgEl?.src,
             buttonTarget: buttonTarget as HTMLElement,
+            type: "other" as ProfileType
+          };
+        }
+      } else if (profile && nameEl && name && settings) {
+        const buttonTarget = settings.parentNode;
+
+        if (buttonTarget) {
+          newResult = {
+            name,
+            avatar: imgEl?.src,
+            buttonTarget: buttonTarget as HTMLElement,
+            type: "mine" as ProfileType
           };
         }
       }
-    }
 
-    if (!isEqual(newResult, result)) {
-      setResult(newResult);
+      if (!isEqual(newResult, result)) {
+        setResult(newResult);
+      }
     }
   }, 1000);
 
@@ -102,7 +116,7 @@ function findChildWithDimension(
   const children = [...el.children];
   const childWithWidth = children.find((c) => {
     const computed = getComputedStyle(c);
-    return computed.width == `${width}px` && computed.height == `${height}px`;
+    return computed.width == `${width}px` && computed.height == `${height}px` && computed.position != "absolute";
   });
   if (!childWithWidth) {
     for (const child of children) {

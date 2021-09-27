@@ -54,7 +54,7 @@ export const Profile = () => {
         <WumboDrawer.Header title="Profile" />
         <WumboDrawer.Content>
           <Box p={4}>
-            It looks like you haven't claimed a coin yet. To claim your coin, navigate to one of your tweets and click the button Wum.bo inserts under it. Then, click the claim button.
+            It looks like you haven't claimed a token yet. To claim your token, navigate to your twitter profile and click the "Claim" button that Wum.bo inserts next to Edit Profile.
           </Box>
         </WumboDrawer.Content>
         <WumboDrawer.Nav />

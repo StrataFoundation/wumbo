@@ -1,5 +1,5 @@
 import { ReactNode } from "react";
-import { RiUserLine, RiWallet3Line, RiArrowUpDownFill } from "react-icons/ri";
+import { RiUserLine, RiCoinLine, RiArrowUpDownFill } from "react-icons/ri";
 import { PublicKey } from "@solana/web3.js";
 
 type Route = {
@@ -14,7 +14,7 @@ export interface IRoutes {
   claim: Route;
   customize: Route;
   trade: Route;
-  wallet: Route;
+  myTokens: Route;
   manageWallet: Route;
   profile: Route;
   editProfile: Route;
@@ -67,7 +67,7 @@ export const routes: IRoutes = {
     isDrawerNav: true,
     exact: true,
   },
-  wallet: { path: "/wallet", Icon: RiWallet3Line, isDrawerNav: true },
+  myTokens: { path: "/my-tokens", Icon: RiCoinLine, isDrawerNav: true },
   manageWallet: { path: "/manage-wallet", Icon: null, isDrawerNav: false },
   trade: {
     path: "/trade/:tokenBondingKey",

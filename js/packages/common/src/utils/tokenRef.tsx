@@ -42,16 +42,16 @@ export async function getReverseTokenRefKey(targetMint: PublicKey): Promise<Publ
   ))[0];
 }
 
-export const useUnclaimedTwitterTokenRefKey = (name: string | undefined): PublicKey | undefined => {
+export const useUnclaimedTwitterTokenRefKey = (name: string | undefined): { result: PublicKey | undefined, loading: boolean } => {
   const connection = useConnection();
-  const { result: key } = useAsync(async (name: string | undefined) => {
+  const { result: key, loading } = useAsync(async (name: string | undefined) => {
       if (connection && name) {
         return getTwitterUnclaimedTokenRefKey(name)
       }
     },
     [name]
   )
-  return key;
+  return { result: key, loading };
 };
 
 
@@ -89,17 +89,24 @@ export function useClaimedTokenRef(owner: PublicKey | undefined): UseAccountStat
 
 export const useTwitterTokenRef = (name: string | undefined): UseAccountState<ITokenRef> => {
   const claimedKey = useClaimedTwitterTokenRefKey(name);
-  const unclaimedKey = useUnclaimedTwitterTokenRefKey(name);
+  const { result: unclaimedKey, loading: claimedLoading } = useUnclaimedTwitterTokenRefKey(name);
   const claimed = useAccount(claimedKey, TokenRef, true);
   const unclaimed = useAccount(unclaimedKey, TokenRef, true);
+
   const result = useMemo(() => {
     if (claimed.info) {
       return claimed;
     }
     return unclaimed;
   }, [claimed?.info, unclaimed?.info, claimed.loading, unclaimed.loading])
+  const loading = useMemo(() => {
+    return claimedLoading || !unclaimedKey || claimed.loading || unclaimed.loading;
+  }, [claimedLoading, name, claimedKey, unclaimedKey, claimed, unclaimed]);
 
-  return result
+  return {
+    ...result,
+    loading
+  }
 };
 
 export interface IUseSocialTokenMetadataResult extends IUseTokenMetadataResult {

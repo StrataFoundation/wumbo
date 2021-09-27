@@ -19,7 +19,7 @@ import Claim from "./claim/Claim";
 import { EditProfileRoute } from "./profile/EditProfile";
 
 const App: FC = () => (
-  <Router initialEntries={[routes.wallet.path]} initialIndex={0}>
+  <Router initialEntries={[routes.myTokens.path]} initialIndex={0}>
     <ContextProviders>
       <NftEnhancer />
       <Twitter />
@@ -29,7 +29,7 @@ const App: FC = () => (
           <Route path={routes.create.path} component={Create} />
           <Route path={routes.claim.path} component={Claim} />
           <Route path={routes.trade.path} component={TradeRoute} />
-          <Route path={routes.wallet.path} component={Wallet} />
+          <Route path={routes.myTokens.path} component={Wallet} />
           <Route path={routes.manageWallet.path} component={ManageWallet} />
           <Route path={routes.viewProfile.path} component={Profile} />
           <Route path={routes.viewNft.path} component={ViewNft} />

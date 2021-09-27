@@ -54,7 +54,7 @@ interface IProfileProps {
 export interface IClaimFlowOutput {
   error: Error | undefined;
   loading: boolean;
-  claim: () => void;
+  claim: () => Promise<void>;
 }
 
 const GET_WUM_RANK = gql`

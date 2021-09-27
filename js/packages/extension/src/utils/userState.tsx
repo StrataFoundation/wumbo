@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   Curve,
   ICurve,
@@ -33,7 +33,6 @@ export interface UserInfoState {
 }
 
 export const useUserInfo = (name: string): UserInfoState => {
-  const [isLoading, setIsLoading] = useState<boolean>(true);
   const [result, setResult] = useState<UserInfo | undefined>();
   const { info: creator, loading: loading1 } = useTwitterTokenRef(name);
 
@@ -56,13 +55,12 @@ export const useUserInfo = (name: string): UserInfoState => {
   );
 
   const current = bondingCurve?.current() || 0;
-
+  const loading = useMemo(() => {
+    return (loading1 || loading2 || loading3 || loading4) || (creator && (!tokenBonding || !curve || !bondingCurve));
+  }, [loading1, loading2, loading3, loading4, creator, curve, bondingCurve, tokenBonding])
 
   useEffect(() => {
-    const loading = loading1 || loading2 || loading3 || loading4;
-    if (loading != isLoading) setIsLoading(loading)
-
-    if (curve && tokenBonding && mint && creator) {
+    if (!loading && curve && tokenBonding && mint && creator) {
       // @ts-ignore
       setResult({
         name,
@@ -76,17 +74,13 @@ export const useUserInfo = (name: string): UserInfoState => {
     }
   }, [
     setResult,
-    setIsLoading,
     current,
     curve,
     tokenBonding,
     mint,
     creator,
-    loading1,
-    loading2,
-    loading3,
-    loading4,
+    loading
   ]);
 
-  return { loading: isLoading, userInfo: result };
+  return { loading, userInfo: result };
 };

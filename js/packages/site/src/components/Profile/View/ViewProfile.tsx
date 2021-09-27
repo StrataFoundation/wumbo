@@ -37,7 +37,7 @@ export const ViewProfileRoute = () => {
       <Profile
         // TODO: Web claim flow
         useClaimFlow={() => ({
-          claim: () => {},
+          claim: () => Promise.resolve(),
           loading: false,
           error: undefined
         })}
