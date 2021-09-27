@@ -70,6 +70,8 @@ export const useProfile = (): IParsedProfile | null => {
       if (!isEqual(newResult, result)) {
         setResult(newResult);
       }
+    } else {
+      setResult(null);
     }
   }, 1000);
 

@@ -13,13 +13,15 @@ const Content: React.FC = () => (
             networks (twitter, twitch, reddit..etc) where creators interact with
             their fans. Our Creator Coins give each creator their own personal,
             customizable cryptocurrency.{" "}
+
+            Interested in the beta?{" "}
             <a
               target="_blank"
               rel="noreferrer"
-              href="https://teamwumbo.medium.com/wum-bo-hello-world-hello-twitter-fa3a7b8b6957"
+              href="https://teamwumbo.medium.com/wum-bo-beta-is-out-now-8d41d9a9f0e6"
               className="underline"
             >
-              Learn More..
+              Learn More...
             </a>
           </p>
         </div>

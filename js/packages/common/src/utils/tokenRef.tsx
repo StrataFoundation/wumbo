@@ -55,16 +55,16 @@ export const useUnclaimedTwitterTokenRefKey = (name: string | undefined): { resu
 };
 
 
-export const useClaimedTwitterTokenRefKey = (name: string | undefined): PublicKey | undefined => {
+export const useClaimedTwitterTokenRefKey = (name: string | undefined): { result: PublicKey | undefined, loading: boolean } => {
   const connection = useConnection();
-  const { result: key } = useAsync(async (connection: Connection | undefined, name: string | undefined) => {
+  const { result: key, loading } = useAsync(async (connection: Connection | undefined, name: string | undefined) => {
       if (connection && name) {
         return getTwitterClaimedTokenRefKey(connection, name)
       }
     },
     [connection, name]
   )
-  return key;
+  return { result: key, loading };
 };
 
 export const useClaimedTokenRefKey = (owner: PublicKey | undefined): PublicKey | undefined => {
@@ -88,7 +88,7 @@ export function useClaimedTokenRef(owner: PublicKey | undefined): UseAccountStat
 }
 
 export const useTwitterTokenRef = (name: string | undefined): UseAccountState<ITokenRef> => {
-  const claimedKey = useClaimedTwitterTokenRefKey(name);
+  const {result: claimedKey, loading: twitterLoading } = useClaimedTwitterTokenRefKey(name);
   const { result: unclaimedKey, loading: claimedLoading } = useUnclaimedTwitterTokenRefKey(name);
   const claimed = useAccount(claimedKey, TokenRef, true);
   const unclaimed = useAccount(unclaimedKey, TokenRef, true);
@@ -100,8 +100,8 @@ export const useTwitterTokenRef = (name: string | undefined): UseAccountState<IT
     return unclaimed;
   }, [claimed?.info, unclaimed?.info, claimed.loading, unclaimed.loading])
   const loading = useMemo(() => {
-    return claimedLoading || !unclaimedKey || claimed.loading || unclaimed.loading;
-  }, [claimedLoading, name, claimedKey, unclaimedKey, claimed, unclaimed]);
+    return twitterLoading || claimedLoading || !unclaimedKey || claimed.loading || unclaimed.loading;
+  }, [twitterLoading, claimedLoading, name, claimedKey, unclaimedKey, claimed, unclaimed]);
 
   return {
     ...result,

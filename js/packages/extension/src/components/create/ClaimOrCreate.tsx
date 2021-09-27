@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useMemo, useState } from "react";
 import { useHistory } from "react-router-dom";
 import { Box, Text, Button } from "@chakra-ui/react";
 import { useConnection } from "@oyster/common";
@@ -18,6 +18,7 @@ import {
 } from "wumbo-common";
 import { useAsyncCallback } from "react-async-hook";
 import { useClaimFlow } from "@/utils/claim";
+import { useUserInfo } from "@/utils/userState";
 
 export default React.memo(() => {
   const history = useHistory();
@@ -26,6 +27,7 @@ export default React.memo(() => {
   const { publicKey, awaitingApproval } = useWallet();
   const { handle: ownerTwitterHandle, error: reverseTwitterError } =
     useReverseTwitter(publicKey || undefined);
+  const { userInfo, loading: loading2 } = useUserInfo(query.get("name")!);
 
   const createCreator = async () => {
     const handle = query.get("name")!;
@@ -49,10 +51,11 @@ export default React.memo(() => {
   } = useAsyncCallback(createCreator);
   const { claim, loading, error: claimError } = useClaimFlow(query.get("name"));
   handleErrors(reverseTwitterError, error, claimError);
-
+  const showCreate = useMemo(() => !userInfo && !loading2, [userInfo, loading2]);
+  
   return (
     <>
-      <Button
+      { showCreate && <Button
         w="full"
         size="md"
         colorScheme="indigo"
@@ -61,14 +64,14 @@ export default React.memo(() => {
         loadingText={awaitingApproval ? "Awaiting Approval" : "Creating Token"}
       >
         Create Token
-      </Button>
+      </Button> }
       {(!ownerTwitterHandle || ownerTwitterHandle == query.get("name")) && (
         <>
-          <Box d="flex" justifyContent="center">
+          { showCreate && <Box d="flex" justifyContent="center">
             <Text fontSize="lg" color="gray.500">
               Or
             </Text>
-          </Box>
+          </Box> }
           <Button
             w="full"
             size="md"

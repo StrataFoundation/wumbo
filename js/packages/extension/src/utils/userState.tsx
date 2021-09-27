@@ -56,10 +56,14 @@ export const useUserInfo = (name: string): UserInfoState => {
 
   const current = bondingCurve?.current() || 0;
   const loading = useMemo(() => {
-    return (loading1 || loading2 || loading3 || loading4) || (creator && (!tokenBonding || !curve || !bondingCurve));
+    return (loading1 || loading2 || loading3 || loading4) || !!(creator && (!tokenBonding || !curve || !bondingCurve));
   }, [loading1, loading2, loading3, loading4, creator, curve, bondingCurve, tokenBonding])
 
   useEffect(() => {
+    if (loading) {
+      setResult(undefined);
+    }
+
     if (!loading && curve && tokenBonding && mint && creator) {
       // @ts-ignore
       setResult({

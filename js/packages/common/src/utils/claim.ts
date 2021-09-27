@@ -144,6 +144,7 @@ export function useCreateOrClaimCoin(): CreateState {
       const unclaimedKey = await getTwitterUnclaimedTokenRefKey(twitterHandle)
 
       const twitterName = await getTwitterRegistryKey(twitterHandle, await getTld());
+      debugger;
       const owner = (await getTwitterRegistry(connection, twitterHandle, await getTld())).owner;
       const claimedAccount = (await cache.search(claimedKey, undefined, true))?.account;
       const unclaimedAccount = (await cache.search(unclaimedKey, undefined, true))?.account;
