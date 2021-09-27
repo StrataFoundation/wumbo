@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import isEqual from "lodash/isEqual";
 import { useInterval } from "wumbo-common";
 import { getElementsBySelector } from "./elements";
+import * as Sentry from "@sentry/react";
 
 const twitterMentionRegex =
   /(?:^|[^a-zA-Z0-9_@＠])(@|＠)(?!\.)([a-zA-Z0-9_\.]{1,15})(?:\b(?!@)|$)/g;
@@ -129,21 +130,21 @@ export const useTweets = (): IParsedTweet[] | null => {
         notCached
       );
       if (tweets.length > 0) {
-        tweets.forEach((t) => cache.add(t));
-
         const parsedTweets = tweets.reduce(
           (acc: any, tweet: any, index: number): IParsedTweet[] => {
             const buttonTarget = (findChildWithDimension(tweet, 48, 48) ||
-              findChildWithDimension(tweet, 32, 32))!;
-            const nameEl = buttonTarget.querySelector("a");
+              findChildWithDimension(tweet, 32, 32));
+            if (buttonTarget) {
+              const nameEl = buttonTarget.querySelector("a");
 
-            if (nameEl) {
-              const name = nameEl.href.split("/").slice(-1)[0];
-              const imgEl = nameEl.querySelector("img");
-              let mentions: string[] | null = null;
-              let replyTokensTarget: Element | undefined;
+              if (nameEl) {
+                cache.add(tweet)
+                
+                const name = nameEl.href.split("/").slice(-1)[0];
+                const imgEl = nameEl.querySelector("img");
+                let mentions: string[] | null = null;
+                let replyTokensTarget: Element | undefined;
 
-              if (buttonTarget) {
                 mentions = tweet.parentNode.innerText
                   .split("\n")
                   .join(" ")
@@ -158,18 +159,18 @@ export const useTweets = (): IParsedTweet[] | null => {
                     `[href="/${name}"]`
                   )[1].parentNode.parentNode.parentNode.parentNode;
                 }
-              }
 
-              return [
-                ...acc,
-                {
-                  name,
-                  avatar: imgEl?.src,
-                  buttonTarget,
-                  mentions,
-                  replyTokensTarget,
-                },
-              ];
+                return [
+                  ...acc,
+                  {
+                    name,
+                    avatar: imgEl?.src,
+                    buttonTarget,
+                    mentions,
+                    replyTokensTarget,
+                  },
+                ];
+              }
             }
 
             return acc;

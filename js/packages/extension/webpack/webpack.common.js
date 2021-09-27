@@ -79,7 +79,9 @@ module.exports = {
       'REACT_APP_TWITTER_TLD',
       'REACT_APP_TWITTER_VERIFIER',
       'REACT_APP_NFT_VERIFIER_URL',
-      'REACT_APP_WUMBO_API_URL'
+      'REACT_APP_WUMBO_API_URL',
+      'REACT_APP_TAGGING_THRESHOLD',
+      'REACT_APP_BASE_SLIPPAGE'
     ]),
     new NodePolyfillPlugin(),
     new CopyPlugin({

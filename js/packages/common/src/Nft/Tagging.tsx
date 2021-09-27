@@ -13,7 +13,7 @@ import ReactShadow from "react-shadow/emotion";
 import compareImages from "resemblejs/compareImages";
 import axios from "axios";
 import { useAsync, useAsyncCallback } from "react-async-hook";
-import { NFT_VERIFIER_URL } from "../constants/globals";
+import { NFT_VERIFIER_URL, TAGGING_THRESHOLD } from "../constants/globals";
 import { handleErrors, useWallet } from "../contexts";
 import {
   useAccountFetchCache,
@@ -42,12 +42,19 @@ const tag = async (
   signTransaction: (transaction: Transaction) => Promise<Transaction>,
   args: ITagArgs
 ): Promise<void> => {
-  const resp = await axios.post(NFT_VERIFIER_URL + "/verify", args, {
-    responseType: "json",
-  });
-  const tx = Transaction.from(resp.data.data);
-  const signed = await signTransaction(tx);
-  await sendAndConfirmRawTransaction(connection, signed.serialize());
+  try {
+    const resp = await axios.post(NFT_VERIFIER_URL + "/verify", args, {
+      responseType: "json",
+    });
+    const tx = Transaction.from(resp.data.data);
+    const signed = await signTransaction(tx);
+    await sendAndConfirmRawTransaction(connection, signed.serialize());
+  } catch (e) {
+    if (e.response?.data?.message) {
+      throw new Error(e.response.data.message)
+    }
+    throw e;
+  }
 };
 
 export const TaggableImage = React.memo(
@@ -282,7 +289,7 @@ export const TaggableImages = ({
                   const mismatchPercent = +(
                     await compareImages(img1, img2, { scaleToSameSize: true })
                   ).misMatchPercentage;
-                  if (mismatchPercent <= 60) {
+                  if (mismatchPercent <= TAGGING_THRESHOLD) {
                     return [
                       img2Src,
                       {

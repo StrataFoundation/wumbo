@@ -13,6 +13,7 @@ const key = [243,99,226,76,228,180,49,28,35,61,133,124,225,80,78,147,2,107,58,14
 export const DEV_TWITTER_VERIFIER: Keypair = Keypair.fromSecretKey(
   Uint8Array.of(...key)
 )
+export const TAGGING_THRESHOLD = Number(process.env.REACT_APP_TAGGING_THRESHOLD!);
 export const SITE_URL = process.env.REACT_APP_SITE_URL;
 
 export const WUMBO_API_URL = process.env.REACT_APP_WUMBO_API_URL!;
@@ -67,4 +68,4 @@ export const AR_SOL_HOLDER_ID = new PublicKey(
   "HvwC9QSAzvGXhhVrgPmauVwFWcYZhne3hVot9EbHuFTm"
 );
 
-export const BASE_SLIPPAGE = 0.1;
+export const BASE_SLIPPAGE = Number(process.env.REACT_APP_BASE_SLIPPAGE!);

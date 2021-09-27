@@ -16,8 +16,12 @@ interface TokenFormProps {
   ticker: string;
   fiatAmountFromTokenAmount: (amount: number) => number;
   tokenAmountFromFiatAmount: (amount: number) => number;
+  tokenAmountMax: number;
 }
 
+function toFloorFixed(num: number, precision: number): string {
+  return (Math.floor(num * Math.pow(10, precision)) / Math.pow(10, precision)).toString()
+}
 export const TokenForm = ({
   type,
   onSubmit,
@@ -26,10 +30,13 @@ export const TokenForm = ({
   ticker,
   fiatAmountFromTokenAmount,
   tokenAmountFromFiatAmount,
+  tokenAmountMax
 }: TokenFormProps) => {
   const { connected, awaitingApproval } = useWallet();
   const { register, handleSubmit, setValue, reset, watch } =
     useForm<FormValues>();
+
+  const fiatAmountMax = fiatAmountFromTokenAmount(tokenAmountMax);
 
   const inputClasses =
     "p-0 bg-transparent border-transparent focus:shadow-none focus:border-transparent";
@@ -40,7 +47,7 @@ export const TokenForm = ({
     target: { value: string };
   }) => {
     setValue("fiatAmount", value);
-    setValue("tokenAmount", tokenAmountFromFiatAmount(+value).toFixed(2));
+    setValue("tokenAmount", toFloorFixed(tokenAmountFromFiatAmount(+value), 2));
   };
 
   const handleOnTokenChange = ({
@@ -49,7 +56,7 @@ export const TokenForm = ({
     target: { value: string };
   }) => {
     setValue("tokenAmount", value);
-    setValue("fiatAmount", fiatAmountFromTokenAmount(+value).toFixed(2));
+    setValue("fiatAmount", toFloorFixed(fiatAmountFromTokenAmount(+value), 2));
   };
 
   const handleOnSubmit = async (values: FormValues) => {
@@ -82,9 +89,10 @@ export const TokenForm = ({
               fontSize="xl"
               type="number"
               min={0}
-              step={0.01}
+              step={0.0000000001}
               placeholder="0.00"
               pr="1px"
+              max={fiatAmountMax}
               {...register("fiatAmount")}
               onChange={handleOnFiatChange}
             />
@@ -98,7 +106,8 @@ export const TokenForm = ({
               fontSize="sm"
               type="number"
               min={0}
-              step={0.01}
+              step={0.0000000001}
+              max={tokenAmountMax}
               placeholder="0"
               pr="1px"
               {...register("tokenAmount")}

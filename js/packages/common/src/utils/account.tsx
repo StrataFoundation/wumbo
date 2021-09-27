@@ -155,7 +155,7 @@ export const getUserTokenAccounts = async (
 
   const tokenAccounts = accounts.value.map(info =>
     TokenAccountParser(info.pubkey, info.account)
-  ).filter(truthy);
+  ).filter(truthy).filter(t => t.info.amount.toNumber() > 0);
 
 
   return tokenAccounts;

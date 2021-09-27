@@ -18,6 +18,7 @@ import { WalletName } from "@solana/wallet-adapter-wallets";
 import { InjectedWalletAdapter } from "@/utils/wallets";
 import toast from "react-hot-toast";
 import { HistoryContextProvider } from "../utils/history";
+import * as Sentry from "@sentry/react";
 
 export const ContextProviders: FC = ({ children }) => {
   const alteredWallets = useMemo(
@@ -43,6 +44,7 @@ export const ContextProviders: FC = ({ children }) => {
   const onError = useCallback(
     (error: Error) => {
       console.error(error);
+      Sentry.captureException(error);
       const code = (error.message?.match("custom program error: (.*)") ||
         [])[1];
       if (code == "0x1") {
@@ -55,7 +57,8 @@ export const ContextProviders: FC = ({ children }) => {
           type="error"
           show={t.visible}
           heading={error.name}
-          message={error.message}
+          // @ts-ignore
+          message={error.message || error.msg || error.toString()}
           onDismiss={() => toast.dismiss(t.id)}
         />
       ));

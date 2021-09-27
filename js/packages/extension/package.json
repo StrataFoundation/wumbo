@@ -8,7 +8,7 @@
   },
   "scripts": {
     "watch": "webpack --config webpack/webpack.dev.js --watch",
-    "build": "webpack --config webpack/webpack.prod.js",
+    "build": "webpack --config webpack/webpack.prod.js && rm -rf dist/*.map",
     "build:tsc": "tsc --project tsconfig.json && webpack --config webpack/webpack.prod.js",
     "style": "prettier --write \"src/**/*.{ts,tsx}\""
   },
@@ -23,6 +23,8 @@
     "@popperjs/core": "^2.9.2",
     "@project-serum/serum": "0.13.38",
     "@project-serum/sol-wallet-adapter": "0.2.4",
+    "@sentry/react": "^6.13.2",
+    "@sentry/tracing": "^6.13.2",
     "@solana/spl-token": "^0.1.6",
     "@solana/spl-token-swap": "0.1.0",
     "@solana/wallet-adapter-base": "0.4.1",
@@ -54,6 +56,7 @@
     "wumbo-common": "^1.0.0"
   },
   "devDependencies": {
+    "@sentry/webpack-plugin": "^1.17.1",
     "@svgr/webpack": "^5.5.0",
     "@types/auth0-js": "^9.14.5",
     "@types/chrome": "0.0.145",

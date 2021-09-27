@@ -19,6 +19,7 @@ import {
 } from "@/constants/routes";
 import WalletRedirect from "../wallet/WalletRedirect";
 import { useClaimFlow } from "@/utils/claim";
+import { Box } from "@chakra-ui/react";
 
 export const Profile = () => {
   const params = useParams<{ tokenRefKey: string | undefined }>();
@@ -52,7 +53,9 @@ export const Profile = () => {
       <Fragment>
         <WumboDrawer.Header title="Profile" />
         <WumboDrawer.Content>
-          It looks like you haven't claimed a coin yet
+          <Box p={4}>
+            It looks like you haven't claimed a coin yet. To claim your coin, navigate to one of your tweets and click the button Wum.bo inserts under it. Then, click the claim button.
+          </Box>
         </WumboDrawer.Content>
         <WumboDrawer.Nav />
       </Fragment>

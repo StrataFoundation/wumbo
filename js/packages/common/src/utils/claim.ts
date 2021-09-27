@@ -68,20 +68,28 @@ export async function claimTwitterHandle({
         preflightCommitment: 'confirmed'
       });
     } else {
-      const resp = await axios.post(TWITTER_REGISTRAR_SERVER_URL, {
-        redirectUri,
-        code,
-        twitterHandle,
-        pubkey: adapter.publicKey?.toBase58()
-      }, {
-        responseType: "json",
-      });
-      const tx = Transaction.from(resp.data.data);
-      const signed = await adapter.signTransaction(tx)
-      await sendAndConfirmRawTransaction(connection, signed.serialize(), {
-        commitment: 'confirmed',
-        preflightCommitment: 'confirmed'
-      });
+      try {
+        const resp = await axios.post(TWITTER_REGISTRAR_SERVER_URL, {
+          redirectUri,
+          code,
+          twitterHandle,
+          pubkey: adapter.publicKey?.toBase58()
+        }, {
+          responseType: "json",
+        });
+        const tx = Transaction.from(resp.data.data);
+        const signed = await adapter.signTransaction(tx)
+        await sendAndConfirmRawTransaction(connection, signed.serialize(), {
+          commitment: 'confirmed',
+          preflightCommitment: 'confirmed'
+        });
+      } catch (e) {
+        if (e.response?.data?.message) {
+          throw new Error(e.response.data.message)
+        }
+        throw e;
+      }
+
     }
   }
 }

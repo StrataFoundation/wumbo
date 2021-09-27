@@ -1,5 +1,4 @@
-import React, { useState, useCallback } from "react";
-import { PublicKey, Transaction, sendAndConfirmRawTransaction } from "@solana/web3.js";
+import { PublicKey } from "@solana/web3.js";
 import { WalletNotConnectedError } from "@solana/wallet-adapter-base";
 import {
   useConnection,
@@ -10,7 +9,7 @@ import BN from "bn.js";
 import { useAsyncCallback } from "react-async-hook";
 
 export const useBuy = (): [
-  (tokenBonding: PublicKey, amount: number, maxPrice: number) => Promise<string>,
+  (tokenBonding: PublicKey, amount: number, maxPrice: number) => Promise<void>,
   { data: any; loading: boolean; error: Error | undefined }
 ] => {
   const connection = useConnection();
@@ -21,21 +20,11 @@ export const useBuy = (): [
     async (tokenBonding, amount, slippage) => {
       if (!connected || !publicKey) throw new WalletNotConnectedError();
 
-      const { instructions, signers } = await splTokenBondingProgram!.buyV0Instructions({
+      await splTokenBondingProgram!.buyV0({
         tokenBonding,
         desiredTargetAmount: new BN(Math.floor(amount * Math.pow(10, 9))),
         slippage
       });
-
-      const transaction = new Transaction({
-        feePayer: publicKey,
-        recentBlockhash: (await connection.getRecentBlockhash('confirmed')).blockhash,
-      });
-      transaction.add(...instructions)
-      signers.length > 0 && transaction.partialSign(...signers)
-      const signed = await signTransaction(transaction);
-      const data = await sendAndConfirmRawTransaction(connection, signed.serialize(), { commitment: 'confirmed', preflightCommitment: 'confirmed' });
-      return data;
     }
   );
 
@@ -43,33 +32,20 @@ export const useBuy = (): [
 };
 
 export const useSell = (): [
-  (tokenBonding: PublicKey, amount: number, minPrice: number) => Promise<string>,
+  (tokenBonding: PublicKey, amount: number, minPrice: number) => Promise<void>,
   { data: any; loading: boolean; error: Error | undefined }
 ] => {
-  const connection = useConnection();
-  const { connected, publicKey, signTransaction } = useWallet();
+  const { connected, publicKey } = useWallet();
   const { splTokenBondingProgram } = usePrograms();
   const { result, loading, execute: sell, error } = useAsyncCallback(
     async (tokenBonding, amount, slippage) => {
       if (!connected || !publicKey) throw new WalletNotConnectedError();
 
-      const { instructions, signers } = await splTokenBondingProgram!.sellV0Instructions({
+      await splTokenBondingProgram!.sellV0({
         tokenBonding,
         targetAmount: new BN(Math.floor(amount * Math.pow(10, 9))),
         slippage
       });
-
-      const transaction = new Transaction({
-        feePayer: publicKey,
-        recentBlockhash: (await connection.getRecentBlockhash('confirmed')).blockhash,
-      });
-
-      transaction.add(...instructions);
-      signers.length > 0 && transaction.partialSign(...signers)
-
-      const signed = await signTransaction(transaction);
-      const data = await sendAndConfirmRawTransaction(connection, signed.serialize(), { commitment: 'confirmed', preflightCommitment: 'confirmed' });
-      return data;
     }
   );
 

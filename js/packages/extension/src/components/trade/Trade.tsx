@@ -39,6 +39,8 @@ import {
   handleErrors,
   useSolOwnedAmount,
   SOL_TOKEN,
+  amountAsNum,
+  useMint,
 } from "wumbo-common";
 import { routes, viewProfilePath } from "@/constants/routes";
 import { TokenForm, FormValues } from "./TokenForm";
@@ -47,6 +49,7 @@ import { PublicKey } from "@solana/web3.js";
 import { TokenBondingV0 } from "@wum.bo/spl-token-bonding";
 import SolLogo from "../../../public/assets/img/sol.svg";
 import { WumboDrawer } from "../WumboDrawer";
+import { u64 } from "@solana/spl-token";
 
 interface TokenInfo {
   name?: string;
@@ -194,7 +197,7 @@ export const TradeRoute = () => {
       </WumboDrawer.Header>
       <WumboDrawer.Content>
         <Trade
-          baseTicker={isTargetWUM ? "SOL" : ticker || ""}
+          baseTicker={isTargetWUM ? "SOL" : "WUM"}
           ticker={ticker || ""}
           name={name}
           tokenBonding={tokenBonding}
@@ -221,6 +224,7 @@ export const Trade = ({
   const fiatPrice = useFiatPrice(tokenBonding.baseMint);
   const toFiat = (a: number) => (fiatPrice || 0) * a;
   const fromFiat = (a: number) => a / (fiatPrice || 0);
+  const targetMint = useMint(tokenBonding.targetMint);
 
   const { amount: ownedSol } = useSolOwnedAmount();
   const ownedBaseNormal = useOwnedAmount(tokenBonding.baseMint);
@@ -230,6 +234,14 @@ export const Trade = ({
   const ownedTarget = useOwnedAmount(tokenBonding.targetMint);
   const location = useLocation();
   const { info: tokenRef } = useTokenRefFromBonding(tokenBonding.publicKey);
+
+  const purchaseCap = tokenBonding.purchaseCap && targetMint ? amountAsNum(tokenBonding.purchaseCap as u64, targetMint) : Number.POSITIVE_INFINITY;
+  const buyMax = Math.min(curve?.buyWithBaseAmount(
+    ownedBase || 0,
+    tokenBonding.baseRoyaltyPercentage,
+    tokenBonding.targetRoyaltyPercentage
+  ) || 0, purchaseCap);
+  const sellMax = ownedTarget;
 
   handleErrors(buyError, sellError);
 
@@ -314,50 +326,50 @@ export const Trade = ({
 
         <TabPanels>
           <TabPanel paddingX={0}>
-            {Info}
-            <TokenForm
-              fiatAmountFromTokenAmount={(tokenAmount: number) =>
-                toFiat(
-                  curve?.buyTargetAmount(
-                    tokenAmount,
-                    tokenBonding.baseRoyaltyPercentage,
-                    tokenBonding.targetRoyaltyPercentage
-                  ) || 0
-                )
-              }
-              tokenAmountFromFiatAmount={(fiatAmount: number) =>
-                curve?.buyWithBaseAmount(
-                  fromFiat(fiatAmount),
-                  tokenBonding.baseRoyaltyPercentage,
-                  tokenBonding.targetRoyaltyPercentage
-                ) || 0
-              }
-              icon={icon}
-              ticker={ticker}
-              type="buy"
-              onSubmit={onHandleBuy}
-              submitting={buyIsSubmitting}
-            />
-            <Flex flexDir="column" justifyContent="center" marginTop={4}>
-              <Flex justifyContent="center" fontSize="xs">
-                You can buy up to{" "}
-                {(
+            {(ownedBase && ownedBase > 0) && <>
+              {Info}
+              <TokenForm
+                 tokenAmountMax={buyMax}
+                fiatAmountFromTokenAmount={(tokenAmount: number) =>
+                  toFiat(
+                    curve?.buyTargetAmount(
+                      tokenAmount,
+                      tokenBonding.baseRoyaltyPercentage,
+                      tokenBonding.targetRoyaltyPercentage
+                    ) || 0
+                  )
+                }
+                tokenAmountFromFiatAmount={(fiatAmount: number) =>
                   curve?.buyWithBaseAmount(
-                    ownedBase || 0,
+                    fromFiat(fiatAmount),
                     tokenBonding.baseRoyaltyPercentage,
                     tokenBonding.targetRoyaltyPercentage
                   ) || 0
-                ).toFixed(4)}{" "}
-                {ticker} coins!
+                }
+                icon={icon}
+                ticker={ticker}
+                type="buy"
+                onSubmit={onHandleBuy}
+                submitting={buyIsSubmitting}
+              />
+              <Flex flexDir="column" justifyContent="center" marginTop={4}>
+                <Flex justifyContent="center" fontSize="xs">
+                  You can buy up to{" "}
+                  {buyMax.toFixed(4)}{" "}
+                  {ticker} coins!
+                </Flex>
               </Flex>
-              <Flex justifyContent="center" marginTop={4}>
-                {buyBaseLink(false)}
-              </Flex>
+            </>}
+            {(!ownedBase || ownedBase == 0) && <Text>It looks like you don't have any {baseTicker}, which you'll need to buy {ticker} tokens. You can buy it by clicking here: </Text> }
+            <Flex justifyContent="center" marginTop={4}>
+              {buyBaseLink(false)}
             </Flex>
+
           </TabPanel>
           <TabPanel paddingX={0}>
             {Info}
             <TokenForm
+              tokenAmountMax={sellMax}
               fiatAmountFromTokenAmount={(tokenAmount: number) =>
                 toFiat(Math.abs(curve?.sellTargetAmount(tokenAmount) || 0))
               }
@@ -372,6 +384,13 @@ export const Trade = ({
               onSubmit={onHandleSell}
               submitting={sellIsSubmitting}
             />
+            <Flex flexDir="column" justifyContent="center" marginTop={4}>
+              <Flex justifyContent="center" fontSize="xs">
+                You can sell up to{" "}
+                {sellMax?.toFixed(4)}{" "}
+                {ticker} coins!
+              </Flex>
+            </Flex>
           </TabPanel>
         </TabPanels>
       </Tabs>
