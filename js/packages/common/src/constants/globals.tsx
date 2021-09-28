@@ -15,7 +15,7 @@ export const DEV_TWITTER_VERIFIER: Keypair = Keypair.fromSecretKey(
 )
 export const TAGGING_THRESHOLD = Number(process.env.REACT_APP_TAGGING_THRESHOLD!);
 export const SITE_URL = process.env.REACT_APP_SITE_URL;
-
+export const ARWEAVE_UPLOAD_URL = process.env.REACT_APP_ARWEAVE_UPLOAD_URL!;
 export const WUMBO_API_URL = process.env.REACT_APP_WUMBO_API_URL!;
 export const NFT_VERIFIER_URL = process.env.REACT_APP_NFT_VERIFIER_URL;
 
