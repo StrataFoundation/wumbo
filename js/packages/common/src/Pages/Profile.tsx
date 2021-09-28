@@ -122,7 +122,7 @@ export const Profile = React.memo(
     let { handle, error: reverseTwitterError2 } =
       useReverseTwitter(ownerWalletKey);
     if (!handle) {
-      handle = query.get("name") || undefined;
+      handle = query.get("name") || metadata?.data.name;
     }
     const { claim, loading: claiming, error: claimError } = useClaimFlow(handle);
     handleErrors(

@@ -55,7 +55,10 @@ export const ContextProviders: FC = ({ children }) => {
         error = new Error("Insufficient balance.");
       } else if (code == "0x136") {
         error = new Error("Purchased more than the cap of 100 bWUM");
+      } else if (code === "0x0") {
+        error = new Error("Blockhash expired. Please retry")
       }
+      
       toast.custom((t) => (
         <Notification
           type="error"
