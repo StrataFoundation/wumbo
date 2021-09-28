@@ -1,9 +1,6 @@
 import { useAsyncCallback } from "react-async-hook";
 import { useConnection } from "../../contexts/connection";
-import {
-  Creator,
-  MetadataCategory,
-} from "@oyster/common";
+import { Creator, MetadataCategory } from "@oyster/common";
 import { useAccount } from "../account";
 import {
   Account,
@@ -29,16 +26,18 @@ import { splWumboProgramId } from "../../constants/programs";
 
 const RESERVED_TXN_MANIFEST = "manifest.json";
 
-async function getFileFromUrl(url: string, name: string, defaultType = "image/jpeg") {
-  console.log('uri', url);
-  const response = await fetch(url, {
-    cache: 'no-cache',
-  });
-  const data = await response.blob();
-  return new File([data], name, {
-    type: response.headers.get("content-type") || defaultType,
-  });
-}
+const getFileFromUrl = async (
+  url: string,
+  name: string,
+  defaultType: string = "image/jpeg"
+): Promise<[File, string]> => {
+  const data = await fetch(url, { cache: "no-cache" });
+  const blob = await data.blob();
+  const fileName = `${name}${blob.type === defaultType ? ".jpeg" : "png"}`;
+  const file = new File([blob], fileName, { type: blob.type || defaultType });
+
+  return [file, fileName];
+};
 
 export type SetMetadataArgs = {
   name: string;
@@ -59,15 +58,20 @@ type SetMetadataState = {
     metadataAccount: PublicKey;
   } | void>;
 };
-export function useSetMetadata(tokenRefKey: PublicKey | undefined): SetMetadataState {
+export function useSetMetadata(
+  tokenRefKey: PublicKey | undefined
+): SetMetadataState {
   const connection = useConnection();
   const { info: tokenRef } = useAccount(tokenRefKey, TokenRef, true);
-  const { info: tokenBonding } = useAccount(tokenRef?.tokenBonding, TokenBonding);
+  const { info: tokenBonding } = useAccount(
+    tokenRef?.tokenBonding,
+    TokenBonding
+  );
   const {
     publicKey: metadataAccountKey,
     image,
     metadata: inflated,
-    error: tokenMetadataError
+    error: tokenMetadataError,
   } = useTokenMetadata(tokenBonding?.targetMint);
 
   const { publicKey, signTransaction } = useWallet();
@@ -83,13 +87,12 @@ export function useSetMetadata(tokenRefKey: PublicKey | undefined): SetMetadataS
       feePayer: publicKey || undefined,
       recentBlockhash: (await connection.getRecentBlockhash()).blockhash,
     });
-  
+
     transaction.instructions = instructions;
-  
+
     extraSigners && transaction.partialSign(...extraSigners);
     return signTransaction(transaction);
   }
-  
 
   async function exec(args: SetMetadataArgs) {
     if (publicKey && tokenRefKey) {
@@ -110,8 +113,9 @@ export function useSetMetadata(tokenRefKey: PublicKey | undefined): SetMetadataS
         files = [];
       } else {
         // Undefined, keep the old one
-        imageName = "image-file";
-        files = [await getFileFromUrl(image!, imageName)];
+        const [file, fileName] = await getFileFromUrl(image!, "untitled");
+        imageName = fileName;
+        files = [file];
       }
       const metadata = {
         name: args.name,
@@ -142,10 +146,19 @@ export function useSetMetadata(tokenRefKey: PublicKey | undefined): SetMetadataS
       const realFiles = getFilesWithMetadata(files, metadata);
       try {
         // Prepay for the arweave upload we're about to do
-        const prepayTxnInstructions = await prepPayForFilesInstructions(publicKey, realFiles);
-        const prepayTxn = await getSignedTransaction(connection, prepayTxnInstructions);
+        const prepayTxnInstructions = await prepPayForFilesInstructions(
+          publicKey,
+          realFiles
+        );
+        const prepayTxn = await getSignedTransaction(
+          connection,
+          prepayTxnInstructions
+        );
         setState("submit-solana");
-        const txid = await sendAndConfirmRawTransaction(connection, prepayTxn.serialize());
+        const txid = await sendAndConfirmRawTransaction(
+          connection,
+          prepayTxn.serialize()
+        );
         try {
           await connection.confirmTransaction(txid, "max");
         } catch {
@@ -154,8 +167,14 @@ export function useSetMetadata(tokenRefKey: PublicKey | undefined): SetMetadataS
 
         // Do the arweave upload
         setState("submit-arweave");
-        const result = await uploadToArweave(txid, tokenBonding!.targetMint, realFiles);
-        const metadataFile = result.messages?.find((m) => m.filename === RESERVED_TXN_MANIFEST);
+        const result = await uploadToArweave(
+          txid,
+          tokenBonding!.targetMint,
+          realFiles
+        );
+        const metadataFile = result.messages?.find(
+          (m) => m.filename === RESERVED_TXN_MANIFEST
+        );
         console.log(JSON.stringify(metadataFile, null, 2));
 
         // For testing
@@ -177,9 +196,15 @@ export function useSetMetadata(tokenRefKey: PublicKey | undefined): SetMetadataS
           metadata
         );
 
-        const createMetadataTxn = await getSignedTransaction(connection, metadataInstructions);
+        const createMetadataTxn = await getSignedTransaction(
+          connection,
+          metadataInstructions
+        );
         setState("submit-solana");
-        await sendAndConfirmRawTransaction(connection, createMetadataTxn.serialize());
+        await sendAndConfirmRawTransaction(
+          connection,
+          createMetadataTxn.serialize()
+        );
 
         return {
           metadataAccount: metadataAccountKey!,

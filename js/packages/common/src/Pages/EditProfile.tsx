@@ -36,7 +36,7 @@ const validationSchema = yup
     name: yup.string().required().min(2),
     symbol: yup.string().required().min(2).max(10),
     founderRewardsPercent: yup.number().required(),
-    image: yup.mixed().required(),
+    image: yup.mixed(),
   })
   .required();
 
@@ -118,10 +118,6 @@ export const EditProfile = React.memo(
 
     const avatar = <Avatar src={imgUrl} name={symbol} />;
 
-    // const { watch } = useForm<EditProfileFormValues>();
-    // const { ticker, founderRewardsPercent, image } = watch()
-    console.log("formErrors", errors);
-    console.log("formValues", getValues());
     return (
       <form onSubmit={handleSubmit(handleOnSubmit)}>
         <VStack w="full" spacing={6} padding={4} alignItems="start">

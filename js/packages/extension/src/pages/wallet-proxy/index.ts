@@ -15,7 +15,8 @@ const getProvider = (name: string): any | undefined =>
 
 let adapter: WalletAdapter | undefined;
 
-const resetWallet = () => window.postMessage({ type: MessageType.WALLET_RESET }, "*");
+const resetWallet = () =>
+  window.postMessage({ type: MessageType.WALLET_RESET }, "*");
 
 (window as Window).addEventListener(
   "message",
