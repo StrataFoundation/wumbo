@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from "react";
 import { PublicKey } from "@solana/web3.js";
 import { useForm } from "react-hook-form";
+import { yupResolver } from "@hookform/resolvers/yup";
+import * as yup from "yup";
 import {
   VStack,
   HStack,
@@ -29,17 +31,32 @@ interface IEditProfileProps {
   onComplete(completeArgs: { metadataAccount: PublicKey }): void;
 }
 
+const validationSchema = yup
+  .object({
+    name: yup.string().required().min(2),
+    symbol: yup.string().required().min(2).max(10),
+    founderRewardsPercent: yup.number().required(),
+    image: yup.mixed().required(),
+  })
+  .required();
+
 export const EditProfile = React.memo(
   ({ ownerWalletKey, onComplete }: IEditProfileProps) => {
     const hiddenFileInput = React.useRef<HTMLInputElement>(null);
     const { awaitingApproval } = useWallet();
     const { info: tokenRef } = useClaimedTokenRef(ownerWalletKey);
-    const { watch, register, handleSubmit, setValue, reset } =
-      useForm<SetMetadataArgs>({
-        defaultValues: {
-          founderRewardsPercent: 5,
-        },
-      });
+    const {
+      watch,
+      register,
+      handleSubmit,
+      setValue,
+      reset,
+      getValues,
+      formState: { errors },
+    } = useForm<SetMetadataArgs>({
+      resolver: yupResolver(validationSchema),
+    });
+
     const { info: tokenBonding } = useAccount(
       tokenRef?.tokenBonding,
       TokenBonding
@@ -103,6 +120,8 @@ export const EditProfile = React.memo(
 
     // const { watch } = useForm<EditProfileFormValues>();
     // const { ticker, founderRewardsPercent, image } = watch()
+    console.log("formErrors", errors);
+    console.log("formValues", getValues());
     return (
       <form onSubmit={handleSubmit(handleOnSubmit)}>
         <VStack w="full" spacing={6} padding={4} alignItems="start">
@@ -132,33 +151,39 @@ export const EditProfile = React.memo(
             <input
               id="image"
               type="file"
-              accept=".png,.jpg"
+              accept="image/*"
               onChange={handleImageChange}
               ref={hiddenFileInput}
               style={{ display: "none" }}
             />
+            <FormHelperText color={errors.image?.message && "red.400"}>
+              {errors.image?.message || `The image of your token.`}
+            </FormHelperText>
           </FormControl>
           <FormControl id="name" borderColor="gray.200">
             <FormLabel>Name</FormLabel>
             <Input
-              required
+              isInvalid={!!errors.name}
               placeholder="My Awesome Coin"
               defaultValue={""}
               {...register("name")}
             />
-            <FormHelperText>The name for your token.</FormHelperText>
+            <FormHelperText color={errors.symbol?.message && "red.400"}>
+              {errors.name?.message || `The name for your token.`}
+            </FormHelperText>
           </FormControl>
           <FormControl id="symbol" borderColor="gray.200">
             <FormLabel>Symbol</FormLabel>
             <Input
-              required
+              isInvalid={!!errors.symbol}
               placeholder="NXX2"
               defaultValue={""}
               {...register("symbol")}
             />
-            <FormHelperText>
-              The short name for your token. For Example, WUM is the token of
-              Wum.bo.
+            <FormHelperText color={errors.symbol?.message && "red.400"}>
+              {errors.symbol?.message ||
+                `The short name for your token. For Example, WUM is the token of
+              Wum.bo.`}
             </FormHelperText>
           </FormControl>
           <FormControl id="founderRewardsPercent" borderColor="gray.200">
@@ -169,13 +194,13 @@ export const EditProfile = React.memo(
               </Text>
             </FormLabel>
             <Input
-              disabled
-              required
+              isReadOnly
+              isRequired
               type="number"
               min={0}
               step={0.1}
               placeholder="5"
-              defaultValue={""}
+              defaultValue={5}
               {...register("founderRewardsPercent")}
             />
             <FormHelperText>

@@ -19,6 +19,7 @@
     "@emotion/styled": "^11",
     "@headlessui/react": "^1.3.0",
     "@heroicons/react": "1.0.1",
+    "@hookform/resolvers": "^2.8.1",
     "@oyster/common": "^0.0.1",
     "@popperjs/core": "^2.9.2",
     "@project-serum/serum": "0.13.38",
@@ -53,7 +54,8 @@
     "serialize-error": "8.1.0",
     "superstruct": "^0.15.2",
     "url-template": "^2.0.8",
-    "wumbo-common": "^1.0.0"
+    "wumbo-common": "^1.0.0",
+    "yup": "^0.32.9"
   },
   "devDependencies": {
     "@sentry/webpack-plugin": "^1.17.1",
