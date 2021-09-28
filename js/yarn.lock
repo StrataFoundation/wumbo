@@ -5418,58 +5418,58 @@
     snake-case "^3.0.4"
     toml "^3.0.0"
 
-"@wum.bo/spl-token-account-split@^0.1.13":
-  version "0.1.13"
-  resolved "https://registry.yarnpkg.com/@wum.bo/spl-token-account-split/-/spl-token-account-split-0.1.13.tgz#e4562efe23acc37c1d6f4d4ed4c702fe9bc4d09b"
-  integrity sha512-FxuDlvb42qOz0XJzE/Gt5+tudpLs02jrZ4L+jQehsSeUliyVkU3YO1QWCyehUzzJUbkN7ALObku5Jc1csL17fg==
+"@wum.bo/spl-token-account-split@^0.1.19":
+  version "0.1.19"
+  resolved "https://registry.yarnpkg.com/@wum.bo/spl-token-account-split/-/spl-token-account-split-0.1.19.tgz#d2f0a1daab4fefbcd9ffc84c9120473562439537"
+  integrity sha512-6ucGF5staCar8eUGLa3vJD5EnJ6/yDBcWE3bcIg9fWhARHr1Rc1hD0MjYJ5ROAKMMgavWdvHZ7v/LuzjAfQ47w==
   dependencies:
     "@project-serum/common" "^0.0.1-beta.3"
     "@solana/web3.js" "^1.24.1"
-    "@wum.bo/spl-token-staking" "^0.1.13"
-    "@wum.bo/spl-utils" "^0.1.13"
+    "@wum.bo/spl-token-staking" "^0.1.19"
+    "@wum.bo/spl-utils" "^0.1.19"
     bn.js "^5.2.0"
 
-"@wum.bo/spl-token-bonding@^0.1.13":
-  version "0.1.13"
-  resolved "https://registry.yarnpkg.com/@wum.bo/spl-token-bonding/-/spl-token-bonding-0.1.13.tgz#7a347aff25fda2ddd99114244cc950150bbfa112"
-  integrity sha512-AqD+Tqo/SiOQ98/WBi6xCG9XXL8JduqxOtNKRHO4cm7GEQJIv2klxzBfJ/o0D0bZvzaQ7llkAM64BGrtgHc2SQ==
+"@wum.bo/spl-token-bonding@^0.1.19":
+  version "0.1.19"
+  resolved "https://registry.yarnpkg.com/@wum.bo/spl-token-bonding/-/spl-token-bonding-0.1.19.tgz#fe2fffa77092e026dbc4d396f5d8ee91e85756ab"
+  integrity sha512-s3FwOk1ju6o8M3+v9Yje78UoWCqi49A/G0qvrAuIDTnpPRA+MJ1xmQUrEak1bih9RkPggcMnt0Gi+GrHXMPtGw==
   dependencies:
     "@project-serum/common" "^0.0.1-beta.3"
     "@solana/web3.js" "^1.24.1"
-    "@wum.bo/spl-utils" "^0.1.13"
+    "@wum.bo/spl-utils" "^0.1.19"
     bn.js "^5.2.0"
     copyfiles "^2.4.1"
 
-"@wum.bo/spl-token-staking@^0.1.13":
-  version "0.1.13"
-  resolved "https://registry.yarnpkg.com/@wum.bo/spl-token-staking/-/spl-token-staking-0.1.13.tgz#944cd0e3850c796584203a584fcfe482c38ddcb5"
-  integrity sha512-cgDdDZhH4JCgPITdUwKcMmmmSGiddFesXLKSCj/+oFIg/tY2ExeGP/BcX/rdHV48cePMppZVEArYqQ0JNzElsA==
+"@wum.bo/spl-token-staking@^0.1.19":
+  version "0.1.19"
+  resolved "https://registry.yarnpkg.com/@wum.bo/spl-token-staking/-/spl-token-staking-0.1.19.tgz#b1a67e2bcac45b69971434aa49a39117cd38725c"
+  integrity sha512-EUjs0XufbnecjqkGFddq1Swd/ievi39o4fDqUecompkgXHrmzavvCeDjd7z5t/XhRbSlIkWVgUhn4FAfYlXDgA==
   dependencies:
     "@project-serum/common" "^0.0.1-beta.3"
     "@solana/web3.js" "^1.24.1"
-    "@wum.bo/spl-utils" "^0.1.13"
+    "@wum.bo/spl-utils" "^0.1.19"
     bn.js "^5.2.0"
     semver "^7.3.5"
 
-"@wum.bo/spl-utils@^0.1.13":
-  version "0.1.13"
-  resolved "https://registry.yarnpkg.com/@wum.bo/spl-utils/-/spl-utils-0.1.13.tgz#31cb349cfb23f0b1c5769f896362febbbb22aa8d"
-  integrity sha512-EZrVIOzt9q9jsq9Gui2/M2izWo1pM+FOu+80skx2KWiKjGNxXdCBDTBii2iKDga0koxPgsX55vUEXjy3Pfx5bQ==
+"@wum.bo/spl-utils@^0.1.19":
+  version "0.1.19"
+  resolved "https://registry.yarnpkg.com/@wum.bo/spl-utils/-/spl-utils-0.1.19.tgz#ec1e15960ffeda0fee25339509db187f45e2d614"
+  integrity sha512-g5VReMC6K4DFLkWjispY1ghHN/mWtzCGzoiie3Hv91j2D5tfe4RV6rWpXDrDrCotM1g/DyjAYu/HwPV62dEB+A==
   dependencies:
     bs58 "^4.0.1"
 
-"@wum.bo/spl-wumbo@^0.1.13":
-  version "0.1.13"
-  resolved "https://registry.yarnpkg.com/@wum.bo/spl-wumbo/-/spl-wumbo-0.1.13.tgz#57e53ec4bd4e6d13b7cb3c3e8d17e055dd4ef241"
-  integrity sha512-WWWxuOE6BpLBJgb9noDl+8eMxbPk+mv3JClSTDbK2mCz/lyIAo/5CyApwI2ghvlPCsIWDKkvPVLHJ/DZIedC7w==
+"@wum.bo/spl-wumbo@^0.1.19":
+  version "0.1.19"
+  resolved "https://registry.yarnpkg.com/@wum.bo/spl-wumbo/-/spl-wumbo-0.1.19.tgz#4f9392c74c866199300d0299295d386589d05640"
+  integrity sha512-KieHNMEW6NdaH0mIqMdM/WuH3srHs1yzxn4y1/8aW3so4s/qSh6GxYco1uQtoLkWWFIjHCPCMlhZL1NJOfVSwA==
   dependencies:
     "@bonfida/spl-name-service" "^0.1.14"
     "@project-serum/common" "^0.0.1-beta.3"
     "@solana/web3.js" "^1.24.1"
-    "@wum.bo/spl-token-account-split" "^0.1.13"
-    "@wum.bo/spl-token-bonding" "^0.1.13"
-    "@wum.bo/spl-token-staking" "^0.1.13"
-    "@wum.bo/spl-utils" "^0.1.13"
+    "@wum.bo/spl-token-account-split" "^0.1.19"
+    "@wum.bo/spl-token-bonding" "^0.1.19"
+    "@wum.bo/spl-token-staking" "^0.1.19"
+    "@wum.bo/spl-utils" "^0.1.19"
     bn.js "^5.2.0"
     copyfiles "^2.4.1"
 
