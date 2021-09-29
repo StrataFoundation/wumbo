@@ -1,18 +1,32 @@
-import React from "react";
+import React, { Fragment, useEffect, useState, useCallback } from "react";
 import ReactShadow from "react-shadow/emotion";
 import { Box } from "@chakra-ui/react";
-import { ThemeProvider, AppendChildPortal } from "wumbo-common";
+import { ThemeProvider, AppendChildPortal, usePrevious } from "wumbo-common";
 import { useProfile } from "../../utils/twitterSpotter";
 import { MainButton } from "../MainButton";
 import { ClaimButton } from "../ClaimButton";
 
 export const ProfileEnhancer = () => {
+  const [triggerCount, setTriggerCount] = useState<number>(0);
   const profile = useProfile();
-  console.log(profile);
+  const previousProfile = usePrevious(profile);
+
+  const triggerRemount = useCallback(() => {
+    setTriggerCount(triggerCount + 1);
+  }, [triggerCount, setTriggerCount]);
+
+  useEffect(() => {
+    if (previousProfile && profile) {
+      const [prevName, currName] = [previousProfile.name, profile.name];
+      if (prevName !== currName) {
+        triggerRemount();
+      }
+    }
+  }, [previousProfile, profile, triggerRemount]);
 
   if (profile) {
     const buttonEl = profile.buttonTarget ? (
-      profile.type == "mine" ?
+      profile.type == "mine" ? (
         <ClaimButton
           creatorName={profile.name}
           creatorImg={profile.avatar || ""}
@@ -23,7 +37,8 @@ export const ProfileEnhancer = () => {
           spinnerProps={{
             size: "lg",
           }}
-        /> :
+        />
+      ) : (
         <MainButton
           creatorName={profile.name}
           creatorImg={profile.avatar || ""}
@@ -35,25 +50,28 @@ export const ProfileEnhancer = () => {
             size: "lg",
           }}
         />
+      )
     ) : null;
 
     if (buttonEl) {
       return (
-        <AppendChildPortal container={profile.buttonTarget as Element}>
-          <ReactShadow.div>
-            <ThemeProvider>
-              <Box
-                d="flex"
-                justifyContent="center"
-                justifySelf="start"
-                marginLeft="4px"
-                marginBottom="11px"
-              >
-                {buttonEl}
-              </Box>
-            </ThemeProvider>
-          </ReactShadow.div>
-        </AppendChildPortal>
+        <Fragment key={triggerCount}>
+          <AppendChildPortal container={profile.buttonTarget as Element}>
+            <ReactShadow.div>
+              <ThemeProvider>
+                <Box
+                  d="flex"
+                  justifyContent="center"
+                  justifySelf="start"
+                  marginLeft="4px"
+                  marginBottom="11px"
+                >
+                  {buttonEl}
+                </Box>
+              </ThemeProvider>
+            </ReactShadow.div>
+          </AppendChildPortal>
+        </Fragment>
       );
     }
   }
