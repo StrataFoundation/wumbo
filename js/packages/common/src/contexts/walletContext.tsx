@@ -16,7 +16,11 @@ import {
   WalletNotReadyError,
 } from "@solana/wallet-adapter-base";
 import { Wallet, WalletName } from "@solana/wallet-adapter-wallets";
-import { PublicKey, Transaction, TransactionInstruction } from "@solana/web3.js";
+import {
+  PublicKey,
+  Transaction,
+  TransactionInstruction,
+} from "@solana/web3.js";
 import { useLocalStorage } from "../utils";
 import { useConnection } from "../contexts/connection";
 import { Provider } from "@wum.bo/anchor";
@@ -47,7 +51,9 @@ export interface IWalletContextState {
   signAllTransactions: (transaction: Transaction[]) => Promise<Transaction[]>;
 }
 
-const WalletContext = createContext<IWalletContextState>({} as IWalletContextState);
+const WalletContext = createContext<IWalletContextState>(
+  {} as IWalletContextState
+);
 
 export class WalletNotSelectedError extends WalletError {}
 
@@ -67,9 +73,15 @@ const WalletProvider: FC<IWalletProviderProps> = ({
   const [disconnecting, setDisconnecting] = useState(false);
   const [connected, setConnected] = useState(false);
   const [autoApprove, setAutoApprove] = useState(false);
-  const [publicKey, setPublicKey] = useLocalStorage<string | null>("walletPublicKey", null);
+  const [publicKey, setPublicKey] = useLocalStorage<string | null>(
+    "walletPublicKey",
+    null
+  );
   const [awaitingApproval, setAwaitingApproval] = useState<boolean>(false);
-  const publicKeyCls = useMemo(() => publicKey ? new PublicKey(publicKey) : null, [publicKey]);
+  const publicKeyCls = useMemo(
+    () => (publicKey ? new PublicKey(publicKey) : null),
+    [publicKey]
+  );
 
   const walletsByName = useMemo(
     () =>
@@ -132,7 +144,16 @@ const WalletProvider: FC<IWalletProviderProps> = ({
     } finally {
       setConnecting(false);
     }
-  }, [connecting, disconnecting, connected, adapter, onError, ready, wallet, setConnecting]);
+  }, [
+    connecting,
+    disconnecting,
+    connected,
+    adapter,
+    onError,
+    ready,
+    wallet,
+    setConnecting,
+  ]);
 
   const disconnect = useCallback(async () => {
     if (disconnecting) return;
@@ -199,14 +220,20 @@ const WalletProvider: FC<IWalletProviderProps> = ({
   useEffect(() => {
     if (adapter) {
       // @ts-ignore
-      adapter.originalSignTransaction = adapter.originalSignTransaction || adapter.signTransaction.bind(adapter);
+      adapter.originalSignTransaction =
+        // @ts-ignore
+        adapter.originalSignTransaction ||
+        adapter.signTransaction.bind(adapter);
       adapter.signTransaction = signTransaction;
 
       // @ts-ignore
-      adapter.originalSignAllTransactions = adapter.originalSignAllTransactions || adapter.signAllTransactions.bind(adapter);
+      adapter.originalSignAllTransactions =
+        // @ts-ignore
+        adapter.originalSignAllTransactions ||
+        adapter.signAllTransactions.bind(adapter);
       adapter.signAllTransactions = signAllTransactions;
     }
-  }, [adapter, signTransaction, signAllTransactions])
+  }, [adapter, signTransaction, signAllTransactions]);
 
   // Reset state and set the wallet, adapter, and ready state when the name changes
   useEffect(() => {
@@ -215,9 +242,14 @@ const WalletProvider: FC<IWalletProviderProps> = ({
     const adapter = wallet ? wallet.adapter() : undefined;
     const asyncReady = async () => {
       const ready =
-        adapter && Object.getOwnPropertyDescriptor(Object.getPrototypeOf(adapter), "readyAsync")
+        adapter &&
+        Object.getOwnPropertyDescriptor(
+          Object.getPrototypeOf(adapter),
+          "readyAsync"
+        )
           ? await (adapter as any)?.readyAsync
           : !!adapter?.ready;
+
       setReady(ready);
     };
 
@@ -246,7 +278,10 @@ const WalletProvider: FC<IWalletProviderProps> = ({
   useEffect(() => {
     (async function () {
       if (adapter) {
-        const ready = Object.getOwnPropertyDescriptor(Object.getPrototypeOf(adapter), "readyAsync")
+        const ready = Object.getOwnPropertyDescriptor(
+          Object.getPrototypeOf(adapter),
+          "readyAsync"
+        )
           ? await (adapter as any)?.readyAsync
           : !!adapter?.ready;
 
@@ -302,7 +337,7 @@ function useProvider(): Provider | undefined {
   const provider = React.useMemo(() => {
     // Let adapter be null, it'll fail if anyone issues transaction commands but will let fetch go through
     // @ts-ignore
-    return new Provider(connection, adapter, {})
+    return new Provider(connection, adapter, {});
   }, [connection, adapter]);
 
   return provider;

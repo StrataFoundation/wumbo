@@ -1,4 +1,8 @@
-import { AR_SOL_HOLDER_ID, IS_DEV } from "../../constants/globals";
+import {
+  ARWEAVE_UPLOAD_URL,
+  AR_SOL_HOLDER_ID,
+  IS_DEV,
+} from "../../constants/globals";
 import { Creator, Data, programIds } from "@oyster/common";
 import {
   PublicKey,
@@ -88,26 +92,32 @@ export async function uploadToArweave(
     },
     {}
   );
+
   data.append("tags", JSON.stringify(tags));
   data.append("transaction", txid);
+  data.append("env", IS_DEV ? "devnet" : "mainnet-beta");
   files.map((f) => data.append("file[]", f));
 
   // TODO: convert to absolute file name for image
+  try {
+    const result: IArweaveResult = await (
+      await fetch(
+        // TODO: add CNAME
+        ARWEAVE_UPLOAD_URL,
+        {
+          method: "POST",
+          body: data,
+        }
+      )
+    ).json();
 
-  const result: IArweaveResult = await (
-    await fetch(
-      // TODO: add CNAME
-      IS_DEV
-        ? "https://us-central1-principal-lane-200702.cloudfunctions.net/uploadFile2"
-        : "https://us-central1-principal-lane-200702.cloudfunctions.net/uploadFileProd2",
-      {
-        method: "POST",
-        body: data,
-      }
-    )
-  ).json();
-
-  return result;
+    return result;
+  } catch (e) {
+    if (e.response?.data?.message) {
+      throw new Error(e.response.data.message);
+    }
+    throw e;
+  }
 }
 
 export async function updateMetadataWithArweave(
@@ -134,8 +144,10 @@ export async function updateMetadataWithArweave(
     name: metadata.name,
     uri: arweaveLink, // size of url for arweave
   };
-  console.log(args)
-  const { instructions } = await splWumboProgram.updateMetadataInstructions(args)
+  console.log(args);
+  const { instructions } = await splWumboProgram.updateMetadataInstructions(
+    args
+  );
   return instructions;
 }
 

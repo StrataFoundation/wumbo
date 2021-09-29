@@ -81,7 +81,8 @@ module.exports = {
       'REACT_APP_NFT_VERIFIER_URL',
       'REACT_APP_WUMBO_API_URL',
       'REACT_APP_TAGGING_THRESHOLD',
-      'REACT_APP_BASE_SLIPPAGE'
+      'REACT_APP_BASE_SLIPPAGE',
+      'REACT_APP_ARWEAVE_UPLOAD_URL'
     ]),
     new NodePolyfillPlugin(),
     new CopyPlugin({

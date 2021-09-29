@@ -22,7 +22,8 @@ export interface IInjectedWalletAdapterConfig {
 
 export class InjectedWalletAdapter
   extends EventEmitter<WalletAdapterEvents>
-  implements WalletAdapter {
+  implements WalletAdapter
+{
   private _name: WalletName | null;
   private _publicKey: PublicKey | null;
   private _connecting: boolean;
@@ -110,7 +111,12 @@ export class InjectedWalletAdapter
           if (!(error.name in errorConstructor)) {
             reject(deserializeError(error));
           } else {
-            reject(new errorConstructor[error.name](error.message, deserializeError(error)));
+            reject(
+              new errorConstructor[error.name](
+                error.message,
+                deserializeError(error)
+              )
+            );
           }
         }
         resolve(rest);
@@ -182,7 +188,9 @@ export class InjectedWalletAdapter
     }
   }
 
-  async signAllTransactions(transactions: Transaction[]): Promise<Transaction[]> {
+  async signAllTransactions(
+    transactions: Transaction[]
+  ): Promise<Transaction[]> {
     try {
       if (!this._publicKey) throw new WalletNotConnectedError();
 
