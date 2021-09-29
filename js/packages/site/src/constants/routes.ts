@@ -13,10 +13,14 @@ interface IRoutes {
   editProfile: Route;
   manageWallet: Route;
   wallet: Route;
+  prototype: Route;
 }
 
 export function profilePath(tokenRefKey: PublicKey): string {
-  return routes.viewProfile.path.replace(":tokenRefKey", tokenRefKey.toBase58());
+  return routes.viewProfile.path.replace(
+    ":tokenRefKey",
+    tokenRefKey.toBase58()
+  );
 }
 
 export function nftPath(mint: PublicKey): string {
@@ -24,7 +28,10 @@ export function nftPath(mint: PublicKey): string {
 }
 
 export function editProfile(ownerWalletKey: PublicKey): string {
-  return routes.editProfile.path.replace(":ownerWalletKey", ownerWalletKey.toBase58());
+  return routes.editProfile.path.replace(
+    ":ownerWalletKey",
+    ownerWalletKey.toBase58()
+  );
 }
 
 const routes: IRoutes = {
@@ -36,6 +43,7 @@ const routes: IRoutes = {
   profile: { path: "/profile" },
   editProfile: { path: "/profile/edit/:ownerWalletKey" },
   betaSplash: { path: "/" },
+  prototype: { path: "/prototype" },
 };
 
 export default routes;
