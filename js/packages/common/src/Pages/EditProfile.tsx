@@ -84,8 +84,8 @@ export const EditProfile = React.memo(
     };
 
     const [imgUrl, setImgUrl] = useState<string>();
-    const reader = new FileReader();
     useEffect(() => {
+      const reader = new FileReader();
       function loadListiner() {
         setImgUrl(reader.result?.toString());
       }

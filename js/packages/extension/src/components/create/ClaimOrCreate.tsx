@@ -63,7 +63,7 @@ export default React.memo(() => {
         isLoading={creationLoading}
         loadingText={awaitingApproval ? "Awaiting Approval" : "Creating Token"}
       >
-        Create Token
+        Create a Token for {query.get("name")}
       </Button> }
       {(!ownerTwitterHandle || ownerTwitterHandle == query.get("name")) && (
         <>
@@ -80,7 +80,7 @@ export default React.memo(() => {
             isLoading={loading}
             loadingText={awaitingApproval ? "Awaiting Approval" : "Claiming"}
           >
-            This is me, Claim!
+            This is me, Claim and Create my Token
           </Button>
         </>
       )}

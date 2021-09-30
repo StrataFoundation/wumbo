@@ -45,6 +45,8 @@ import { useQuery as apolloUseQuery, gql } from "@apollo/client";
 interface IProfileProps {
   tokenRefKey: PublicKey;
   editPath: string;
+  topTokensPath: string;
+  wumNetWorthPath: string;
   onAccountClick?: (tokenRefKey: PublicKey) => void;
   onTradeClick?: () => void;
   getNftLink: (t: ITokenWithMeta) => string;
@@ -77,6 +79,8 @@ export const Profile = React.memo(
     onTradeClick,
     getNftLink,
     editPath,
+    topTokensPath,
+    wumNetWorthPath
   }: IProfileProps) => {
     const { info: tokenRef, loading } = useAccount(tokenRefKey, TokenRef, true);
     const ownerWalletKey = tokenRef?.owner as PublicKey | undefined;
@@ -183,20 +187,26 @@ export const Profile = React.memo(
           </VStack>
           <Spacer />
           <VStack spacing={2}>
-            <StatCardWithIcon
-              icon="coin"
-              label="Token Rank"
-              value={
-                typeof tokenRank != undefined && tokenRank != null ? (tokenRank! + 1).toString() : ""
-              }
-            />
-            { tokenRef?.isClaimed && <StatCardWithIcon
-              icon="wumbo"
-              label="WUM Locked"
-              value={
-                typeof wumRank != undefined && wumRank != null ? (wumRank! + 1).toString() : ""
-              }
-            /> }
+            <Link to={topTokensPath}>
+              <StatCardWithIcon
+                icon="coin"
+                label="Token Rank"
+                value={
+                  typeof tokenRank != undefined && tokenRank != null ? (tokenRank! + 1).toString() : ""
+                }
+              />
+            </Link>
+            {tokenRef?.isClaimed &&
+              <Link to={wumNetWorthPath}>
+                <StatCardWithIcon
+                  icon="wumbo"
+                  label="Net Worth"
+                  value={
+                    typeof wumRank != undefined && wumRank != null ? (wumRank! + 1).toString() : ""
+                  }
+                />
+              </Link>
+            }
           </VStack>
         </HStack>
         <HStack spacing={2} w="full">
@@ -256,7 +266,7 @@ export const Profile = React.memo(
             <TabPanel paddingX={0}>
               <TokenLeaderboard
                 onAccountClick={onAccountClick}
-                mint={tokenBonding.targetMint}
+                mintKey={tokenBonding.targetMint}
               />
             </TabPanel>
             <TabPanel paddingX={0}>

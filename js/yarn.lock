@@ -3596,7 +3596,7 @@
     bn.js "^5.1.2"
     buffer-layout "^1.2.0"
 
-"@project-serum/serum@^0.13.34":
+"@project-serum/serum@^0.13.52":
   version "0.13.60"
   resolved "https://registry.yarnpkg.com/@project-serum/serum/-/serum-0.13.60.tgz#abeb3355ebc1895d685250df5965f688502ebcbb"
   integrity sha512-fGsp9F0ZAS48YQ2HNy+6CNoifJESFXxVsOLPd9QK1XNV8CTuQoECOnVXxV6s5cKGre8pLNq5hrhi5J6aCGauEQ==
@@ -3615,7 +3615,7 @@
     bs58 "^4.0.1"
     eventemitter3 "^4.0.4"
 
-"@project-serum/sol-wallet-adapter@^0.2.0", "@project-serum/sol-wallet-adapter@^0.2.5":
+"@project-serum/sol-wallet-adapter@^0.2.5":
   version "0.2.5"
   resolved "https://registry.yarnpkg.com/@project-serum/sol-wallet-adapter/-/sol-wallet-adapter-0.2.5.tgz#d949a8cc4d2f74e31e4f0205989703977689c76b"
   integrity sha512-Y0XHe+FXXJ7P8XZtx3luAlatO0ge2LdrZUCmqMSzJf+K+fko+qTYIBSUuWwO7y/O4brIXVReR1mEUvF6QKDF2w==
@@ -3798,7 +3798,14 @@
   dependencies:
     buffer "~6.0.3"
 
-"@solana/spl-token-registry@0.2.176", "@solana/spl-token-registry@^0.2.176":
+"@solana/spl-token-registry@0.2.202":
+  version "0.2.202"
+  resolved "https://registry.yarnpkg.com/@solana/spl-token-registry/-/spl-token-registry-0.2.202.tgz#bf990ffd9bd6aac60ee933b8987173fd50cd1b96"
+  integrity sha512-W0uZ4kO2LFaRAvsvC77Xw8jUw3nCxebowKLh53RGmOmXjUsX1Xtoh+6odRVk2S+N5GkrjUol/3SPHeCEW8bPvw==
+  dependencies:
+    cross-fetch "3.0.6"
+
+"@solana/spl-token-registry@^0.2.176":
   version "0.2.176"
   resolved "https://registry.yarnpkg.com/@solana/spl-token-registry/-/spl-token-registry-0.2.176.tgz#8a9c09463b1250a91a183e21d99936bbf9c35b45"
   integrity sha512-fKmaAox3k8eqE6mkXFidMcWc2xAsDoWefqvwsBOQ42Utj9sdJwXtNMB14CHtPaWAOJWTjgSp/kpd/kn2VGpBAw==
@@ -3995,26 +4002,6 @@
     superstruct "^0.8.3"
     tweetnacl "^1.0.0"
     ws "^7.0.0"
-
-"@solana/web3.js@^1.10.0":
-  version "1.29.1"
-  resolved "https://registry.yarnpkg.com/@solana/web3.js/-/web3.js-1.29.1.tgz#b8dfcbba4a097a06aab6a1bd72be8cdff79c6230"
-  integrity sha512-cgYOec8pJaDZ0Wk8TmfA895JE0d6+05lY7/hq2RpEoKsT/d0bTPGhN2yUQmOew1meG60R1pIMoNc3yzBB5/MlQ==
-  dependencies:
-    "@babel/runtime" "^7.12.5"
-    "@solana/buffer-layout" "^3.0.0"
-    bn.js "^5.0.0"
-    borsh "^0.4.0"
-    bs58 "^4.0.1"
-    buffer "6.0.1"
-    cross-fetch "^3.1.4"
-    crypto-hash "^1.2.2"
-    jayson "^3.4.4"
-    js-sha3 "^0.8.0"
-    rpc-websockets "^7.4.2"
-    secp256k1 "^4.0.2"
-    superstruct "^0.14.2"
-    tweetnacl "^1.0.0"
 
 "@solana/web3.js@^1.11.0", "@solana/web3.js@^1.12.0", "@solana/web3.js@^1.9.1":
   version "1.21.0"

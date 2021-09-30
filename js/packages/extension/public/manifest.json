@@ -2,7 +2,7 @@
   "manifest_version": 2,
   "name": "Wum.bo",
   "description": "Wum.bo Creator Coins",
-  "version": "1.0.5",
+  "version": "1.0.6",
   "browser_action": {
     "default_title": "Wum.bo",
     "default_icon": {

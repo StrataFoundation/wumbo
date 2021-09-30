@@ -95,7 +95,7 @@ export async function uploadToArweave(
 
   data.append("tags", JSON.stringify(tags));
   data.append("transaction", txid);
-  data.append("env", IS_DEV ? "devnet" : "mainnet-beta");
+  // data.append("env", IS_DEV ? "devnet" : "mainnet-beta");
   files.map((f) => data.append("file[]", f));
 
   // TODO: convert to absolute file name for image

@@ -44,6 +44,7 @@ export const StatCardWithIcon = ({
   ...flexProps
 }: IStatCardWithIconProps) => (
   <HStack
+    _hover={{ cursor: "pointer", bgColor: "gray.100" }}
     w="full"
     spacing={2}
     padding={2}
