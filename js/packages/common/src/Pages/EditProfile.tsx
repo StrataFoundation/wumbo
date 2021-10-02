@@ -35,7 +35,7 @@ const validationSchema = yup
   .object({
     name: yup.string().required().min(2),
     symbol: yup.string().required().min(2).max(10),
-    founderRewardsPercent: yup.number().required(),
+    targetRoyaltyPercentage: yup.number().required(),
     image: yup.mixed(),
   })
   .required();
@@ -67,7 +67,7 @@ export const EditProfile = React.memo(
       metadata,
       error: tokenMetadataError,
     } = useTokenMetadata(tokenBonding?.targetMint);
-    const { name = "", symbol = "", founderRewardsPercent, image } = watch();
+    const { name = "", symbol = "", targetRoyaltyPercentage, image } = watch();
     const { setMetadata, state, error } = useSetMetadata(tokenRef?.publicKey);
 
     handleErrors(tokenMetadataError, error);
@@ -110,8 +110,8 @@ export const EditProfile = React.memo(
         reset({
           name: metadata?.data.name,
           symbol: metadata?.data.symbol,
-          founderRewardsPercent:
-            (tokenBonding?.targetRoyaltyPercentage || 0) / 4294967295,
+          targetRoyaltyPercentage:
+            ((tokenBonding?.targetRoyaltyPercentage || 0) / 4294967295) * 100,
         });
       }
     }, [metadata?.data.name, metadata?.data.symbol, metadataImage]);
@@ -182,22 +182,18 @@ export const EditProfile = React.memo(
               Wum.bo.`}
             </FormHelperText>
           </FormControl>
-          <FormControl id="founderRewardsPercent" borderColor="gray.200">
+          <FormControl id="targetRoyaltyPercentage" borderColor="gray.200">
             <FormLabel>
-              Royalties{" "}
-              <Text fontSize="xs" color="gray.400" fontWeight="normal">
-                (editing is disabled for beta)
-              </Text>
+              Royalties
             </FormLabel>
             <Input
-              isReadOnly
               isRequired
               type="number"
               min={0}
-              step={0.1}
+              max={100}
               placeholder="5"
               defaultValue={5}
-              {...register("founderRewardsPercent")}
+              {...register("targetRoyaltyPercentage")}
             />
             <FormHelperText>
               A Percentage of coin sales that will be sent to your wallet. We

@@ -120,37 +120,6 @@ export async function uploadToArweave(
   }
 }
 
-export async function updateMetadataWithArweave(
-  splWumboProgram: SplWumbo,
-  tokenRef: PublicKey,
-  metadataFile: ArweaveFile,
-  metadata: {
-    name: string;
-    symbol: string;
-    description: string;
-    image: string | undefined;
-    animation_url: string | undefined;
-    external_url: string;
-    properties: any;
-    creators: Creator[] | null;
-    sellerFeeBasisPoints: number;
-  }
-): Promise<TransactionInstruction[]> {
-  // TODO: connect to testnet arweave
-  const arweaveLink = `https://arweave.net/${metadataFile.transactionId}`;
-  const args = {
-    tokenRef,
-    symbol: metadata.symbol,
-    name: metadata.name,
-    uri: arweaveLink, // size of url for arweave
-  };
-  console.log(args);
-  const { instructions } = await splWumboProgram.updateMetadataInstructions(
-    args
-  );
-  return instructions;
-}
-
 export const prepPayForFilesInstructions = async (
   payer: PublicKey,
   files: File[]
