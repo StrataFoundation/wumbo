@@ -14,8 +14,10 @@ import { WumboDrawer } from "../WumboDrawer";
 import {
   nftPath,
   routes,
+  topTokensPath,
   tradePath,
   viewProfilePath,
+  wumNetWorthPath,
 } from "@/constants/routes";
 import WalletRedirect from "../wallet/WalletRedirect";
 import { useClaimFlow } from "@/utils/claim";
@@ -67,6 +69,8 @@ export const Profile = () => {
       <WumboDrawer.Header title={metadata?.data.name || "View Profile"} />
       <WumboDrawer.Content>
         <CommonProfile
+          topTokensPath={tokenRef ? topTokensPath(tokenRef.tokenBonding) : ""}
+          wumNetWorthPath={tokenRef?.owner ? wumNetWorthPath(tokenRef.owner as PublicKey) : ""}
           editPath={routes.editProfile.path}
           useClaimFlow={useClaimFlow}
           tokenRefKey={tokenRefKey}

@@ -13,7 +13,7 @@ import {
   IMetadataExtension,
 } from "@oyster/common";
 import { useConnection } from "../../contexts/connection";
-import { AccountInfo } from "@solana/spl-token";
+import { AccountInfo, MintInfo } from "@solana/spl-token";
 import { Connection, PublicKey } from "@solana/web3.js";
 import { useAsync, UseAsyncReturn } from "react-async-hook";
 import { useAssociatedAccount } from "..";
@@ -32,15 +32,17 @@ import {
   getDescription,
   getImage,
   getImageFromMeta,
-  getMetadataKey,
+  getMetadataKey
 } from "./utils";
 import { getReverseTokenRefKey, getTokenRefKeyFromOwner, useClaimedTokenRef } from "../../utils/tokenRef";
 import { ITokenRef, TokenRef } from "../../utils/deserializers";
+import { Mint, useMint } from "../../utils/mintState"
 import { TokenRefV0 } from "@wum.bo/spl-wumbo";
 
 export interface ITokenWithMeta {
   metadataKey?: PublicKey;
   metadata?: Metadata;
+  mint?: MintInfo;
   edition?: Edition;
   masterEdition?: MasterEditionV1 | MasterEditionV2;
   data?: IMetadataExtension;
@@ -125,6 +127,8 @@ export async function getEditionInfo(
   };
 }
 
+const MintParser: AccountParser<MintInfo> = (pubkey, account) => ({ pubkey, account, info: Mint.fromAccount(account) });
+
 export async function getTokenMetadata(
   cache: AccountFetchCache,
   metadataKey: PublicKey
@@ -134,11 +138,12 @@ export async function getTokenMetadata(
   const data = await getArweaveMetadata(metadata?.data.uri);
   const image = await getImage(metadata?.data.uri)
   const description = data?.description;
-
+  const { info: mint } = (metadata?.mint && await cache.search(metadata.mint, MintParser)) || {};
   return {
     metadata,
     metadataKey,
     image,
+    mint,
     data,
     description,
     ...(metadata ? await getEditionInfo(cache, metadata) : {}),
@@ -192,12 +197,14 @@ export function useTokenMetadata(
     loading: imageLoading,
     error: imageError,
   } = useAsync(getImage, [metadata?.data.uri]);
+  const mint = useMint(token)
 
   const { info: tokenRef } = useClaimedTokenRef(wallet.publicKey || undefined);
   return {
     tokenRef,
     loading: Boolean(token && (loading || accountLoading || dataLoading || imageLoading)),
     error: error || dataError || imageError,
+    mint,
     metadata,
     metadataKey: metadataAccountKey,
     data,

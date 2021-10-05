@@ -5443,10 +5443,10 @@
   dependencies:
     bs58 "^4.0.1"
 
-"@wum.bo/spl-wumbo@^0.1.19":
-  version "0.1.19"
-  resolved "https://registry.yarnpkg.com/@wum.bo/spl-wumbo/-/spl-wumbo-0.1.19.tgz#4f9392c74c866199300d0299295d386589d05640"
-  integrity sha512-KieHNMEW6NdaH0mIqMdM/WuH3srHs1yzxn4y1/8aW3so4s/qSh6GxYco1uQtoLkWWFIjHCPCMlhZL1NJOfVSwA==
+"@wum.bo/spl-wumbo@^0.1.20":
+  version "0.1.20"
+  resolved "https://registry.yarnpkg.com/@wum.bo/spl-wumbo/-/spl-wumbo-0.1.20.tgz#f8a3d8e335411fd5902e6c97b286bebb68d34a68"
+  integrity sha512-wbzajCH2L/E1yE524xqNdTpKp6InbgK6H7Q41KzCfLzkBeD98zPj9i3sJQbVIv4kll7NX9/8cYwQQ1naNH2Zzw==
   dependencies:
     "@bonfida/spl-name-service" "^0.1.14"
     "@project-serum/common" "^0.0.1-beta.3"

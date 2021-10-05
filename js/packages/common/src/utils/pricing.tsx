@@ -123,8 +123,8 @@ export function useBondingPricing(tokenBonding: PublicKey | undefined): PricingS
 
 
 const GET_TOTAL_WUM_LOCKED = gql`
-  query GetTotalWumLocked {
-    totalWumLocked
+  query GetTotalWumNetWorth {
+    totalWumNetWorth
   }
 `;
 export const UsdWumboPriceProvider = ({ children = undefined as any }) => {
@@ -143,9 +143,9 @@ export const UsdWumboPriceProvider = ({ children = undefined as any }) => {
       return TokenAccountParser(pubkey, acct)!.info;
     }
   );
-  const { data: { totalWumLocked } = {} } = useQuery<{ totalWumLocked: number | undefined }>(GET_TOTAL_WUM_LOCKED, {})
+  const { data: { totalWumNetWorth } = {} } = useQuery<{ totalWumNetWorth: number | undefined }>(GET_TOTAL_WUM_LOCKED, {})
   const baseStorageAmount = baseStorage && solMint ? amountAsNum(baseStorage.amount, solMint) : 0
-  const bwumPrice = (baseStorageAmount / (totalWumLocked || 1)) * (solPrice || 0)
+  const bwumPrice = (baseStorageAmount / (totalWumNetWorth || 1)) * (solPrice || 0)
 
   return (
     <UsdWumboPriceContext.Provider value={bwumPrice}>

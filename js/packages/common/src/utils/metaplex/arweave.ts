@@ -95,7 +95,7 @@ export async function uploadToArweave(
 
   data.append("tags", JSON.stringify(tags));
   data.append("transaction", txid);
-  data.append("env", IS_DEV ? "devnet" : "mainnet-beta");
+  // data.append("env", IS_DEV ? "devnet" : "mainnet-beta");
   files.map((f) => data.append("file[]", f));
 
   // TODO: convert to absolute file name for image
@@ -118,37 +118,6 @@ export async function uploadToArweave(
     }
     throw e;
   }
-}
-
-export async function updateMetadataWithArweave(
-  splWumboProgram: SplWumbo,
-  tokenRef: PublicKey,
-  metadataFile: ArweaveFile,
-  metadata: {
-    name: string;
-    symbol: string;
-    description: string;
-    image: string | undefined;
-    animation_url: string | undefined;
-    external_url: string;
-    properties: any;
-    creators: Creator[] | null;
-    sellerFeeBasisPoints: number;
-  }
-): Promise<TransactionInstruction[]> {
-  // TODO: connect to testnet arweave
-  const arweaveLink = `https://arweave.net/${metadataFile.transactionId}`;
-  const args = {
-    tokenRef,
-    symbol: metadata.symbol,
-    name: metadata.name,
-    uri: arweaveLink, // size of url for arweave
-  };
-  console.log(args);
-  const { instructions } = await splWumboProgram.updateMetadataInstructions(
-    args
-  );
-  return instructions;
 }
 
 export const prepPayForFilesInstructions = async (

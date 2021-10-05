@@ -15,6 +15,8 @@ import { ManageWallet } from "./wallet/ManageWallet";
 import { ViewNft } from "./nft/ViewNft";
 import { TagNft } from "./nft/TagNft";
 import { Profile } from "./profile/Profile";
+import { TopTokens } from "./leaderboards/TopTokens";
+import { WumNetWorth } from "./leaderboards/WumNetWorth";
 import Claim from "./claim/Claim";
 import { EditProfileRoute } from "./profile/EditProfile";
 
@@ -32,6 +34,8 @@ const App: FC = () => (
           <Route path={routes.myTokens.path} component={Wallet} />
           <Route path={routes.manageWallet.path} component={ManageWallet} />
           <Route path={routes.viewProfile.path} component={Profile} />
+          <Route path={routes.topTokens.path} component={TopTokens} />
+          <Route path={routes.wumNetWorth.path} component={WumNetWorth} />
           <Route path={routes.viewNft.path} component={ViewNft} />
           <Route path={routes.tagNft.path} component={TagNft} />
           <Route path={routes.editProfile.path} component={EditProfileRoute} />
