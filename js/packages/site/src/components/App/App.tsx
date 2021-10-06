@@ -11,6 +11,7 @@ import { ContextProviders } from "./ContextProviders";
 import { ViewProfileRoute } from "../Profile/View/ViewProfile";
 import { ViewNftRoute } from "../Nft/View/ViewNft";
 import { WalletAutoReconnect } from "../../../../common/dist/lib";
+import { SwapRoute } from "../Swap/Swap";
 import { PrototypeRoute } from "../Prototype";
 
 const App: React.FC = () => (
@@ -25,6 +26,7 @@ const App: React.FC = () => (
       <Route path={Routes.viewNft.path} component={ViewNftRoute} />
       <Route path={Routes.profile.path} exact component={ViewProfileRoute} />
       <Route path={Routes.editProfile.path} component={EditProfileRoute} />
+      <Route path={Routes.swap.path} component={SwapRoute} />
       <Route path={Routes.prototype.path} component={PrototypeRoute} />
     </Switch>
   </ContextProviders>

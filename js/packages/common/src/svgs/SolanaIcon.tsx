@@ -3,55 +3,31 @@ import { createIcon } from "@chakra-ui/react";
 
 export const SolanaIcon = createIcon({
   displayName: "Solana",
-  viewBox: "0 0 397.7 311.7",
+  viewBox: "0 0 400 400",
   path: [
-    <linearGradient
-      id="a"
-      x1="360.8791"
-      x2="141.213"
-      y1="351.4553"
-      y2="-69.2936"
-      gradientTransform="matrix(1 0 0 -1 0 314)"
-      gradientUnits="userSpaceOnUse"
-    >
-      <stop offset="0" stop-color="#00ffa3" />
-      <stop offset="1" stop-color="#dc1fff" />
-    </linearGradient>,
-    <path
-      fill="url(#a)"
-      d="M64.6 237.9c2.4-2.4 5.7-3.8 9.2-3.8h317.4c5.8 0 8.7 7 4.6 11.1l-62.7 62.7c-2.4 2.4-5.7 3.8-9.2 3.8H6.5c-5.8 0-8.7-7-4.6-11.1l62.7-62.7z"
-    />,
+    <circle cx="200" cy="200" r="200" fill="#fff" />,
+    <g clip-path="url(#a)">
+      <path
+        fill="url(#b)"
+        fill-rule="evenodd"
+        d="M123.42 255.13a8.0387 8.0387 0 0 1 5.94-2.63l183.28.15c.781.002 1.544.23 2.197.657a4.0228 4.0228 0 0 1 1.483 1.749 4.0297 4.0297 0 0 1-.71 4.339l-39.03 42.975a8.0454 8.0454 0 0 1-2.694 1.943 8.0346 8.0346 0 0 1-3.251.687l-183.2748-.15a4.0346 4.0346 0 0 1-2.1971-.657 4.0302 4.0302 0 0 1-.7729-6.088L123.42 255.13Zm192.19-35.775a4.0297 4.0297 0 0 1-.773 6.088c-.653.427-1.416.655-2.197.657l-183.275.15c-1.119 0-2.226-.234-3.25-.687a8.0393 8.0393 0 0 1-2.695-1.943l-39.0298-43a4.0302 4.0302 0 0 1 .7729-6.088 4.0346 4.0346 0 0 1 2.1971-.657l183.2798-.15c1.119.001 2.225.235 3.248.688a8.0249 8.0249 0 0 1 2.692 1.942l39.03 43ZM123.42 97.63a8.0417 8.0417 0 0 1 2.693-1.9421A8.0318 8.0318 0 0 1 129.36 95l183.28.15a4.028 4.028 0 0 1 2.197.6569 4.0217 4.0217 0 0 1 1.483 1.749 4.0295 4.0295 0 0 1-.71 4.3391l-39.03 42.975a8.0454 8.0454 0 0 1-2.694 1.943 8.0346 8.0346 0 0 1-3.251.687l-183.2748-.15a4.0346 4.0346 0 0 1-2.1971-.657 4.0302 4.0302 0 0 1-.7729-6.088L123.42 97.63Z"
+        clip-rule="evenodd"
+      />
+    </g>,
     <linearGradient
       id="b"
-      x1="264.8291"
-      x2="45.163"
-      y1="401.6014"
-      y2="-19.1475"
-      gradientTransform="matrix(1 0 0 -1 0 314)"
+      x1="90.4202"
+      x2="309.58"
+      y1="309.58"
+      y2="90.42"
       gradientUnits="userSpaceOnUse"
     >
-      <stop offset="0" stop-color="#00ffa3" />
-      <stop offset="1" stop-color="#dc1fff" />
+      <stop stop-color="#9945FF" />
+      <stop offset=".2" stop-color="#7962E7" />
+      <stop offset="1" stop-color="#00D18C" />
     </linearGradient>,
-    <path
-      fill="url(#b)"
-      d="M64.6 3.8C67.1 1.4 70.4 0 73.8 0h317.4c5.8 0 8.7 7 4.6 11.1l-62.7 62.7c-2.4 2.4-5.7 3.8-9.2 3.8H6.5c-5.8 0-8.7-7-4.6-11.1L64.6 3.8z"
-    />,
-    <linearGradient
-      id="c"
-      x1="312.5484"
-      x2="92.8822"
-      y1="376.688"
-      y2="-44.061"
-      gradientTransform="matrix(1 0 0 -1 0 314)"
-      gradientUnits="userSpaceOnUse"
-    >
-      <stop offset="0" stop-color="#00ffa3" />
-      <stop offset="1" stop-color="#dc1fff" />
-    </linearGradient>,
-    <path
-      fill="url(#c)"
-      d="M333.1 120.1c-2.4-2.4-5.7-3.8-9.2-3.8H6.5c-5.8 0-8.7 7-4.6 11.1l62.7 62.7c2.4 2.4 5.7 3.8 9.2 3.8h317.4c5.8 0 8.7-7 4.6-11.1l-62.7-62.7z"
-    />,
+    <clipPath id="a">
+      <path fill="#fff" d="M0 0h240v210H0z" transform="translate(80 95)" />
+    </clipPath>,
   ],
 });

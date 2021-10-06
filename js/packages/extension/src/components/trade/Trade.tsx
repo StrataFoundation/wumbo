@@ -132,6 +132,7 @@ export const TradeRoute = () => {
 
   const isTargetWUM =
     tokenBonding.targetMint.toBase58() == WUM_TOKEN.toBase58();
+
   const buyBaseLink = (showFiat = true) => {
     if (!connected) {
       return (
@@ -235,12 +236,18 @@ export const Trade = ({
   const location = useLocation();
   const { info: tokenRef } = useTokenRefFromBonding(tokenBonding.publicKey);
 
-  const purchaseCap = tokenBonding.purchaseCap && targetMint ? amountAsNum(tokenBonding.purchaseCap as u64, targetMint) : Number.POSITIVE_INFINITY;
-  const buyMax = Math.min(curve?.buyWithBaseAmount(
-    ownedBase || 0,
-    tokenBonding.baseRoyaltyPercentage,
-    tokenBonding.targetRoyaltyPercentage
-  ) || 0, purchaseCap);
+  const purchaseCap =
+    tokenBonding.purchaseCap && targetMint
+      ? amountAsNum(tokenBonding.purchaseCap as u64, targetMint)
+      : Number.POSITIVE_INFINITY;
+  const buyMax = Math.min(
+    curve?.buyWithBaseAmount(
+      ownedBase || 0,
+      tokenBonding.baseRoyaltyPercentage,
+      tokenBonding.targetRoyaltyPercentage
+    ) || 0,
+    purchaseCap
+  );
   const sellMax = ownedTarget;
 
   handleErrors(buyError, sellError);
@@ -326,45 +333,49 @@ export const Trade = ({
 
         <TabPanels>
           <TabPanel paddingX={0}>
-            {(ownedBase && ownedBase > 0) && <>
-              {Info}
-              <TokenForm
-                 tokenAmountMax={buyMax}
-                fiatAmountFromTokenAmount={(tokenAmount: number) =>
-                  toFiat(
-                    curve?.buyTargetAmount(
-                      tokenAmount,
+            {ownedBase && ownedBase > 0 && (
+              <>
+                {Info}
+                <TokenForm
+                  tokenAmountMax={buyMax}
+                  fiatAmountFromTokenAmount={(tokenAmount: number) =>
+                    toFiat(
+                      curve?.buyTargetAmount(
+                        tokenAmount,
+                        tokenBonding.baseRoyaltyPercentage,
+                        tokenBonding.targetRoyaltyPercentage
+                      ) || 0
+                    )
+                  }
+                  tokenAmountFromFiatAmount={(fiatAmount: number) =>
+                    curve?.buyWithBaseAmount(
+                      fromFiat(fiatAmount),
                       tokenBonding.baseRoyaltyPercentage,
                       tokenBonding.targetRoyaltyPercentage
                     ) || 0
-                  )
-                }
-                tokenAmountFromFiatAmount={(fiatAmount: number) =>
-                  curve?.buyWithBaseAmount(
-                    fromFiat(fiatAmount),
-                    tokenBonding.baseRoyaltyPercentage,
-                    tokenBonding.targetRoyaltyPercentage
-                  ) || 0
-                }
-                icon={icon}
-                ticker={ticker}
-                type="buy"
-                onSubmit={onHandleBuy}
-                submitting={buyIsSubmitting}
-              />
-              <Flex flexDir="column" justifyContent="center" marginTop={4}>
-                <Flex justifyContent="center" fontSize="xs">
-                  You can buy up to{" "}
-                  {buyMax.toFixed(4)}{" "}
-                  {ticker} coins!
+                  }
+                  icon={icon}
+                  ticker={ticker}
+                  type="buy"
+                  onSubmit={onHandleBuy}
+                  submitting={buyIsSubmitting}
+                />
+                <Flex flexDir="column" justifyContent="center" marginTop={4}>
+                  <Flex justifyContent="center" fontSize="xs">
+                    You can buy up to {buyMax.toFixed(4)} {ticker} coins!
+                  </Flex>
                 </Flex>
-              </Flex>
-            </>}
-            {(!ownedBase || ownedBase == 0) && <Text>It looks like you don't have any {baseTicker}, which you'll need to buy {ticker} tokens. You can buy it by clicking here: </Text> }
+              </>
+            )}
+            {(!ownedBase || ownedBase == 0) && (
+              <Text>
+                It looks like you don't have any {baseTicker}, which you'll need
+                to buy {ticker} tokens. You can buy it by clicking here:{" "}
+              </Text>
+            )}
             <Flex justifyContent="center" marginTop={4}>
               {buyBaseLink(false)}
             </Flex>
-
           </TabPanel>
           <TabPanel paddingX={0}>
             {Info}
@@ -386,9 +397,7 @@ export const Trade = ({
             />
             <Flex flexDir="column" justifyContent="center" marginTop={4}>
               <Flex justifyContent="center" fontSize="xs">
-                You can sell up to{" "}
-                {sellMax?.toFixed(4)}{" "}
-                {ticker} coins!
+                You can sell up to {sellMax?.toFixed(4)} {ticker} coins!
               </Flex>
             </Flex>
           </TabPanel>
