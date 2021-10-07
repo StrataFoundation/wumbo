@@ -219,6 +219,7 @@ export const Trade = ({
   buyBaseLink,
   tokenBonding,
 }: TradeParams) => {
+  console.log("tokenBonding", tokenBonding?.publicKey?.toBase58());
   const [buy, { loading: buyIsSubmitting, error: buyError }] = useBuy();
   const [sell, { loading: sellIsSubmitting, error: sellError }] = useSell();
   const { curve } = useBondingPricing(tokenBonding.publicKey);

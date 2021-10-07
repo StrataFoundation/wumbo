@@ -1,5 +1,6 @@
 import React from "react";
 import { Switch, Route } from "react-router-dom";
+import { Toaster } from "react-hot-toast";
 import Routes from "../../constants/routes";
 import BetaSplash from "../BetaSplash/BetaSplash";
 import { ClaimRoute } from "../Claim/Claim";
@@ -29,6 +30,13 @@ const App: React.FC = () => (
       <Route path={Routes.swap.path} component={SwapRoute} />
       <Route path={Routes.prototype.path} component={PrototypeRoute} />
     </Switch>
+    <Toaster
+      position="bottom-center"
+      containerStyle={{
+        margin: "auto",
+        width: "420px",
+      }}
+    />
   </ContextProviders>
 );
 
