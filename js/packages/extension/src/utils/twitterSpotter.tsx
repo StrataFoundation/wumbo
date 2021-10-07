@@ -7,12 +7,12 @@ import * as Sentry from "@sentry/react";
 const twitterMentionRegex =
   /(?:^|[^a-zA-Z0-9_@＠])(@|＠)(?!\.)([a-zA-Z0-9_\.]{1,15})(?:\b(?!@)|$)/g;
 
-type ProfileType = 'mine' | 'other' | undefined;
+type ProfileType = "mine" | "other" | undefined;
 interface IParsedProfile {
   name: string;
   buttonTarget: HTMLElement | null;
   avatar?: string;
-  type: ProfileType
+  type: ProfileType;
 }
 
 const sanitizeMentions = (mentions: string[]) => [
@@ -51,7 +51,7 @@ export const useProfile = (): IParsedProfile | null => {
             name,
             avatar: imgEl?.src,
             buttonTarget: buttonTarget as HTMLElement,
-            type: "other" as ProfileType
+            type: "other" as ProfileType,
           };
         }
       } else if (profile && nameEl && name && settings) {
@@ -62,7 +62,7 @@ export const useProfile = (): IParsedProfile | null => {
             name,
             avatar: imgEl?.src,
             buttonTarget: buttonTarget as HTMLElement,
-            type: "mine" as ProfileType
+            type: "mine" as ProfileType,
           };
         }
       }
@@ -118,7 +118,11 @@ function findChildWithDimension(
   const children = [...el.children];
   const childWithWidth = children.find((c) => {
     const computed = getComputedStyle(c);
-    return computed.width == `${width}px` && computed.height == `${height}px` && computed.position != "absolute";
+    return (
+      computed.width == `${width}px` &&
+      computed.height == `${height}px` &&
+      computed.position != "absolute"
+    );
   });
   if (!childWithWidth) {
     for (const child of children) {
@@ -148,14 +152,15 @@ export const useTweets = (): IParsedTweet[] | null => {
       if (tweets.length > 0) {
         const parsedTweets = tweets.reduce(
           (acc: any, tweet: any, index: number): IParsedTweet[] => {
-            const buttonTarget = (findChildWithDimension(tweet, 48, 48) ||
-              findChildWithDimension(tweet, 32, 32));
+            const buttonTarget =
+              findChildWithDimension(tweet, 48, 48) ||
+              findChildWithDimension(tweet, 32, 32);
             if (buttonTarget) {
               const nameEl = buttonTarget.querySelector("a");
 
               if (nameEl) {
-                cache.add(tweet)
-                
+                cache.add(tweet);
+
                 const name = nameEl.href.split("/").slice(-1)[0];
                 const imgEl = nameEl.querySelector("img");
                 let mentions: string[] | null = null;
