@@ -20,9 +20,9 @@ export const SwapRoute = React.memo(() => {
         onHandleFlipTokens={(tokenBonding, action) =>
           history.push(swapPath(tokenBonding, action))
         }
-        onHandleBuyWum={(tokenBonding, action) =>
-          history.push(swapPath(tokenBonding, action))
-        }
+        onHandleBuyBase={(tokenBonding) => {
+          console.log(tokenBonding.toBase58());
+        }}
       />
     </AppContainer>
   );

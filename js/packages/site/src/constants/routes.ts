@@ -37,11 +37,11 @@ export const editProfile = (ownerWalletKey: PublicKey): string =>
   });
 
 export const swapPath = (
-  tokenBonding: PublicKey,
+  tokenBondingKey: PublicKey,
   action: "buy" | "sell"
 ): string =>
   replaceAll(routes.swap.path, {
-    ":tokenBonding": tokenBonding.toBase58(),
+    ":tokenBondingKey": tokenBondingKey.toBase58(),
     ":action": action,
   });
 
@@ -54,7 +54,7 @@ const routes: IRoutes = {
   profile: { path: "/profile" },
   editProfile: { path: "/profile/edit/:ownerWalletKey" },
   betaSplash: { path: "/" },
-  swap: { path: "/swap/:tokenBonding/:action" },
+  swap: { path: "/swap/:tokenBondingKey/:action" },
   prototype: { path: "/prototype" },
 };
 
