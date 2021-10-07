@@ -8,6 +8,8 @@ import { RiCoinLine } from 'react-icons/ri';
 import { useWallet } from '../contexts/walletContext';
 import { Spinner } from '../Spinner';
 import { Link } from 'react-router-dom';
+import { WumboRankIcon } from '../svgs';
+import { useWumNetWorth } from '../hooks';
 
 const SolLogoIcon = createIcon({
   displayName: "Solana",
@@ -67,6 +69,7 @@ const TokenInfo = React.memo(({
 })
 
 export const Wallet = React.memo(({
+  wumLeaderboardLink,
   getTokenLink,
   wumLink,
   solLink
@@ -74,6 +77,7 @@ export const Wallet = React.memo(({
   getTokenLink: (tokenWithMeta: ITokenWithMetaAndAccount) => string;
   wumLink: string;
   solLink: string;
+  wumLeaderboardLink: string;
 }) => {
   const { metadata: wumMetadata, image: wumImage } = useTokenMetadata(WUM_TOKEN);
   const { amount: solOwned } = useSolOwnedAmount();
@@ -82,57 +86,84 @@ export const Wallet = React.memo(({
   const wumOwned = useOwnedAmount(WUM_TOKEN);
   const { publicKey } = useWallet()
   const { result: tokens, loading } = useUserTokensWithMeta(publicKey || undefined);
+  const { wumNetWorth } = useWumNetWorth(publicKey || undefined);
 
   return <VStack
     align="stretch"
-    divider={<StackDivider borderColor="gray.200" />}
     spacing={4}
     w="full"
   >
-    <HStack
+    <Link to={wumLeaderboardLink}>
+      <VStack
+        _hover={{ opacity: 0.7 }}
+        color="white"
+        rounded={8}
+        bg="linear-gradient(227.94deg, #6F27E6 12.77%, #5856EB 85.19%)"
+        p="8px"
+        spacing={0}
+      >
+        <HStack alignItems="center">
+          <WumboRankIcon h="21px" w="21px" />
+          <Text fontSize={26} fontWeight={800}>{wumNetWorth?.toFixed(2)}</Text>
+        </HStack>
+        <HStack>
+          <Text fontSize={16}>WUM Net Worth</Text>
+          {wumNetWorth && wumPrice && <Text fontSize={16} color="gray.400" mt={0}>(~${(wumPrice * wumNetWorth).toFixed(2)})</Text>}
+        </HStack>
+      </VStack>
+    </Link>
+    <VStack
       align="stretch"
-      justify="space-evenly"
       divider={<StackDivider borderColor="gray.200" />}
       spacing={4}
+      w="full"
     >
-      <Link
-        to={wumLink}
+
+      <HStack
+        align="stretch"
+        justify="space-evenly"
+        divider={<StackDivider borderColor="gray.200" />}
+        spacing={4}
       >
-        <VStack _hover={{ opacity: "0.5", cursor: "pointer" }} spacing={1} align="center">
-          <Avatar
-            name={wumMetadata?.data.symbol}
-            src={wumImage}
-          />
+        <Link
+          to={wumLink}
+        >
+          <VStack _hover={{ opacity: "0.5", cursor: "pointer" }} spacing={1} align="center">
+            <Avatar
+              name={wumMetadata?.data.symbol}
+              src={wumImage}
+            />
+            <HStack align="center" spacing={1}>
+              <Icon as={RiCoinLine} w="16px" h="16px" />
+              <Text>{wumOwned?.toFixed(2)} {wumMetadata?.data.symbol}</Text>
+            </HStack>
+            <Text color="gray.500">(~${((wumPrice || 0) * (wumOwned || 0)).toFixed(2)})</Text>
+          </VStack>
+        </Link>
+
+        <VStack onClick={() => window.open(solLink, '_blank')} _hover={{ opacity: "0.5", cursor: "pointer" }} spacing={1} flexDir="column" align="center">
+          <Icon as={SolLogoIcon} w={"48px"} h={"48px"} />
           <HStack align="center" spacing={1}>
             <Icon as={RiCoinLine} w="16px" h="16px" />
-            <Text>{wumOwned?.toFixed(2)} {wumMetadata?.data.symbol}</Text>
+            <Text>{solOwned?.toFixed(2)} SOL</Text>
           </HStack>
-          <Text color="gray.500">(~${((wumPrice || 0) * (wumOwned || 0)).toFixed(2)})</Text>
+          <Text color="gray.500">(~${((solPrice || 0) * solOwned).toFixed(2)})</Text>
         </VStack>
-      </Link>
-
-      <VStack onClick={() => window.open(solLink, '_blank')} _hover={{ opacity: "0.5", cursor: "pointer" }} spacing={1} flexDir="column" align="center">
-        <Icon as={SolLogoIcon} w={"48px"} h={"48px"} />
-        <HStack align="center" spacing={1}>
-          <Icon as={RiCoinLine} w="16px" h="16px" />
-          <Text>{solOwned?.toFixed(2)} SOL</Text>
-        </HStack>
-        <Text color="gray.500">(~${((solPrice || 0) * solOwned).toFixed(2)})</Text>
-      </VStack>
-    </HStack>
-    {loading && <Center>
-      <Spinner size="lg" />
-    </Center>}
-    {!loading &&
-      tokens?.filter(t => !!t.tokenRef && t.tokenRef.wumbo.equals(WUMBO_INSTANCE_KEY))
-        .sort((a, b) => a.metadata!.data.name.localeCompare(b.metadata!.data.name))
-        .map(tokenWithMeta =>
-          <TokenInfo
-            key={tokenWithMeta.publicKey?.toBase58()}
-            tokenWithMeta={tokenWithMeta}
-            getTokenLink={getTokenLink}
-          />
-        )
-    }
+      </HStack>
+      {loading && <Center>
+        <Spinner size="lg" />
+      </Center>}
+      {!loading &&
+        tokens?.filter(t => !!t.tokenRef && t.tokenRef.wumbo.equals(WUMBO_INSTANCE_KEY))
+          .sort((a, b) => a.metadata!.data.name.localeCompare(b.metadata!.data.name))
+          .map(tokenWithMeta =>
+            <TokenInfo
+              key={tokenWithMeta.publicKey?.toBase58()}
+              tokenWithMeta={tokenWithMeta}
+              getTokenLink={getTokenLink}
+            />
+          )
+      }
+    </VStack>
   </VStack>
 })

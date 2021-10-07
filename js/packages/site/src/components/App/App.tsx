@@ -11,6 +11,8 @@ import { ContextProviders } from "./ContextProviders";
 import { ViewProfileRoute } from "../Profile/View/ViewProfile";
 import { ViewNftRoute } from "../Nft/View/ViewNft"
 import { WalletAutoReconnect } from "../../../../common/dist/lib";
+import { TopTokens } from "../Leaderboard/TopTokens";
+import { WumNetWorth } from "../Leaderboard/WumNetWorth";
 
 const App: React.FC = () => (
   <ContextProviders>
@@ -24,6 +26,8 @@ const App: React.FC = () => (
       <Route path={Routes.viewNft.path} component={ViewNftRoute} />
       <Route path={Routes.profile.path} exact component={ViewProfileRoute} />
       <Route path={Routes.editProfile.path} component={EditProfileRoute} />
+      <Route path={Routes.topTokens.path} component={TopTokens} />
+      <Route path={Routes.wumNetWorth.path} component={WumNetWorth} />
     </Switch>
   </ContextProviders>
 );

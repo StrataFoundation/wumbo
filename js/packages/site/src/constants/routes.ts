@@ -13,6 +13,22 @@ interface IRoutes {
   editProfile: Route;
   manageWallet: Route;
   wallet: Route;
+  wumNetWorth: Route;
+  topTokens: Route;
+}
+
+export function topTokensPath(tokenBondingKey: PublicKey): string {
+  return routes.topTokens.path.replace(
+    ":tokenBondingKey",
+    tokenBondingKey.toBase58()
+  );
+}
+
+export function wumNetWorthPath(wallet: PublicKey): string {
+  return routes.wumNetWorth.path.replace(
+    ":wallet",
+    wallet.toBase58()
+  );
 }
 
 export function profilePath(tokenRefKey: PublicKey): string {
@@ -36,6 +52,8 @@ const routes: IRoutes = {
   profile: { path: "/profile" },
   editProfile: { path: "/profile/edit/:ownerWalletKey" },
   betaSplash: { path: "/" },
+  topTokens: { path: "/top-tokens/:tokenBondingKey" },
+  wumNetWorth: { path: "/wum-net-worth/:wallet" },
 };
 
 export default routes;

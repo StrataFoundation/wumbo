@@ -54,6 +54,8 @@ export const ViewNftRaw = React.memo(
   }) => {
     const [isExpanded, setIsExpanded] = useState<boolean>(false);
 
+    console.log("Metadata: ", token.metadataKey?.toBase58());
+
     /* const { connected } = useWallet(); */
 
     /* if (!connected && taggingMode) {
