@@ -106,18 +106,20 @@ export const Swap = ({
     return <Spinner />;
   }
 
-  const { name = "", ticker = "", icon } = tokenBonding;
+  const { name = "", ticker = "", icon, publicKey } = tokenBonding;
 
   const base = isBaseSol
     ? {
         name: "SOL",
         ticker: "SOL",
         icon: <SolanaIcon w="full" h="full" />,
+        publicKey: SOL_TOKEN,
       }
     : {
         name: wumMeta.data.name,
         ticker: wumMeta.data.symbol,
         icon: <WumboIcon w="full" h="full" />,
+        publicKey: WUM_TOKEN,
       };
 
   const target = isBaseSol
@@ -125,8 +127,9 @@ export const Swap = ({
         name: wumMeta.data.name,
         ticker: wumMeta.data.symbol,
         icon: <WumboIcon w="full" h="full" />,
+        publicKey: WUM_TOKEN,
       }
-    : { name, ticker, icon };
+    : { name, ticker, icon, publicKey };
 
   const handleSubmit = async (values: ISwapFormValues) => {
     const { ticker: notificationTicker } = isBuying ? target : base;

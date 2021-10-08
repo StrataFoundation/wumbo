@@ -68,11 +68,13 @@ export interface ISwapFormProps {
     name: string;
     ticker: string;
     icon: React.ReactNode;
+    publicKey: PublicKey;
   };
   target: {
     name: string;
     ticker: string;
     icon: React.ReactNode;
+    publicKey: PublicKey;
   };
   ownedBase: number;
   spendCap: number;
@@ -115,8 +117,8 @@ export const SwapForm = ({
     resolver: yupResolver(validationSchema),
   });
 
-  const isBaseSol = tokenBonding.baseMint.equals(SOL_TOKEN);
-  const isBaseWum = tokenBonding.baseMint.equals(WUM_TOKEN);
+  const isBaseSol = base.publicKey.equals(SOL_TOKEN);
+  const isBaseWum = base.publicKey.equals(WUM_TOKEN);
   const isBuying = action === "buy";
   const topAmount = watch("topAmount");
   const slippage = watch("slippage");
