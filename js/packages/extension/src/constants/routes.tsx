@@ -23,6 +23,15 @@ export interface IRoutes {
   wumNetWorth: Route;
   viewNft: Route;
   tagNft: Route;
+  sendSearch: Route;
+  send: Route;
+}
+
+export function sendPath(mint: PublicKey): string {
+  return routes.send.path.replace(
+    ":mint",
+    mint.toBase58()
+  );
 }
 
 export function viewProfilePath(tokenRefKey: PublicKey): string {
@@ -108,6 +117,8 @@ export const routes: IRoutes = {
   },
   viewNft: { path: "/nft/view/:mint", Icon: null, isDrawerNav: false },
   tagNft: { path: "/nft/tag/:mint", Icon: null, isDrawerNav: false },
+  sendSearch: { path: "/send", Icon: null, isDrawerNav: false },
+  send: { path: "/send/:mint", Icon: null, isDrawerNav: false },
 };
 
 export const paths: string[] = Object.keys(routes).map(

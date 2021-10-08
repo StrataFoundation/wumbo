@@ -54,6 +54,7 @@
     "bip39": "^3.0.4",
     "borsh": "^0.4.0",
     "framer-motion": "^4",
+    "fuse.js": "^6.4.6",
     "graphql": "^15.5.3",
     "lambert-w-function": "^2.0.0",
     "lodash": "^4.17.21",

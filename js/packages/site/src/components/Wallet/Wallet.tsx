@@ -1,5 +1,5 @@
 import React, { useEffect } from "react";
-import { profilePath, wumNetWorthPath } from "../../constants/routes";
+import routes, { profilePath, wumNetWorthPath } from "../../constants/routes";
 import AppContainer from "../common/AppContainer";
 import { useHistory } from "react-router-dom";
 import { useFtxPayLink, useWallet, Wallet } from "wumbo-common";
@@ -20,6 +20,7 @@ export default React.memo(() => {
           getTokenLink={(t) => t.tokenRef?.publicKey ? profilePath(t.tokenRef?.publicKey) : ""}
           wumLink={""}
           solLink={solLink}
+          sendLink={routes.sendSearch.path}
         />
       </Box>
     </AppContainer>

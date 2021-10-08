@@ -63,7 +63,11 @@ export async function getArweaveMetadata(uri: string | undefined): Promise<IMeta
             ...await getArweaveMetadata(data.uri)
           }
         }
-        localStorage.setItem(newUri, JSON.stringify(data));
+        try {
+          localStorage.setItem(newUri, JSON.stringify(data));
+        } catch (e) {
+          // ignore
+        }
         return data
       } catch(e) {
         console.log(`Could not fetch from ${uri}`, e)

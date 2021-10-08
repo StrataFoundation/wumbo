@@ -225,7 +225,7 @@ export class AccountFetchCache {
 
       // Only set the cache for defined static accounts. Static accounts can change if they go from nonexistant to existant.
       // Rely on searchAndWatch to set the generic cache for everything else.
-      if (isStatic && result.info) {
+      if (isStatic && result && result.info) {
         this.updateCache(address, result)
       }
 
@@ -282,7 +282,10 @@ export class AccountFetchCache {
     const deserialize = (this.keyToAccountParser.get(address) || AccountFetchCache.defaultParser) as AccountParser<T>;
     const account = deserialize(new PublicKey(address), obj);
     if (!account) {
-      return;
+      return {
+        pubkey: new PublicKey(id), 
+        account: obj
+      };
     }
 
     return account;

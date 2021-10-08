@@ -23,6 +23,7 @@ import { useTwitterTokenRef } from "./tokenRef";
 import { Curve as DeserializeCurve, TokenBonding } from "./deserializers/spl-token-bonding";
 import { Curve, fromCurve } from "@wum.bo/spl-token-bonding";
 import { useQuery, gql } from '@apollo/client';
+import { usePrograms } from "./programs";
 
 // TODO: Use actual connection. But this can't happen in dev
 let connection = new Connection("https://api.mainnet-beta.solana.com");
@@ -39,27 +40,10 @@ export function amountAsNum(amount: u64, mint: MintInfo): number {
   return amount.div(decimals).toNumber() + decimal;
 }
 
-export function useRentExemptAmount(size: number): {
-  loading: boolean;
-  amount: number | undefined;
-  error: Error | undefined;
-} {
-  const connection = useConnection();
-  const { loading, error, result } = useAsync(connection.getMinimumBalanceForRentExemption, [size]);
-
-  const amount = useMemo(() => (result || 0) / Math.pow(10, 9), [result]);
-
-  return {
-    amount,
-    error,
-    loading,
-  };
-}
-
 export function useSolOwnedAmount(): { amount: number; loading: boolean } {
-  const { adapter } = useWallet();
+  const { publicKey } = useWallet();
   const { info: lamports, loading } = useAccount<number>(
-    adapter?.publicKey || undefined,
+    publicKey || undefined,
     (_, account) => account.lamports
   );
   const result = React.useMemo(() => (lamports || 0) / Math.pow(10, 9), [lamports]);
@@ -121,6 +105,29 @@ export function useBondingPricing(tokenBonding: PublicKey | undefined): PricingS
   };
 }
 
+async function getTokenBondingKey(programId: PublicKey | undefined, mint: PublicKey | undefined) {
+  if (!mint || !programId) {
+    return undefined;
+  }
+
+  return (await PublicKey.findProgramAddress(
+    [Buffer.from("token-bonding", "utf-8"), mint.toBuffer()],
+    programId
+  ))[0]
+}
+export function useBondingPricingFromMint(mint: PublicKey | undefined): PricingState {
+  const { splTokenBondingProgram } = usePrograms();
+  const { result: key, loading } = useAsync(getTokenBondingKey, [
+    splTokenBondingProgram?.programId,
+    mint
+  ])
+  const bondingPricing = useBondingPricing(key);
+
+  return {
+    ...bondingPricing,
+    loading: bondingPricing.loading || loading
+  }
+}
 
 const GET_TOTAL_WUM_LOCKED = gql`
   query GetTotalWumNetWorth {
@@ -198,6 +205,7 @@ export const useMarketPrice = (marketAddress: PublicKey): number | undefined => 
 export function useFiatPrice(token: PublicKey | undefined): number | undefined {
   const wumboPrice = useWumboUsdPrice();
   const solPrice = useSolPrice();
+  const { curve } = useBondingPricingFromMint(token)
   
   const [price, setPrice] = useState<number>();
 
@@ -206,8 +214,10 @@ export function useFiatPrice(token: PublicKey | undefined): number | undefined {
       setPrice(solPrice);
     } else if (token?.toBase58() == WUM_TOKEN.toBase58()) {
       setPrice(wumboPrice);
+    } else {
+      setPrice(curve?.current())
     }
-  }, [token, wumboPrice, solPrice]);
+  }, [token, wumboPrice, solPrice, curve]);
 
   return price;
 }

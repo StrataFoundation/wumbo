@@ -1,7 +1,8 @@
-import { Text, Box, Center, createIcon, Flex, HStack, Icon, StackDivider, VStack } from '@chakra-ui/react';
+import { Text, Box, Center, createIcon, Flex, HStack, Icon, StackDivider, VStack, Button, SimpleGrid, Divider } from '@chakra-ui/react';
 import { SOL_TOKEN, WUMBO_INSTANCE_KEY, WUM_TOKEN } from '../constants/globals';
 import { TokenAccount } from "@oyster/common";
 import { Avatar } from "../Avatar";
+import { Notification } from '../Notification';
 import React from 'react';
 import { useUserTokenAccounts, useFiatPrice, useOwnedAmount, useSolOwnedAmount, useTokenMetadata, useUserTokensWithMeta, ITokenWithMeta, ITokenWithMetaAndAccount, useBondingPricing, amountAsNum } from '../utils';
 import { RiCoinLine } from 'react-icons/ri';
@@ -10,6 +11,7 @@ import { Spinner } from '../Spinner';
 import { Link } from 'react-router-dom';
 import { WumboRankIcon } from '../svgs';
 import { useWumNetWorth } from '../hooks';
+import toast from "react-hot-toast";
 
 const SolLogoIcon = createIcon({
   displayName: "Solana",
@@ -33,14 +35,15 @@ const SolLogoIcon = createIcon({
         <stop offset="1" stopColor="#DC1FFF" />,
       </linearGradient>,
     </defs>
-
   ],
 });
 
-const TokenInfo = React.memo(({
+export const TokenInfo = React.memo(({
   tokenWithMeta,
-  getTokenLink
+  getTokenLink,
+  highlighted
 }: {
+  highlighted?: boolean,
   tokenWithMeta: ITokenWithMetaAndAccount;
   getTokenLink: (tokenWithMeta: ITokenWithMetaAndAccount) => string
 }) => {
@@ -51,7 +54,7 @@ const TokenInfo = React.memo(({
   const ownedAmount = useOwnedAmount(account?.mint);
 
   return <Link to={getTokenLink(tokenWithMeta)}>
-    <HStack spacing={3} align="center" _hover={{ opacity: "0.5" }}>
+    <HStack padding={4} spacing={3} align="center" _hover={{ opacity: "0.5" }} borderColor={highlighted ? "indigo.500" : undefined} borderWidth={highlighted ? "1px" : undefined} borderRadius={highlighted ? "4px" : undefined}>
       <Avatar
         name={metadata?.data.symbol}
         src={image}
@@ -72,12 +75,14 @@ export const Wallet = React.memo(({
   wumLeaderboardLink,
   getTokenLink,
   wumLink,
-  solLink
+  solLink,
+  sendLink
 }: {
   getTokenLink: (tokenWithMeta: ITokenWithMetaAndAccount) => string;
   wumLink: string;
   solLink: string;
   wumLeaderboardLink: string;
+  sendLink: string;
 }) => {
   const { metadata: wumMetadata, image: wumImage } = useTokenMetadata(WUM_TOKEN);
   const { amount: solOwned } = useSolOwnedAmount();
@@ -90,80 +95,118 @@ export const Wallet = React.memo(({
 
   return <VStack
     align="stretch"
-    spacing={4}
     w="full"
+    spacing={4}
+    divider={<StackDivider borderColor="gray.200" />}
   >
-    <Link to={wumLeaderboardLink}>
-      <VStack
-        _hover={{ opacity: 0.7 }}
-        color="white"
-        rounded={8}
-        bg="linear-gradient(227.94deg, #6F27E6 12.77%, #5856EB 85.19%)"
-        p="8px"
-        spacing={0}
-      >
-        <HStack alignItems="center">
-          <WumboRankIcon h="21px" w="21px" />
-          <Text fontSize={26} fontWeight={800}>{wumNetWorth?.toFixed(2)}</Text>
-        </HStack>
-        <HStack>
-          <Text fontSize={16}>WUM Net Worth</Text>
-          {wumNetWorth && wumPrice && <Text fontSize={16} color="gray.400" mt={0}>(~${(wumPrice * wumNetWorth).toFixed(2)})</Text>}
-        </HStack>
-      </VStack>
-    </Link>
     <VStack
       align="stretch"
-      divider={<StackDivider borderColor="gray.200" />}
-      spacing={4}
       w="full"
+      spacing={4}
     >
-
-      <HStack
+      <Link to={wumLeaderboardLink}>
+        <VStack
+          _hover={{ opacity: 0.7 }}
+          color="white"
+          rounded={8}
+          bg="linear-gradient(227.94deg, #6F27E6 12.77%, #5856EB 85.19%)"
+          p="8px"
+          spacing={0}
+        >
+          <HStack alignItems="center">
+            <WumboRankIcon h="21px" w="21px" />
+            <Text fontSize={26} fontWeight={800}>{wumNetWorth?.toFixed(2)}</Text>
+          </HStack>
+          <HStack>
+            <Text fontSize={16}>WUM Net Worth</Text>
+            {wumNetWorth && wumPrice && <Text fontSize={16} color="gray.400" mt={0}>(~${(wumPrice * wumNetWorth).toFixed(2)})</Text>}
+          </HStack>
+        </VStack>
+      </Link>
+      <SimpleGrid spacing={2} columns={2}>
+        <Button
+          flexGrow={1}
+          colorScheme="indigo"
+          onClick={() => {
+            navigator.clipboard.writeText(publicKey?.toBase58() || "")
+            toast.custom((t) => (
+              <Notification
+                show={t.visible}
+                type="info"
+                heading="Copied to Clipboard"
+                message={publicKey?.toBase58()}
+                onDismiss={() => toast.dismiss(t.id)}
+              />
+            ));
+          }}
+        >
+          Receive
+        </Button>
+        <Link style={{ flexGrow: 1 }} to={sendLink}>
+          <Button flexGrow={1} w="full" colorScheme="indigo">Send</Button>
+        </Link>
+      </SimpleGrid>
+      <VStack
+        pt={2}
         align="stretch"
-        justify="space-evenly"
         divider={<StackDivider borderColor="gray.200" />}
         spacing={4}
+        w="full"
       >
-        <Link
-          to={wumLink}
+        <HStack
+          direction="row"
+          justifyContent="space-evenly"
+          divider={<StackDivider borderColor="gray.200" />}
         >
-          <VStack _hover={{ opacity: "0.5", cursor: "pointer" }} spacing={1} align="center">
-            <Avatar
-              name={wumMetadata?.data.symbol}
-              src={wumImage}
-            />
+          <Link
+            style={{ flexGrow: 1, flexBasis: 0 }}
+            to={wumLink}
+          >
+            <VStack _hover={{ opacity: "0.5", cursor: "pointer" }} spacing={1} align="center">
+              <Avatar
+                name={wumMetadata?.data.symbol}
+                src={wumImage}
+              />
+              <HStack align="center" spacing={1}>
+                <Icon as={RiCoinLine} w="16px" h="16px" />
+                <Text>{wumOwned?.toFixed(2)} {wumMetadata?.data.symbol}</Text>
+              </HStack>
+              <Text color="gray.500">(~${((wumPrice || 0) * (wumOwned || 0)).toFixed(2)})</Text>
+            </VStack>
+          </Link>
+
+          <VStack flexGrow={1} flexBasis={0} onClick={() => window.open(solLink, '_blank')} _hover={{ opacity: "0.5", cursor: "pointer" }} spacing={1} flexDir="column" align="center">
+            <Icon as={SolLogoIcon} w={"48px"} h={"48px"} />
             <HStack align="center" spacing={1}>
               <Icon as={RiCoinLine} w="16px" h="16px" />
-              <Text>{wumOwned?.toFixed(2)} {wumMetadata?.data.symbol}</Text>
+              <Text>{solOwned?.toFixed(2)} SOL</Text>
             </HStack>
-            <Text color="gray.500">(~${((wumPrice || 0) * (wumOwned || 0)).toFixed(2)})</Text>
+            <Text color="gray.500">(~${((solPrice || 0) * solOwned).toFixed(2)})</Text>
           </VStack>
-        </Link>
-
-        <VStack onClick={() => window.open(solLink, '_blank')} _hover={{ opacity: "0.5", cursor: "pointer" }} spacing={1} flexDir="column" align="center">
-          <Icon as={SolLogoIcon} w={"48px"} h={"48px"} />
-          <HStack align="center" spacing={1}>
-            <Icon as={RiCoinLine} w="16px" h="16px" />
-            <Text>{solOwned?.toFixed(2)} SOL</Text>
-          </HStack>
-          <Text color="gray.500">(~${((solPrice || 0) * solOwned).toFixed(2)})</Text>
-        </VStack>
-      </HStack>
-      {loading && <Center>
-        <Spinner size="lg" />
-      </Center>}
-      {!loading &&
-        tokens?.filter(t => !!t.tokenRef && t.tokenRef.wumbo.equals(WUMBO_INSTANCE_KEY))
-          .sort((a, b) => a.metadata!.data.name.localeCompare(b.metadata!.data.name))
-          .map(tokenWithMeta =>
-            <TokenInfo
-              key={tokenWithMeta.publicKey?.toBase58()}
-              tokenWithMeta={tokenWithMeta}
-              getTokenLink={getTokenLink}
-            />
-          )
-      }
+        </HStack>
+      </VStack>
     </VStack>
+    <VStack
+        align="stretch"
+        w="full"
+        spacing={0}
+        mt={loading ? 0 : -4}
+        divider={<StackDivider borderColor="gray.200" />}
+      >
+        {loading && <Center>
+          <Spinner size="lg" />
+        </Center>}
+        {!loading &&
+          tokens?.filter(t => !!t.tokenRef && t.tokenRef.wumbo.equals(WUMBO_INSTANCE_KEY))
+            .sort((a, b) => a.metadata!.data.name.localeCompare(b.metadata!.data.name))
+            .map(tokenWithMeta =>
+              <TokenInfo
+                key={tokenWithMeta.publicKey?.toBase58()}
+                tokenWithMeta={tokenWithMeta}
+                getTokenLink={getTokenLink}
+              />
+            )
+        }
+      </VStack>
   </VStack>
 })

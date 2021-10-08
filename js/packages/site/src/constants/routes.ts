@@ -15,6 +15,15 @@ interface IRoutes {
   wallet: Route;
   wumNetWorth: Route;
   topTokens: Route;
+  sendSearch: Route;
+  send: Route;
+}
+
+export function sendPath(mint: PublicKey): string {
+  return routes.send.path.replace(
+    ":mint",
+    mint.toBase58()
+  );
 }
 
 export function topTokensPath(tokenBondingKey: PublicKey): string {
@@ -54,6 +63,8 @@ const routes: IRoutes = {
   betaSplash: { path: "/" },
   topTokens: { path: "/top-tokens/:tokenBondingKey" },
   wumNetWorth: { path: "/wum-net-worth/:wallet" },
+  sendSearch: { path: "/send" },
+  send: { path: "/send/:mint" }
 };
 
 export default routes;

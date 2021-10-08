@@ -6,12 +6,15 @@ import {
   TextProps,
   Avatar as ChakraAvatar,
   AvatarProps as ChakraAvatarProps,
+  Stack,
+  StackDirection
 } from "@chakra-ui/react";
 import { Spinner, useTokenMetadata } from ".";
 import { handleErrors } from "./contexts";
 import { ITokenBonding } from "utils";
 
 export interface AvatarProps extends ChakraAvatarProps {
+  direction?: StackDirection;
   nameProps?: TextProps;
   subText?: string;
   subTextProps?: TextProps;
@@ -26,9 +29,10 @@ export const Avatar = ({
   subTextProps = {},
   showDetails,
   size = "md",
+  direction="row",
   ...props
 }: AvatarProps) => (
-  <HStack spacing={2} alignItems="center">
+  <Stack direction={direction} spacing={2} alignItems="center">
     <ChakraAvatar size={size} src={src} bgColor="gray.200" {...props} />
     {showDetails && (
       <VStack spacing={2}>
@@ -36,7 +40,7 @@ export const Avatar = ({
         {subText && <Text {...subTextProps}>{subText}</Text>}
       </VStack>
     )}
-  </HStack>
+  </Stack>
 );
 
 interface MetadataAvatarProps extends AvatarProps {
