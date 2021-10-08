@@ -20,7 +20,7 @@ interface IRoutes {
 const replaceAll = (str: string, mapObj: Record<string, string>) => {
   const re = new RegExp(Object.keys(mapObj).join("|"), "gi");
 
-  return str.replace(re, (matched: string) => mapObj[matched.toLowerCase()]);
+  return str.replace(re, (matched: string) => mapObj[matched]);
 };
 
 export const profilePath = (tokenRefKey: PublicKey): string =>

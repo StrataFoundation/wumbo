@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { useAsyncCallback } from "react-async-hook";
 import { WalletNotConnectedError } from "@solana/wallet-adapter-base";
 import {
@@ -16,6 +16,8 @@ import {
   TokenBonding,
   useTokenMetadata,
   ITokenBonding,
+  Avatar,
+  MetadataAvatar,
 } from "../";
 
 export const useTokenLargestAccounts = (
@@ -54,11 +56,12 @@ export const useTokenLargestAccounts = (
 interface IUseTokenBondingInfo extends ITokenBonding {
   name?: string;
   ticker?: string;
-  iconSrc?: string;
+  icon?: React.ReactElement;
 }
 
 export const useTokenBondingInfo = (
-  tokenBonding: string | undefined
+  tokenBonding: string | undefined,
+  avatarSize: "sm" | "md" | "lg" = "sm"
 ): {
   loading: boolean;
   result: IUseTokenBondingInfo | undefined;
@@ -97,14 +100,20 @@ export const useTokenBondingInfo = (
           setResult({
             ticker: metadata.data.symbol,
             name: metadata.data.name,
-            iconSrc: metadata.data.uri,
+            icon: (
+              <MetadataAvatar
+                size={avatarSize}
+                tokenBonding={tokenBondingInfo}
+                name={metadata.data.name || "UNCLAIMED"}
+              />
+            ),
             ...tokenBondingInfo!,
           });
         } else {
           setResult({
             ticker: "UNCLAIMED",
-            name: undefined,
-            iconSrc: image,
+            name: "UNCLAIMED",
+            icon: <Avatar size={avatarSize} src={image} name={"UNCLAIMED"} />,
             ...tokenBondingInfo!,
           });
         }

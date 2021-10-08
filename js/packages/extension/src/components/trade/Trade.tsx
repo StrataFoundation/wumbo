@@ -72,11 +72,7 @@ function useTokenInfo(tokenBonding: TokenBondingV0 | undefined): TokenInfo {
           error,
           ticker: metadata.data.symbol,
           icon: (
-            <MetadataAvatar
-              token
-              tokenBonding={tokenBonding}
-              name={"UNCLAIMED"}
-            />
+            <MetadataAvatar tokenBonding={tokenBonding} name={"UNCLAIMED"} />
           ),
           name: metadata.data.name,
         };

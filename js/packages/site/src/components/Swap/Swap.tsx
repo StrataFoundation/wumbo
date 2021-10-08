@@ -17,11 +17,11 @@ export const SwapRoute = React.memo(() => {
               `?redirect=${location.pathname}${location.search}`
           );
         }}
-        onHandleFlipTokens={(tokenBonding, action) =>
-          history.push(swapPath(tokenBonding, action))
-        }
+        onHandleFlipTokens={(tokenBonding, action) => {
+          history.push(swapPath(tokenBonding, action));
+        }}
         onHandleBuyBase={(tokenBonding) => {
-          console.log(tokenBonding.toBase58());
+          history.push(swapPath(tokenBonding, "buy"));
         }}
       />
     </AppContainer>

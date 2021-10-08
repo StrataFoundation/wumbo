@@ -16,20 +16,17 @@ import {
   Input,
   InputGroup,
   InputRightElement,
-  Avatar,
   Button,
   Divider,
   Menu,
   MenuButton,
-  MenuList,
-  MenuItem,
 } from "@chakra-ui/react";
 import {
   RiArrowUpDownFill,
   RiInformationLine,
   RiArrowDownSLine,
 } from "react-icons/ri";
-import { useWallet, ITokenBonding } from "../../";
+import { WUM_BONDING, useWallet, useFtxPayLink, ITokenBonding } from "../../";
 import { Curve } from "@wum.bo/spl-token-bonding";
 
 export interface ISwapFormValues {
@@ -76,6 +73,7 @@ export const SwapForm = ({
   spendCap,
 }: ISwapFormProps) => {
   const { connected, awaitingApproval } = useWallet();
+  const ftxPayLink = useFtxPayLink();
   const [rate, setRate] = useState<string>("--");
   const {
     register,
@@ -93,6 +91,7 @@ export const SwapForm = ({
   });
 
   const isBaseSol = base.ticker === "SOL";
+  const isBaseWum = base.ticker === "WUM";
   const baseAmount = watch("baseAmount");
   const hasBaseAmount = ownedBase >= +(baseAmount || 0);
   const moreThanSpendCap = +(baseAmount || 0) > spendCap;
@@ -103,14 +102,22 @@ export const SwapForm = ({
     setValue("baseAmount", ownedBase >= spendCap ? spendCap : ownedBase);
 
   const handleFlipTokens = () => {
-    reset();
     onHandleFlipTokens(
       tokenBonding.publicKey,
       action === "buy" ? "sell" : "buy"
     );
+    reset();
   };
 
-  const handleBuyBase = () => onHandleBuyBase(tokenBonding.publicKey);
+  const handleBuyBase = () => {
+    if (isBaseSol) {
+      window.open(ftxPayLink);
+    } else if (isBaseWum) {
+      onHandleBuyBase(WUM_BONDING);
+    } else {
+      handleFlipTokens();
+    }
+  };
 
   const handleSwap = async (values: ISwapFormValues) => {
     await onHandleSubmit(values);
@@ -143,6 +150,9 @@ export const SwapForm = ({
             <Text color="gray.600" fontSize="xs">
               You Pay
             </Text>
+            <Link color="indigo.500" fontSize="xs" onClick={handleBuyBase}>
+              Buy More {base.ticker}
+            </Link>
           </Flex>
           <InputGroup size="lg">
             <Input
@@ -170,49 +180,23 @@ export const SwapForm = ({
                     isDisabled={!connected}
                     as={Button}
                     leftIcon={
-                      <Center w={8} h={8}>
+                      <Center
+                        w={8}
+                        h={8}
+                        color="white"
+                        bg="indigo.500"
+                        rounded="full"
+                      >
                         {base.icon}
-                        {/* <Icon
-                          as={base.icon}
-                          w="full"
-                          h="full"
-                          color="white"
-                          rounded="full"
-                          bg="indigo.500"
-                        /> */}
                       </Center>
                     }
-                    rightIcon={<Icon as={RiArrowDownSLine} w={6} h={6} />}
                     borderRadius="20px 6px 6px 20px"
                     paddingX={1.5}
                     bgColor="gray.200"
-                    _hover={{ bgColor: "gray.300" }}
+                    _hover={{ cursor: "default" }}
                   >
                     {base.ticker}
                   </MenuButton>
-                  {/* <MenuList>
-                    <MenuItem
-                      icon={
-                        <Center w={8} h={8}>
-                          <Icon
-                            as={altBaseIcon}
-                            w="full"
-                            h="full"
-                            color="white"
-                            rounded="full"
-                            bg="indigo.500"
-                          />
-                        </Center>
-                      }
-                    >
-                      <Flex justifyContent="space-between">
-                        <Text fontSize="lg" fontWeight="semibold">
-                          {altBaseText}
-                        </Text>
-                        <Text fontSize="lg">0 {altBaseText}</Text>
-                      </Flex>
-                    </MenuItem>
-                  </MenuList> */}
                 </Menu>
               )}
             </InputRightElement>
@@ -291,31 +275,27 @@ export const SwapForm = ({
             >
               {connected && (
                 <Menu>
-                  {isBaseSol && (
-                    <MenuButton
-                      isDisabled={!connected}
-                      as={Button}
-                      leftIcon={
-                        <Center w={8} h={8}>
-                          {target.icon}
-                          {/* <Icon
-                            as={altBaseIcon}
-                            w="full"
-                            h="full"
-                            color="white"
-                            rounded="full"
-                            bgColor="indigo.500"
-                          /> */}
-                        </Center>
-                      }
-                      borderRadius="20px 6px 6px 20px"
-                      paddingX={1.5}
-                      bgColor="gray.200"
-                      _hover={{ bgColor: "gray.200", cursor: "default" }}
-                    >
-                      {target.ticker}
-                    </MenuButton>
-                  )}
+                  <MenuButton
+                    isDisabled={!connected}
+                    as={Button}
+                    leftIcon={
+                      <Center
+                        w={8}
+                        h={8}
+                        color="white"
+                        bg="indigo.500"
+                        rounded="full"
+                      >
+                        {target.icon}
+                      </Center>
+                    }
+                    borderRadius="20px 6px 6px 20px"
+                    paddingX={1.5}
+                    bgColor="gray.200"
+                    _hover={{ cursor: "default" }}
+                  >
+                    {target.ticker}
+                  </MenuButton>
                 </Menu>
               )}
             </InputRightElement>
@@ -442,23 +422,20 @@ export const SwapForm = ({
             >
               {moreThanSpendCap && (
                 <Text>
-                  Spend Cap is {spendCap} {isBaseSol ? "SOL" : "WUM"}. Please
-                  adjust amount
+                  Spend Cap is {spendCap} {base.ticker}. Please adjust amount
                 </Text>
               )}
               {!moreThanSpendCap && (
                 <Text>
                   Insufficent funds for this trade.{" "}
                   <Text as="u">
-                    {!isBaseSol && (
-                      <Link
-                        color="indigo.100"
-                        _hover={{ color: "indigo.200" }}
-                        onClick={handleBuyBase}
-                      >
-                        {`Buy more ${base.ticker} now.`}
-                      </Link>
-                    )}
+                    <Link
+                      color="indigo.100"
+                      _hover={{ color: "indigo.200" }}
+                      onClick={handleBuyBase}
+                    >
+                      {`Buy more ${base.ticker} now.`}
+                    </Link>
                   </Text>
                 </Text>
               )}
