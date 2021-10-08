@@ -24,13 +24,7 @@ import {
   MenuButton,
 } from "@chakra-ui/react";
 import { RiArrowUpDownFill, RiInformationLine } from "react-icons/ri";
-import {
-  WUM_BONDING,
-  useWallet,
-  useFtxPayLink,
-  ITokenBonding,
-  useEstimatedFees,
-} from "../../";
+import { WUM_BONDING, useWallet, useFtxPayLink, ITokenBonding } from "../../";
 import { Curve } from "@wum.bo/spl-token-bonding";
 
 export interface ISwapFormValues {
@@ -66,15 +60,16 @@ export interface ISwapFormProps {
   base: {
     name: string;
     ticker: string;
-    icon: React.ReactElement;
+    icon: React.ReactNode;
   };
   target: {
     name: string;
     ticker: string;
-    icon: React.ReactElement;
+    icon: React.ReactNode;
   };
   ownedBase: number;
   spendCap: number;
+  feeAmount?: number;
 }
 
 export const SwapForm = ({
@@ -90,10 +85,12 @@ export const SwapForm = ({
   target,
   ownedBase,
   spendCap,
+  feeAmount,
 }: ISwapFormProps) => {
   const { connected, awaitingApproval } = useWallet();
   const ftxPayLink = useFtxPayLink();
   const [rate, setRate] = useState<string>("--");
+  const [fee, setFee] = useState<string>("--");
   const {
     register,
     handleSubmit,
@@ -155,11 +152,13 @@ export const SwapForm = ({
 
       setValue("targetAmount", buyMax);
       setRate(`${buyMax / baseAmount}`);
+      setFee(feeAmount);
     } else {
       reset({ slippage: slippage });
       setRate("--");
+      setFee("--");
     }
-  }, [baseAmount, setValue, setRate, tokenBonding, curve, slippage]);
+  }, [baseAmount, feeAmount, setValue, setRate, tokenBonding, curve, slippage]);
 
   return (
     <form onSubmit={handleSubmit(handleSwap)}>
@@ -388,7 +387,7 @@ export const SwapForm = ({
           </Flex>
           <Flex justify="space-between" alignItems="center">
             <Text>Estimated Fees</Text>
-            <Flex>--</Flex>
+            <Flex>{fee}</Flex>
           </Flex>
           <Flex justify="space-between" alignItems="center">
             <HStack>

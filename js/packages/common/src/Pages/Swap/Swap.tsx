@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import toast from "react-hot-toast";
-import { u64 } from "@solana/spl-token";
+import { u64, AccountLayout } from "@solana/spl-token";
 import {
   SOL_TOKEN,
   useBuyToken,
@@ -17,7 +17,7 @@ import {
   SolanaIcon,
   WumboIcon,
   Notification,
-  Icon,
+  useEstimatedFees,
 } from "../../";
 
 import { ISwapFormValues, ISwapFormProps, SwapForm } from "./SwapForm";
@@ -37,6 +37,10 @@ export const Swap = ({
   const [sell, { loading: sellLoading, error: sellError }] = useSellToken();
   const [internalError, setInternalError] = useState<Error | undefined>();
   const [spendCap, setSpendCap] = useState<number>(0);
+  const { amount: feeAmount, error: feeError } = useEstimatedFees(
+    AccountLayout.span,
+    1
+  );
   const params =
     useParams<{ tokenBondingKey: string; action: "buy" | "sell" }>();
   const isBuying = params.action === "buy";
@@ -58,7 +62,7 @@ export const Swap = ({
   const ownedBase = isBaseSol ? ownedSol : ownedBaseNormal;
   const ownedTarget = useOwnedAmount(tokenBonding?.targetMint);
 
-  handleErrors(buyError, sellError, tokenBondingError, internalError);
+  handleErrors(buyError, feeError, sellError, tokenBondingError, internalError);
 
   useEffect(() => {
     if (tokenBonding && targetMint && curve) {
@@ -155,6 +159,7 @@ export const Swap = ({
       target={isBuying ? target : base}
       ownedBase={isBuying ? ownedBase || 0 : ownedTarget || 0}
       spendCap={spendCap}
+      feeAmount={feeAmount}
     />
   );
 };
