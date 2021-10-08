@@ -4,6 +4,7 @@ import toast from "react-hot-toast";
 import { u64, AccountLayout } from "@solana/spl-token";
 import {
   SOL_TOKEN,
+  WUM_TOKEN,
   useBuyToken,
   useSellToken,
   useTokenBondingInfo,
@@ -18,6 +19,7 @@ import {
   WumboIcon,
   Notification,
   useEstimatedFees,
+  useTokenMetadata,
 } from "../../";
 
 import { ISwapFormValues, ISwapFormProps, SwapForm } from "./SwapForm";
@@ -33,6 +35,11 @@ export const Swap = ({
   onHandleFlipTokens,
   onHandleBuyBase,
 }: ISwapProps) => {
+  const {
+    metadata: wumMeta,
+    loading: wumMetaLoading,
+    error: wumMetaError,
+  } = useTokenMetadata(WUM_TOKEN);
   const [buy, { loading: buyLoading, error: buyError }] = useBuyToken();
   const [sell, { loading: sellLoading, error: sellError }] = useSellToken();
   const [internalError, setInternalError] = useState<Error | undefined>();
@@ -62,7 +69,14 @@ export const Swap = ({
   const ownedBase = isBaseSol ? ownedSol : ownedBaseNormal;
   const ownedTarget = useOwnedAmount(tokenBonding?.targetMint);
 
-  handleErrors(buyError, feeError, sellError, tokenBondingError, internalError);
+  handleErrors(
+    wumMetaError,
+    buyError,
+    feeError,
+    sellError,
+    tokenBondingError,
+    internalError
+  );
 
   useEffect(() => {
     if (tokenBonding && targetMint && curve) {
@@ -81,11 +95,13 @@ export const Swap = ({
   }, [tokenBonding, targetMint, curve, setSpendCap]);
 
   if (
+    wumMetaLoading ||
     tokenBondingLoading ||
     curveLoading ||
     solLoading ||
     !tokenBonding ||
-    !curve
+    !curve ||
+    !wumMeta
   ) {
     return <Spinner />;
   }
@@ -99,30 +115,34 @@ export const Swap = ({
         icon: <SolanaIcon w="full" h="full" />,
       }
     : {
-        name: "WUM",
-        ticker: "WUM",
+        name: wumMeta.data.name,
+        ticker: wumMeta.data.symbol,
         icon: <WumboIcon w="full" h="full" />,
       };
 
   const target = isBaseSol
-    ? { name: "WUM", ticker: "WUM", icon: <WumboIcon w="full" h="full" /> }
+    ? {
+        name: wumMeta.data.name,
+        ticker: wumMeta.data.symbol,
+        icon: <WumboIcon w="full" h="full" />,
+      }
     : { name, ticker, icon };
 
   const handleSubmit = async (values: ISwapFormValues) => {
     const { ticker: notificationTicker } = isBuying ? target : base;
 
-    if (values.baseAmount) {
+    if (values.topAmount) {
       try {
         if (isBuying) {
           await buy(
             tokenBonding.publicKey,
-            +values.baseAmount,
+            +values.bottomAmount,
             +values.slippage
           );
         } else {
           await sell(
             tokenBonding.publicKey,
-            +values.baseAmount,
+            +values.topAmount,
             +values.slippage
           );
         }
@@ -132,7 +152,7 @@ export const Swap = ({
             show={t.visible}
             type="success"
             heading="Transaction Succesful"
-            message={`You now own ${Number(values.targetAmount).toFixed(
+            message={`You now own ${Number(values.bottomAmount).toFixed(
               4
             )} of ${notificationTicker}`}
             onDismiss={() => toast.dismiss(t.id)}

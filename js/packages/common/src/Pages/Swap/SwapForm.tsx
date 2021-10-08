@@ -28,15 +28,15 @@ import { WUM_BONDING, useWallet, useFtxPayLink, ITokenBonding } from "../../";
 import { Curve } from "@wum.bo/spl-token-bonding";
 
 export interface ISwapFormValues {
-  baseAmount: number;
-  targetAmount: number;
+  topAmount: number;
+  bottomAmount: number;
   slippage: number;
 }
 
 const validationSchema = yup
   .object({
-    baseAmount: yup.number().required().moreThan(0),
-    targetAmount: yup.number().required().moreThan(0),
+    topAmount: yup.number().required().moreThan(0),
+    bottomAmount: yup.number().required().moreThan(0),
     slippage: yup.number().required().moreThan(0),
   })
   .required();
@@ -100,8 +100,8 @@ export const SwapForm = ({
     formState: { errors },
   } = useForm<ISwapFormValues>({
     defaultValues: {
-      baseAmount: undefined,
-      targetAmount: undefined,
+      topAmount: undefined,
+      bottomAmount: undefined,
       slippage: 1,
     },
     resolver: yupResolver(validationSchema),
@@ -110,15 +110,15 @@ export const SwapForm = ({
   const isBaseSol = base.ticker === "SOL";
   const isBaseWum = base.ticker === "WUM";
   const isBuying = action === "buy";
-  const baseAmount = watch("baseAmount");
+  const topAmount = watch("topAmount");
   const slippage = watch("slippage");
-  const hasBaseAmount = ownedBase >= +(baseAmount || 0);
-  const moreThanSpendCap = +(baseAmount || 0) > spendCap;
+  const hasBaseAmount = ownedBase >= +(topAmount || 0);
+  const moreThanSpendCap = +(topAmount || 0) > spendCap;
 
   const handleConnectWallet = () => onHandleConnectWallet();
 
   const handleUseMax = () =>
-    setValue("baseAmount", ownedBase >= spendCap ? spendCap : ownedBase);
+    setValue("topAmount", ownedBase >= spendCap ? spendCap : ownedBase);
 
   const handleFlipTokens = () => {
     onHandleFlipTokens(tokenBonding.publicKey, isBuying ? "sell" : "buy");
@@ -141,24 +141,22 @@ export const SwapForm = ({
   };
 
   useEffect(() => {
-    if (baseAmount && baseAmount > 0 && tokenBonding && curve) {
-      const buyMax = Math.min(
-        curve.buyWithBaseAmount(
-          +baseAmount,
-          tokenBonding.baseRoyaltyPercentage,
-          tokenBonding.targetRoyaltyPercentage
-        )
+    if (topAmount && topAmount > 0 && tokenBonding && curve) {
+      const buyMax = curve.buyWithBaseAmount(
+        +topAmount,
+        tokenBonding.baseRoyaltyPercentage,
+        tokenBonding.targetRoyaltyPercentage
       );
 
-      setValue("targetAmount", buyMax);
-      setRate(`${Math.trunc((buyMax / baseAmount) * 1000000) / 1000000}`);
+      setValue("bottomAmount", buyMax);
+      setRate(`${Math.trunc((buyMax / topAmount) * 1000000) / 1000000}`);
       setFee(`${feeAmount}`);
     } else {
       reset({ slippage: slippage });
       setRate("--");
       setFee("--");
     }
-  }, [baseAmount, feeAmount, setValue, setRate, tokenBonding, curve, slippage]);
+  }, [topAmount, feeAmount, setValue, setRate, tokenBonding, curve, slippage]);
 
   return (
     <form onSubmit={handleSubmit(handleSwap)}>
@@ -174,9 +172,9 @@ export const SwapForm = ({
           </Flex>
           <InputGroup size="lg">
             <Input
-              isInvalid={!!errors.baseAmount}
+              isInvalid={!!errors.topAmount}
               isDisabled={!connected}
-              id="baseAmount"
+              id="topAmount"
               borderColor="gray.200"
               placeholder="0"
               type="number"
@@ -185,7 +183,7 @@ export const SwapForm = ({
               _placeholder={{ color: "gray.200" }}
               step={0.0000000001}
               min={0}
-              {...register("baseAmount")}
+              {...register("topAmount")}
             />
             <InputRightElement
               w="auto"
@@ -271,10 +269,10 @@ export const SwapForm = ({
           </Text>
           <InputGroup size="lg">
             <Input
-              isInvalid={!!errors.targetAmount}
+              isInvalid={!!errors.bottomAmount}
               isReadOnly
               isDisabled={!connected}
-              id="targetAmount"
+              id="bottomAmount"
               borderColor="gray.200"
               placeholder="0"
               type="number"
@@ -285,7 +283,7 @@ export const SwapForm = ({
               _placeholder={{ color: "gray.200" }}
               _hover={{ cursor: "not-allowed" }}
               _focus={{ outline: "none", borderColor: "gray.200" }}
-              {...register("targetAmount")}
+              {...register("bottomAmount")}
             />
             <InputRightElement
               w="auto"

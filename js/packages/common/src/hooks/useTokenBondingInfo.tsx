@@ -1,10 +1,11 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { PublicKey } from "@solana/web3.js";
 import {
   useAccount,
   ITokenBonding,
   TokenBonding,
   useTokenMetadata,
+  usePublicKey,
   Avatar,
   MetadataAvatar,
 } from "../";
@@ -26,10 +27,9 @@ export const useTokenBondingInfo = (
   const [loading, setLoading] = useState<boolean>(false);
   const [result, setResult] = useState<IUseTokenBondingInfo | undefined>();
   const [error, setError] = useState<Error | undefined>();
-
-  const tokenBondingKey = tokenBonding
-    ? new PublicKey(tokenBonding)
-    : PublicKey.default;
+  const tokenBondingKey = usePublicKey(
+    tokenBonding ? tokenBonding : PublicKey.default.toBase58()
+  );
 
   const { info: tokenBondingInfo, loading: tokenBondingInfoLoading } =
     useAccount(tokenBondingKey, TokenBonding);
@@ -43,6 +43,7 @@ export const useTokenBondingInfo = (
 
   useEffect(() => {
     const run =
+      tokenBondingKey &&
       !tokenBondingKey.equals(PublicKey.default) &&
       !tokenBondingInfoLoading &&
       !!tokenBondingInfo &&
