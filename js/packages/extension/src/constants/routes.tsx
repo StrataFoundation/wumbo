@@ -20,6 +20,8 @@ export interface IRoutes {
   profile: Route;
   editProfile: Route;
   viewProfile: Route;
+  topTokens: Route;
+  wumNetWorth: Route;
   viewNft: Route;
   tagNft: Route;
 }
@@ -33,6 +35,20 @@ export const nftPath = (mint: PublicKey): string =>
   replaceAll(routes.viewNft.path, {
     ":mint": mint.toBase58(),
   });
+
+export function topTokensPath(tokenBondingKey: PublicKey): string {
+  return routes.topTokens.path.replace(
+    ":tokenBondingKey",
+    tokenBondingKey.toBase58()
+  );
+}
+
+export function wumNetWorthPath(wallet: PublicKey): string {
+  return routes.wumNetWorth.path.replace(
+    ":wallet",
+    wallet.toBase58()
+  );
+}
 
 export const tagNftPath = (mint: PublicKey): string =>
   replaceAll(routes.tagNft.path, { ":mint": mint.toBase58() });
@@ -78,6 +94,16 @@ export const routes: IRoutes = {
   editProfile: { path: "/profile/edit", Icon: null, isDrawerNav: false },
   viewProfile: {
     path: "/profile/view/:tokenRefKey",
+    Icon: null,
+    isDrawerNav: false,
+  },
+  topTokens: {
+    path: "/top-tokens/:tokenBondingKey",
+    Icon: null,
+    isDrawerNav: false,
+  },
+  wumNetWorth: {
+    path: "/wum-net-worth/:wallet",
     Icon: null,
     isDrawerNav: false,
   },

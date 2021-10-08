@@ -12,7 +12,8 @@ export const TokenRef: TypedAccountParser<ITokenRef> = (pubkey, account) => {
   
   return {
     ...coded,
-    publicKey: pubkey
+    publicKey: pubkey,
+    isClaimed: coded.isClaimed || !!coded.owner // TODO: Remove this or after beta, there was a bug in the smart contract
   };
 }
 

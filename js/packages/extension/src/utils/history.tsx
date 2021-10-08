@@ -9,6 +9,7 @@ export const HistoryContextProvider: React.FC = ({ children }) => {
   const history = useHistory();
   useEffect(() => {
     return history.listen((location, action) => {
+      console.log(`${action}: ${location.pathname + location.search}`)
       if (action == 'PUSH') {
         setHistory((existing: string[]) => [...existing, location.pathname + location.search])
       } else if (action == 'POP') {

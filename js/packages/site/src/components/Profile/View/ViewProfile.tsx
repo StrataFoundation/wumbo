@@ -35,6 +35,8 @@ export const ViewProfileRoute = () => {
   return (
     <AppContainer>
       <Profile
+        wumNetWorthPath={""}
+        topTokensPath={""}
         // TODO: Web claim flow
         useClaimFlow={() => ({
           claim: () => Promise.resolve(),
