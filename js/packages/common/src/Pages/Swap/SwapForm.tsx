@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
+import { yupResolver } from "@hookform/resolvers/yup";
+import * as yup from "yup";
 import { PublicKey } from "@solana/web3.js";
 import {
   Flex,
@@ -21,19 +23,36 @@ import {
   Menu,
   MenuButton,
 } from "@chakra-ui/react";
+import { RiArrowUpDownFill, RiInformationLine } from "react-icons/ri";
 import {
-  RiArrowUpDownFill,
-  RiInformationLine,
-  RiArrowDownSLine,
-} from "react-icons/ri";
-import { WUM_BONDING, useWallet, useFtxPayLink, ITokenBonding } from "../../";
+  WUM_BONDING,
+  useWallet,
+  useFtxPayLink,
+  ITokenBonding,
+  useEstimatedFees,
+} from "../../";
 import { Curve } from "@wum.bo/spl-token-bonding";
 
 export interface ISwapFormValues {
-  baseAmount?: number;
-  targetAmount?: number;
+  baseAmount: number;
+  targetAmount: number;
   slippage: number;
 }
+
+const validationSchema = yup
+  .object({
+    baseAmount: yup.number().required().moreThan(0),
+    targetAmount: yup.number().required().moreThan(0),
+    slippage: yup.number().required().moreThan(0),
+  })
+  .required();
+
+const humanReadablePercentage = (u32: number) => {
+  if (u32 && u32 !== 0) {
+    return ((u32 / 4294967295) * 100).toFixed(2);
+  }
+  return 0;
+};
 
 export interface ISwapFormProps {
   action: "buy" | "sell";
@@ -88,11 +107,14 @@ export const SwapForm = ({
       targetAmount: undefined,
       slippage: 1,
     },
+    resolver: yupResolver(validationSchema),
   });
 
   const isBaseSol = base.ticker === "SOL";
   const isBaseWum = base.ticker === "WUM";
+  const isBuying = action === "buy";
   const baseAmount = watch("baseAmount");
+  const slippage = watch("slippage");
   const hasBaseAmount = ownedBase >= +(baseAmount || 0);
   const moreThanSpendCap = +(baseAmount || 0) > spendCap;
 
@@ -102,10 +124,7 @@ export const SwapForm = ({
     setValue("baseAmount", ownedBase >= spendCap ? spendCap : ownedBase);
 
   const handleFlipTokens = () => {
-    onHandleFlipTokens(
-      tokenBonding.publicKey,
-      action === "buy" ? "sell" : "buy"
-    );
+    onHandleFlipTokens(tokenBonding.publicKey, isBuying ? "sell" : "buy");
     reset();
   };
 
@@ -125,7 +144,7 @@ export const SwapForm = ({
   };
 
   useEffect(() => {
-    if (baseAmount && tokenBonding && curve) {
+    if (baseAmount && baseAmount > 0 && tokenBonding && curve) {
       const buyMax = Math.min(
         curve.buyWithBaseAmount(
           +baseAmount,
@@ -137,10 +156,10 @@ export const SwapForm = ({
       setValue("targetAmount", buyMax);
       setRate(`${buyMax / baseAmount}`);
     } else {
-      setValue("targetAmount", undefined);
+      reset({ slippage: slippage });
       setRate("--");
     }
-  }, [baseAmount, setValue, setRate, tokenBonding, curve]);
+  }, [baseAmount, setValue, setRate, tokenBonding, curve, slippage]);
 
   return (
     <form onSubmit={handleSubmit(handleSwap)}>
@@ -156,6 +175,7 @@ export const SwapForm = ({
           </Flex>
           <InputGroup size="lg">
             <Input
+              isInvalid={!!errors.baseAmount}
               isDisabled={!connected}
               id="baseAmount"
               borderColor="gray.200"
@@ -252,6 +272,7 @@ export const SwapForm = ({
           </Text>
           <InputGroup size="lg">
             <Input
+              isInvalid={!!errors.targetAmount}
               isReadOnly
               isDisabled={!connected}
               id="targetAmount"
@@ -339,6 +360,7 @@ export const SwapForm = ({
             </HStack>
             <InputGroup size="md" w="60px">
               <Input
+                isInvalid={!!errors.slippage}
                 isDisabled={!connected}
                 id="slippage"
                 borderColor="gray.200"
@@ -370,11 +392,11 @@ export const SwapForm = ({
           </Flex>
           <Flex justify="space-between" alignItems="center">
             <HStack>
-              <Text>Token Royalties</Text>
+              <Text>{isBuying ? base.ticker : target.ticker} Royalties</Text>
               <Tooltip
                 isDisabled={!connected}
                 placement="top"
-                label="Your transaction will fail if the price changes unfavorably more than this percentage."
+                label={`A purchase fee in ${base.ticker} that is split amongst stakers of ${target.ticker}`}
               >
                 <Flex>
                   <Icon
@@ -386,15 +408,17 @@ export const SwapForm = ({
                 </Flex>
               </Tooltip>
             </HStack>
-            <Flex>{tokenBonding.targetRoyaltyPercentage || 0}%</Flex>
+            <Flex>
+              {humanReadablePercentage(tokenBonding.baseRoyaltyPercentage)}%
+            </Flex>
           </Flex>
           <Flex justify="space-between" alignItems="center">
             <HStack>
-              <Text>WUM Royalties</Text>
+              <Text>{isBuying ? target.ticker : base.ticker} Royalties</Text>
               <Tooltip
                 isDisabled={!connected}
                 placement="top"
-                label="Your transaction will fail if the price changes unfavorably more than this percentage."
+                label={`A percentage of every ${target.ticker} token minted goes to the person who has claimed this token`}
               >
                 <Flex>
                   <Icon
@@ -406,7 +430,9 @@ export const SwapForm = ({
                 </Flex>
               </Tooltip>
             </HStack>
-            <Flex>{tokenBonding.baseRoyaltyPercentage || 0}%</Flex>
+            <Flex>
+              {humanReadablePercentage(tokenBonding.targetRoyaltyPercentage)}%
+            </Flex>
           </Flex>
         </VStack>
         <Box position="relative">
