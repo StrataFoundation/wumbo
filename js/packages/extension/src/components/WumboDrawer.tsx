@@ -13,6 +13,7 @@ import { useUserInfo } from "@/utils/userState";
 import {
   WalletAutoReconnect,
   useWallet,
+  replaceAll,
   Spinner,
   WUM_BONDING,
 } from "wumbo-common";
@@ -227,24 +228,16 @@ WumboDrawer.Nav = () => {
 
           // Fill paths with params in
           let filledPath = path;
-          if (
-            path.endsWith(":tokenBondingKey") ||
-            path.endsWith(":tokenRefKey")
-          ) {
-            const replacedKeys = path
-              .replace(
-                ":tokenBondingKey",
-                creatorInfo?.tokenBonding?.publicKey?.toBase58() ||
-                  WUM_BONDING.toBase58()
-              )
-              .replace(
-                ":tokenRefKey",
-                creatorInfo?.tokenRef?.publicKey.toBase58() || ""
-              );
-            filledPath = `${replacedKeys}${
-              creatorInfo ? "?name=" + creatorInfo.name : ""
-            }`;
-          }
+          const replacedKeys = replaceAll(path, {
+            ":tokenBondingKey":
+              creatorInfo?.tokenBonding?.publicKey?.toBase58() ||
+              WUM_BONDING.toBase58(),
+            ":tokenRefKey": creatorInfo?.tokenRef?.publicKey.toBase58() || "",
+            ":action": "buy",
+          });
+          filledPath = `${replacedKeys}${
+            creatorInfo ? "?name=" + creatorInfo.name : ""
+          }`;
 
           if (isDrawerNav && Icon) {
             return (

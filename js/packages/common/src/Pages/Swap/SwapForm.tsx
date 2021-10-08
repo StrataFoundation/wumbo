@@ -151,8 +151,8 @@ export const SwapForm = ({
       );
 
       setValue("targetAmount", buyMax);
-      setRate(`${buyMax / baseAmount}`);
-      setFee(feeAmount);
+      setRate(`${Math.trunc((buyMax / baseAmount) * 1000000) / 1000000}`);
+      setFee(`${feeAmount}`);
     } else {
       reset({ slippage: slippage });
       setRate("--");
@@ -227,7 +227,7 @@ export const SwapForm = ({
           position="relative"
           paddingY={2}
         >
-          <Divider />
+          <Divider color="gray.200" />
           <Flex>
             {!connected && (
               <Button
@@ -251,7 +251,7 @@ export const SwapForm = ({
               </Button>
             )}
           </Flex>
-          <Divider />
+          <Divider color="gray.200" />
           {/* flipping to wum (Selling wum to sol) is disabled in beta*/}
           <IconButton
             isDisabled={!connected || isBaseSol}

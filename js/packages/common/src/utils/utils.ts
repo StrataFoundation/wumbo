@@ -76,3 +76,9 @@ export function useLocalStorage<T>(
 
   return [value, setLocalStorage];
 }
+
+export const replaceAll = (str: string, mapObj: Record<string, string>) => {
+  const re = new RegExp(Object.keys(mapObj).join("|"), "gi");
+
+  return str.replace(re, (matched: string) => mapObj[matched]);
+};

@@ -1,4 +1,5 @@
 import { PublicKey } from "@solana/web3.js";
+import { replaceAll } from "wumbo-common";
 
 type Route = {
   path: string;
@@ -16,12 +17,6 @@ interface IRoutes {
   swap: Route;
   prototype: Route;
 }
-
-const replaceAll = (str: string, mapObj: Record<string, string>) => {
-  const re = new RegExp(Object.keys(mapObj).join("|"), "gi");
-
-  return str.replace(re, (matched: string) => mapObj[matched]);
-};
 
 export const profilePath = (tokenRefKey: PublicKey): string =>
   replaceAll(routes.viewProfile.path, {

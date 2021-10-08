@@ -1,6 +1,7 @@
 import { ReactNode } from "react";
 import { RiUserLine, RiCoinLine, RiArrowUpDownFill } from "react-icons/ri";
 import { PublicKey } from "@solana/web3.js";
+import { replaceAll } from "wumbo-common";
 
 type Route = {
   path: string;
@@ -23,27 +24,27 @@ export interface IRoutes {
   tagNft: Route;
 }
 
-export function viewProfilePath(tokenRefKey: PublicKey): string {
-  return routes.viewProfile.path.replace(
-    ":tokenRefKey",
-    tokenRefKey.toBase58()
-  );
-}
+export const viewProfilePath = (tokenRefKey: PublicKey): string =>
+  replaceAll(routes.viewProfile.path, {
+    ":tokenRefKey": tokenRefKey.toBase58(),
+  });
 
-export function nftPath(mint: PublicKey): string {
-  return routes.viewNft.path.replace(":mint", mint.toBase58());
-}
+export const nftPath = (mint: PublicKey): string =>
+  replaceAll(routes.viewNft.path, {
+    ":mint": mint.toBase58(),
+  });
 
-export function tagNftPath(mint: PublicKey): string {
-  return routes.tagNft.path.replace(":mint", mint.toBase58());
-}
+export const tagNftPath = (mint: PublicKey): string =>
+  replaceAll(routes.tagNft.path, { ":mint": mint.toBase58() });
 
-export function tradePath(tokenBondingKey: PublicKey): string {
-  return routes.trade.path.replace(
-    ":tokenBondingKey",
-    tokenBondingKey.toBase58()
-  );
-}
+export const tradePath = (
+  tokenBondingKey: PublicKey,
+  action: "buy" | "sell"
+): string =>
+  replaceAll(routes.trade.path, {
+    ":tokenBondingKey": tokenBondingKey.toBase58(),
+    ":action": action,
+  });
 
 export function claimPath({
   code,
@@ -70,7 +71,7 @@ export const routes: IRoutes = {
   myTokens: { path: "/my-tokens", Icon: RiCoinLine, isDrawerNav: true },
   manageWallet: { path: "/manage-wallet", Icon: null, isDrawerNav: false },
   trade: {
-    path: "/trade/:tokenBondingKey",
+    path: "/swap/:tokenBondingKey/:action",
     Icon: RiArrowUpDownFill,
     isDrawerNav: true,
   },

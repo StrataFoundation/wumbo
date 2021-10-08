@@ -54,7 +54,9 @@ export const Profile = () => {
         <WumboDrawer.Header title="Profile" />
         <WumboDrawer.Content>
           <Box p={4}>
-            It looks like you haven't claimed a token yet. To claim your token, navigate to your twitter profile and click the "Claim" button that Wum.bo inserts next to Edit Profile.
+            It looks like you haven't claimed a token yet. To claim your token,
+            navigate to your twitter profile and click the "Claim" button that
+            Wum.bo inserts next to Edit Profile.
           </Box>
         </WumboDrawer.Content>
         <WumboDrawer.Nav />
@@ -74,7 +76,7 @@ export const Profile = () => {
             history.push(viewProfilePath(tokenRefKey))
           }
           onTradeClick={() =>
-            tokenRef && history.push(tradePath(tokenRef.tokenBonding))
+            tokenRef && history.push(tradePath(tokenRef.tokenBonding, "buy"))
           }
           getNftLink={(token) =>
             token?.metadata ? nftPath(token?.metadata?.mint) : ""
