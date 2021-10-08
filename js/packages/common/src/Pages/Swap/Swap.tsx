@@ -144,7 +144,6 @@ export const Swap = ({
     }
   };
 
-  // need to fix ownedBase
   return (
     <SwapForm
       action={params.action}
