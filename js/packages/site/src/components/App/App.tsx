@@ -1,5 +1,6 @@
 import React from "react";
 import { Switch, Route } from "react-router-dom";
+import { Toaster } from "react-hot-toast";
 import Routes from "../../constants/routes";
 import BetaSplash from "../BetaSplash/BetaSplash";
 import { ClaimRoute } from "../Claim/Claim";
@@ -9,12 +10,14 @@ import Wallet from "../Wallet/Wallet";
 import "./index.css";
 import { ContextProviders } from "./ContextProviders";
 import { ViewProfileRoute } from "../Profile/View/ViewProfile";
-import { ViewNftRoute } from "../Nft/View/ViewNft"
+import { ViewNftRoute } from "../Nft/View/ViewNft";
 import { WalletAutoReconnect } from "../../../../common/dist/lib";
 import { TopTokens } from "../Leaderboard/TopTokens";
 import { WumNetWorth } from "../Leaderboard/WumNetWorth";
 import Send from "../Wallet/Send";
 import SendSearch from "../Wallet/SendSearch";
+import { SwapRoute } from "../Swap/Swap";
+import { PrototypeRoute } from "../Prototype";
 
 const App: React.FC = () => (
   <ContextProviders>
@@ -32,7 +35,16 @@ const App: React.FC = () => (
       <Route path={Routes.wumNetWorth.path} component={WumNetWorth} />
       <Route path={Routes.sendSearch.path} exact component={SendSearch} />
       <Route path={Routes.send.path} component={Send} />
+      <Route path={Routes.swap.path} component={SwapRoute} />
+      <Route path={Routes.prototype.path} component={PrototypeRoute} />
     </Switch>
+    <Toaster
+      position="bottom-center"
+      containerStyle={{
+        margin: "auto",
+        width: "420px",
+      }}
+    />
   </ContextProviders>
 );
 

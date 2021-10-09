@@ -1,9 +1,10 @@
 import { useState, useEffect } from "react";
-import { useConnection } from "../contexts/connection";
-import { PublicKey, RpcResponseAndContext, TokenAccountBalancePair } from "@solana/web3.js";
-
-// wouldb eventually like to collocate all token related hooks here
-// use them for composing into larget hooks.
+import {
+  PublicKey,
+  RpcResponseAndContext,
+  TokenAccountBalancePair,
+} from "@solana/web3.js";
+import { useConnection } from "../";
 
 export const useTokenLargestAccounts = (
   tokenMint: PublicKey | undefined

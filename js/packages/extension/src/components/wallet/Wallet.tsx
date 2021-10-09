@@ -18,7 +18,7 @@ export const Wallet = () => {
             sendLink={routes.sendSearch.path}
             wumLeaderboardLink={publicKey ? wumNetWorthPath(publicKey) : ""}
             solLink={solLink}        
-            wumLink={tradePath(WUM_BONDING)}
+            wumLink={tradePath(WUM_BONDING, "buy")}
             getTokenLink={(t) => t.tokenRef ? viewProfilePath(t.tokenRef.publicKey) : ""}
           />
         </Box>
