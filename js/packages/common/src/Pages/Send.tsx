@@ -13,25 +13,12 @@ import { getImage, useAccount, useAssociatedAccount, useAssociatedTokenAddress, 
 import { AccountLayout, ASSOCIATED_TOKEN_PROGRAM_ID, Token, TOKEN_PROGRAM_ID } from '@solana/spl-token';
 import { AiOutlineExclamation } from "react-icons/ai";
 import { BiCheck } from 'react-icons/bi';
-import { useEstimatedFees } from '../hooks';
+import { useEstimatedFees, usePublicKey } from '../hooks';
 import * as yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
 import toast from "react-hot-toast";
 
-export function usePublicKey(publicKeyStr: string | undefined)  {
-  return useMemo(() => {
-    if (publicKeyStr) {
-      try {
-        return new PublicKey(publicKeyStr)
-      } catch {
-        // Ignore
-      }
-    }
-  }, [publicKeyStr])
-}
-
 type FormValues = { amount: number, recipient: string };
-
 
 export const Send = ({
   finishRedirectUrl
@@ -142,7 +129,7 @@ export const Send = ({
       </Center>
       <FormControl>
         <HStack mb={1} w="full" justifyContent="space-between">
-          <FormLabel m={0} fontSize="sm" fontWeight="500" fontStyle="normal" for="send">Send</FormLabel>
+          <FormLabel color="gray.600" m={0} fontSize="sm" fontWeight="500" fontStyle="normal" for="send">Send</FormLabel>
           <Text fontSize="sm" fontWeight="500" onClick={handleUseMax} color="indigo.500" textDecoration="underline" _hover={{ cursor: "pointer" }}>
             Use Max {baseMetadata?.data.symbol} {fiatPrice && ownedAmount ? `(~$${toFiat(ownedAmount)?.toFixed(2)})` : undefined}
           </Text>
@@ -160,7 +147,7 @@ export const Send = ({
       </Alert>}
 
       <FormControl>
-        <FormLabel mb={1} fontSize="sm" fontWeight="500" fontStyle="normal" for="recipient">Recipient</FormLabel>
+        <FormLabel color="gray.600" mb={1} fontSize="sm" fontWeight="500" fontStyle="normal" for="recipient">Recipient</FormLabel>
         <HStack spacing={4} rounded={4} border="1px" borderColor="gray.200" p={4}>
           <Center>
             {metadata && <Avatar
