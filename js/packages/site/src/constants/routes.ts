@@ -1,4 +1,5 @@
 import { PublicKey } from "@solana/web3.js";
+import { replaceAll } from "wumbo-common";
 
 type Route = {
   path: string;
@@ -13,19 +14,31 @@ interface IRoutes {
   editProfile: Route;
   manageWallet: Route;
   wallet: Route;
+  swap: Route;
+  prototype: Route;
 }
 
-export function profilePath(tokenRefKey: PublicKey): string {
-  return routes.viewProfile.path.replace(":tokenRefKey", tokenRefKey.toBase58());
-}
+export const profilePath = (tokenRefKey: PublicKey): string =>
+  replaceAll(routes.viewProfile.path, {
+    ":tokenRefKey": tokenRefKey.toBase58(),
+  });
 
-export function nftPath(mint: PublicKey): string {
-  return routes.viewNft.path.replace(":mint", mint.toBase58());
-}
+export const nftPath = (mint: PublicKey): string =>
+  replaceAll(routes.viewNft.path, { ":mint": mint.toBase58() });
 
-export function editProfile(ownerWalletKey: PublicKey): string {
-  return routes.editProfile.path.replace(":ownerWalletKey", ownerWalletKey.toBase58());
-}
+export const editProfile = (ownerWalletKey: PublicKey): string =>
+  replaceAll(routes.editProfile.path, {
+    ":ownerWalletKey": ownerWalletKey.toBase58(),
+  });
+
+export const swapPath = (
+  tokenBondingKey: PublicKey,
+  action: "buy" | "sell"
+): string =>
+  replaceAll(routes.swap.path, {
+    ":tokenBondingKey": tokenBondingKey.toBase58(),
+    ":action": action,
+  });
 
 const routes: IRoutes = {
   claim: { path: "/claimSite" },
@@ -36,6 +49,8 @@ const routes: IRoutes = {
   profile: { path: "/profile" },
   editProfile: { path: "/profile/edit/:ownerWalletKey" },
   betaSplash: { path: "/" },
+  swap: { path: "/swap/:tokenBondingKey/:action" },
+  prototype: { path: "/prototype" },
 };
 
 export default routes;
