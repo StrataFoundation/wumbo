@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { useClaimTwitterHandle, useCreateOrClaimCoin } from "../utils/claim";
-import { useSolOwnedAmount, useRentExemptAmount } from "../utils/pricing";
+import { useSolOwnedAmount } from "../utils/pricing";
+import { useRentExemptAmount } from "../hooks/fees";
 import { TWITTER_REGISTRY_SIZE } from "../utils/twitter";
 import { Spinner } from "../Spinner";
 import { Button, LinkButton } from "../Button";

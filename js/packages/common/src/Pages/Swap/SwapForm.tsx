@@ -81,6 +81,10 @@ export interface ISwapFormProps {
   feeAmount?: number;
 }
 
+function roundToDecimals(num: number, decimals: number): number {
+  return Math.trunc(num * Math.pow(10, decimals)) / Math.pow(10, decimals)
+}
+
 export const SwapForm = ({
   action,
   isSubmitting,
@@ -151,15 +155,15 @@ export const SwapForm = ({
   };
 
   useEffect(() => {
-    if (topAmount && topAmount > 0 && tokenBonding && curve) {
+    if (topAmount && topAmount >= 0 && tokenBonding && curve) {
       const buyMax = curve.buyWithBaseAmount(
         +topAmount,
         tokenBonding.baseRoyaltyPercentage,
         tokenBonding.targetRoyaltyPercentage
       );
 
-      setValue("bottomAmount", buyMax);
-      setRate(`${Math.trunc((buyMax / topAmount) * 1000000) / 1000000}`);
+      setValue("bottomAmount", roundToDecimals(buyMax, 9));
+      setRate(`${roundToDecimals((buyMax / topAmount), 9)}`);
       setFee(`${feeAmount}`);
     } else {
       reset({ slippage: slippage });

@@ -39,23 +39,6 @@ export function amountAsNum(amount: u64, mint: MintInfo): number {
   return amount.div(decimals).toNumber() + decimal;
 }
 
-export function useRentExemptAmount(size: number): {
-  loading: boolean;
-  amount: number | undefined;
-  error: Error | undefined;
-} {
-  const connection = useConnection();
-  const { loading, error, result } = useAsync(connection.getMinimumBalanceForRentExemption, [size]);
-
-  const amount = useMemo(() => (result || 0) / Math.pow(10, 9), [result]);
-
-  return {
-    amount,
-    error,
-    loading,
-  };
-}
-
 export function useSolOwnedAmount(): { amount: number; loading: boolean } {
   const { adapter } = useWallet();
   const { info: lamports, loading } = useAccount<number>(

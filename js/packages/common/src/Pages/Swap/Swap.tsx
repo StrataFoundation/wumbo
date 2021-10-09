@@ -140,13 +140,13 @@ export const Swap = ({
           await buy(
             tokenBonding.publicKey,
             +values.bottomAmount,
-            +values.slippage
+            +values.slippage/100
           );
         } else {
           await sell(
             tokenBonding.publicKey,
             +values.topAmount,
-            +values.slippage
+            +values.slippage/100
           );
         }
 
