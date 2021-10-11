@@ -7,17 +7,16 @@ import { ClaimRoute } from "../Claim/Claim";
 import { EditProfileRoute } from "../Profile/Edit/EditProfile";
 import ManageWallet from "../Wallet/ManageWallet";
 import Wallet from "../Wallet/Wallet";
-import "./index.css";
 import { ContextProviders } from "./ContextProviders";
 import { ViewProfileRoute } from "../Profile/View/ViewProfile";
 import { ViewNftRoute } from "../Nft/View/ViewNft";
-import { WalletAutoReconnect } from "../../../../common/dist/lib";
 import { TopTokens } from "../Leaderboard/TopTokens";
 import { WumNetWorth } from "../Leaderboard/WumNetWorth";
 import Send from "../Wallet/Send";
 import SendSearch from "../Wallet/SendSearch";
 import { SwapRoute } from "../Swap/Swap";
 import { PrototypeRoute } from "../Prototype";
+import { WalletAutoReconnect } from "wumbo-common";
 
 const App: React.FC = () => (
   <ContextProviders>

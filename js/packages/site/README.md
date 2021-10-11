@@ -1,7 +1,7 @@
 # Wum.bo Site
 
 Barebones repo rolled with
-- [tailwindcss](https://tailwindcss.com/)
+- [chakra-ui](https://chakra-ui.com/docs/getting-started)
 - [react-hook-form](https://react-hook-form.com/)
 
 Currently only used for serving beta signup splash

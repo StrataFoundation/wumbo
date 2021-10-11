@@ -1,6 +1,6 @@
 import React from "react";
+import { Flex, HStack, Text } from "@chakra-ui/react";
 import { ReactComponent as Logo } from "../../assets/images/logo.svg";
-import { classNames } from "wumbo-common";
 
 const Header = ({
   children,
@@ -11,25 +11,25 @@ const Header = ({
   gradient?: boolean;
   size?: "lg" | "sm";
 }) => (
-  <div
-    className={classNames(
-      "flex flex-row items-center justify-between px-4 md:px-10",
-      size == "lg" && "py-6",
-      size == "sm" && "py-3"
-    )}
-    style={{
-      background: gradient
-        ? `linear-gradient(to top, rgba(0, 0, 0, 0), rgba(0, 0, 0, 0.28)`
-        : "",
-    }}
+  <Flex
+    w="full"
+    justifyContent="space-between"
+    alignItems="center"
+    paddingX={10}
+    paddingY={size === "lg" ? 6 : 3}
+    bg={
+      gradient
+        ? `linear-gradient(to top, rgba(0, 0, 0, 0), rgba(0, 0, 0, 0.28))`
+        : ""
+    }
   >
-    <div className="flex flex-row items-center">
-      <Logo className="mr-4" width="40" height="40" />
-      <p className="text-xl">Wum.bo</p>
-    </div>
+    <HStack>
+      <Logo width="40" height="40" />
+      <Text fontSize="xl">Wum.bo</Text>
+    </HStack>
 
     {children}
-  </div>
+  </Flex>
 );
 
 export default Header;

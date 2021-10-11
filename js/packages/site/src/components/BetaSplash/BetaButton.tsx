@@ -1,4 +1,4 @@
-import React from "react";
+import React, { Fragment } from "react";
 import {
   StackDivider,
   Image,
@@ -16,14 +16,12 @@ import {
   useDisclosure,
   VStack,
 } from "@chakra-ui/react";
-import DevMode from "../../../public/EnableDevMode.png";
-import LoadUnpacked from "../../../public/LoadUnpacked.png";
 
 export default ({ colorScheme = "indigo" }) => {
   const { isOpen, onOpen, onClose } = useDisclosure();
 
   return (
-    <>
+    <Fragment>
       <Button colorScheme={colorScheme} onClick={onOpen}>
         Download the Beta
       </Button>
@@ -82,7 +80,7 @@ export default ({ colorScheme = "indigo" }) => {
                   Once on the Extensions page, make sure you enable the
                   Developer Mode switch.
                 </Text>
-                <Image src={DevMode} />
+                <Image src={process.env.PUBLIC_URL + "EnableDevMode.png"} />
               </Box>
               <Box>
                 <Heading size="md">
@@ -94,7 +92,7 @@ export default ({ colorScheme = "indigo" }) => {
                   unpacked (previously dist.zip). Click on that file and click
                   “Select.” This will install the extension to Chrome.
                 </Text>
-                <Image src={LoadUnpacked} />
+                <Image src={process.env.PUBLIC_URL + "LoadUnpacked.png"} />
               </Box>
               <Box>
                 <Heading size="md">
@@ -119,6 +117,6 @@ export default ({ colorScheme = "indigo" }) => {
           </ModalBody>
         </ModalContent>
       </Modal>
-    </>
+    </Fragment>
   );
 };
