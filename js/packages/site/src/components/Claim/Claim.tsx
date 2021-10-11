@@ -1,29 +1,30 @@
-import React, { useState } from "react";
+import React from "react";
 import AppContainer from "../common/AppContainer";
 import routes from "../../constants/routes";
-import {
-  Alert,
-  Claim,
-  useAccountFetchCache,
-  useQuery,
-  TokenRef
-} from "wumbo-common";
-import { PublicKey } from "@solana/web3.js";
+import { Alert, AlertIcon } from "@chakra-ui/react";
+import { Claim, useAccountFetchCache, useQuery, TokenRef } from "wumbo-common";
 import { useHistory } from "react-router-dom";
 import WalletRedirect from "../Wallet/WalletRedirect";
 
 export const ClaimRoute = React.memo(() => {
   const query = useQuery();
   const code = query.get("code");
-  const name = query.get("name")
-  const redirectUri = `${window.location.origin.replace(/\/$/, "")}${routes.claim.path}`;
+  const name = query.get("name");
+  const redirectUri = `${window.location.origin.replace(/\/$/, "")}${
+    routes.claim.path
+  }`;
   const history = useHistory();
-  const cache = useAccountFetchCache()
-  
+  const cache = useAccountFetchCache();
+
   if (!code) {
-    return  <AppContainer>
-      <Alert message="No authorization code" type="error" />
-    </AppContainer>
+    return (
+      <AppContainer>
+        <Alert status="error">
+          <AlertIcon />
+          No authorization code
+        </Alert>
+      </AppContainer>
+    );
   }
 
   return (
@@ -35,13 +36,10 @@ export const ClaimRoute = React.memo(() => {
         redirectUri={redirectUri}
         onComplete={({ owner }) => {
           history.push(
-            routes.editProfile.path.replace(
-              ":ownerWalletKey",
-              owner.toBase58()
-            )
+            routes.editProfile.path.replace(":ownerWalletKey", owner.toBase58())
           );
         }}
       />
     </AppContainer>
-  )
+  );
 });

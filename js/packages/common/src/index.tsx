@@ -4,10 +4,8 @@ export * from "./contexts";
 export * from "./constants";
 export * from "./svgs";
 
-export * from "./Button";
 export * from "./Spinner";
 export * from "./Tab";
-export * from "./Alert";
 export * from "./Avatar";
 export * from "./Badge";
 export * from "./Pages";

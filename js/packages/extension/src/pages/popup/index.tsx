@@ -1,8 +1,8 @@
 import React from "react";
 import ReactDOM from "react-dom";
+import { Alert, AlertIcon } from "@chakra-ui/react";
 import { ConnectionProvider } from "@oyster/common";
 import Popup from "./Popup";
-import { Alert } from "wumbo-common";
 
 try {
   ReactDOM.render(
@@ -16,7 +16,10 @@ try {
 } catch (e) {
   ReactDOM.render(
     <React.StrictMode>
-      <Alert message={e} type="error" />
+      <Alert status="error">
+        <AlertIcon />
+        {e}
+      </Alert>
     </React.StrictMode>,
     document.getElementById("root")
   );

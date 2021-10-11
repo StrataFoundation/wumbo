@@ -1,20 +1,21 @@
 import React from "react";
+import { Center, Text, Alert, AlertIcon } from "@chakra-ui/react";
 import AppContainer from "../common/AppContainer";
-import {
-  Alert,
-  useQuery,
-  Spinner,
-} from "wumbo-common";
-import { Center, Text } from "@chakra-ui/react";
+import { useQuery, Spinner } from "wumbo-common";
 
 export const ExtensionClaimRoute = React.memo(() => {
   const query = useQuery();
   const code = query.get("code");
-  
+
   if (!code) {
-    return  <AppContainer>
-      <Alert message="No authorization code" type="error" />
-    </AppContainer>
+    return (
+      <AppContainer>
+        <Alert status="error">
+          <AlertIcon />
+          No authorization code
+        </Alert>
+      </AppContainer>
+    );
   }
 
   return (
@@ -24,5 +25,5 @@ export const ExtensionClaimRoute = React.memo(() => {
         <Text>Claiming your twitter handle...</Text>
       </Center>
     </AppContainer>
-  )
+  );
 });

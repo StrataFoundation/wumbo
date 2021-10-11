@@ -12,6 +12,8 @@ import {
   FormLabel,
   Text,
   Button,
+  Alert,
+  AlertIcon,
 } from "@chakra-ui/react";
 import { useClaimedTokenRef } from "../utils/tokenRef";
 import {
@@ -22,7 +24,6 @@ import {
 import { useAccount } from "../utils/account";
 import { TokenPill } from "../TokenPill";
 import { Avatar } from "../Avatar";
-import { Alert } from "../Alert";
 import { TokenBonding } from "../utils/deserializers/spl-token-bonding";
 import { handleErrors, useWallet } from "../contexts";
 
@@ -183,9 +184,7 @@ export const EditProfile = React.memo(
             </FormHelperText>
           </FormControl>
           <FormControl id="targetRoyaltyPercentage" borderColor="gray.200">
-            <FormLabel>
-              Royalties
-            </FormLabel>
+            <FormLabel>Royalties</FormLabel>
             <Input
               isRequired
               type="number"
@@ -200,7 +199,12 @@ export const EditProfile = React.memo(
               recommend keep this less than 10%.
             </FormHelperText>
           </FormControl>
-          {error && <Alert type="error" message={error.toString()} />}
+          {error && (
+            <Alert status="error">
+              <AlertIcon />
+              {error.toString()}
+            </Alert>
+          )}
           <Button
             w="full"
             colorScheme="indigo"

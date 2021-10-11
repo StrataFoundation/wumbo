@@ -1,5 +1,5 @@
 import React, { FC, useState } from "react";
-import { Button, Alert } from "wumbo-common";
+import { Button } from "@chakra-ui/react";
 import { WebAuth } from "auth0-js";
 
 const auth0 = new WebAuth({
@@ -26,11 +26,7 @@ const Popup: FC = () => {
       </Button>
       {!showWalletConnect && (
         <div className="w-full px-4">
-          <Button
-            color="primary"
-            onClick={() => setShowWalletConnect(true)}
-            block
-          >
+          <Button onClick={() => setShowWalletConnect(true)} w="full">
             Connect Wallet
           </Button>
         </div>

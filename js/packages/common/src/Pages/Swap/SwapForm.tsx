@@ -82,7 +82,7 @@ export interface ISwapFormProps {
 }
 
 function roundToDecimals(num: number, decimals: number): number {
-  return Math.trunc(num * Math.pow(10, decimals)) / Math.pow(10, decimals)
+  return Math.trunc(num * Math.pow(10, decimals)) / Math.pow(10, decimals);
 }
 
 export const SwapForm = ({
@@ -163,7 +163,7 @@ export const SwapForm = ({
       );
 
       setValue("bottomAmount", roundToDecimals(buyMax, 9));
-      setRate(`${roundToDecimals((buyMax / topAmount), 9)}`);
+      setRate(`${roundToDecimals(buyMax / topAmount, 9)}`);
       setFee(`${feeAmount}`);
     } else {
       reset({ slippage: slippage });
@@ -173,7 +173,7 @@ export const SwapForm = ({
   }, [topAmount, feeAmount, setValue, setRate, tokenBonding, curve, slippage]);
 
   return (
-    <Box ref={formRef}>
+    <Box ref={formRef} w="full">
       <form onSubmit={handleSubmit(handleSwap)}>
         <VStack spacing={4} padding={4} align="stretch" color="gray.500">
           <Flex flexDir="column">
