@@ -1,6 +1,6 @@
 import { PublicKey } from "@solana/web3.js";
 import { AccountInfo as TokenAccountInfo, Token } from "@solana/spl-token";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   SPL_ASSOCIATED_TOKEN_ACCOUNT_PROGRAM_ID,
   TOKEN_PROGRAM_ID,
@@ -35,7 +35,7 @@ export function useAssociatedTokenAddress(
       if (!state.result || result.toString() != state.result.toString()) {
         setState({ result, loading: false });
       }
-    });
+    }).catch(() => {});
   }, [wallet, mint]);
 
   return state;
@@ -43,23 +43,38 @@ export function useAssociatedTokenAddress(
 
 export interface AssociatedAccountState {
   associatedAccount?: TokenAccountInfo;
+  associatedAccountKey?: PublicKey;
   loading: boolean;
 }
 export function useAssociatedAccount(
-  wallet: PublicKey | undefined | null,
+  walletOrAta: PublicKey | undefined | null,
   mint: PublicKey | undefined
 ): AssociatedAccountState {
   const { result: associatedTokenAddress, loading: associatedTokenLoading } =
-    useAssociatedTokenAddress(wallet, mint);
+    useAssociatedTokenAddress(walletOrAta, mint);
+  const parser = (pubkey: PublicKey, acct: AccountInfo<Buffer>) => {
+    return TokenAccountParser(pubkey, acct)?.info;
+  }
   const { info: associatedAccount, loading } = useAccount(
     associatedTokenAddress,
-    (pubkey: PublicKey, acct: AccountInfo<Buffer>) => {
-      return TokenAccountParser(pubkey, acct)!.info;
-    }
+    parser
+  );
+  const { info: account, loading: loading2 } = useAccount(
+    walletOrAta || undefined,
+    parser
   );
 
+  const result = useMemo(() => {
+    if (account?.mint === mint) { // The passed value is the ata
+      return account;
+    } else {
+      return associatedAccount
+    }
+  }, [associatedAccount, account])
+
   return {
-    associatedAccount,
-    loading,
+    associatedAccount: result,
+    loading: loading || loading2,
+    associatedAccountKey: associatedTokenAddress
   };
 }

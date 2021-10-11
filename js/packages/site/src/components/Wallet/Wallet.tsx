@@ -1,21 +1,26 @@
 import React, { useEffect } from "react";
-import { profilePath } from "../../constants/routes";
+import routes, { profilePath, wumNetWorthPath } from "../../constants/routes";
 import AppContainer from "../common/AppContainer";
 import { useHistory } from "react-router-dom";
-import { useFtxPayLink, Wallet } from "wumbo-common";
+import { useFtxPayLink, useWallet, Wallet } from "wumbo-common";
 import WalletRedirect from "./WalletRedirect";
 import { Box } from "@chakra-ui/react";
+import { PublicKey } from "@solana/web3.js";
 
 export default React.memo(() => {
   const solLink = useFtxPayLink();
+  const { publicKey } = useWallet();
+  
   return (
     <AppContainer>
       <WalletRedirect />
       <Box p={4}>
         <Wallet
+          wumLeaderboardLink={publicKey ? wumNetWorthPath(publicKey) : ""}
           getTokenLink={(t) => t.tokenRef?.publicKey ? profilePath(t.tokenRef?.publicKey) : ""}
           wumLink={""}
           solLink={solLink}
+          sendLink={routes.sendSearch.path}
         />
       </Box>
     </AppContainer>

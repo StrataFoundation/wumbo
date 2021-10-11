@@ -6,6 +6,7 @@ export const WumboRankIcon = createIcon({
   viewBox: "0 0 24 24",
   path: [
     <circle
+      fill="transparent"
       cx="12"
       cy="12"
       r="11.025"

@@ -14,8 +14,33 @@ interface IRoutes {
   editProfile: Route;
   manageWallet: Route;
   wallet: Route;
+  wumNetWorth: Route;
+  topTokens: Route;
+  sendSearch: Route;
+  send: Route;
   swap: Route;
   prototype: Route;
+}
+
+export function sendPath(mint: PublicKey): string {
+  return routes.send.path.replace(
+    ":mint",
+    mint.toBase58()
+  );
+}
+
+export function topTokensPath(tokenBondingKey: PublicKey): string {
+  return routes.topTokens.path.replace(
+    ":tokenBondingKey",
+    tokenBondingKey.toBase58()
+  );
+}
+
+export function wumNetWorthPath(wallet: PublicKey): string {
+  return routes.wumNetWorth.path.replace(
+    ":wallet",
+    wallet.toBase58()
+  );
 }
 
 export const profilePath = (tokenRefKey: PublicKey): string =>
@@ -49,6 +74,10 @@ const routes: IRoutes = {
   profile: { path: "/profile" },
   editProfile: { path: "/profile/edit/:ownerWalletKey" },
   betaSplash: { path: "/" },
+  topTokens: { path: "/top-tokens/:tokenBondingKey" },
+  wumNetWorth: { path: "/wum-net-worth/:wallet" },
+  sendSearch: { path: "/send" },
+  send: { path: "/send/:mint" },
   swap: { path: "/swap/:tokenBondingKey/:action" },
   prototype: { path: "/prototype" },
 };

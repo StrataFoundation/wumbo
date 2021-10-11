@@ -19,6 +19,8 @@ import { TopTokens } from "./leaderboards/TopTokens";
 import { WumNetWorth } from "./leaderboards/WumNetWorth";
 import Claim from "./claim/Claim";
 import { EditProfileRoute } from "./profile/EditProfile";
+import { Send } from "./wallet/Send";
+import { SendSearch } from "./wallet/SendSearch";
 
 const App: FC = () => (
   <Router initialEntries={[routes.myTokens.path]} initialIndex={0}>
@@ -40,6 +42,8 @@ const App: FC = () => (
           <Route path={routes.tagNft.path} component={TagNft} />
           <Route path={routes.editProfile.path} component={EditProfileRoute} />
           <Route path={routes.profile.path} exact component={Profile} />
+          <Route path={routes.sendSearch.path} exact component={SendSearch} />
+          <Route path={routes.send.path} component={Send} />
         </Switch>
       </WumboDrawer>
     </ContextProviders>

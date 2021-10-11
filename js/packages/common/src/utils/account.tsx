@@ -107,7 +107,7 @@ export function useAccount<T>(
         if (acc) {
           setState({
             loading: false,
-            info: acc.info as any,
+            info: (parser && parser(acc.pubkey, acc!.account)) as any,
             account: acc.account,
           });
         } else {
@@ -125,7 +125,7 @@ export function useAccount<T>(
         cache.query(id, parsedAccountBaseParser).then((acc) => {
           setState({
             loading: false,
-            info: acc!.info as any,
+            info: (parser && parser(acc.pubkey, acc!.account)) as any,
             account: acc!.account,
           });
         });

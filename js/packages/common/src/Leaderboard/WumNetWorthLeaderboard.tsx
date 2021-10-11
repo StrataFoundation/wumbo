@@ -6,6 +6,7 @@ import { useBondingPricing, useFiatPrice, useUserOwnedAmount } from "../utils/pr
 import { TokenBonding, useAccount, useClaimedTokenRef, useReverseTwitter, useTokenRefFromBonding } from "../utils";
 import { UserLeaderboardElement } from "./UserLeaderboardElement";
 import { WUM_TOKEN } from "../constants";
+import { useWumNetWorth } from "../hooks";
 
 const GET_TOP_WUM = gql`
   query GetTopWumLocked($startRank: Int!, $stopRank: Int!) {
@@ -20,20 +21,10 @@ const GET_TOKEN_RANK = gql`
   }
 `;
 
-const GET_NET_WORTH = gql`
-  query GetNetWorth($wallet: String!) {
-    wumNetWorth(wallet: $wallet)
-  }
-`;
-
 const Element = React.memo(({ wallet, onClick }: { wallet: PublicKey, onClick?: (tokenRefKey: PublicKey) => void }) => {
   const { info: tokenRef } = useClaimedTokenRef(wallet)
 
-  const { data: { wumNetWorth } = {} } = useQuery<{ wumNetWorth: number }>(GET_NET_WORTH, {
-    variables: {
-      wallet: wallet.toBase58()
-    }
-  })
+  const { wumNetWorth } = useWumNetWorth(wallet);
   const amount = wumNetWorth?.toFixed(2)
 
   return <UserLeaderboardElement
