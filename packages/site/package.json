@@ -43,7 +43,8 @@
     "eject": "react-scripts eject",
     "predeploy": "react-scripts build",
     "deploy": "echo 'wum.bo' > ./build/CNAME && gh-pages -d build",
-    "style": "prettier --write \"src/**/*.{ts,tsx}\""
+    "format": "prettier --write \"src/**/*.{ts,tsx}\"",
+    "precommit": "yarn format"
   },
   "browserslist": {
     "production": [

@@ -7,6 +7,7 @@
   "devDependencies": {
     "@types/react": "^17.0.0",
     "@types/react-dom": "^17.0.0",
+    "husky": "^7.0.0",
     "lerna": "^3.4.3",
     "react": "^17.0.2",
     "react-dom": "^17.0.2",
@@ -16,6 +17,7 @@
     "build": "lerna run build",
     "watch:common": "lerna exec yarn watch --scope wumbo-common",
     "watch:all": "lerna exec --parallel yarn run watch --scope wumbo-common --scope spl-token-bonding --scope @oyster/common --scope spl-wumbo --scope wumbo-extension",
-    "state:site": "lerna exec yarn start --scope site"
-}
+    "start:site": "lerna exec yarn start --scope site",
+    "prepare": "husky install"
+  }
 }
