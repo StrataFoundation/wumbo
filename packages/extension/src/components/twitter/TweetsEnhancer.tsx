@@ -35,13 +35,16 @@ export const TweetsEnhancer = () => {
           />
         ) : null;
 
-        const replyTokensEl = tweet.replyTokensTarget && tweet.mentions && tweet.mentions.length > 0 ? (
-          <ReplyTokens
-            outsideRef={outsideRef}
-            creatorName={tweet.name}
-            mentions={tweet.mentions || []}
-          />
-        ) : null;
+        const replyTokensEl =
+          tweet.replyTokensTarget &&
+          tweet.mentions &&
+          tweet.mentions.length > 0 ? (
+            <ReplyTokens
+              outsideRef={outsideRef}
+              creatorName={tweet.name}
+              mentions={tweet.mentions || []}
+            />
+          ) : null;
 
         if (buttonEl) {
           return (
@@ -55,15 +58,17 @@ export const TweetsEnhancer = () => {
                   </ThemeProvider>
                 </ReactShadow.div>
               </AppendChildPortal>
-              {tweet.replyTokensTarget && tweet.mentions && tweet.mentions.length > 0 && (
-                <AppendChildPortal
-                  container={tweet.replyTokensTarget as Element}
-                >
-                  <ReactShadow.div>
-                    <ThemeProvider>{replyTokensEl}</ThemeProvider>
-                  </ReactShadow.div>
-                </AppendChildPortal>
-              )}
+              {tweet.replyTokensTarget &&
+                tweet.mentions &&
+                tweet.mentions.length > 0 && (
+                  <AppendChildPortal
+                    container={tweet.replyTokensTarget as Element}
+                  >
+                    <ReactShadow.div>
+                      <ThemeProvider>{replyTokensEl}</ThemeProvider>
+                    </ReactShadow.div>
+                  </AppendChildPortal>
+                )}
             </Fragment>
           );
         }
@@ -72,10 +77,12 @@ export const TweetsEnhancer = () => {
       })
       .filter(Boolean);
 
-    return <Fragment>
-      {tweetEls}
-      <Box ref={outsideRef} />
-    </Fragment>;
+    return (
+      <Fragment>
+        {tweetEls}
+        <Box ref={outsideRef} />
+      </Fragment>
+    );
   }
 
   return null;

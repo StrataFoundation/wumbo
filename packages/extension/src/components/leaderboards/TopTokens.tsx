@@ -8,20 +8,22 @@ import { viewProfilePath } from "@/constants/routes";
 export const TopTokens = () => {
   const params = useParams<{ tokenBondingKey: string | undefined }>();
   const passedTokenBondingKey = params.tokenBondingKey
-  ? new PublicKey(params.tokenBondingKey)
-  : undefined;
+    ? new PublicKey(params.tokenBondingKey)
+    : undefined;
   const history = useHistory();
 
-  return <Fragment>
-    <WumboDrawer.Header title={"Top Tokens"} />
-    <WumboDrawer.Content>
-      <TopTokenLeaderboard 
-        tokenBondingKey={passedTokenBondingKey} 
-        onAccountClick={(tokenRefKey) =>
-          history.push(viewProfilePath(tokenRefKey))
-        }
-      />
-    </WumboDrawer.Content>
-    <WumboDrawer.Nav />
-  </Fragment>
-}
+  return (
+    <Fragment>
+      <WumboDrawer.Header title={"Top Tokens"} />
+      <WumboDrawer.Content>
+        <TopTokenLeaderboard
+          tokenBondingKey={passedTokenBondingKey}
+          onAccountClick={(tokenRefKey) =>
+            history.push(viewProfilePath(tokenRefKey))
+          }
+        />
+      </WumboDrawer.Content>
+      <WumboDrawer.Nav />
+    </Fragment>
+  );
+};

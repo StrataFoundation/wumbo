@@ -45,9 +45,9 @@ export class Mint {
 }
 
 export function useMint(key: PublicKey | undefined): MintInfo | undefined {
-  const { info: mint } = useAccount(key, (pubkey, account) => Mint.fromAccount(account))
+  const { info: mint } = useAccount(key, (pubkey, account) =>
+    Mint.fromAccount(account)
+  );
 
   return mint;
 }
-
-

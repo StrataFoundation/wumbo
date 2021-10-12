@@ -1,20 +1,20 @@
-import { AccountInfo, Connection, PublicKey } from '@solana/web3.js';
+import { AccountInfo, Connection, PublicKey } from "@solana/web3.js";
 
 export function chunks<T>(array: T[], size: number): T[][] {
   return Array.apply<number, T[], T[][]>(
     0,
-    new Array(Math.ceil(array.length / size)),
+    new Array(Math.ceil(array.length / size))
   ).map((_, index) => array.slice(index * size, (index + 1) * size));
 }
 
 export const getMultipleAccounts = async (
   connection: any,
   keys: string[],
-  commitment: string,
-): Promise<{ keys: string[], array: AccountInfo<Buffer>[] }> => {
-  const result = await getMultipleAccountsCore(connection, keys, commitment)
+  commitment: string
+): Promise<{ keys: string[]; array: AccountInfo<Buffer>[] }> => {
+  const result = await getMultipleAccountsCore(connection, keys, commitment);
 
-  const array = result.array.map(acc => {
+  const array = result.array.map((acc) => {
     if (!acc) {
       return undefined;
     }
@@ -22,24 +22,24 @@ export const getMultipleAccounts = async (
     const { data, ...rest } = acc;
     const obj = {
       ...rest,
-      data: Buffer.from(data[0], 'base64'),
+      data: Buffer.from(data[0], "base64"),
     } as AccountInfo<Buffer>;
     return obj;
-  }) as AccountInfo<Buffer>[]
+  }) as AccountInfo<Buffer>[];
   return { keys, array };
 };
 
 const getMultipleAccountsCore = async (
   connection: any,
   keys: string[],
-  commitment: string,
+  commitment: string
 ) => {
-  const args = connection._buildArgs([keys], commitment, 'base64');
+  const args = connection._buildArgs([keys], commitment, "base64");
 
-  const unsafeRes = await connection._rpcRequest('getMultipleAccounts', args);
+  const unsafeRes = await connection._rpcRequest("getMultipleAccounts", args);
   if (unsafeRes.error) {
     throw new Error(
-      'failed to get info about account ' + unsafeRes.error.message,
+      "failed to get info about account " + unsafeRes.error.message
     );
   }
 

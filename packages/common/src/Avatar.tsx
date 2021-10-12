@@ -7,7 +7,7 @@ import {
   Avatar as ChakraAvatar,
   AvatarProps as ChakraAvatarProps,
   Stack,
-  StackDirection
+  StackDirection,
 } from "@chakra-ui/react";
 import { Spinner, useTokenMetadata } from ".";
 import { handleErrors } from "./contexts";
@@ -29,7 +29,7 @@ export const Avatar = ({
   subTextProps = {},
   showDetails,
   size = "md",
-  direction="row",
+  direction = "row",
   ...props
 }: AvatarProps) => (
   <Stack direction={direction} spacing={2} alignItems="center">

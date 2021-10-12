@@ -7,21 +7,21 @@ import { viewProfilePath } from "@/constants/routes";
 
 export const WumNetWorth = () => {
   const params = useParams<{ wallet: string | undefined }>();
-  const passedWallet = params.wallet
-  ? new PublicKey(params.wallet)
-  : undefined;
+  const passedWallet = params.wallet ? new PublicKey(params.wallet) : undefined;
   const history = useHistory();
 
-  return <Fragment>
-    <WumboDrawer.Header title={"Top Net Worth"} />
-    <WumboDrawer.Content>
-      <WumNetWorthLeaderboard 
-        wallet={passedWallet} 
-        onAccountClick={(tokenRefKey) =>
-          history.push(viewProfilePath(tokenRefKey))
-        }
-      />
-    </WumboDrawer.Content>
-    <WumboDrawer.Nav />
-  </Fragment>
-}
+  return (
+    <Fragment>
+      <WumboDrawer.Header title={"Top Net Worth"} />
+      <WumboDrawer.Content>
+        <WumNetWorthLeaderboard
+          wallet={passedWallet}
+          onAccountClick={(tokenRefKey) =>
+            history.push(viewProfilePath(tokenRefKey))
+          }
+        />
+      </WumboDrawer.Content>
+      <WumboDrawer.Nav />
+    </Fragment>
+  );
+};

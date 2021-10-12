@@ -72,7 +72,9 @@ export const Profile = () => {
       <WumboDrawer.Content>
         <CommonProfile
           topTokensPath={tokenRef ? topTokensPath(tokenRef.tokenBonding) : ""}
-          wumNetWorthPath={tokenRef?.owner ? wumNetWorthPath(tokenRef.owner as PublicKey) : ""}
+          wumNetWorthPath={
+            tokenRef?.owner ? wumNetWorthPath(tokenRef.owner as PublicKey) : ""
+          }
           editPath={routes.editProfile.path}
           useClaimFlow={useClaimFlow}
           tokenRefKey={tokenRefKey}

@@ -1,6 +1,6 @@
 import { useLocalStorage } from "../utils";
 import { SOLANA_API_URL } from "../constants";
-import React, { useContext, useMemo, useEffect }  from "react";
+import React, { useContext, useMemo, useEffect } from "react";
 import { Connection, Keypair } from "@solana/web3.js";
 import { DEFAULT_COMMITMENT } from "../constants/globals";
 
@@ -13,24 +13,22 @@ interface ConnectionConfig {
 const ConnectionContext = React.createContext<ConnectionConfig>({
   endpoint: SOLANA_API_URL,
   setEndpoint: () => {},
-  connection: new Connection(SOLANA_API_URL, DEFAULT_COMMITMENT)
+  connection: new Connection(SOLANA_API_URL, DEFAULT_COMMITMENT),
 });
 
 export function useConnection() {
   return useContext(ConnectionContext).connection as Connection;
 }
 
-export const ConnectionProvider: React.FC = ({
-  children
-}) => {
+export const ConnectionProvider: React.FC = ({ children }) => {
   const [endpoint, setEndpoint] = useLocalStorage(
-    'connectionEndpoint',
-    SOLANA_API_URL,
+    "connectionEndpoint",
+    SOLANA_API_URL
   );
 
   const connection = useMemo(
     () => new Connection(endpoint, DEFAULT_COMMITMENT),
-    [endpoint],
+    [endpoint]
   );
 
   // The websocket library solana/web3.js uses closes its websocket connection when the subscription list
@@ -39,7 +37,7 @@ export const ConnectionProvider: React.FC = ({
   useEffect(() => {
     const id = connection.onAccountChange(
       Keypair.generate().publicKey,
-      () => {},
+      () => {}
     );
     return () => {
       connection.removeAccountChangeListener(id);
@@ -58,10 +56,10 @@ export const ConnectionProvider: React.FC = ({
       value={{
         endpoint,
         setEndpoint,
-        connection
+        connection,
       }}
     >
       {children}
     </ConnectionContext.Provider>
   );
-}
+};

@@ -21,50 +21,87 @@ const GET_HOLDER_RANK = gql`
   }
 `;
 
+const Element = React.memo(
+  ({
+    wallet,
+    mint,
+    onClick,
+  }: {
+    mint: PublicKey | undefined;
+    wallet: PublicKey;
+    onClick?: (tokenRefKey: PublicKey) => void;
+  }) => {
+    const amount = useUserOwnedAmount(wallet, mint)?.toFixed(2);
+    const { tokenRef } = useSocialTokenMetadata(wallet);
 
-const Element = React.memo(({ wallet, mint, onClick }: { mint: PublicKey | undefined, wallet: PublicKey, onClick?: (tokenRefKey: PublicKey) => void }) => {
-  const amount = useUserOwnedAmount(wallet, mint)?.toFixed(2);
-  const { tokenRef } = useSocialTokenMetadata(wallet)
+    return (
+      <UserLeaderboardElement
+        amount={amount}
+        onClick={() => tokenRef && onClick && onClick(tokenRef.publicKey)}
+        tokenRef={tokenRef}
+      />
+    );
+  }
+);
 
-  return <UserLeaderboardElement
-    amount={amount}
-    onClick={() => tokenRef && onClick && onClick(tokenRef.publicKey)}
-    tokenRef={tokenRef}
-  />
-})
+export const TokenLeaderboard = React.memo(
+  ({
+    mintKey,
+    onAccountClick,
+  }: {
+    mintKey: PublicKey | undefined;
+    onAccountClick?: (tokenRefKey: PublicKey) => void;
+  }) => {
+    const { publicKey } = useWallet();
+    const client = useApolloClient();
 
-export const TokenLeaderboard = React.memo(({ mintKey, onAccountClick }: { mintKey: PublicKey | undefined, onAccountClick?: (tokenRefKey: PublicKey) => void }) => {
-  const { publicKey } = useWallet();
-  const client = useApolloClient()
+    const getRank = useMemo(
+      () => () => {
+        return client
+          .query<{
+            accountRank: number | undefined;
+          }>({
+            query: GET_HOLDER_RANK,
+            variables: {
+              mint: mintKey?.toBase58(),
+              key: publicKey?.toBase58(),
+            },
+          })
+          .then((result) => result.data.accountRank)
+          .catch(() => undefined);
+      },
+      [mintKey]
+    );
 
-  const getRank = useMemo(() => () => {
-    return client.query<{
-      accountRank: number | undefined;
-    }>({
-      query: GET_HOLDER_RANK,
-      variables: {
-        mint: mintKey?.toBase58(),
-        key: publicKey?.toBase58()
-      }
-    }).then(result => result.data.accountRank).catch(() => undefined)
-  }, [mintKey])
+    const getTopHolders = (startIndex: number, stopIndex: number) =>
+      client
+        .query<{
+          topHolders: { publicKey: string }[];
+        }>({
+          query: GET_TOP_HOLDERS,
+          variables: {
+            mint: mintKey?.toBase58(),
+            key: publicKey?.toBase58(),
+            startRank: startIndex,
+            stopRank: stopIndex,
+          },
+        })
+        .then((result) =>
+          result.data.topHolders.map(
+            ({ publicKey }) => new PublicKey(publicKey)
+          )
+        )
+        .catch(() => []);
 
-  const getTopHolders = (startIndex: number, stopIndex: number) => client.query<{
-    topHolders: { publicKey: string }[];
-  }>({
-    query: GET_TOP_HOLDERS,
-    variables: {
-      mint: mintKey?.toBase58(),
-      key: publicKey?.toBase58(),
-      startRank: startIndex,
-      stopRank: stopIndex
-    }
-  }).then(result => result.data.topHolders.map(({ publicKey }) => new PublicKey(publicKey))).catch(() => [])
-
-  return <WumboUserLeaderboard
-    getRank={getRank}
-    getTopWallets={getTopHolders}
-    selected={key => publicKey ? key.equals(publicKey) : false}
-    Element={({ publicKey }) => <Element onClick={onAccountClick} wallet={publicKey} mint={mintKey} />}
-  />
-})
+    return (
+      <WumboUserLeaderboard
+        getRank={getRank}
+        getTopWallets={getTopHolders}
+        selected={(key) => (publicKey ? key.equals(publicKey) : false)}
+        Element={({ publicKey }) => (
+          <Element onClick={onAccountClick} wallet={publicKey} mint={mintKey} />
+        )}
+      />
+    );
+  }
+);

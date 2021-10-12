@@ -20,8 +20,15 @@ export const ViewNftRoute = () => {
   );
 
   const { loading: loading1 } = useTokenMetadata(token);
-  const { loading: loading2, result: res2, error: err2 } = useTokenLargestAccounts(token);
-  const { loading: loading3, info } = useAccount(res2?.value[0]?.address, TokenAccountParser);
+  const {
+    loading: loading2,
+    result: res2,
+    error: err2,
+  } = useTokenLargestAccounts(token);
+  const { loading: loading3, info } = useAccount(
+    res2?.value[0]?.address,
+    TokenAccountParser
+  );
   const loading = loading1 || loading2 || loading3;
 
   if (loading) {

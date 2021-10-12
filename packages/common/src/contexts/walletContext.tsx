@@ -20,7 +20,7 @@ import {
   PublicKey,
   Transaction,
   TransactionInstruction,
-  sendAndConfirmRawTransaction
+  sendAndConfirmRawTransaction,
 } from "@solana/web3.js";
 import { useLocalStorage } from "../utils";
 import { useConnection } from "../contexts/connection";
@@ -349,7 +349,9 @@ function useProvider(): Provider | undefined {
         opts = this.opts;
       }
       tx.feePayer = this.wallet.publicKey;
-      tx.recentBlockhash = (await this.connection.getRecentBlockhash(opts.preflightCommitment)).blockhash;
+      tx.recentBlockhash = (
+        await this.connection.getRecentBlockhash(opts.preflightCommitment)
+      ).blockhash;
       const signed = await this.wallet.signTransaction(tx);
       signers
         .filter((s) => s !== undefined)
@@ -359,7 +361,7 @@ function useProvider(): Provider | undefined {
       const rawTx = signed.serialize();
       const txId = await sendAndConfirmRawTransaction(connection, rawTx, opts);
       return txId;
-    }
+    };
 
     return provider;
   }, [connection, adapter]);

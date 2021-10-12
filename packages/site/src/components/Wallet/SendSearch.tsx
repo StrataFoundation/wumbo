@@ -10,8 +10,10 @@ export default React.memo(() => {
     <AppContainer>
       <WalletRedirect />
       <Box p={4}>
-        <SendSearch 
-          getSendLink={(t: ITokenWithMetaAndAccount) => sendPath(t.account!.mint)}
+        <SendSearch
+          getSendLink={(t: ITokenWithMetaAndAccount) =>
+            sendPath(t.account!.mint)
+          }
         />
       </Box>
     </AppContainer>

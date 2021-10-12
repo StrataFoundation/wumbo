@@ -27,7 +27,10 @@ import {
   TWITTER_VERIFIER,
   TWITTER_TLD,
 } from "../constants/globals";
-import { createVerifiedTwitterRegistry, getTwitterRegistry } from "./testableNameServiceTwitter";
+import {
+  createVerifiedTwitterRegistry,
+  getTwitterRegistry,
+} from "./testableNameServiceTwitter";
 
 async function sendTransaction(
   connection: Connection,
@@ -37,17 +40,23 @@ async function sendTransaction(
 ): Promise<string> {
   const transaction = new Transaction({
     feePayer: wallet.publicKey || undefined,
-    recentBlockhash: (await connection.getRecentBlockhash('confirmed')).blockhash,
+    recentBlockhash: (await connection.getRecentBlockhash("confirmed"))
+      .blockhash,
   });
   transaction.instructions = instructions;
 
   extraSigners && transaction.partialSign(...extraSigners);
   const signed = await wallet.signTransaction(transaction);
 
-  return sendAndConfirmRawTransaction(connection, signed.serialize(), { commitment: 'confirmed' });
+  return sendAndConfirmRawTransaction(connection, signed.serialize(), {
+    commitment: "confirmed",
+  });
 }
 
-export async function createTestTld(connection: Connection, wallet: WalletAdapter) {
+export async function createTestTld(
+  connection: Connection,
+  wallet: WalletAdapter
+) {
   if (IS_DEV) {
     const tld = await getNameAccountKey(await getHashedName(DEV_TWITTER_TLD));
     const account = await connection.getAccountInfo(tld);
@@ -60,7 +69,9 @@ export async function createTestTld(connection: Connection, wallet: WalletAdapte
         wallet.publicKey!,
         getTwitterVerifier()
       );
-      console.log(await sendTransaction(connection, [createInstruction], wallet));
+      console.log(
+        await sendTransaction(connection, [createInstruction], wallet)
+      );
     }
   }
 }
@@ -101,7 +112,9 @@ export async function apiPost(url: string, body: any, headers: any) {
           "Specified handle did not match the handle you logged in with, or the authorization expired. Please try again"
         );
       } else if (response.status == 500) {
-        throw new Error("Registration transaction failed, please report this error in our discord");
+        throw new Error(
+          "Registration transaction failed, please report this error in our discord"
+        );
       }
 
       throw new Error(
@@ -112,7 +125,9 @@ export async function apiPost(url: string, body: any, headers: any) {
     return json;
   } catch (err) {
     console.warn(err);
-    throw new Error(`Error apiPost - err ${err}. Please report this error in our discord`);
+    throw new Error(
+      `Error apiPost - err ${err}. Please report this error in our discord`
+    );
   }
 }
 
@@ -129,7 +144,9 @@ export async function claimTwitterTransactionInstructions(
 
   if (nameRegistryItem) {
     if (nameRegistryItem.owner.toBase58() != owner.toBase58()) {
-      throw new Error(`Twitter handle is already registered to wallet ${nameRegistryItem.owner}`);
+      throw new Error(
+        `Twitter handle is already registered to wallet ${nameRegistryItem.owner}`
+      );
     }
 
     // Exit. It's already been claimed
@@ -169,7 +186,10 @@ export async function getTwitterReverse(
   return ReverseTwitterRegistryState.retrieve(connection, key);
 }
 
-async function getTwitterName(connection: Connection, owner: PublicKey | undefined) {
+async function getTwitterName(
+  connection: Connection,
+  owner: PublicKey | undefined
+) {
   if (!owner) {
     return;
   }
@@ -182,13 +202,21 @@ interface ReverseTwitterState {
   handle: string | undefined;
   error: Error | undefined;
 }
-export function useReverseTwitter(owner: PublicKey | undefined): ReverseTwitterState {
+export function useReverseTwitter(
+  owner: PublicKey | undefined
+): ReverseTwitterState {
   const connection = useConnection();
-  const { loading, error, result: handle } = useAsync(getTwitterName, [connection, owner]);
+  const {
+    loading,
+    error,
+    result: handle,
+  } = useAsync(getTwitterName, [connection, owner]);
 
   return {
     loading,
-    error: error?.message?.includes("Invalid reverse Twitter account provided") ? undefined : error,
+    error: error?.message?.includes("Invalid reverse Twitter account provided")
+      ? undefined
+      : error,
     handle,
   };
 }

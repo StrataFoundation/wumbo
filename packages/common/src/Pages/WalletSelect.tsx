@@ -20,7 +20,11 @@ export const WalletSelect = () => {
         <VStack spacing={4} alignItems="start">
           <Text fontSize="lg">
             New to Crypto & dont have an existing wallet?&nbsp;
-            <Link href="#" onClick={() => select(WalletName.Torus)} color="indigo.600">
+            <Link
+              href="#"
+              onClick={() => select(WalletName.Torus)}
+              color="indigo.600"
+            >
               Connect with Social.
             </Link>
           </Text>

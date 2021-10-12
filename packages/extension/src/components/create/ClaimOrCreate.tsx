@@ -51,27 +51,36 @@ export default React.memo(() => {
   } = useAsyncCallback(createCreator);
   const { claim, loading, error: claimError } = useClaimFlow(query.get("name"));
   handleErrors(reverseTwitterError, error, claimError);
-  const showCreate = useMemo(() => !userInfo && !loading2, [userInfo, loading2]);
-  
+  const showCreate = useMemo(
+    () => !userInfo && !loading2,
+    [userInfo, loading2]
+  );
+
   return (
     <>
-      { showCreate && <Button
-        w="full"
-        size="md"
-        colorScheme="indigo"
-        onClick={execute}
-        isLoading={creationLoading}
-        loadingText={awaitingApproval ? "Awaiting Approval" : "Creating Token"}
-      >
-        Create a Token for {query.get("name")}
-      </Button> }
+      {showCreate && (
+        <Button
+          w="full"
+          size="md"
+          colorScheme="indigo"
+          onClick={execute}
+          isLoading={creationLoading}
+          loadingText={
+            awaitingApproval ? "Awaiting Approval" : "Creating Token"
+          }
+        >
+          Create a Token for {query.get("name")}
+        </Button>
+      )}
       {(!ownerTwitterHandle || ownerTwitterHandle == query.get("name")) && (
         <>
-          { showCreate && <Box d="flex" justifyContent="center">
-            <Text fontSize="lg" color="gray.500">
-              Or
-            </Text>
-          </Box> }
+          {showCreate && (
+            <Box d="flex" justifyContent="center">
+              <Text fontSize="lg" color="gray.500">
+                Or
+              </Text>
+            </Box>
+          )}
           <Button
             w="full"
             size="md"

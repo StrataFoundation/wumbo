@@ -44,7 +44,7 @@ export const ViewNftRaw = React.memo(
     owner,
     getCreatorLink,
     tagNftPath,
-    modalRef
+    modalRef,
   }: {
     token: ITokenWithMeta;
     owner: PublicKey | undefined;
@@ -87,7 +87,9 @@ export const ViewNftRaw = React.memo(
                 {displayName(token.data?.properties.category)} &bull;{" "}
                 {token.edition
                   ? `Editon no. ${token.edition.edition.toNumber()} of ${token.masterEdition?.supply.toNumber()}`
-                  : token.masterEdition ? "Master Edition" : "No Edition or Master Edition"}
+                  : token.masterEdition
+                  ? "Master Edition"
+                  : "No Edition or Master Edition"}
               </Flex>
               {token.metadata && (
                 <>
@@ -178,12 +180,12 @@ export const ViewNftRaw = React.memo(
           </VStack>
         </VStack>
         <ExpandedNft
-            isExpanded={isExpanded}
-            setIsExpanded={setIsExpanded}
-            tokenData={token}
-            portalProps={{
-              containerRef: modalRef
-            }}
+          isExpanded={isExpanded}
+          setIsExpanded={setIsExpanded}
+          tokenData={token}
+          portalProps={{
+            containerRef: modalRef,
+          }}
         />
       </>
     );

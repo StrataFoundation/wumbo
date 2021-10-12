@@ -3,7 +3,7 @@ import {
   useTokenMetadata,
   useTokenLargestAccounts,
   useAccount,
-  handleErrors
+  handleErrors,
 } from "wumbo-common";
 import React, { Fragment, useMemo } from "react";
 import { useOutsideOfDrawerRef, WumboDrawer } from "../WumboDrawer";
@@ -22,10 +22,17 @@ export const ViewNft: React.FC = () => {
   const modalRef = useOutsideOfDrawerRef();
 
   const { loading: loading1, metadata } = useTokenMetadata(token);
-  const { loading: loading2, result: res2, error: err2 } = useTokenLargestAccounts(token);
-  const { loading: loading3, info } = useAccount(res2?.value[0]?.address, TokenAccountParser);
+  const {
+    loading: loading2,
+    result: res2,
+    error: err2,
+  } = useTokenLargestAccounts(token);
+  const { loading: loading3, info } = useAccount(
+    res2?.value[0]?.address,
+    TokenAccountParser
+  );
   const loading = loading1 || loading2 || loading3;
-  handleErrors(err2)
+  handleErrors(err2);
 
   if (loading) {
     return <WumboDrawer.Loading />;

@@ -10,14 +10,16 @@ import { PublicKey } from "@solana/web3.js";
 export default React.memo(() => {
   const solLink = useFtxPayLink();
   const { publicKey } = useWallet();
-  
+
   return (
     <AppContainer>
       <WalletRedirect />
       <Box p={4}>
         <Wallet
           wumLeaderboardLink={publicKey ? wumNetWorthPath(publicKey) : ""}
-          getTokenLink={(t) => t.tokenRef?.publicKey ? profilePath(t.tokenRef?.publicKey) : ""}
+          getTokenLink={(t) =>
+            t.tokenRef?.publicKey ? profilePath(t.tokenRef?.publicKey) : ""
+          }
           wumLink={""}
           solLink={solLink}
           sendLink={routes.sendSearch.path}

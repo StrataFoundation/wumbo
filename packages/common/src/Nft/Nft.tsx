@@ -12,7 +12,7 @@ const MeshArtContent = ({
   animationUrl,
   style,
   files,
-  image
+  image,
 }: {
   uri?: string;
   animationUrl?: string;
@@ -34,7 +34,7 @@ const VideoArtContent = ({
   image,
   animationURL,
   active,
-  uri
+  uri,
 }: {
   style?: React.CSSProperties;
   files?: (MetadataFile | string)[];
@@ -53,7 +53,7 @@ const VideoArtContent = ({
   if (isExtension && window.location.href.includes("twitter")) {
     return (
       <a target="_blank" href={`${SITE_URL}/#${location.pathname}`}>
-        { image }
+        {image}
       </a>
     );
   }
@@ -140,7 +140,14 @@ export const Nft: React.FC<{
   videoEnabled?: boolean;
   style?: React.CSSProperties;
   imageProps?: ImageProps;
-}> = ({ image, data, style, videoEnabled = true, meshEnabled = true, imageProps = {} }) => {
+}> = ({
+  image,
+  data,
+  style,
+  videoEnabled = true,
+  meshEnabled = true,
+  imageProps = {},
+}) => {
   const animationURL = data?.animation_url || "";
   const animationUrlExt = new URLSearchParams(
     getLast(animationURL.split("?"))
@@ -148,7 +155,9 @@ export const Nft: React.FC<{
 
   const category = data?.properties.category;
   const imageUri = image || getImageFromMeta(data);
-  const imageComponent = <Image src={imageUri} alt={data?.name} {...imageProps} />;
+  const imageComponent = (
+    <Image src={imageUri} alt={data?.name} {...imageProps} />
+  );
 
   if (
     meshEnabled &&

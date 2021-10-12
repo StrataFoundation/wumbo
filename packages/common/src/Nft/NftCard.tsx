@@ -30,7 +30,9 @@ export const NftCard = React.memo(
         justifyContent="center"
       >
         <Box w={20} height={20}>
-          {token.data && <Nft image={token.image} meshEnabled={false} data={token.data} />}
+          {token.data && (
+            <Nft image={token.image} meshEnabled={false} data={token.data} />
+          )}
         </Box>
       </Flex>
       <Flex w="full" flexDirection="column" padding={2} alignItems="start">

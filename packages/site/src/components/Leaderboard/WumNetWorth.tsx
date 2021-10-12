@@ -7,17 +7,15 @@ import AppContainer from "../common/AppContainer";
 
 export const WumNetWorth = () => {
   const params = useParams<{ wallet: string | undefined }>();
-  const passedWallet = params.wallet
-  ? new PublicKey(params.wallet)
-  : undefined;
+  const passedWallet = params.wallet ? new PublicKey(params.wallet) : undefined;
   const history = useHistory();
 
-  return <AppContainer>
-      <WumNetWorthLeaderboard 
-        wallet={passedWallet} 
-        onAccountClick={(tokenRefKey) =>
-          history.push(profilePath(tokenRefKey))
-        }
+  return (
+    <AppContainer>
+      <WumNetWorthLeaderboard
+        wallet={passedWallet}
+        onAccountClick={(tokenRefKey) => history.push(profilePath(tokenRefKey))}
       />
-  </AppContainer>
-}
+    </AppContainer>
+  );
+};

@@ -1,7 +1,7 @@
-import { EventEmitter as Emitter } from 'eventemitter3';
+import { EventEmitter as Emitter } from "eventemitter3";
 
 export class CacheUpdateEvent {
-  static type = 'CacheUpdate';
+  static type = "CacheUpdate";
   id: string;
   parser: any;
   isNew: boolean;
@@ -13,7 +13,7 @@ export class CacheUpdateEvent {
 }
 
 export class CacheDeleteEvent {
-  static type = 'CacheDelete';
+  static type = "CacheDelete";
   id: string;
   constructor(id: string) {
     this.id = id;
@@ -29,14 +29,10 @@ export class EventEmitter {
     return () => this.emitter.removeListener(CacheUpdateEvent.type, callback);
   }
 
-  raiseCacheUpdated(
-    id: string,
-    isNew: boolean,
-    parser: any
-  ) {
+  raiseCacheUpdated(id: string, isNew: boolean, parser: any) {
     this.emitter.emit(
       CacheUpdateEvent.type,
-      new CacheUpdateEvent(id, isNew, parser),
+      new CacheUpdateEvent(id, isNew, parser)
     );
   }
 

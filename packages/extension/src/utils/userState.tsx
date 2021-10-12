@@ -56,8 +56,23 @@ export const useUserInfo = (name: string): UserInfoState => {
 
   const current = bondingCurve?.current() || 0;
   const loading = useMemo(() => {
-    return (loading1 || loading2 || loading3 || loading4) || !!(creator && (!tokenBonding || !curve || !bondingCurve));
-  }, [loading1, loading2, loading3, loading4, creator, curve, bondingCurve, tokenBonding])
+    return (
+      loading1 ||
+      loading2 ||
+      loading3 ||
+      loading4 ||
+      !!(creator && (!tokenBonding || !curve || !bondingCurve))
+    );
+  }, [
+    loading1,
+    loading2,
+    loading3,
+    loading4,
+    creator,
+    curve,
+    bondingCurve,
+    tokenBonding,
+  ]);
 
   useEffect(() => {
     if (loading) {
@@ -76,15 +91,7 @@ export const useUserInfo = (name: string): UserInfoState => {
         coinPriceUsd: current * (wumboUsdPrice || 0),
       });
     }
-  }, [
-    setResult,
-    current,
-    curve,
-    tokenBonding,
-    mint,
-    creator,
-    loading
-  ]);
+  }, [setResult, current, curve, tokenBonding, mint, creator, loading]);
 
   return { loading, userInfo: result };
 };

@@ -3,8 +3,9 @@ import { useLocalStorageState } from "@oyster/common";
 import { SITE_URL } from "../constants";
 
 export const auth0Options = {
-  domain: process.env.REACT_APP_AUTH0_DOMAIN || 'wumbo.us.auth0.com',
-  clientID: process.env.REACT_APP_AUTH0_CLIENT_ID || 'GPsjYroOyNKWCScIk2woGZi4kBTGDDTW',
+  domain: process.env.REACT_APP_AUTH0_DOMAIN || "wumbo.us.auth0.com",
+  clientID:
+    process.env.REACT_APP_AUTH0_CLIENT_ID || "GPsjYroOyNKWCScIk2woGZi4kBTGDDTW",
 };
 export const auth0 = new WebAuth(auth0Options);
 
@@ -18,12 +19,18 @@ function makeId(length: number): string {
   }
   return result;
 }
-export function useClaimLink({ handle, newTab = false}: { handle: string, newTab?: boolean }): { redirectUri: string,  claim: () => Window | null } {
+export function useClaimLink({
+  handle,
+  newTab = false,
+}: {
+  handle: string;
+  newTab?: boolean;
+}): { redirectUri: string; claim: () => Window | null } {
   const setAuth0State = useLocalStorageState("auth0-state")[1];
   const redirectUri = `${SITE_URL}/claim?name=${handle}`;
   const claim = () => {
     const state = makeId(6);
-  
+
     const auth0Url = auth0.client.buildAuthorizeUrl({
       ...auth0Options,
       scope: "openid profile",
@@ -33,11 +40,11 @@ export function useClaimLink({ handle, newTab = false}: { handle: string, newTab
     });
     setAuth0State(state);
 
-    return window.open(auth0Url, newTab ? '_blank' : undefined)
-  }
+    return window.open(auth0Url, newTab ? "_blank" : undefined);
+  };
 
   return {
     redirectUri,
-    claim
-  }
+    claim,
+  };
 }

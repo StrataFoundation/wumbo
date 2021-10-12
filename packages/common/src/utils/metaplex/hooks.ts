@@ -14,10 +14,7 @@ import { getFilesWithMetadata } from "./utils";
 import { useWallet } from "../../contexts/walletContext";
 import { TokenRef } from "../deserializers/spl-wumbo";
 import { useState } from "react";
-import {
-  prepPayForFilesInstructions,
-  uploadToArweave,
-} from "./arweave";
+import { prepPayForFilesInstructions, uploadToArweave } from "./arweave";
 import { useTokenMetadata } from "./nftMetadataHooks";
 import { TokenBonding } from "../../utils/deserializers/spl-token-bonding";
 import { usePrograms } from "../../utils/programs";
@@ -104,7 +101,10 @@ export function useSetMetadata(
         )
       )[0];
       let files: File[];
-      let metadataChanged = args.image != undefined || args.name != inflated?.data.name || args.symbol != inflated.data.symbol;
+      let metadataChanged =
+        args.image != undefined ||
+        args.name != inflated?.data.name ||
+        args.symbol != inflated.data.symbol;
 
       try {
         let arweaveLink;
@@ -203,11 +203,9 @@ export function useSetMetadata(
           symbol: args.symbol,
           name: args.name,
           uri: arweaveLink, // size of url for arweave
-          targetRoyaltyPercentage: percent(args.targetRoyaltyPercentage)
+          targetRoyaltyPercentage: percent(args.targetRoyaltyPercentage),
         };
-        await splWumboProgram!.updateMetadata(
-          changeArgs
-        );
+        await splWumboProgram!.updateMetadata(changeArgs);
 
         return {
           metadataAccount: metadataAccountKey!,

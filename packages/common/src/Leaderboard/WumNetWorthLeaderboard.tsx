@@ -2,8 +2,18 @@ import React, { useMemo } from "react";
 import { PublicKey } from "@solana/web3.js";
 import { gql, useApolloClient, useQuery } from "@apollo/client";
 import { WumboUserLeaderboard } from "./WumboUserLeaderboard";
-import { useBondingPricing, useFiatPrice, useUserOwnedAmount } from "../utils/pricing";
-import { TokenBonding, useAccount, useClaimedTokenRef, useReverseTwitter, useTokenRefFromBonding } from "../utils";
+import {
+  useBondingPricing,
+  useFiatPrice,
+  useUserOwnedAmount,
+} from "../utils/pricing";
+import {
+  TokenBonding,
+  useAccount,
+  useClaimedTokenRef,
+  useReverseTwitter,
+  useTokenRefFromBonding,
+} from "../utils";
 import { UserLeaderboardElement } from "./UserLeaderboardElement";
 import { WUM_TOKEN } from "../constants";
 import { useWumNetWorth } from "../hooks";
@@ -21,48 +31,84 @@ const GET_TOKEN_RANK = gql`
   }
 `;
 
-const Element = React.memo(({ wallet, onClick }: { wallet: PublicKey, onClick?: (tokenRefKey: PublicKey) => void }) => {
-  const { info: tokenRef } = useClaimedTokenRef(wallet)
+const Element = React.memo(
+  ({
+    wallet,
+    onClick,
+  }: {
+    wallet: PublicKey;
+    onClick?: (tokenRefKey: PublicKey) => void;
+  }) => {
+    const { info: tokenRef } = useClaimedTokenRef(wallet);
 
-  const { wumNetWorth } = useWumNetWorth(wallet);
-  const amount = wumNetWorth?.toFixed(2)
+    const { wumNetWorth } = useWumNetWorth(wallet);
+    const amount = wumNetWorth?.toFixed(2);
 
-  return <UserLeaderboardElement
-    amount={amount}
-    onClick={() => tokenRef && onClick && onClick(tokenRef.publicKey)}
-    tokenRef={tokenRef}
-  />
-})
+    return (
+      <UserLeaderboardElement
+        amount={amount}
+        onClick={() => tokenRef && onClick && onClick(tokenRef.publicKey)}
+        tokenRef={tokenRef}
+      />
+    );
+  }
+);
 
-export const WumNetWorthLeaderboard = React.memo(({ wallet, onAccountClick }: { wallet: PublicKey | undefined, onAccountClick?: (tokenRefKey: PublicKey) => void }) => {
-  const client = useApolloClient()
+export const WumNetWorthLeaderboard = React.memo(
+  ({
+    wallet,
+    onAccountClick,
+  }: {
+    wallet: PublicKey | undefined;
+    onAccountClick?: (tokenRefKey: PublicKey) => void;
+  }) => {
+    const client = useApolloClient();
 
-  const getRank = useMemo(() => () => {
-    return client.query<{
-      wumRank: number | undefined;
-    }>({
-      query: GET_TOKEN_RANK,
-      variables: {
-        wallet: wallet?.toBase58()
-      }
-    }).then(result => result.data.wumRank).catch(() => undefined)
-  }, [wallet])
+    const getRank = useMemo(
+      () => () => {
+        return client
+          .query<{
+            wumRank: number | undefined;
+          }>({
+            query: GET_TOKEN_RANK,
+            variables: {
+              wallet: wallet?.toBase58(),
+            },
+          })
+          .then((result) => result.data.wumRank)
+          .catch(() => undefined);
+      },
+      [wallet]
+    );
 
-  const getTopHolders = (startIndex: number, stopIndex: number) => client.query<{
-    topWumHolders: { publicKey: string }[];
-  }>({
-    query: GET_TOP_WUM,
-    variables: {
-      startRank: startIndex,
-      stopRank: stopIndex
-    }
-  }).then(result => result.data.topWumHolders.map(({ publicKey }) => new PublicKey(publicKey))).catch(() => [])
+    const getTopHolders = (startIndex: number, stopIndex: number) =>
+      client
+        .query<{
+          topWumHolders: { publicKey: string }[];
+        }>({
+          query: GET_TOP_WUM,
+          variables: {
+            startRank: startIndex,
+            stopRank: stopIndex,
+          },
+        })
+        .then((result) =>
+          result.data.topWumHolders.map(
+            ({ publicKey }) => new PublicKey(publicKey)
+          )
+        )
+        .catch(() => []);
 
-  return <WumboUserLeaderboard
-    initialFetchSize={9}
-    getRank={getRank}
-    getTopWallets={getTopHolders}
-    selected={key => wallet ? wallet.equals(key) : false}
-    Element={({ publicKey }) => <Element onClick={onAccountClick} wallet={publicKey} />}
-  />
-})
+    return (
+      <WumboUserLeaderboard
+        initialFetchSize={9}
+        getRank={getRank}
+        getTopWallets={getTopHolders}
+        selected={(key) => (wallet ? wallet.equals(key) : false)}
+        Element={({ publicKey }) => (
+          <Element onClick={onAccountClick} wallet={publicKey} />
+        )}
+      />
+    );
+  }
+);

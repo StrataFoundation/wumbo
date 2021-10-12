@@ -31,7 +31,13 @@ interface MetadataTokenPillProps {
   curve?: Curve;
 }
 export const MetadataTokenPill = React.memo(
-  ({ name, ticker, tokenBonding, detailsPath, curve }: MetadataTokenPillProps) => {
+  ({
+    name,
+    ticker,
+    tokenBonding,
+    detailsPath,
+    curve,
+  }: MetadataTokenPillProps) => {
     const { metadata, loading, error } = useTokenMetadata(
       tokenBonding?.targetMint
     );
@@ -58,7 +64,14 @@ export const MetadataTokenPill = React.memo(
 );
 
 export const TokenPill = React.memo(
-  ({ name, ticker, icon, tokenBonding, detailsPath, curve: curvePassed }: TokenPillProps) => {
+  ({
+    name,
+    ticker,
+    icon,
+    tokenBonding,
+    detailsPath,
+    curve: curvePassed,
+  }: TokenPillProps) => {
     const { curve: curveResolved } = useBondingPricing(tokenBonding.publicKey);
     const fiatPrice = useFiatPrice(tokenBonding.baseMint);
     const toFiat = (a: number) => (fiatPrice || 0) * a;
@@ -87,7 +100,11 @@ export const TokenPill = React.memo(
         >
           <Flex justify="space-between" fontSize="lg" fontWeight="medium">
             <span>{name}</span>
-            <span>{curve ? ("$" + toFiat(curve!.current() || 0).toFixed(2)) : "Loading"  }</span>
+            <span>
+              {curve
+                ? "$" + toFiat(curve!.current() || 0).toFixed(2)
+                : "Loading"}
+            </span>
           </Flex>
           <Flex justify="space-between" fontSize="xs">
             <span>{ticker}</span>

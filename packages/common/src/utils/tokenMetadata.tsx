@@ -139,10 +139,8 @@ export const setTokenMetadata = async (
     new File([JSON.stringify(metadataContent)], "metadata.json"),
   ];
 
-  const {
-    instructions: pushInstructions,
-    signers: pushSigners,
-  } = await prepPayForFilesTxn(wallet, realFiles, metadata);
+  const { instructions: pushInstructions, signers: pushSigners } =
+    await prepPayForFilesTxn(wallet, realFiles, metadata);
 
   // This owner is a temporary signer and owner of metadata we use to circumvent requesting signing
   // twice post Arweave. We store in an account (payer) and use it post-Arweave to update MD with new link

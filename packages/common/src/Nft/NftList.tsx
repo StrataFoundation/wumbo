@@ -44,7 +44,11 @@ export const NftListRaw = React.memo(
     return (
       <SimpleGrid w="full" minChildWidth="93px" spacing={4}>
         {tokens
-          .filter((t) => t.masterEdition || (t.account?.amount.toNumber() == 1 && t.mint?.decimals === 0))
+          .filter(
+            (t) =>
+              t.masterEdition ||
+              (t.account?.amount.toNumber() == 1 && t.mint?.decimals === 0)
+          )
           .map((token) => (
             <Box key={token.publicKey?.toBase58()} height="156px" w="full">
               <NftCard getLink={getLink} token={token} />

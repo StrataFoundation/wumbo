@@ -3,10 +3,7 @@ import { useAsync, useAsyncCallback } from "react-async-hook";
 import { TokenRef, WumboInstance } from "./deserializers/spl-wumbo";
 import { useConnection } from "../contexts/connection";
 import { useWallet } from "../contexts/walletContext";
-import {
-  createTestTld,
-  getTld,
-} from "./twitter";
+import { createTestTld, getTld } from "./twitter";
 import { useAccount, useAccountFetchCache } from "./account";
 import {
   DEV_TWITTER_TLD,
@@ -15,10 +12,19 @@ import {
   TWITTER_REGISTRAR_SERVER_URL,
   WUMBO_INSTANCE_KEY,
 } from "../constants/globals";
-import { Connection, PublicKey, sendAndConfirmRawTransaction, sendAndConfirmTransaction, Transaction } from "@solana/web3.js";
+import {
+  Connection,
+  PublicKey,
+  sendAndConfirmRawTransaction,
+  sendAndConfirmTransaction,
+  Transaction,
+} from "@solana/web3.js";
 import { getTwitterRegistryKey, getTwitterRegistry } from "../utils";
 import { usePrograms } from "./programs";
-import { getTwitterClaimedTokenRefKey, getTwitterUnclaimedTokenRefKey } from "./tokenRef";
+import {
+  getTwitterClaimedTokenRefKey,
+  getTwitterUnclaimedTokenRefKey,
+} from "./tokenRef";
 import { WalletAdapter } from "@solana/wallet-adapter-base";
 import axios from "axios";
 import { createVerifiedTwitterRegistry } from "./testableNameServiceTwitter";
@@ -35,7 +41,7 @@ export async function claimTwitterHandle({
   code,
   twitterHandle,
   adapter,
-  connection
+  connection,
 }: {
   redirectUri: string;
   code: string;
@@ -57,39 +63,43 @@ export async function claimTwitterHandle({
         await getTld()
       );
       const tx = new Transaction({
-        recentBlockhash: (await connection.getRecentBlockhash('confirmed')).blockhash,
-        feePayer: adapter.publicKey
-      })
+        recentBlockhash: (await connection.getRecentBlockhash("confirmed"))
+          .blockhash,
+        feePayer: adapter.publicKey,
+      });
       tx.add(...instructions);
       tx.partialSign(DEV_TWITTER_VERIFIER);
-      const signed = await adapter.signTransaction(tx)
+      const signed = await adapter.signTransaction(tx);
       await sendAndConfirmRawTransaction(connection, signed.serialize(), {
-        commitment: 'confirmed',
-        preflightCommitment: 'confirmed'
+        commitment: "confirmed",
+        preflightCommitment: "confirmed",
       });
     } else {
       try {
-        const resp = await axios.post(TWITTER_REGISTRAR_SERVER_URL, {
-          redirectUri,
-          code,
-          twitterHandle,
-          pubkey: adapter.publicKey?.toBase58()
-        }, {
-          responseType: "json",
-        });
+        const resp = await axios.post(
+          TWITTER_REGISTRAR_SERVER_URL,
+          {
+            redirectUri,
+            code,
+            twitterHandle,
+            pubkey: adapter.publicKey?.toBase58(),
+          },
+          {
+            responseType: "json",
+          }
+        );
         const tx = Transaction.from(resp.data.data);
-        const signed = await adapter.signTransaction(tx)
+        const signed = await adapter.signTransaction(tx);
         await sendAndConfirmRawTransaction(connection, signed.serialize(), {
-          commitment: 'confirmed',
-          preflightCommitment: 'confirmed'
+          commitment: "confirmed",
+          preflightCommitment: "confirmed",
         });
       } catch (e) {
         if (e.response?.data?.message) {
-          throw new Error(e.response.data.message)
+          throw new Error(e.response.data.message);
         }
         throw e;
       }
-
     }
   }
 }
@@ -108,8 +118,8 @@ export function useClaimTwitterHandle({
       code,
       twitterHandle,
       adapter,
-      connection
-    })
+      connection,
+    });
   }
   const { loading: claiming, execute, error } = useAsyncCallback(exec);
 
@@ -125,7 +135,9 @@ interface CreateState {
   awaitingApproval: boolean;
   creating: boolean;
   error: Error | undefined;
-  create: (twitterHandle: string) => Promise<{ tokenRef: PublicKey, owner: PublicKey }>;
+  create: (
+    twitterHandle: string
+  ) => Promise<{ tokenRef: PublicKey; owner: PublicKey }>;
 }
 
 export function useCreateOrClaimCoin(): CreateState {
@@ -133,20 +145,35 @@ export function useCreateOrClaimCoin(): CreateState {
   const connection = useConnection();
   const { adapter, publicKey } = useWallet();
   const [creating, setCreating] = useState<boolean>(false);
-  const { info: wumboInstance } = useAccount(WUMBO_INSTANCE_KEY, WumboInstance, true);
+  const { info: wumboInstance } = useAccount(
+    WUMBO_INSTANCE_KEY,
+    WumboInstance,
+    true
+  );
   const { splWumboProgram } = usePrograms();
 
   async function exec(twitterHandle: string) {
     let result;
     try {
       setCreating(true);
-      const claimedKey = await getTwitterClaimedTokenRefKey(connection, twitterHandle);
-      const unclaimedKey = await getTwitterUnclaimedTokenRefKey(twitterHandle)
+      const claimedKey = await getTwitterClaimedTokenRefKey(
+        connection,
+        twitterHandle
+      );
+      const unclaimedKey = await getTwitterUnclaimedTokenRefKey(twitterHandle);
 
-      const twitterName = await getTwitterRegistryKey(twitterHandle, await getTld());
-      const owner = (await getTwitterRegistry(connection, twitterHandle, await getTld())).owner;
-      const claimedAccount = (await cache.search(claimedKey, undefined, true))?.account;
-      const unclaimedAccount = (await cache.search(unclaimedKey, undefined, true))?.account;
+      const twitterName = await getTwitterRegistryKey(
+        twitterHandle,
+        await getTld()
+      );
+      const owner = (
+        await getTwitterRegistry(connection, twitterHandle, await getTld())
+      ).owner;
+      const claimedAccount = (await cache.search(claimedKey, undefined, true))
+        ?.account;
+      const unclaimedAccount = (
+        await cache.search(unclaimedKey, undefined, true)
+      )?.account;
       if (!claimedAccount && !unclaimedAccount) {
         const isOwner = publicKey && owner.equals(publicKey);
         console.log("Creator does not exist, creating");
@@ -157,31 +184,31 @@ export function useCreateOrClaimCoin(): CreateState {
           // Only claim it as my own if this is my handle
           owner: isOwner ? owner : undefined,
           name: isOwner ? undefined : twitterName,
-          nameParent: await getTld()
-        }
+          nameParent: await getTld(),
+        };
         const { tokenRef } = await splWumboProgram!.createSocialToken(args);
         result = {
           tokenRef,
-          owner
-        }
+          owner,
+        };
       } else if (claimedAccount) {
         result = {
           tokenRef: claimedKey,
-          owner
-        }
+          owner,
+        };
       } else {
         const creator = TokenRef(unclaimedKey, unclaimedAccount!);
         result = {
           tokenRef: creator!.publicKey,
-          owner
+          owner,
         };
 
         if (!creator.isClaimed) {
           await splWumboProgram!.claimSocialToken({
             owner,
             tokenRef: unclaimedKey,
-            symbol: twitterHandle.slice(0, 10)
-          })
+            symbol: twitterHandle.slice(0, 10),
+          });
         }
       }
     } finally {

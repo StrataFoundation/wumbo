@@ -13,7 +13,7 @@ import {
   Tab,
   TabPanels,
   TabPanel,
-  Link as PlainLink
+  Link as PlainLink,
 } from "@chakra-ui/react";
 import { HiOutlinePencilAlt } from "react-icons/hi";
 import { useClaimedTokenRef, useClaimedTokenRefKey } from "../utils/tokenRef";
@@ -80,7 +80,7 @@ export const Profile = React.memo(
     getNftLink,
     editPath,
     topTokensPath,
-    wumNetWorthPath
+    wumNetWorthPath,
   }: IProfileProps) => {
     const { info: tokenRef, loading } = useAccount(tokenRefKey, TokenRef, true);
     const ownerWalletKey = tokenRef?.owner as PublicKey | undefined;
@@ -128,7 +128,11 @@ export const Profile = React.memo(
     if (!handle) {
       handle = query.get("name") || metadata?.data.name;
     }
-    const { claim, loading: claiming, error: claimError } = useClaimFlow(handle);
+    const {
+      claim,
+      loading: claiming,
+      error: claimError,
+    } = useClaimFlow(handle);
     handleErrors(
       claimError,
       error,
@@ -145,12 +149,18 @@ export const Profile = React.memo(
       return Boolean(
         t.data?.properties?.creators?.some(
           // @ts-ignore
-          (c) => c.address == TROPHY_CREATOR.toBase58() && (t.data?.attributes || []).some(attr => attr.trait_type == "is_trophy" && attr.value == "true")
+          (c) =>
+            c.address == TROPHY_CREATOR.toBase58() &&
+            (t.data?.attributes || []).some(
+              (attr) => attr.trait_type == "is_trophy" && attr.value == "true"
+            )
         )
       );
     }
 
-    const handleLink = <PlainLink href={`https://twitter.com/${handle}`}>@{handle}</PlainLink> 
+    const handleLink = (
+      <PlainLink href={`https://twitter.com/${handle}`}>@{handle}</PlainLink>
+    );
     return (
       <VStack spacing={4} padding={4}>
         <HStack spacing={2} w="full" alignItems="start">
@@ -162,28 +172,29 @@ export const Profile = React.memo(
             />
             <HStack spacing={2} alignItems="center">
               <Text fontSize="18px" lineHeight="none">
-                {metadata?.data.name || handleLink }
+                {metadata?.data.name || handleLink}
               </Text>
-              {myTokenRefKey && walletTokenRef?.publicKey.equals(myTokenRefKey) && (
-                <Link to={editPath}>
-                  <Icon
-                    as={HiOutlinePencilAlt}
-                    w={5}
-                    h={5}
-                    color="indigo.500"
-                    _hover={{ color: "indigo.700", cursor: "pointer" }}
-                  />
-                </Link>
-              )}
+              {myTokenRefKey &&
+                walletTokenRef?.publicKey.equals(myTokenRefKey) && (
+                  <Link to={editPath}>
+                    <Icon
+                      as={HiOutlinePencilAlt}
+                      w={5}
+                      h={5}
+                      color="indigo.500"
+                      _hover={{ color: "indigo.700", cursor: "pointer" }}
+                    />
+                  </Link>
+                )}
             </HStack>
-            {metadata && <Text fontSize="14px">
-              {metadata.data.symbol} |&nbsp;{handleLink}
-            </Text>}
-            {!metadata &&
+            {metadata && (
               <Text fontSize="14px">
-                UNCLAIMED |&nbsp;{handleLink}
+                {metadata.data.symbol} |&nbsp;{handleLink}
               </Text>
-            }
+            )}
+            {!metadata && (
+              <Text fontSize="14px">UNCLAIMED |&nbsp;{handleLink}</Text>
+            )}
           </VStack>
           <Spacer />
           <VStack spacing={2}>
@@ -192,21 +203,25 @@ export const Profile = React.memo(
                 icon="coin"
                 label="Token Rank"
                 value={
-                  typeof tokenRank != undefined && tokenRank != null ? (tokenRank! + 1).toString() : ""
+                  typeof tokenRank != undefined && tokenRank != null
+                    ? (tokenRank! + 1).toString()
+                    : ""
                 }
               />
             </Link>
-            {tokenRef?.isClaimed &&
+            {tokenRef?.isClaimed && (
               <Link to={wumNetWorthPath}>
                 <StatCardWithIcon
                   icon="wumbo"
                   label="Net Worth"
                   value={
-                    typeof wumRank != undefined && wumRank != null ? (wumRank! + 1).toString() : ""
+                    typeof wumRank != undefined && wumRank != null
+                      ? (wumRank! + 1).toString()
+                      : ""
                   }
                 />
               </Link>
-            }
+            )}
           </VStack>
         </HStack>
         <HStack spacing={2} w="full">
@@ -226,7 +241,9 @@ export const Profile = React.memo(
                 variant="outline"
                 onClick={claim}
                 isLoading={claiming}
-                loadingText={awaitingApproval ? "Awaiting Approval" : "Claiming"}
+                loadingText={
+                  awaitingApproval ? "Awaiting Approval" : "Claiming"
+                }
               >
                 Claim
               </Button>

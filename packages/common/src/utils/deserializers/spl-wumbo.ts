@@ -5,23 +5,27 @@ import { TypedAccountParser } from "../account";
 
 const wumboCoder = new Coder(SplWumboIDLJson);
 export interface ITokenRef extends TokenRefV0 {
-  publicKey: PublicKey
+  publicKey: PublicKey;
 }
 export const TokenRef: TypedAccountParser<ITokenRef> = (pubkey, account) => {
-  const coded = wumboCoder.accounts.decode<TokenRefV0>("TokenRefV0", account.data);
-  
+  const coded = wumboCoder.accounts.decode<TokenRefV0>(
+    "TokenRefV0",
+    account.data
+  );
+
   return {
     ...coded,
     publicKey: pubkey,
-    isClaimed: coded.isClaimed || !!coded.owner // TODO: Remove this or after beta, there was a bug in the smart contract
+    isClaimed: coded.isClaimed || !!coded.owner, // TODO: Remove this or after beta, there was a bug in the smart contract
   };
-}
+};
 
-export const WumboInstance: TypedAccountParser<WumboV0 & { publicKey: PublicKey }> = (pubkey, account) => {
+export const WumboInstance: TypedAccountParser<
+  WumboV0 & { publicKey: PublicKey }
+> = (pubkey, account) => {
   const coded = wumboCoder.accounts.decode<WumboV0>("WumboV0", account.data);
   return {
     ...coded,
-    publicKey: pubkey
+    publicKey: pubkey,
   };
-}
-
+};

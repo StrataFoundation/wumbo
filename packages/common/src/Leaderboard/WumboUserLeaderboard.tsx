@@ -2,10 +2,7 @@ import React, { Fragment, useEffect, useState } from "react";
 import { PublicKey } from "@solana/web3.js";
 import { Center, Box, Flex, Icon } from "@chakra-ui/react";
 import { HiChevronUp, HiChevronDown } from "react-icons/hi";
-import {
-  Leaderboard,
-  LeaderboardNumber
-} from "../Leaderboard";
+import { Leaderboard, LeaderboardNumber } from "../Leaderboard";
 import { Spinner } from "../Spinner";
 import { useAsync } from "react-async-hook";
 import { handleErrors } from "../contexts";
@@ -59,7 +56,7 @@ function zeroMin(input: number): number {
   return input < 0 ? 0 : input;
 }
 
-const PAGE_INCR = 10
+const PAGE_INCR = 10;
 
 function useLocalAccountsPagination(
   getRank: GetRank,
@@ -68,7 +65,11 @@ function useLocalAccountsPagination(
   const [startIndex, setStartIndex] = useState<number>(0);
   const [stopIndex, setStopIndex] = useState<number>(0);
   const { loading, result: accountRank, error } = useAsync(getRank, []);
-  const { loading: loading2, result: holders, error: error2 } = useAsync(getTopWallets, [startIndex, stopIndex]);
+  const {
+    loading: loading2,
+    result: holders,
+    error: error2,
+  } = useAsync(getTopWallets, [startIndex, stopIndex]);
 
   handleErrors(error, error2);
 
@@ -86,7 +87,8 @@ function useLocalAccountsPagination(
     })),
     userRank: accountRank,
     loading: loading || loading2,
-    pageUp: () => setStartIndex((startIndex) => zeroMin(startIndex - PAGE_INCR)),
+    pageUp: () =>
+      setStartIndex((startIndex) => zeroMin(startIndex - PAGE_INCR)),
     pageDown: () => setStopIndex((stopIndex) => stopIndex + PAGE_INCR),
   };
 }
@@ -96,23 +98,29 @@ function useAccountsPagination(
 ): IAccountsPagination {
   const [startIndex, setStartIndex] = useState<number>(0);
   const [stopIndex, setStopIndex] = useState<number>(initialFetchSize);
-  const { result, loading, error } = useAsync(getTopWallets, [startIndex, stopIndex]);
+  const { result, loading, error } = useAsync(getTopWallets, [
+    startIndex,
+    stopIndex,
+  ]);
   handleErrors(error);
-
 
   return {
     accounts: result?.map((publicKey, index) => ({
       rank: startIndex + index + 1,
-      key: publicKey
+      key: publicKey,
     })),
     loading: loading,
-    pageUp: () => setStartIndex((startIndex) => zeroMin(startIndex - PAGE_INCR)),
+    pageUp: () =>
+      setStartIndex((startIndex) => zeroMin(startIndex - PAGE_INCR)),
     pageDown: () => setStopIndex((stopIndex) => stopIndex + PAGE_INCR),
   };
 }
 
-export type GetTopWallets = (startIndex: number, stopIndex: number) => Promise<PublicKey[]>
-export type GetRank = () => Promise<number | undefined>
+export type GetTopWallets = (
+  startIndex: number,
+  stopIndex: number
+) => Promise<PublicKey[]>;
+export type GetRank = () => Promise<number | undefined>;
 
 export const WumboUserLeaderboard = React.memo(
   ({
@@ -120,13 +128,13 @@ export const WumboUserLeaderboard = React.memo(
     getTopWallets,
     Element,
     selected,
-    initialFetchSize = 3
+    initialFetchSize = 3,
   }: {
     getRank: GetRank;
     getTopWallets: GetTopWallets;
     Element: (props: { publicKey: PublicKey }) => React.ReactElement;
     selected: (key: PublicKey) => boolean;
-    initialFetchSize?: number
+    initialFetchSize?: number;
   }) => {
     const top = useAccountsPagination(getTopWallets, initialFetchSize);
     const local = useLocalAccountsPagination(getRank, getTopWallets);
@@ -170,10 +178,7 @@ export const WumboUserLeaderboard = React.memo(
           <PageChevron direction="up" onClick={local.pageUp} />
           <Leaderboard
             numbers={local.accounts.map(({ rank, key }) => (
-              <LeaderboardNumber
-                selected={selected(key)}
-                key={"num" + rank}
-              >
+              <LeaderboardNumber selected={selected(key)} key={"num" + rank}>
                 {rank}
               </LeaderboardNumber>
             ))}
@@ -191,10 +196,7 @@ export const WumboUserLeaderboard = React.memo(
         <WhiteCard>
           <Leaderboard
             numbers={top.accounts.map(({ rank, key }) => (
-              <LeaderboardNumber
-                selected={selected(key)}
-                key={"num" + rank}
-              >
+              <LeaderboardNumber selected={selected(key)} key={"num" + rank}>
                 {rank}
               </LeaderboardNumber>
             ))}

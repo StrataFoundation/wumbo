@@ -31,11 +31,13 @@ export function useAssociatedTokenAddress(
       return;
     }
 
-    fetch(wallet, mint).then((result) => {
-      if (!state.result || result.toString() != state.result.toString()) {
-        setState({ result, loading: false });
-      }
-    }).catch(() => {});
+    fetch(wallet, mint)
+      .then((result) => {
+        if (!state.result || result.toString() != state.result.toString()) {
+          setState({ result, loading: false });
+        }
+      })
+      .catch(() => {});
   }, [wallet, mint]);
 
   return state;
@@ -54,7 +56,7 @@ export function useAssociatedAccount(
     useAssociatedTokenAddress(walletOrAta, mint);
   const parser = (pubkey: PublicKey, acct: AccountInfo<Buffer>) => {
     return TokenAccountParser(pubkey, acct)?.info;
-  }
+  };
   const { info: associatedAccount, loading } = useAccount(
     associatedTokenAddress,
     parser
@@ -65,16 +67,17 @@ export function useAssociatedAccount(
   );
 
   const result = useMemo(() => {
-    if (account?.mint === mint) { // The passed value is the ata
+    if (account?.mint === mint) {
+      // The passed value is the ata
       return account;
     } else {
-      return associatedAccount
+      return associatedAccount;
     }
-  }, [associatedAccount, account])
+  }, [associatedAccount, account]);
 
   return {
     associatedAccount: result,
     loading: loading || loading2,
-    associatedAccountKey: associatedTokenAddress
+    associatedAccountKey: associatedTokenAddress,
   };
 }

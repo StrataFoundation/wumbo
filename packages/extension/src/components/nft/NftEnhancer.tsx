@@ -43,7 +43,9 @@ const NftBadge = ({
       onMouseLeave={() => setIsHovering(false)}
     >
       {!isHovering && <NftBadgeIcon width={dimensionPx} height={dimensionPx} />}
-      {isHovering && <NftBadgeHoverIcon width={dimensionPx} height={dimensionPx} />}
+      {isHovering && (
+        <NftBadgeHoverIcon width={dimensionPx} height={dimensionPx} />
+      )}
     </Box>
   );
 };
@@ -68,7 +70,11 @@ export const NftEnhancer: React.FC = () => {
             >
               <ReactShadow.div>
                 <ThemeProvider>
-                  <NftBadge key={nft.img.id} mintKey={nft.mintKey} dimension={dimension} />
+                  <NftBadge
+                    key={nft.img.id}
+                    mintKey={nft.mintKey}
+                    dimension={dimension}
+                  />
                 </ThemeProvider>
               </ReactShadow.div>
             </FloatPortal>

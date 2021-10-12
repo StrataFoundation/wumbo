@@ -1,4 +1,4 @@
-import { Buffer } from 'buffer';
+import { Buffer } from "buffer";
 
 // @ts-ignore
 window.Buffer = Buffer;

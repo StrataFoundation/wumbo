@@ -20,7 +20,7 @@ export function MeshViewer(props: MeshViewerProps) {
   if (isExtension) {
     return (
       <a target="_blank" href={`${SITE_URL}/#${location.pathname}`}>
-        { props.image }
+        {props.image}
       </a>
     );
   }

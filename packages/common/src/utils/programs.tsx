@@ -5,8 +5,11 @@ import { handleErrors, useProvider } from "../contexts";
 
 export function usePrograms(): AnchorPrograms {
   const provider = useProvider();
-  const { result: programs, error } = useAsync(() => getPrograms(provider), [provider]);
-  handleErrors(error)
+  const { result: programs, error } = useAsync(
+    () => getPrograms(provider),
+    [provider]
+  );
+  handleErrors(error);
 
   return programs || {};
 }

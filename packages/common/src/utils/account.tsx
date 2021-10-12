@@ -1,10 +1,22 @@
-import { AccountInfo, Commitment, Connection, PublicKey } from "@solana/web3.js";
+import {
+  AccountInfo,
+  Commitment,
+  Connection,
+  PublicKey,
+} from "@solana/web3.js";
 import { useConnection } from "../contexts/connection";
-import { TokenAccount, ParsedAccountBase, TokenAccountParser } from "@oyster/common";
+import {
+  TokenAccount,
+  ParsedAccountBase,
+  TokenAccountParser,
+} from "@oyster/common";
 import React, { useState, useEffect, useContext, useMemo } from "react";
 import { useAsync } from "react-async-hook";
 import { TOKEN_PROGRAM_ID } from "@solana/spl-token";
-import { AccountFetchCache, AccountParser } from "./accountFetchCache/accountFetchCache";
+import {
+  AccountFetchCache,
+  AccountParser,
+} from "./accountFetchCache/accountFetchCache";
 import { truthy } from "./truthy";
 import { DEFAULT_COMMITMENT } from "../constants/globals";
 
@@ -19,7 +31,8 @@ export type TypedAccountParser<T> = (
   data: AccountInfo<Buffer>
 ) => T;
 
-export const AccountCacheContext = React.createContext<AccountFetchCache | null>(null);
+export const AccountCacheContext =
+  React.createContext<AccountFetchCache | null>(null);
 
 export function useAccountFetchCache(): AccountFetchCache {
   return useContext(AccountCacheContext)!;
@@ -31,41 +44,41 @@ export const AccountCacheContextProvider: React.FC = ({ children }) => {
     return new AccountFetchCache({
       connection,
       delay: 500,
-      commitment: DEFAULT_COMMITMENT
-    })
-  }, [connection])
+      commitment: DEFAULT_COMMITMENT,
+    });
+  }, [connection]);
 
   useEffect(() => {
     const oldGetAccountInfo = connection.getAccountInfo.bind(connection);
     // Make sure everything in our app is using the cache
-    connection.getAccountInfo = function(
+    connection.getAccountInfo = function (
       publicKey: PublicKey,
-      commitment?: Commitment,
+      commitment?: Commitment
     ): Promise<AccountInfo<Buffer> | null> {
       if (commitment && commitment != DEFAULT_COMMITMENT) {
         return oldGetAccountInfo(publicKey, commitment);
       }
 
-      return cache.search(publicKey).then(i => {
+      return cache.search(publicKey).then((i) => {
         if (i) {
           return i.account;
         }
 
         return null;
-      })
-    }
+      });
+    };
 
     return () => {
       cache.close();
-    }
+    };
   }, [connection]);
 
-  return <AccountCacheContext.Provider
-    value={cache}
-  >
-    {children}
-  </AccountCacheContext.Provider>
-}
+  return (
+    <AccountCacheContext.Provider value={cache}>
+      {children}
+    </AccountCacheContext.Provider>
+  );
+};
 
 export function useAccount<T>(
   key: undefined | PublicKey,
@@ -95,10 +108,10 @@ export function useAccount<T>(
 
   useEffect(() => {
     if (!id) {
-      setState({ loading: false })
+      setState({ loading: false });
       return;
     } else {
-      setState({ loading: true })
+      setState({ loading: true });
     }
 
     cache
@@ -141,7 +154,7 @@ export function useAccount<T>(
 
 export const getUserTokenAccounts = async (
   connection: Connection,
-  owner?: PublicKey,
+  owner?: PublicKey
 ): Promise<TokenAccount[]> => {
   if (!owner) {
     return [];
@@ -153,15 +166,15 @@ export const getUserTokenAccounts = async (
     programId: TOKEN_PROGRAM_ID,
   });
 
-  const tokenAccounts = accounts.value.map(info =>
-    TokenAccountParser(info.pubkey, info.account)
-  ).filter(truthy).filter(t => t.info.amount.toNumber() > 0);
-
+  const tokenAccounts = accounts.value
+    .map((info) => TokenAccountParser(info.pubkey, info.account))
+    .filter(truthy)
+    .filter((t) => t.info.amount.toNumber() > 0);
 
   return tokenAccounts;
 };
 
 export function useUserTokenAccounts(owner?: PublicKey) {
   const connection = useConnection();
-  return useAsync(getUserTokenAccounts, [connection, owner])
+  return useAsync(getUserTokenAccounts, [connection, owner]);
 }

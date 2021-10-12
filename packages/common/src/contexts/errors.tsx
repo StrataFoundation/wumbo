@@ -2,16 +2,16 @@ import React, { useEffect } from "react";
 import { truthy } from "../utils";
 
 interface IErrorHandlingContext {
-  onError(error: Error): void
+  onError(error: Error): void;
 }
 export const ErrorHandlingContext = React.createContext<IErrorHandlingContext>({
-  onError: (error) => console.error(error)
+  onError: (error) => console.error(error),
 });
 
 export function useErrorHandler(): (error: Error) => void {
   const { onError } = React.useContext(ErrorHandlingContext);
 
-  return onError
+  return onError;
 }
 
 export function handleErrors(...errors: (Error | undefined)[]) {
@@ -19,5 +19,5 @@ export function handleErrors(...errors: (Error | undefined)[]) {
 
   useEffect(() => {
     errors.filter(truthy).map(onError);
-  }, errors)
+  }, errors);
 }

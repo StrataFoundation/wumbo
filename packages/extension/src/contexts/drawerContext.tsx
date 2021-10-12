@@ -1,4 +1,11 @@
-import React, { FC, ReactNode, createContext, useContext, useState, useCallback } from "react";
+import React, {
+  FC,
+  ReactNode,
+  createContext,
+  useContext,
+  useState,
+  useCallback,
+} from "react";
 
 export interface IDrawerProviderProps {
   children: ReactNode;
@@ -17,7 +24,9 @@ export interface IDrawerContextState {
   }) => void;
 }
 
-const DrawerContext = createContext<IDrawerContextState>({} as IDrawerContextState);
+const DrawerContext = createContext<IDrawerContextState>(
+  {} as IDrawerContextState
+);
 
 const DrawerProvider: FC<IDrawerProviderProps> = ({ children }) => {
   const [isOpen, setIsOpen] = useState<boolean>(false);

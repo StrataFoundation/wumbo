@@ -30,7 +30,9 @@ interface ITagArgs {
   feePayer: string;
 }
 
-const getBufferFromUrl = async (url: string | undefined): Promise<Blob | undefined> => {
+const getBufferFromUrl = async (
+  url: string | undefined
+): Promise<Blob | undefined> => {
   if (url) {
     const response = await axios.get(url, { responseType: "blob" });
     return response.data;
@@ -51,7 +53,7 @@ const tag = async (
     await sendAndConfirmRawTransaction(connection, signed.serialize());
   } catch (e) {
     if (e.response?.data?.message) {
-      throw new Error(e.response.data.message)
+      throw new Error(e.response.data.message);
     }
     throw e;
   }
@@ -93,12 +95,9 @@ export const TaggableImage = React.memo(
         onMouseEnter={() => setHovering(true)}
         onMouseLeave={() => setHovering(false)}
       >
-        { selected &&
-          images.map(image =>
-            <FloatPortal
-              container={image}
-              clearance={{}}
-            >
+        {selected &&
+          images.map((image) => (
+            <FloatPortal container={image} clearance={{}}>
               <ReactShadow.div>
                 <ThemeProvider>
                   <Box
@@ -111,14 +110,10 @@ export const TaggableImage = React.memo(
                 </ThemeProvider>
               </ReactShadow.div>
             </FloatPortal>
-          )
-        }
-        { hovering &&
-          images.map(image =>
-            <FloatPortal
-              container={image}
-              clearance={{}}
-            >
+          ))}
+        {hovering &&
+          images.map((image) => (
+            <FloatPortal container={image} clearance={{}}>
               <ReactShadow.div>
                 <ThemeProvider>
                   <Box
@@ -130,8 +125,7 @@ export const TaggableImage = React.memo(
                 </ThemeProvider>
               </ReactShadow.div>
             </FloatPortal>
-          )
-        }
+          ))}
         <Checkbox
           name={src}
           isChecked={selected}

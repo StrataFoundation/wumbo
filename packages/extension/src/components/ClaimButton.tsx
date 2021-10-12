@@ -31,16 +31,25 @@ export const ClaimButton: FC<Props> = ({
   const { toggleDrawer } = useDrawer();
   const creatorInfoState = useUserInfo(creatorName);
   const { userInfo: creatorInfo, loading } = creatorInfoState;
-  const { claim, loading: loadingClaim, error: claimError } = useClaimFlow(creatorName);
+  const {
+    claim,
+    loading: loadingClaim,
+    error: claimError,
+  } = useClaimFlow(creatorName);
   const { publicKey, connected } = useWallet();
-  const { handle: ownerTwitterHandle, error: reverseTwitterError } = useReverseTwitter(publicKey || undefined);
+  const { handle: ownerTwitterHandle, error: reverseTwitterError } =
+    useReverseTwitter(publicKey || undefined);
   handleErrors(claimError);
 
   if (loading || loadingClaim) {
     return <Spinner size="sm" {...spinnerProps} />;
   }
 
-  if (!loading && !creatorInfo?.tokenRef.isClaimed && (!ownerTwitterHandle || ownerTwitterHandle == creatorName)) {
+  if (
+    !loading &&
+    !creatorInfo?.tokenRef.isClaimed &&
+    (!ownerTwitterHandle || ownerTwitterHandle == creatorName)
+  ) {
     return (
       <Button
         as={Link}
@@ -65,27 +74,30 @@ export const ClaimButton: FC<Props> = ({
       </Button>
     );
   }
-  
+
   if (!creatorInfo) {
-    return null
+    return null;
   }
 
-  return <Button
-    as={Link}
-    to={`${viewProfilePath(creatorInfo.tokenRef.publicKey)}?name=${creatorInfo.name
+  return (
+    <Button
+      as={Link}
+      to={`${viewProfilePath(creatorInfo.tokenRef.publicKey)}?name=${
+        creatorInfo.name
       }`}
-    size="xs"
-    colorScheme="green"
-    color="green.800"
-    fontFamily="body"
-    onClick={() =>
-      toggleDrawer({
-        isOpen: true,
-        creator: { name: creatorName, img: creatorImg },
-      })
-    }
-    {...btnProps}
-  >
-    ${creatorInfo?.coinPriceUsd.toFixed(2)}
-  </Button>
+      size="xs"
+      colorScheme="green"
+      color="green.800"
+      fontFamily="body"
+      onClick={() =>
+        toggleDrawer({
+          isOpen: true,
+          creator: { name: creatorName, img: creatorImg },
+        })
+      }
+      {...btnProps}
+    >
+      ${creatorInfo?.coinPriceUsd.toFixed(2)}
+    </Button>
+  );
 };

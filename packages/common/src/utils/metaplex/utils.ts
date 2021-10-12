@@ -23,11 +23,13 @@ const routeCDN = (uri: string) => {
 };
 
 export function getImageFromMeta(meta?: any): string | undefined {
-  if(meta?.image) {
+  if (meta?.image) {
     return meta?.image;
   } else {
-    const found = (meta?.properties?.files || []).find((f: any) => typeof f !== "string" && f.type === MetadataCategory.Image)?.uri
-    return found
+    const found = (meta?.properties?.files || []).find(
+      (f: any) => typeof f !== "string" && f.type === MetadataCategory.Image
+    )?.uri;
+    return found;
   }
 }
 
@@ -36,7 +38,7 @@ const imageFromJson = (newUri: string, extended: any) => {
     return;
   }
 
-  const image = getImageFromMeta(extended)
+  const image = getImageFromMeta(extended);
   if (image) {
     const file = image.startsWith("http")
       ? extended.image
@@ -45,7 +47,9 @@ const imageFromJson = (newUri: string, extended: any) => {
   }
 };
 
-export async function getArweaveMetadata(uri: string | undefined): Promise<IMetadataExtension | undefined> {
+export async function getArweaveMetadata(
+  uri: string | undefined
+): Promise<IMetadataExtension | undefined> {
   if (uri) {
     const newUri = routeCDN(uri);
 
@@ -60,17 +64,17 @@ export async function getArweaveMetadata(uri: string | undefined): Promise<IMeta
         if (data.uri) {
           data = {
             ...data,
-            ...await getArweaveMetadata(data.uri)
-          }
+            ...(await getArweaveMetadata(data.uri)),
+          };
         }
         try {
           localStorage.setItem(newUri, JSON.stringify(data));
         } catch (e) {
           // ignore
         }
-        return data
-      } catch(e) {
-        console.log(`Could not fetch from ${uri}`, e)
+        return data;
+      } catch (e) {
+        console.log(`Could not fetch from ${uri}`, e);
         return undefined;
       }
     }
@@ -86,10 +90,10 @@ export async function getImage(
     // @ts-ignore
     if (metadata?.uri) {
       // @ts-ignore
-      return getImage(metadata?.uri)
+      return getImage(metadata?.uri);
     }
 
-    return imageFromJson(newUri, metadata)
+    return imageFromJson(newUri, metadata);
   }
 }
 
@@ -97,7 +101,7 @@ export async function getDescription(
   uri: string | undefined
 ): Promise<string | undefined> {
   if (uri) {
-    return (await getArweaveMetadata(uri))?.description
+    return (await getArweaveMetadata(uri))?.description;
   }
 }
 

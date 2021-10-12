@@ -8,16 +8,16 @@ import AppContainer from "../common/AppContainer";
 export const TopTokens = () => {
   const params = useParams<{ tokenBondingKey: string | undefined }>();
   const passedTokenBondingKey = params.tokenBondingKey
-  ? new PublicKey(params.tokenBondingKey)
+    ? new PublicKey(params.tokenBondingKey)
     : undefined;
   const history = useHistory();
 
-  return <AppContainer>
-    <TopTokenLeaderboard
-      tokenBondingKey={passedTokenBondingKey}
-      onAccountClick={(tokenRefKey) =>
-        history.push(profilePath(tokenRefKey))
-      }
-    />
-  </AppContainer>
-}
+  return (
+    <AppContainer>
+      <TopTokenLeaderboard
+        tokenBondingKey={passedTokenBondingKey}
+        onAccountClick={(tokenRefKey) => history.push(profilePath(tokenRefKey))}
+      />
+    </AppContainer>
+  );
+};

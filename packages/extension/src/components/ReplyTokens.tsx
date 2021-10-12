@@ -12,7 +12,11 @@ import {
   Portal,
   Flex,
 } from "@chakra-ui/react";
-import { ASSOCIATED_TOKEN_PROGRAM_ID, Token, TOKEN_PROGRAM_ID } from "@solana/spl-token";
+import {
+  ASSOCIATED_TOKEN_PROGRAM_ID,
+  Token,
+  TOKEN_PROGRAM_ID,
+} from "@solana/spl-token";
 import { AccountInfo, PublicKey } from "@solana/web3.js";
 import {
   ThemeProvider,
@@ -31,7 +35,7 @@ import {
   TokenBonding,
   useAccount,
   TokenRef,
-  AccountFetchCache
+  AccountFetchCache,
 } from "wumbo-common";
 import { useAsync } from "react-async-hook";
 import { TokenAccountParser } from "@oyster/common";
@@ -148,15 +152,19 @@ interface IReplyTokensProps extends Pick<AvatarProps, "size"> {
   outsideRef: React.MutableRefObject<HTMLInputElement>;
 }
 
-async function ownsTokensOf(owner: PublicKey, cache: AccountFetchCache, mint: PublicKey): Promise<boolean> {
+async function ownsTokensOf(
+  owner: PublicKey,
+  cache: AccountFetchCache,
+  mint: PublicKey
+): Promise<boolean> {
   const ata = await Token.getAssociatedTokenAddress(
     ASSOCIATED_TOKEN_PROGRAM_ID,
     TOKEN_PROGRAM_ID,
     mint,
     owner
-  )
-  const { info: acct } = (await cache.search(ata, TokenAccountParser)) || {}
-  return (acct?.amount.toNumber() || 0) > 0
+  );
+  const { info: acct } = (await cache.search(ata, TokenAccountParser)) || {};
+  return (acct?.amount.toNumber() || 0) > 0;
 }
 
 const getMentionsWithTokens = async (
@@ -165,7 +173,7 @@ const getMentionsWithTokens = async (
   mentions: string[]
 ): Promise<string[]> => {
   if (!owner) {
-    return []
+    return [];
   }
   return (
     await Promise.all(
@@ -176,13 +184,23 @@ const getMentionsWithTokens = async (
             cache.connection,
             mention
           );
-          const TokenRefParser = (pubkey: PublicKey, account: AccountInfo<Buffer>) => ({ pubkey, account, info: TokenRef(pubkey, account) })
+          const TokenRefParser = (
+            pubkey: PublicKey,
+            account: AccountInfo<Buffer>
+          ) => ({ pubkey, account, info: TokenRef(pubkey, account) });
           const unclaimed = await getTwitterUnclaimedTokenRefKey(mention);
           const claimedRef = await cache.search(claimed, TokenRefParser, true);
-          const unclaimedRef = await cache.search(unclaimed, TokenRefParser, true);
+          const unclaimedRef = await cache.search(
+            unclaimed,
+            TokenRefParser,
+            true
+          );
           let tokenRef = claimedRef || unclaimedRef;
-          if (tokenRef?.info && await ownsTokensOf(owner, cache, tokenRef.info.mint)) {
-            return mention
+          if (
+            tokenRef?.info &&
+            (await ownsTokensOf(owner, cache, tokenRef.info.mint))
+          ) {
+            return mention;
           }
         }
       })
@@ -202,21 +220,33 @@ export const ReplyTokens = ({
     result: relevantMentions,
     loading: loadingRelevantMentions,
     error,
-  } = useAsync(getMentionsWithTokens, [tokenRef?.owner as PublicKey | undefined, cache, mentions]);
+  } = useAsync(getMentionsWithTokens, [
+    tokenRef?.owner as PublicKey | undefined,
+    cache,
+    mentions,
+  ]);
   handleErrors(error);
 
   const isLoading = loading || loadingRelevantMentions;
-  const mentionTokens = relevantMentions?.map((mention, index) => (
-    <MentionToken
-      key={`${index}${mention}`}
-      mention={mention}
-      owner={tokenRef?.owner as PublicKey}
-      size={size}
-    />
-  )).filter(truthy);
+  const mentionTokens = relevantMentions
+    ?.map((mention, index) => (
+      <MentionToken
+        key={`${index}${mention}`}
+        mention={mention}
+        owner={tokenRef?.owner as PublicKey}
+        size={size}
+      />
+    ))
+    .filter(truthy);
 
   const nullState =
-    isLoading || !tokenRef || !tokenRef.isClaimed || !relevantMentions?.length || relevantMentions?.length == 0 || !mentionTokens || mentionTokens?.length == 0;
+    isLoading ||
+    !tokenRef ||
+    !tokenRef.isClaimed ||
+    !relevantMentions?.length ||
+    relevantMentions?.length == 0 ||
+    !mentionTokens ||
+    mentionTokens?.length == 0;
 
   if (nullState) return null;
 
@@ -229,9 +259,7 @@ export const ReplyTokens = ({
         e.stopPropagation();
       }}
     >
-      <HStack spacing={-2}>
-        {mentionTokens}
-      </HStack>
+      <HStack spacing={-2}>{mentionTokens}</HStack>
       <Popover placement="bottom" trigger="hover">
         <HStack spacing={1} color="gray.500">
           <Text>owns these</Text>

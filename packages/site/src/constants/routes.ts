@@ -23,10 +23,7 @@ interface IRoutes {
 }
 
 export function sendPath(mint: PublicKey): string {
-  return routes.send.path.replace(
-    ":mint",
-    mint.toBase58()
-  );
+  return routes.send.path.replace(":mint", mint.toBase58());
 }
 
 export function topTokensPath(tokenBondingKey: PublicKey): string {
@@ -37,10 +34,7 @@ export function topTokensPath(tokenBondingKey: PublicKey): string {
 }
 
 export function wumNetWorthPath(wallet: PublicKey): string {
-  return routes.wumNetWorth.path.replace(
-    ":wallet",
-    wallet.toBase58()
-  );
+  return routes.wumNetWorth.path.replace(":wallet", wallet.toBase58());
 }
 
 export const profilePath = (tokenRefKey: PublicKey): string =>

@@ -3,7 +3,7 @@ import {
   useTokenMetadata,
   useTokenLargestAccounts,
   useAccount,
-  handleErrors
+  handleErrors,
 } from "wumbo-common";
 import React, { Fragment, useMemo } from "react";
 import { WumboDrawer } from "../WumboDrawer";
@@ -21,11 +21,18 @@ export const TagNft: React.FC = () => {
   );
 
   const { loading: loading1, metadata, error: err1 } = useTokenMetadata(token);
-  const { loading: loading2, result: res2, error: err2 } = useTokenLargestAccounts(token);
-  const { loading: loading3, info } = useAccount(res2?.value[0]?.address, TokenAccountParser);
+  const {
+    loading: loading2,
+    result: res2,
+    error: err2,
+  } = useTokenLargestAccounts(token);
+  const { loading: loading3, info } = useAccount(
+    res2?.value[0]?.address,
+    TokenAccountParser
+  );
   const loading = loading1 || loading2 || loading3;
 
-  handleErrors(err1, err2)
+  handleErrors(err1, err2);
 
   if (loading) {
     return <WumboDrawer.Loading />;
@@ -36,9 +43,7 @@ export const TagNft: React.FC = () => {
       <WumboDrawer.Header title={`Tag ${metadata?.data.name}`} />
       <WumboDrawer.Content>
         <WalletRedirect />
-        <CommonTagNft
-          token={token}
-        />
+        <CommonTagNft token={token} />
       </WumboDrawer.Content>
       <WumboDrawer.Nav />
     </Fragment>
