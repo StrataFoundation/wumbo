@@ -7,7 +7,6 @@ import {
   UsdWumboPriceProvider,
   AccountCacheContextProvider,
   wumboApi,
-  ThemeProvider,
   SolPriceProvider,
   ErrorHandlingContext,
   Notification,
@@ -63,17 +62,15 @@ export const ContextProviders: React.FC = ({ children }) => {
         <ApolloProvider client={wumboApi}>
           <AccountCacheContextProvider>
             <EndpointSetter>
-              <ThemeProvider>
-                <AccountsProvider>
-                  <SolPriceProvider>
-                    <UsdWumboPriceProvider>
-                      <WalletProvider wallets={wallets} onError={console.error}>
-                        {children}
-                      </WalletProvider>
-                    </UsdWumboPriceProvider>
-                  </SolPriceProvider>
-                </AccountsProvider>
-              </ThemeProvider>
+              <AccountsProvider>
+                <SolPriceProvider>
+                  <UsdWumboPriceProvider>
+                    <WalletProvider wallets={wallets} onError={console.error}>
+                      {children}
+                    </WalletProvider>
+                  </UsdWumboPriceProvider>
+                </SolPriceProvider>
+              </AccountsProvider>
             </EndpointSetter>
           </AccountCacheContextProvider>
         </ApolloProvider>
