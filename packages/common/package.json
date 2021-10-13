@@ -1,0 +1,82 @@
+{
+  "name": "wumbo-common",
+  "version": "1.0.0",
+  "description": "Use of spl libraries to buy and sell creator coins",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ChewingGlassFund/wumbo"
+  },
+  "main": "dist/lib/index.js",
+  "types": "dist/lib/index.d.ts",
+  "exports": {
+    ".": "./dist/lib"
+  },
+  "scripts": {
+    "build": "yarn run copy-files && tsc --project tsconfig.json",
+    "watch": "yarn run copy-files && tsc --watch --project tsconfig.json",
+    "copy-files": "copyfiles -u 1 src/**/*.js dist/lib",
+    "format": "prettier --write \"src/**/*.{ts,tsx}\"",
+    "precommit": "yarn format"
+  },
+  "dependencies": {
+    "@apollo/client": "^3.4.12",
+    "@bonfida/spl-name-service": "0.1.12",
+    "@chakra-ui/react": "^1.6.7",
+    "@cloudflare/stream-react": "^1.2.0",
+    "@emotion/react": "^11",
+    "@emotion/styled": "^11",
+    "@google/model-viewer": "^1.8.0",
+    "@oyster/common": "^0.0.1",
+    "@project-serum/serum": "0.13.38",
+    "@project-serum/sol-wallet-adapter": "0.2.4",
+    "@solana/spl-token": "0.1.6",
+    "@solana/spl-token-swap": "0.1.0",
+    "@solana/wallet-adapter-base": "0.4.1",
+    "@solana/wallet-adapter-wallets": "0.6.1",
+    "@solana/web3.js": "1.22.0",
+    "@toruslabs/openlogin": "0.9.0",
+    "@toruslabs/openlogin-ed25519": "0.9.0",
+    "@toruslabs/openlogin-utils": "0.9.0",
+    "@toruslabs/torus-direct-web-sdk": "4.14.0",
+    "@types/axios": "^0.14.0",
+    "@types/react-dom": "^17.0.0",
+    "@webcomponents/custom-elements": "^1.5.0",
+    "@wum.bo/anchor": "^0.16.2",
+    "@wum.bo/spl-token-account-split": "^0.1.19",
+    "@wum.bo/spl-token-bonding": "^0.1.19",
+    "@wum.bo/spl-token-staking": "^0.1.19",
+    "@wum.bo/spl-utils": "^0.1.19",
+    "@wum.bo/spl-wumbo": "^0.1.20",
+    "auth0-js": "^9.16.2",
+    "axios": "^0.21.4",
+    "bip39": "^3.0.4",
+    "borsh": "^0.4.0",
+    "framer-motion": "^4",
+    "fuse.js": "^6.4.6",
+    "graphql": "^15.5.3",
+    "lambert-w-function": "^2.0.0",
+    "lodash": "^4.17.21",
+    "react": "^17.0.2",
+    "react-async-hook": "^3.6.2",
+    "react-dom": "^17.0.2",
+    "react-hook-form": "^7.9.0",
+    "react-icons": "^4.2.0",
+    "react-router-dom": "^5.2.0",
+    "resemblejs": "^4.0.0",
+    "url-template": "^2.0.8"
+  },
+  "devDependencies": {
+    "@types/auth0-js": "^9.14.5",
+    "@types/chrome": "0.0.145",
+    "@types/lodash": "^4.14.171",
+    "@types/url-template": "^2.0.28",
+    "copyfiles": "^2.4.1",
+    "prettier": "2.3.1",
+    "typescript": "^4.3.4"
+  },
+  "peerDependencies": {
+    "react": "^17.0.2",
+    "react-dom": "^17.0.2",
+    "react-router-dom": "^5.2.0"
+  }
+}
