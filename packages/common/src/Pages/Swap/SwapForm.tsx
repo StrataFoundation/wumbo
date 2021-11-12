@@ -32,7 +32,7 @@ import {
   useFtxPayLink,
   ITokenBonding,
 } from "../../";
-import { Curve } from "@wum.bo/spl-token-bonding";
+import { IPricingCurve } from "@strata-foundation/spl-token-bonding";
 
 export interface ISwapFormValues {
   topAmount: number;
@@ -63,7 +63,7 @@ export interface ISwapFormProps {
   onHandleBuyBase: (tokenBonding: PublicKey) => void;
   onHandleSubmit: (values: ISwapFormValues) => Promise<void>;
   tokenBonding: ITokenBonding;
-  curve: Curve;
+  curve: IPricingCurve;
   base: {
     name: string;
     ticker: string;

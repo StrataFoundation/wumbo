@@ -1,14 +1,12 @@
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useEffect } from "react";
 import { PublicKey } from "@solana/web3.js";
+import { ITokenBonding } from "@strata-foundation/spl-token-bonding";
 import {
-  useAccount,
-  ITokenBonding,
-  TokenBonding,
-  useTokenMetadata,
   usePublicKey,
-  Avatar,
-  MetadataAvatar,
-} from "../";
+  useTokenBonding,
+  useTokenMetadata,
+} from "@strata-foundation/react";
+import { Avatar, MetadataAvatar } from "../";
 
 interface IUseTokenBondingInfo extends ITokenBonding {
   name?: string;
@@ -32,7 +30,7 @@ export const useTokenBondingInfo = (
   );
 
   const { info: tokenBondingInfo, loading: tokenBondingInfoLoading } =
-    useAccount(tokenBondingKey, TokenBonding);
+    useTokenBonding(tokenBondingKey);
 
   const {
     metadata,

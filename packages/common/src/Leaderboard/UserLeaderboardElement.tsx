@@ -1,9 +1,10 @@
 import React from "react";
-import { ITokenRef, useReverseTwitter, useTokenMetadata } from "../utils";
-import { Flex, Box, Text } from "@chakra-ui/react";
-import { Avatar, Spinner } from "..";
-import { handleErrors } from "../contexts";
 import { PublicKey } from "@solana/web3.js";
+import { Flex, Box, Text } from "@chakra-ui/react";
+import { useErrorHandler, useTokenMetadata } from "@strata-foundation/react";
+import { ITokenRef } from "@strata-foundation/spl-token-collective";
+import { useReverseTwitter } from "../utils";
+import { Spinner, Avatar } from "..";
 
 export const UserLeaderboardElement = React.memo(
   ({
@@ -18,10 +19,13 @@ export const UserLeaderboardElement = React.memo(
     const { loading, image, metadata, error } = useTokenMetadata(
       tokenRef?.mint
     );
+
     const name = metadata?.data.name;
     const symbol = metadata?.data.symbol;
     const { handle: reverseTwitterHandle, error: reverseTwitterError } =
       useReverseTwitter(tokenRef?.owner as PublicKey | undefined);
+
+    const { handleErrors } = useErrorHandler();
     const handle = reverseTwitterHandle || name;
 
     handleErrors(error, reverseTwitterError);

@@ -1,19 +1,13 @@
 import React, { useMemo } from "react";
 import { PublicKey } from "@solana/web3.js";
 import { gql, useApolloClient } from "@apollo/client";
-import { WumboUserLeaderboard } from "./WumboUserLeaderboard";
 import {
   useBondingPricing,
   useFiatPrice,
-  useUserOwnedAmount,
-} from "../utils/pricing";
-import {
-  TokenBonding,
-  useAccount,
-  useClaimedTokenRef,
-  useReverseTwitter,
   useTokenRefFromBonding,
-} from "../utils";
+  useTokenBonding,
+} from "@strata-foundation/react";
+import { WumboUserLeaderboard } from "./WumboUserLeaderboard";
 import { UserLeaderboardElement } from "./UserLeaderboardElement";
 
 const GET_TOP_TOKENS = gql`
@@ -38,7 +32,7 @@ const Element = React.memo(
     onClick?: (tokenRefKey: PublicKey) => void;
   }) => {
     const { curve } = useBondingPricing(tokenBondingKey);
-    const { info: tokenBonding } = useAccount(tokenBondingKey, TokenBonding);
+    const { info: tokenBonding } = useTokenBonding(tokenBondingKey);
     const fiatPrice = useFiatPrice(tokenBonding?.baseMint);
     const toFiat = (a: number) => (fiatPrice || 0) * a;
 

@@ -3,23 +3,25 @@ import { useParams } from "react-router-dom";
 import toast from "react-hot-toast";
 import { u64, AccountLayout } from "@solana/spl-token";
 import {
-  SOL_TOKEN,
-  WUM_TOKEN,
-  useBuyToken,
-  useSellToken,
-  useTokenBondingInfo,
+  useBuy,
+  useSell,
   useMint,
   useBondingPricing,
   useOwnedAmount,
   useSolOwnedAmount,
   amountAsNum,
+  useEstimatedFees,
+  useTokenMetadata,
+} from "@strata-foundation/react";
+import {
+  SOL_TOKEN,
+  WUM_TOKEN,
+  useTokenBondingInfo,
   handleErrors,
   Spinner,
   SolanaIcon,
   WumboIcon,
   Notification,
-  useEstimatedFees,
-  useTokenMetadata,
 } from "../../";
 
 import { ISwapFormValues, ISwapFormProps, SwapForm } from "./SwapForm";
@@ -40,8 +42,8 @@ export const Swap = ({
     loading: wumMetaLoading,
     error: wumMetaError,
   } = useTokenMetadata(WUM_TOKEN);
-  const [buy, { loading: buyLoading, error: buyError }] = useBuyToken();
-  const [sell, { loading: sellLoading, error: sellError }] = useSellToken();
+  const [buy, { loading: buyLoading, error: buyError }] = useBuy();
+  const [sell, { loading: sellLoading, error: sellError }] = useSell();
   const [internalError, setInternalError] = useState<Error | undefined>();
   const [spendCap, setSpendCap] = useState<number>(0);
   const { amount: feeAmount, error: feeError } = useEstimatedFees(

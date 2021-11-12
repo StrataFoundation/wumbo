@@ -1,12 +1,14 @@
 import React, { useMemo } from "react";
 import { PublicKey } from "@solana/web3.js";
-import { Flex } from "@chakra-ui/react";
-import { useWallet } from "../contexts/walletContext";
 import { gql, useApolloClient } from "@apollo/client";
+import {
+  useUserOwnedAmount,
+  useSocialTokenMetadata,
+} from "@strata-foundation/react";
+import { useWallet } from "../contexts/walletContext";
 import { WumboUserLeaderboard } from "./WumboUserLeaderboard";
-import { useUserOwnedAmount } from "../utils/pricing";
 import { UserLeaderboardElement } from "./UserLeaderboardElement";
-import { useSocialTokenMetadata } from "../utils";
+import { Spinner } from "@chakra-ui/react";
 
 const GET_TOP_HOLDERS = gql`
   query GetTopHolders($mint: String!, $startRank: Int!, $stopRank: Int!) {
@@ -32,7 +34,11 @@ const Element = React.memo(
     onClick?: (tokenRefKey: PublicKey) => void;
   }) => {
     const amount = useUserOwnedAmount(wallet, mint)?.toFixed(2);
-    const { tokenRef } = useSocialTokenMetadata(wallet);
+    const { tokenRef, loading } = useSocialTokenMetadata(wallet);
+
+    if (loading || !tokenRef) {
+      return <Spinner />;
+    }
 
     return (
       <UserLeaderboardElement

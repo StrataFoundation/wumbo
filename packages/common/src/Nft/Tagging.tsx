@@ -1,28 +1,31 @@
 import React, { useEffect, useMemo, useState } from "react";
+import ReactShadow from "react-shadow/emotion";
+// @ts-ignore
+import compareImages from "resemblejs/compareImages";
+import axios from "axios";
+import { useAsync, useAsyncCallback } from "react-async-hook";
 import {
   Connection,
   PublicKey,
   Transaction,
   sendAndConfirmRawTransaction,
 } from "@solana/web3.js";
-import { useConnection } from "../contexts/connection";
 import { VStack, HStack, Box, Text, Checkbox, Button } from "@chakra-ui/react";
-import { Spinner } from "../";
-import ReactShadow from "react-shadow/emotion";
-// @ts-ignore
-import compareImages from "resemblejs/compareImages";
-import axios from "axios";
-import { useAsync, useAsyncCallback } from "react-async-hook";
-import { NFT_VERIFIER_URL, TAGGING_THRESHOLD } from "../constants/globals";
-import { handleErrors, useWallet } from "../contexts";
 import {
   useAccountFetchCache,
-  truthy,
+  useErrorHandler,
+} from "@strata-foundation/react";
+import {
+  NFT_VERIFIER_URL,
+  TAGGING_THRESHOLD,
+  useWallet,
+  useConnection,
   getNftNameRecordKey,
-  classNames,
-} from "../utils";
-import { ThemeProvider } from "../contexts/themeContext";
-import { FloatPortal } from "../Portals";
+  truthy,
+  ThemeProvider,
+  Spinner,
+  FloatPortal,
+} from "../";
 
 interface ITagArgs {
   imgUrls: string[];
@@ -184,6 +187,7 @@ export const TaggableImages = ({
   const [selected, setSelected] = useState<Record<string, boolean>>({});
   const [allSelected, setAllSelected] = useState<boolean>(false);
   const { awaitingApproval, publicKey, signTransaction } = useWallet();
+  const { handleErrors } = useErrorHandler();
 
   handleErrors(bufferError, error);
   const cache = useAccountFetchCache();
