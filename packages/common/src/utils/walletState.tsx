@@ -1,13 +1,12 @@
-import { PublicKey } from "@solana/web3.js";
-import { AccountInfo as TokenAccountInfo, Token } from "@solana/spl-token";
 import { useEffect, useMemo, useState } from "react";
+import { PublicKey, AccountInfo } from "@solana/web3.js";
+import { AccountInfo as TokenAccountInfo, Token } from "@solana/spl-token";
+import { TokenAccountParser } from "@oyster/common";
+import { useAccount } from "@strata-foundation/react";
 import {
   SPL_ASSOCIATED_TOKEN_ACCOUNT_PROGRAM_ID,
   TOKEN_PROGRAM_ID,
 } from "../constants/globals";
-import { TokenAccountParser } from "@oyster/common";
-import { useAccount } from "./account";
-import { AccountInfo } from "@solana/web3.js";
 
 const fetch = (wallet: PublicKey, mint: PublicKey) =>
   Token.getAssociatedTokenAddress(

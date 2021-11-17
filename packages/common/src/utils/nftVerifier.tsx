@@ -3,10 +3,10 @@ import {
   getHashedName,
   NameRegistryState,
 } from "@bonfida/spl-name-service";
-import { Connection, PublicKey } from "@solana/web3.js";
-import { NFT_VERIFIER, NFT_VERIFIER_TLD } from "../constants/globals";
+import { PublicKey } from "@solana/web3.js";
 import { deserializeUnchecked } from "borsh";
-import { AccountFetchCache } from "./accountFetchCache/accountFetchCache";
+import { AccountFetchCache } from "@strata-foundation/spl-utils";
+import { NFT_VERIFIER, NFT_VERIFIER_TLD } from "../constants/globals";
 import { MetadataParser } from "./metaplex";
 
 export async function getNftNameRecordKey(imgUrl: string): Promise<PublicKey> {
