@@ -1,6 +1,9 @@
+import React from "react";
+import { Link } from "react-router-dom";
+import { RiCoinLine } from "react-icons/ri";
+import toast from "react-hot-toast";
 import {
   Text,
-  Box,
   Center,
   createIcon,
   Flex,
@@ -10,32 +13,22 @@ import {
   VStack,
   Button,
   SimpleGrid,
-  Divider,
 } from "@chakra-ui/react";
-import { SOL_TOKEN, WUMBO_INSTANCE_KEY, WUM_TOKEN } from "../constants/globals";
-import { TokenAccount } from "@oyster/common";
-import { Avatar } from "../Avatar";
-import { Notification } from "../Notification";
-import React from "react";
 import {
-  useUserTokenAccounts,
+  useBondingPricing,
   useFiatPrice,
   useOwnedAmount,
   useSolOwnedAmount,
   useTokenMetadata,
-  useUserTokensWithMeta,
-  ITokenWithMeta,
-  ITokenWithMetaAndAccount,
-  useBondingPricing,
-  amountAsNum,
-} from "../utils";
-import { RiCoinLine } from "react-icons/ri";
-import { useWallet } from "../contexts/walletContext";
-import { Spinner } from "../Spinner";
-import { Link } from "react-router-dom";
-import { WumboRankIcon } from "../svgs";
+} from "@strata-foundation/react";
+import { useUserTokensWithMeta, ITokenWithMetaAndAccount } from "../utils";
 import { useWumNetWorth } from "../hooks";
-import toast from "react-hot-toast";
+import { useWallet } from "../contexts/walletContext";
+import { SOL_TOKEN, WUMBO_INSTANCE_KEY, WUM_TOKEN } from "../constants/globals";
+import { Avatar } from "../Avatar";
+import { Notification } from "../Notification";
+import { Spinner } from "../Spinner";
+import { WumboRankIcon } from "../svgs";
 
 const SolLogoIcon = createIcon({
   displayName: "Solana",

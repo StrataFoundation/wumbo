@@ -1,18 +1,18 @@
-import React, { Fragment, useState } from "react";
+import React from "react";
 import { Flex } from "@chakra-ui/react";
-import { HiChevronRight } from "react-icons/hi";
 import {
+  useErrorHandler,
   useBondingPricing,
   useFiatPrice,
-  useOwnedAmount,
-} from "./utils/pricing";
+} from "@strata-foundation/react";
+import {
+  ITokenBonding,
+  IPricingCurve,
+} from "@strata-foundation/spl-token-bonding";
 import { Spinner } from "./";
 import { useTokenMetadata } from "./utils/metaplex";
 import { MetadataAvatar } from "./Avatar";
-import { Link, useHistory } from "react-router-dom";
-import { ITokenBonding } from "./utils/deserializers/spl-token-bonding";
-import { handleErrors } from "./contexts";
-import { Curve } from "@wum.bo/spl-token-bonding";
+import { useHistory } from "react-router-dom";
 
 interface TokenPillProps {
   name?: String;
@@ -20,7 +20,7 @@ interface TokenPillProps {
   icon?: React.ReactElement;
   tokenBonding: ITokenBonding;
   detailsPath?: string;
-  curve?: Curve;
+  curve?: IPricingCurve;
 }
 
 interface MetadataTokenPillProps {
@@ -28,7 +28,7 @@ interface MetadataTokenPillProps {
   ticker?: string;
   tokenBonding: ITokenBonding;
   detailsPath?: string;
-  curve?: Curve;
+  curve?: IPricingCurve;
 }
 export const MetadataTokenPill = React.memo(
   ({
@@ -38,6 +38,7 @@ export const MetadataTokenPill = React.memo(
     detailsPath,
     curve,
   }: MetadataTokenPillProps) => {
+    const { handleErrors } = useErrorHandler();
     const { metadata, loading, error } = useTokenMetadata(
       tokenBonding?.targetMint
     );
