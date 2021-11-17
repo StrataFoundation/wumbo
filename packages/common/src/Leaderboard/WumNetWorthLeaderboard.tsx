@@ -1,21 +1,9 @@
 import React, { useMemo } from "react";
 import { PublicKey } from "@solana/web3.js";
-import { gql, useApolloClient, useQuery } from "@apollo/client";
+import { gql, useApolloClient } from "@apollo/client";
+import { useClaimedTokenRef } from "@strata-foundation/react";
 import { WumboUserLeaderboard } from "./WumboUserLeaderboard";
-import {
-  useBondingPricing,
-  useFiatPrice,
-  useUserOwnedAmount,
-} from "../utils/pricing";
-import {
-  TokenBonding,
-  useAccount,
-  useClaimedTokenRef,
-  useReverseTwitter,
-  useTokenRefFromBonding,
-} from "../utils";
 import { UserLeaderboardElement } from "./UserLeaderboardElement";
-import { WUM_TOKEN } from "../constants";
 import { useWumNetWorth } from "../hooks";
 
 const GET_TOP_WUM = gql`

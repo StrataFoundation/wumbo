@@ -12,12 +12,12 @@ import {
   amountAsNum,
   useEstimatedFees,
   useTokenMetadata,
+  useErrorHandler,
 } from "@strata-foundation/react";
 import {
   SOL_TOKEN,
   WUM_TOKEN,
   useTokenBondingInfo,
-  handleErrors,
   Spinner,
   SolanaIcon,
   WumboIcon,
@@ -37,6 +37,7 @@ export const Swap = ({
   onHandleFlipTokens,
   onHandleBuyBase,
 }: ISwapProps) => {
+  const { handleErrors } = useErrorHandler();
   const {
     metadata: wumMeta,
     loading: wumMetaLoading,
@@ -88,8 +89,8 @@ export const Swap = ({
 
       const maxSpend = curve.buyTargetAmount(
         purchaseCap,
-        tokenBonding.baseRoyaltyPercentage,
-        tokenBonding.targetRoyaltyPercentage
+        tokenBonding.buyBaseRoyaltyPercentage,
+        tokenBonding.buyTargetRoyaltyPercentage
       );
 
       setSpendCap(maxSpend);

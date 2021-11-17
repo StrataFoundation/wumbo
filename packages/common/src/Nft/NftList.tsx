@@ -1,6 +1,7 @@
 import React from "react";
 import { PublicKey } from "@solana/web3.js";
 import { SimpleGrid, Box, Center } from "@chakra-ui/react";
+import { useErrorHandler } from "@strata-foundation/react";
 import { NftCard } from "./NftCard";
 import { Spinner } from "../Spinner";
 import {
@@ -8,7 +9,6 @@ import {
   ITokenWithMetaAndAccount,
   useUserTokensWithMeta,
 } from "../utils";
-import { handleErrors } from "../contexts";
 
 export const NftListRaw = React.memo(
   ({
@@ -67,7 +67,9 @@ export const NftList = React.memo(
     owner?: PublicKey;
     getLink: (t: ITokenWithMeta) => string;
   }) => {
+    const { handleErrors } = useErrorHandler();
     const { result: tokens, loading, error } = useUserTokensWithMeta(owner);
+
     handleErrors(error);
     return <NftListRaw getLink={getLink} loading={loading} tokens={tokens} />;
   }

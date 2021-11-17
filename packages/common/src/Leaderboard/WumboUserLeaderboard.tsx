@@ -1,11 +1,11 @@
 import React, { Fragment, useEffect, useState } from "react";
+import { useAsync } from "react-async-hook";
 import { PublicKey } from "@solana/web3.js";
 import { Center, Box, Flex, Icon } from "@chakra-ui/react";
 import { HiChevronUp, HiChevronDown } from "react-icons/hi";
+import { useErrorHandler } from "@strata-foundation/react";
 import { Leaderboard, LeaderboardNumber } from "../Leaderboard";
 import { Spinner } from "../Spinner";
-import { useAsync } from "react-async-hook";
-import { handleErrors } from "../contexts";
 
 const WhiteCard = ({ children = null as any }) => (
   <Box
@@ -64,6 +64,7 @@ function useLocalAccountsPagination(
 ): IAccountsPagination & { userRank?: number } {
   const [startIndex, setStartIndex] = useState<number>(0);
   const [stopIndex, setStopIndex] = useState<number>(0);
+  const { handleErrors } = useErrorHandler();
   const { loading, result: accountRank, error } = useAsync(getRank, []);
   const {
     loading: loading2,
@@ -98,10 +99,12 @@ function useAccountsPagination(
 ): IAccountsPagination {
   const [startIndex, setStartIndex] = useState<number>(0);
   const [stopIndex, setStopIndex] = useState<number>(initialFetchSize);
+  const { handleErrors } = useErrorHandler();
   const { result, loading, error } = useAsync(getTopWallets, [
     startIndex,
     stopIndex,
   ]);
+
   handleErrors(error);
 
   return {

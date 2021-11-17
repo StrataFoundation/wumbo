@@ -1,13 +1,15 @@
 import React, { useState } from "react";
 import { Button, Alert, AlertIcon } from "@chakra-ui/react";
+import {
+  useSolOwnedAmount,
+  useRentExemptAmount,
+  useErrorHandler,
+} from "@strata-foundation/react";
 import { useClaimTwitterHandle, useCreateOrClaimCoin } from "../utils/claim";
-import { useSolOwnedAmount } from "../utils/pricing";
-import { useRentExemptAmount } from "../hooks/fees";
 import { TWITTER_REGISTRY_SIZE } from "../utils/twitter";
 import { Spinner } from "../Spinner";
 import { useFtxPayLink } from "../utils/ftxPay";
 import { PublicKey } from "@solana/web3.js";
-import { handleErrors } from "../contexts";
 
 export interface IClaimProps {
   onComplete(result: { tokenRef: PublicKey; owner: PublicKey }): void;
@@ -17,6 +19,7 @@ export interface IClaimProps {
 }
 export const Claim = React.memo(
   ({ handle, redirectUri, code, onComplete }: IClaimProps) => {
+    const { handleErrors } = useErrorHandler();
     const ftxPayLink = useFtxPayLink();
     const [twitterHandle, setTwitterHandle] = useState<string>(handle || "");
     const {

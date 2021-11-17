@@ -1,7 +1,8 @@
 import { useAsyncCallback } from "react-async-hook";
-import { useConnection } from "../../contexts/connection";
 import { Creator, MetadataCategory } from "@oyster/common";
-import { useAccount } from "../account";
+import { percent } from "@wum.bo/spl-utils";
+import { useTokenRef, useTokenBonding } from "@strata-foundation/react";
+import { useConnection } from "../../contexts/connection";
 import {
   Account,
   Connection,
@@ -12,14 +13,11 @@ import {
 } from "@solana/web3.js";
 import { getFilesWithMetadata } from "./utils";
 import { useWallet } from "../../contexts/walletContext";
-import { TokenRef } from "../deserializers/spl-wumbo";
 import { useState } from "react";
 import { prepPayForFilesInstructions, uploadToArweave } from "./arweave";
 import { useTokenMetadata } from "./nftMetadataHooks";
-import { TokenBonding } from "../../utils/deserializers/spl-token-bonding";
 import { usePrograms } from "../../utils/programs";
 import { splWumboProgramId } from "../../constants/programs";
-import { percent } from "@wum.bo/spl-utils";
 
 const RESERVED_TXN_MANIFEST = "manifest.json";
 
@@ -39,7 +37,10 @@ const getFileFromUrl = async (
 export type SetMetadataArgs = {
   name: string;
   symbol: string;
-  targetRoyaltyPercentage: number;
+  sellBaseRoyaltyPercentage: number;
+  buyBaseRoyaltyPercentage: number;
+  sellTargetRoyaltyPercentage: number;
+  buyTargetRoyaltyPercentage: number;
   image: File | undefined;
 };
 
@@ -59,11 +60,8 @@ export function useSetMetadata(
   tokenRefKey: PublicKey | undefined
 ): SetMetadataState {
   const connection = useConnection();
-  const { info: tokenRef } = useAccount(tokenRefKey, TokenRef, true);
-  const { info: tokenBonding } = useAccount(
-    tokenRef?.tokenBonding,
-    TokenBonding
-  );
+  const { info: tokenRef } = useTokenRef(tokenRefKey);
+  const { info: tokenBonding } = useTokenBonding(tokenRef?.tokenBonding);
   const {
     publicKey: metadataAccountKey,
     image,
@@ -203,7 +201,12 @@ export function useSetMetadata(
           symbol: args.symbol,
           name: args.name,
           uri: arweaveLink, // size of url for arweave
-          targetRoyaltyPercentage: percent(args.targetRoyaltyPercentage),
+          sellBaseRoyaltyPercentage: percent(args.sellBaseRoyaltyPercentage),
+          buyBaseRoyaltyPercentage: percent(args.buyBaseRoyaltyPercentage),
+          sellTargetRoyaltyPercentage: percent(
+            args.sellTargetRoyaltyPercentage
+          ),
+          buyTargetRoyaltyPercentage: percent(args.buyTargetRoyaltyPercentage),
         };
         await splWumboProgram!.updateMetadata(changeArgs);
 

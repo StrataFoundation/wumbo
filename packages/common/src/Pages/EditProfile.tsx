@@ -15,17 +15,16 @@ import {
   Alert,
   AlertIcon,
 } from "@chakra-ui/react";
-import { useClaimedTokenRef } from "../utils/tokenRef";
 import {
-  SetMetadataArgs,
-  useSetMetadata,
+  useTokenBonding,
   useTokenMetadata,
-} from "../utils/metaplex";
-import { useAccount } from "../utils/account";
+  useClaimedTokenRef,
+  useErrorHandler,
+} from "@strata-foundation/react";
+import { SetMetadataArgs, useSetMetadata } from "../utils/metaplex";
 import { TokenPill } from "../TokenPill";
 import { Avatar } from "../Avatar";
-import { TokenBonding } from "../utils/deserializers/spl-token-bonding";
-import { handleErrors, useWallet } from "../contexts";
+import { useWallet } from "../contexts";
 
 interface IEditProfileProps {
   ownerWalletKey: PublicKey;
@@ -36,7 +35,10 @@ const validationSchema = yup
   .object({
     name: yup.string().required().min(2),
     symbol: yup.string().required().min(2).max(10),
-    targetRoyaltyPercentage: yup.number().required(),
+    sellBaseRoyaltyPercentage: yup.number().required(),
+    buyBaseRoyaltyPercentage: yup.number().required(),
+    sellTargetRoyaltyPercentage: yup.number().required(),
+    buyTargetRoyaltyPercentage: yup.number().required(),
     image: yup.mixed(),
   })
   .required();
@@ -45,6 +47,7 @@ export const EditProfile = React.memo(
   ({ ownerWalletKey, onComplete }: IEditProfileProps) => {
     const hiddenFileInput = React.useRef<HTMLInputElement>(null);
     const { awaitingApproval } = useWallet();
+    const { handleErrors } = useErrorHandler();
     const { info: tokenRef } = useClaimedTokenRef(ownerWalletKey);
     const {
       watch,
@@ -52,23 +55,19 @@ export const EditProfile = React.memo(
       handleSubmit,
       setValue,
       reset,
-      getValues,
       formState: { errors },
     } = useForm<SetMetadataArgs>({
       resolver: yupResolver(validationSchema),
     });
 
-    const { info: tokenBonding } = useAccount(
-      tokenRef?.tokenBonding,
-      TokenBonding
-    );
+    const { info: tokenBonding } = useTokenBonding(tokenRef?.tokenBonding);
 
     const {
       image: metadataImage,
       metadata,
       error: tokenMetadataError,
     } = useTokenMetadata(tokenBonding?.targetMint);
-    const { name = "", symbol = "", targetRoyaltyPercentage, image } = watch();
+    const { name = "", symbol = "", image } = watch();
     const { setMetadata, state, error } = useSetMetadata(tokenRef?.publicKey);
 
     handleErrors(tokenMetadataError, error);
@@ -83,6 +82,9 @@ export const EditProfile = React.memo(
         onComplete(result);
       }
     };
+
+    const humanRedablePercent = (p: number | undefined = 0) =>
+      (p / 4294967295) * 100;
 
     const [imgUrl, setImgUrl] = useState<string>();
     useEffect(() => {
@@ -111,8 +113,18 @@ export const EditProfile = React.memo(
         reset({
           name: metadata?.data.name,
           symbol: metadata?.data.symbol,
-          targetRoyaltyPercentage:
-            ((tokenBonding?.targetRoyaltyPercentage || 0) / 4294967295) * 100,
+          sellBaseRoyaltyPercentage: humanRedablePercent(
+            tokenBonding?.sellBaseRoyaltyPercentage
+          ),
+          buyBaseRoyaltyPercentage: humanRedablePercent(
+            tokenBonding?.buyBaseRoyaltyPercentage
+          ),
+          sellTargetRoyaltyPercentage: humanRedablePercent(
+            tokenBonding?.sellTargetRoyaltyPercentage
+          ),
+          buyTargetRoyaltyPercentage: humanRedablePercent(
+            tokenBonding?.buyTargetRoyaltyPercentage
+          ),
         });
       }
     }, [metadata?.data.name, metadata?.data.symbol, metadataImage]);
@@ -183,7 +195,7 @@ export const EditProfile = React.memo(
               Wum.bo.`}
             </FormHelperText>
           </FormControl>
-          <FormControl id="targetRoyaltyPercentage" borderColor="gray.200">
+          <FormControl id="buyBaseRoyaltyPercentage" borderColor="gray.200">
             <FormLabel>Royalties</FormLabel>
             <Input
               isRequired
@@ -192,7 +204,55 @@ export const EditProfile = React.memo(
               max={100}
               placeholder="5"
               defaultValue={5}
-              {...register("targetRoyaltyPercentage")}
+              {...register("buyBaseRoyaltyPercentage")}
+            />
+            <FormHelperText>
+              A Percentage of coin sales that will be sent to your wallet. We
+              recommend keep this less than 10%.
+            </FormHelperText>
+          </FormControl>
+          <FormControl id="sellBaseRoyaltyPercentage" borderColor="gray.200">
+            <FormLabel>Royalties</FormLabel>
+            <Input
+              isRequired
+              type="number"
+              min={0}
+              max={100}
+              placeholder="5"
+              defaultValue={5}
+              {...register("sellBaseRoyaltyPercentage")}
+            />
+            <FormHelperText>
+              A Percentage of coin sales that will be sent to your wallet. We
+              recommend keep this less than 10%.
+            </FormHelperText>
+          </FormControl>
+          <FormControl id="buyTargetRoyaltyPercentage" borderColor="gray.200">
+            <FormLabel>Royalties</FormLabel>
+            <Input
+              isRequired
+              type="number"
+              min={0}
+              max={100}
+              placeholder="5"
+              defaultValue={5}
+              {...register("buyTargetRoyaltyPercentage")}
+            />
+            <FormHelperText>
+              A Percentage of coin sales that will be sent to your wallet. We
+              recommend keep this less than 10%.
+            </FormHelperText>
+          </FormControl>
+          <FormControl id="sellTargetRoyaltyPercentage" borderColor="gray.200">
+            <FormLabel>Royalties</FormLabel>
+            <Input
+              isRequired
+              type="number"
+              min={0}
+              max={100}
+              placeholder="5"
+              defaultValue={5}
+              {...register("sellTargetRoyaltyPercentage")}
             />
             <FormHelperText>
               A Percentage of coin sales that will be sent to your wallet. We

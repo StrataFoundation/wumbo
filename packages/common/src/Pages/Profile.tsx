@@ -1,6 +1,7 @@
 import React from "react";
 import { Link } from "react-router-dom";
 import { PublicKey } from "@solana/web3.js";
+import { useQuery as apolloUseQuery, gql } from "@apollo/client";
 import {
   VStack,
   HStack,
@@ -16,31 +17,26 @@ import {
   Link as PlainLink,
 } from "@chakra-ui/react";
 import { HiOutlinePencilAlt } from "react-icons/hi";
-import { useClaimedTokenRef, useClaimedTokenRefKey } from "../utils/tokenRef";
-import { Spinner } from "../Spinner";
-import { useAccount } from "../utils/account";
-import { TokenBonding } from "../utils/deserializers/spl-token-bonding";
 import {
-  TokenRef,
-  ITokenWithMeta,
-  supplyAsNum,
+  useErrorHandler,
+  useTokenRef,
+  useTokenBonding,
   useBondingPricing,
-  useFiatPrice,
   useMint,
-  useOwnedAmount,
-  useQuery,
-  useReverseTwitter,
+  useFiatPrice,
+  useClaimedTokenRef,
+  useClaimedTokenRefKey,
   useTokenMetadata,
-  useUserTokensWithMeta,
-  useClaimLink,
-} from "../utils";
+  supplyAsNum,
+} from "@strata-foundation/react";
+import { ITokenWithMetaAndAccount } from "@strata-foundation/spl-token-collective";
+import { Spinner } from "../Spinner";
+import { useQuery, useReverseTwitter, useUserTokensWithMeta } from "../utils";
 import { StatCard, StatCardWithIcon } from "../StatCard";
 import { MetadataAvatar, useWallet } from "..";
 import { TokenLeaderboard } from "../Leaderboard/TokenLeaderboard";
 import { NftListRaw } from "../Nft";
 import { TROPHY_CREATOR } from "../constants/globals";
-import { handleErrors } from "../contexts";
-import { useQuery as apolloUseQuery, gql } from "@apollo/client";
 
 interface IProfileProps {
   tokenRefKey: PublicKey;
@@ -49,7 +45,7 @@ interface IProfileProps {
   wumNetWorthPath: string;
   onAccountClick?: (tokenRefKey: PublicKey) => void;
   onTradeClick?: () => void;
-  getNftLink: (t: ITokenWithMeta) => string;
+  getNftLink: (t: ITokenWithMetaAndAccount) => string;
   useClaimFlow: (handle: string | undefined | null) => IClaimFlowOutput;
 }
 
@@ -82,13 +78,12 @@ export const Profile = React.memo(
     topTokensPath,
     wumNetWorthPath,
   }: IProfileProps) => {
-    const { info: tokenRef, loading } = useAccount(tokenRefKey, TokenRef, true);
+    const { handleErrors } = useErrorHandler();
+    const { info: tokenRef, loading } = useTokenRef(tokenRefKey);
     const ownerWalletKey = tokenRef?.owner as PublicKey | undefined;
     const { info: walletTokenRef } = useClaimedTokenRef(ownerWalletKey);
-    const { info: tokenBonding, loading: tokenBondingLoading } = useAccount(
-      tokenRef?.tokenBonding,
-      TokenBonding
-    );
+    const { info: tokenBonding, loading: tokenBondingLoading } =
+      useTokenBonding(tokenRef?.tokenBonding);
     const {
       metadata,
       loading: loadingMetadata,
@@ -145,7 +140,7 @@ export const Profile = React.memo(
       return <Spinner />;
     }
 
-    function isTrophy(t: ITokenWithMeta): boolean {
+    function isTrophy(t: ITokenWithMetaAndAccount): boolean {
       return Boolean(
         t.data?.properties?.creators?.some(
           // @ts-ignore

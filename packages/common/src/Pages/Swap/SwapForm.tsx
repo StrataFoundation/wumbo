@@ -30,9 +30,11 @@ import {
   WUM_BONDING,
   useWallet,
   useFtxPayLink,
-  ITokenBonding,
 } from "../../";
-import { IPricingCurve } from "@strata-foundation/spl-token-bonding";
+import {
+  ITokenBonding,
+  IPricingCurve,
+} from "@strata-foundation/spl-token-bonding";
 
 export interface ISwapFormValues {
   topAmount: number;
@@ -158,8 +160,8 @@ export const SwapForm = ({
     if (topAmount && topAmount >= 0 && tokenBonding && curve) {
       const buyMax = curve.buyWithBaseAmount(
         +topAmount,
-        tokenBonding.baseRoyaltyPercentage,
-        tokenBonding.targetRoyaltyPercentage
+        tokenBonding.buyBaseRoyaltyPercentage,
+        tokenBonding.buyTargetRoyaltyPercentage
       );
 
       setValue("bottomAmount", roundToDecimals(buyMax, 9));
@@ -423,7 +425,12 @@ export const SwapForm = ({
                 </Tooltip>
               </HStack>
               <Flex>
-                {humanReadablePercentage(tokenBonding.baseRoyaltyPercentage)}%
+                {humanReadablePercentage(
+                  isBuying
+                    ? tokenBonding.buyBaseRoyaltyPercentage
+                    : tokenBonding.sellBaseRoyaltyPercentage
+                )}
+                %
               </Flex>
             </Flex>
             <Flex justify="space-between" alignItems="center">
@@ -446,7 +453,12 @@ export const SwapForm = ({
                 </Tooltip>
               </HStack>
               <Flex>
-                {humanReadablePercentage(tokenBonding.targetRoyaltyPercentage)}%
+                {humanReadablePercentage(
+                  isBuying
+                    ? tokenBonding.buyBaseRoyaltyPercentage
+                    : tokenBonding.sellBaseRoyaltyPercentage
+                )}
+                %
               </Flex>
             </Flex>
           </VStack>

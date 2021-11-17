@@ -1,46 +1,25 @@
+import React from "react";
+import { useHistory, useParams } from "react-router-dom";
+import { useAsync } from "react-async-hook";
+import { useForm } from "react-hook-form";
 import {
   Text,
   HStack,
   VStack,
   Center,
-  Box,
   FormLabel,
   Input,
   FormControl,
   InputRightElement,
   InputGroup,
-  InputLeftElement,
   Circle,
-  Textarea,
   Button,
   Alert,
   AlertIcon,
   Icon,
   Flex,
-  ScaleFade,
 } from "@chakra-ui/react";
 import { PublicKey, Transaction } from "@solana/web3.js";
-import { decodeMetadata } from "@wum.bo/spl-utils";
-import { Notification } from "../Notification";
-import { handleErrors, useProvider, useWallet } from "../contexts";
-import React, { useMemo } from "react";
-import { useAsync } from "react-async-hook";
-import { useForm } from "react-hook-form";
-import { useHistory, useParams } from "react-router-dom";
-import { Spinner } from "../Spinner";
-import { Avatar } from "../Avatar";
-import {
-  getImage,
-  useAccount,
-  useAssociatedAccount,
-  useAssociatedTokenAddress,
-  useClaimedTokenRef,
-  useFiatPrice,
-  useMint,
-  useOwnedAmount,
-  useSolPrice,
-  useTokenMetadata,
-} from "../utils";
 import {
   AccountLayout,
   ASSOCIATED_TOKEN_PROGRAM_ID,
@@ -49,14 +28,34 @@ import {
 } from "@solana/spl-token";
 import { AiOutlineExclamation } from "react-icons/ai";
 import { BiCheck } from "react-icons/bi";
-import { useEstimatedFees, usePublicKey } from "../hooks";
 import * as yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
 import toast from "react-hot-toast";
+import { decodeMetadata } from "@wum.bo/spl-utils";
+import {
+  useErrorHandler,
+  useAccount,
+  useTokenMetadata,
+  useAssociatedAccount,
+  useAssociatedTokenAddress,
+  useClaimedTokenRef,
+  useMint,
+  useFiatPrice,
+  useOwnedAmount,
+  useSolPrice,
+  useEstimatedFees,
+  usePublicKey,
+} from "@strata-foundation/react";
+import { Notification } from "../Notification";
+import { useProvider, useWallet } from "../contexts";
+import { Spinner } from "../Spinner";
+import { Avatar } from "../Avatar";
+import { getImage } from "../utils";
 
 type FormValues = { amount: number; recipient: string };
 
 export const Send = ({ finishRedirectUrl }: { finishRedirectUrl: string }) => {
+  const { handleErrors } = useErrorHandler();
   const history = useHistory();
   const params = useParams<{ mint: string | undefined }>();
   const mint = usePublicKey(params.mint);
