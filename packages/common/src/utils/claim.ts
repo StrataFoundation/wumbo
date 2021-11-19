@@ -1,30 +1,29 @@
 import { useState } from "react";
-import { useAsync, useAsyncCallback } from "react-async-hook";
-import { TokenRef, WumboInstance } from "./deserializers/spl-wumbo";
-import { useConnection } from "../contexts/connection";
-import { useWallet } from "../contexts/walletContext";
-import { createTestTld, getTld } from "./twitter";
-import { useAccount, useAccountFetchCache } from "./account";
-import {
-  DEV_TWITTER_TLD,
-  DEV_TWITTER_VERIFIER,
-  IS_DEV,
-  TWITTER_REGISTRAR_SERVER_URL,
-  WUMBO_INSTANCE_KEY,
-} from "../constants/globals";
+import { useAsyncCallback } from "react-async-hook";
 import {
   Connection,
   PublicKey,
   sendAndConfirmRawTransaction,
-  sendAndConfirmTransaction,
   Transaction,
 } from "@solana/web3.js";
-import { getTwitterRegistryKey, getTwitterRegistry } from "../utils";
-import { usePrograms } from "./programs";
 import {
+  useStrataSdks,
+  useAccountFetchCache,
   getTwitterClaimedTokenRefKey,
   getTwitterUnclaimedTokenRefKey,
-} from "./tokenRef";
+} from "@strata-foundation/react";
+import { ICreateSocialTokenArgs } from "@strata-foundation/spl-token-collective";
+import { useConnection } from "../contexts/connection";
+import { useWallet } from "../contexts/walletContext";
+import { createTestTld, getTld } from "./twitter";
+import {
+  DEV_TWITTER_VERIFIER,
+  IS_DEV,
+  TWITTER_REGISTRAR_SERVER_URL,
+  WUMBO_INSTANCE_KEY,
+  WUM_BONDING,
+} from "../constants/globals";
+import { getTwitterRegistryKey, getTwitterRegistry } from "../utils";
 import { WalletAdapter } from "@solana/wallet-adapter-base";
 import axios from "axios";
 import { createVerifiedTwitterRegistry } from "./testableNameServiceTwitter";
@@ -103,6 +102,7 @@ export async function claimTwitterHandle({
     }
   }
 }
+
 export function useClaimTwitterHandle({
   redirectUri,
   code,
@@ -141,16 +141,11 @@ interface CreateState {
 }
 
 export function useCreateOrClaimCoin(): CreateState {
+  const { tokenCollectiveSdk } = useStrataSdks();
   const cache = useAccountFetchCache();
   const connection = useConnection();
-  const { adapter, publicKey } = useWallet();
+  const { publicKey } = useWallet();
   const [creating, setCreating] = useState<boolean>(false);
-  const { info: wumboInstance } = useAccount(
-    WUMBO_INSTANCE_KEY,
-    WumboInstance,
-    true
-  );
-  const { splWumboProgram } = usePrograms();
 
   async function exec(twitterHandle: string) {
     let result;
@@ -160,6 +155,7 @@ export function useCreateOrClaimCoin(): CreateState {
         connection,
         twitterHandle
       );
+
       const unclaimedKey = await getTwitterUnclaimedTokenRefKey(twitterHandle);
 
       const twitterName = await getTwitterRegistryKey(
@@ -178,15 +174,25 @@ export function useCreateOrClaimCoin(): CreateState {
         const isOwner = publicKey && owner.equals(publicKey);
         console.log("Creator does not exist, creating");
 
-        const args = {
-          wumbo: WUMBO_INSTANCE_KEY,
-          tokenName: twitterHandle,
+        const args: ICreateSocialTokenArgs = {
+          collective: WUMBO_INSTANCE_KEY,
+          name: isOwner ? undefined : twitterName,
           // Only claim it as my own if this is my handle
           owner: isOwner ? owner : undefined,
-          name: isOwner ? undefined : twitterName,
-          nameParent: await getTld(),
+          metadata: {
+            name: twitterHandle,
+            symbol: isOwner ? twitterHandle.slice(0, 10) : "UNCLAIMED",
+          },
+          tokenBondingParams: {
+            curve: WUM_BONDING,
+            buyBaseRoyaltyPercentage: 10,
+            buyTargetRoyaltyPercentage: 5,
+            sellBaseRoyaltyPercentage: 0,
+            sellTargetRoyaltyPercentage: 0,
+          },
         };
-        const { tokenRef } = await splWumboProgram!.createSocialToken(args);
+
+        const { tokenRef } = await tokenCollectiveSdk!.createSocialToken(args);
         result = {
           tokenRef,
           owner,
@@ -197,14 +203,18 @@ export function useCreateOrClaimCoin(): CreateState {
           owner,
         };
       } else {
-        const creator = TokenRef(unclaimedKey, unclaimedAccount!);
+        const creator = tokenCollectiveSdk?.tokenRefDecoder(
+          unclaimedKey,
+          unclaimedAccount!
+        );
+
         result = {
           tokenRef: creator!.publicKey,
           owner,
         };
 
-        if (!creator.isClaimed) {
-          await splWumboProgram!.claimSocialToken({
+        if (!creator?.isClaimed) {
+          await tokenCollectiveSdk!.claimSocialToken({
             owner,
             tokenRef: unclaimedKey,
             symbol: twitterHandle.slice(0, 10),
