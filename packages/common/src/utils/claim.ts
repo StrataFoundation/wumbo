@@ -186,7 +186,7 @@ export function useCreateOrClaimCoin(): CreateState {
           tokenBondingParams: {
             curve: WUM_BONDING,
             buyBaseRoyaltyPercentage: 10,
-            buyTargetRoyaltyPercentage: 5,
+            buyTargetRoyaltyPercentage: 0,
             sellBaseRoyaltyPercentage: 0,
             sellTargetRoyaltyPercentage: 0,
           },

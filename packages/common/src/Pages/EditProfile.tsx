@@ -20,8 +20,8 @@ import {
   useTokenMetadata,
   useClaimedTokenRef,
   useErrorHandler,
+  useStrataSdks,
 } from "@strata-foundation/react";
-import { SetMetadataArgs, useSetMetadata } from "../utils/metaplex";
 import { TokenPill } from "../TokenPill";
 import { Avatar } from "../Avatar";
 import { useWallet } from "../contexts";
@@ -70,14 +70,14 @@ export const EditProfile = React.memo(
     const { name = "", symbol = "", image } = watch();
     const { setMetadata, state, error } = useSetMetadata(tokenRef?.publicKey);
 
-    handleErrors(tokenMetadataError, error);
-
+    handleErrors(tokenMetadataError);
     const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
       setValue("image", e.target.files![0] || null);
     };
 
     const handleOnSubmit = async (values: SetMetadataArgs) => {
       const result = await setMetadata(values);
+
       if (result) {
         onComplete(result);
       }
