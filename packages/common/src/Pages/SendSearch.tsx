@@ -1,10 +1,5 @@
 import React, { useEffect, useMemo, useState } from "react";
-import { ITokenWithMetaAndAccount, useUserTokensWithMeta } from "../utils";
-import { useWallet } from "../contexts";
-import { TokenInfo } from "./Wallet";
-import { BiSearch } from "react-icons/bi";
-import { Spinner } from "../Spinner";
-import { WUMBO_INSTANCE_KEY } from "../constants";
+import { useHistory } from "react-router-dom";
 import {
   StackDivider,
   Icon,
@@ -17,7 +12,12 @@ import {
 } from "@chakra-ui/react";
 import { RiCoinLine } from "react-icons/ri";
 import Fuse from "fuse.js";
-import { useHistory } from "react-router-dom";
+import { ITokenWithMetaAndAccount, useUserTokensWithMeta } from "../utils";
+import { useWallet } from "../contexts";
+import { TokenInfo } from "./Wallet";
+import { BiSearch } from "react-icons/bi";
+import { Spinner } from "../Spinner";
+import { WUMBO_INSTANCE_KEY } from "../constants";
 
 const SearchError = ({
   title = "",
