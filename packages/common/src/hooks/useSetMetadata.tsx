@@ -47,9 +47,10 @@ const getFileFromUrl = async (
 export const useSetMetadata = (
   tokenRefKey: PublicKey | undefined
 ): [
-  (args: ISetMetadataArgs) => Promise<{ metadataAccount: PublicKey } | void>,
+  (
+    args: ISetMetadataArgs
+  ) => Promise<{ metadataAccount: PublicKey | undefined } | void>,
   {
-    data: PublicKey | undefined;
     loading: boolean;
     loadingState: MetadataFiniteState;
     error: Error | undefined;
@@ -60,7 +61,6 @@ export const useSetMetadata = (
   const { tokenCollectiveSdk, tokenMetadataSdk } = useStrataSdks();
   const [loading, setLoading] = useState<boolean>(false);
   const [loadingState, setLoadingState] = useState<MetadataFiniteState>("idle");
-  const [data, setData] = useState<PublicKey | undefined>();
 
   const { info: tokenRef } = useTokenRef(tokenRefKey);
   const { info: tokenBonding } = useTokenBonding(tokenRef?.tokenBonding);
@@ -159,7 +159,9 @@ export const useSetMetadata = (
         );
         await connection.confirmTransaction(txId, "max");
 
-        setData(metadataAccountKey);
+        return {
+          metadataAccount: metadataAccountKey,
+        };
       } finally {
         setLoading(false);
         setLoadingState("idle");
@@ -170,6 +172,6 @@ export const useSetMetadata = (
   const { execute, error } = useAsyncCallback(exec);
   return [
     execute,
-    { data, loading, loadingState, error: tokenMetadataError || error },
+    { loading, loadingState, error: tokenMetadataError || error },
   ];
 };

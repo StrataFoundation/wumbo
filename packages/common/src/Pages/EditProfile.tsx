@@ -20,8 +20,8 @@ import {
   useTokenMetadata,
   useClaimedTokenRef,
   useErrorHandler,
-  useStrataSdks,
 } from "@strata-foundation/react";
+import { ISetMetadataArgs, useSetMetadata } from "../hooks";
 import { TokenPill } from "../TokenPill";
 import { Avatar } from "../Avatar";
 import { useWallet } from "../contexts";
@@ -56,7 +56,7 @@ export const EditProfile = React.memo(
       setValue,
       reset,
       formState: { errors },
-    } = useForm<SetMetadataArgs>({
+    } = useForm<ISetMetadataArgs>({
       resolver: yupResolver(validationSchema),
     });
 
@@ -68,18 +68,20 @@ export const EditProfile = React.memo(
       error: tokenMetadataError,
     } = useTokenMetadata(tokenBonding?.targetMint);
     const { name = "", symbol = "", image } = watch();
-    const { setMetadata, state, error } = useSetMetadata(tokenRef?.publicKey);
+    const [setMetadata, { loading, loadingState, error }] = useSetMetadata(
+      tokenRef?.publicKey
+    );
 
     handleErrors(tokenMetadataError);
     const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
       setValue("image", e.target.files![0] || null);
     };
 
-    const handleOnSubmit = async (values: SetMetadataArgs) => {
+    const handleOnSubmit = async (values: ISetMetadataArgs) => {
       const result = await setMetadata(values);
 
-      if (result) {
-        onComplete(result);
+      if (result && result.metadataAccount) {
+        onComplete(result as any);
       }
     };
 
@@ -109,7 +111,7 @@ export const EditProfile = React.memo(
         setImgUrl(metadataImage);
       }
 
-      if (state == "idle") {
+      if (loadingState == "idle") {
         reset({
           name: metadata?.data.name,
           symbol: metadata?.data.symbol,
@@ -269,14 +271,14 @@ export const EditProfile = React.memo(
             w="full"
             colorScheme="indigo"
             size="lg"
-            isLoading={state != "idle"}
+            isLoading={loading}
             type="submit"
             loadingText={
               awaitingApproval
                 ? "Awaiting Approval"
-                : state === "submit-solana"
+                : loadingState === "submit-solana"
                 ? "Sending to Solana"
-                : state === "submit-arweave"
+                : loadingState === "submit-arweave"
                 ? "Sending to Arweave"
                 : "Gathering Files"
             }
