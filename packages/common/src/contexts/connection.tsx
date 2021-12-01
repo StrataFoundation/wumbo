@@ -1,7 +1,7 @@
-import { useLocalStorage } from "../utils";
-import { SOLANA_API_URL } from "../constants";
 import React, { useContext, useMemo, useEffect } from "react";
 import { Connection, Keypair } from "@solana/web3.js";
+import { useLocalStorage } from "@strata-foundation/react";
+import { SOLANA_API_URL } from "../constants";
 import { DEFAULT_COMMITMENT } from "../constants/globals";
 
 interface ConnectionConfig {

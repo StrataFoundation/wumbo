@@ -16,15 +16,14 @@ import {
   WalletNotReadyError,
 } from "@solana/wallet-adapter-base";
 import { Wallet, WalletName } from "@solana/wallet-adapter-wallets";
+import { Provider } from "@project-serum/anchor";
 import {
   PublicKey,
   Transaction,
-  TransactionInstruction,
   sendAndConfirmRawTransaction,
 } from "@solana/web3.js";
-import { useLocalStorage } from "../utils";
+import { useLocalStorage } from "@strata-foundation/react";
 import { useConnection } from "../contexts/connection";
-import { Provider } from "@wum.bo/anchor";
 
 export interface IWalletProviderProps {
   children: ReactNode;

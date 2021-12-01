@@ -9,7 +9,8 @@ import {
   StackDirection,
 } from "@chakra-ui/react";
 import { useErrorHandler, useTokenMetadata } from "@strata-foundation/react";
-import { Spinner, ITokenBonding } from "../";
+import { ITokenBonding } from "@strata-foundation/spl-token-bonding";
+import { Spinner } from "./";
 
 export interface AvatarProps extends ChakraAvatarProps {
   direction?: StackDirection;

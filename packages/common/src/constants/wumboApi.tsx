@@ -1,10 +1,4 @@
-import {
-  ApolloClient,
-  InMemoryCache,
-  ApolloProvider,
-  useQuery,
-  gql,
-} from "@apollo/client";
+import { ApolloClient, InMemoryCache } from "@apollo/client";
 import { WUMBO_API_URL } from "./globals";
 
 export const wumboApi = new ApolloClient({
