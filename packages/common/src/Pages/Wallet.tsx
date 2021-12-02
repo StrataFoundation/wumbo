@@ -21,10 +21,13 @@ import {
   useSolOwnedAmount,
   useTokenMetadata,
 } from "@strata-foundation/react";
-import { useUserTokensWithMeta, ITokenWithMetaAndAccount } from "../utils";
-import { useWumNetWorth } from "../hooks";
+import {
+  ITokenWithMetaAndAccount,
+  SplTokenCollective,
+} from "@strata-foundation/spl-token-collective";
+import { useWumNetWorth, useUserTokensWithMeta } from "../hooks";
 import { useWallet } from "../contexts/walletContext";
-import { SOL_TOKEN, WUMBO_INSTANCE_KEY, WUM_TOKEN } from "../constants/globals";
+import { SOL_TOKEN } from "../constants/globals";
 import { Avatar } from "../Avatar";
 import { Notification } from "../Notification";
 import { Spinner } from "../Spinner";
@@ -103,9 +106,9 @@ export const TokenInfo = React.memo(
     getTokenLink: (tokenWithMeta: ITokenWithMetaAndAccount) => string;
   }) => {
     const { metadata, image, tokenRef, account } = tokenWithMeta;
-    const wumPrice = useFiatPrice(WUM_TOKEN);
+    const openPrice = useFiatPrice(SplTokenCollective.OPEN_COLLECTIVE_MINT_ID);
     const { curve } = useBondingPricing(tokenRef?.tokenBonding);
-    const fiatPrice = wumPrice && curve && wumPrice * curve.current();
+    const fiatPrice = openPrice && curve && openPrice * curve.current();
     const ownedAmount = useOwnedAmount(account?.mint);
 
     return (
@@ -156,14 +159,17 @@ export const Wallet = React.memo(
     wumLeaderboardLink: string;
     sendLink: string;
   }) => {
-    const { metadata: wumMetadata, image: wumImage } =
-      useTokenMetadata(WUM_TOKEN);
+    const { metadata: wumMetadata, image: wumImage } = useTokenMetadata(
+      SplTokenCollective.OPEN_COLLECTIVE_MINT_ID
+    );
     const { amount: solOwned } = useSolOwnedAmount();
     const solPrice = useFiatPrice(SOL_TOKEN);
-    const wumPrice = useFiatPrice(WUM_TOKEN);
-    const wumOwned = useOwnedAmount(WUM_TOKEN);
+    const openPrice = useFiatPrice(SplTokenCollective.OPEN_COLLECTIVE_MINT_ID);
+    const openOwned = useOwnedAmount(
+      SplTokenCollective.OPEN_COLLECTIVE_MINT_ID
+    );
     const { publicKey } = useWallet();
-    const { result: tokens, loading } = useUserTokensWithMeta(
+    const { data: tokens, loading } = useUserTokensWithMeta(
       publicKey || undefined
     );
     const { wumNetWorth } = useWumNetWorth(publicKey || undefined);
@@ -193,9 +199,9 @@ export const Wallet = React.memo(
               </HStack>
               <HStack>
                 <Text fontSize={16}>WUM Net Worth</Text>
-                {wumNetWorth && wumPrice && (
+                {wumNetWorth && openPrice && (
                   <Text fontSize={16} color="gray.400" mt={0}>
-                    (~${(wumPrice * wumNetWorth).toFixed(2)})
+                    (~${(openPrice * wumNetWorth).toFixed(2)})
                   </Text>
                 )}
               </HStack>
@@ -248,11 +254,11 @@ export const Wallet = React.memo(
                   <HStack align="center" spacing={1}>
                     <Icon as={RiCoinLine} w="16px" h="16px" />
                     <Text>
-                      {wumOwned?.toFixed(2)} {wumMetadata?.data.symbol}
+                      {openOwned?.toFixed(2)} {wumMetadata?.data.symbol}
                     </Text>
                   </HStack>
                   <Text color="gray.500">
-                    (~${((wumPrice || 0) * (wumOwned || 0)).toFixed(2)})
+                    (~${((openPrice || 0) * (openOwned || 0)).toFixed(2)})
                   </Text>
                 </VStack>
               </Link>
@@ -294,7 +300,8 @@ export const Wallet = React.memo(
             tokens
               ?.filter(
                 (t) =>
-                  !!t.tokenRef && t.tokenRef.wumbo.equals(WUMBO_INSTANCE_KEY)
+                  !!t.tokenRef &&
+                  t.tokenRef.collective?.equals(SplTokenCollective.ID)
               )
               .sort((a, b) =>
                 a.metadata!.data.name.localeCompare(b.metadata!.data.name)
