@@ -1,7 +1,7 @@
 import React from "react";
-import { Flex, Box, Tag, Text } from "@chakra-ui/react";
-import { ITokenWithMeta } from "../utils/metaplex/nftMetadataHooks";
 import { Link } from "react-router-dom";
+import { Flex, Box, Tag, Text } from "@chakra-ui/react";
+import { ITokenWithMeta } from "@strata-foundation/spl-utils";
 import { Nft } from "./Nft";
 
 export const NftCard = React.memo(
@@ -31,6 +31,7 @@ export const NftCard = React.memo(
       >
         <Box w={20} height={20}>
           {token.data && (
+            // @ts-ignore
             <Nft image={token.image} meshEnabled={false} data={token.data} />
           )}
         </Box>

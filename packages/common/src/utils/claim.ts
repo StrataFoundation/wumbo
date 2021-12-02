@@ -192,9 +192,12 @@ export function useCreateOrClaimCoin(): CreateState {
           },
         };
 
-        const { tokenRef } = await tokenCollectiveSdk!.createSocialToken(args);
+        const { mintTokenRef } = await tokenCollectiveSdk!.createSocialToken(
+          args
+        );
+
         result = {
-          tokenRef,
+          tokenRef: mintTokenRef,
           owner,
         };
       } else if (claimedAccount) {

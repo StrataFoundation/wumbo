@@ -1,6 +1,6 @@
 import React from "react";
 import { IconButton, Flex, VStack, Icon } from "@chakra-ui/react";
-import { ITokenWithMeta } from "../utils";
+import { ITokenWithMeta } from "@strata-foundation/spl-utils";
 import { Nft } from "./Nft";
 
 export const NftSmallView = React.memo(
@@ -25,8 +25,8 @@ export const NftSmallView = React.memo(
         {token.data && (
           <Nft
             image={token.image}
-            data={token.data}
             // @ts-ignore
+            data={token.data}
             imageProps={{ w: "110px", m: "auto", rounded: "lg" }}
           />
         )}

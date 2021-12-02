@@ -45,6 +45,7 @@ export const Creator = React.memo(
       </>
     );
 
+    // @ts-ignore
     const link = getCreatorLink(creator, metadata, tokenRef);
 
     if (link.includes("http")) {
