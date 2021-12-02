@@ -4,13 +4,13 @@ import {
   useErrorHandler,
   useBondingPricing,
   useFiatPrice,
+  useTokenMetadata,
 } from "@strata-foundation/react";
 import {
   ITokenBonding,
   IPricingCurve,
 } from "@strata-foundation/spl-token-bonding";
 import { Spinner } from "./";
-import { useTokenMetadata } from "./utils/metaplex";
 import { MetadataAvatar } from "./Avatar";
 import { useHistory } from "react-router-dom";
 

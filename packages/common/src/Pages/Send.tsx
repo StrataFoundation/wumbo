@@ -2,6 +2,29 @@ import React from "react";
 import { useHistory, useParams } from "react-router-dom";
 import { useAsync } from "react-async-hook";
 import { useForm } from "react-hook-form";
+import { PublicKey, Transaction } from "@solana/web3.js";
+import {
+  AccountLayout,
+  ASSOCIATED_TOKEN_PROGRAM_ID,
+  Token,
+  TOKEN_PROGRAM_ID,
+} from "@solana/spl-token";
+import * as yup from "yup";
+import { yupResolver } from "@hookform/resolvers/yup";
+import toast from "react-hot-toast";
+import {
+  useErrorHandler,
+  useTokenMetadata,
+  useAssociatedAccount,
+  useAssociatedTokenAddress,
+  useClaimedTokenRef,
+  useMint,
+  useFiatPrice,
+  useOwnedAmount,
+  useSolPrice,
+  useEstimatedFees,
+  usePublicKey,
+} from "@strata-foundation/react";
 import {
   Text,
   HStack,
@@ -19,33 +42,8 @@ import {
   Icon,
   Flex,
 } from "@chakra-ui/react";
-import { PublicKey, Transaction } from "@solana/web3.js";
-import {
-  AccountLayout,
-  ASSOCIATED_TOKEN_PROGRAM_ID,
-  Token,
-  TOKEN_PROGRAM_ID,
-} from "@solana/spl-token";
 import { AiOutlineExclamation } from "react-icons/ai";
 import { BiCheck } from "react-icons/bi";
-import * as yup from "yup";
-import { yupResolver } from "@hookform/resolvers/yup";
-import toast from "react-hot-toast";
-import { decodeMetadata } from "@wum.bo/spl-utils";
-import {
-  useErrorHandler,
-  useAccount,
-  useTokenMetadata,
-  useAssociatedAccount,
-  useAssociatedTokenAddress,
-  useClaimedTokenRef,
-  useMint,
-  useFiatPrice,
-  useOwnedAmount,
-  useSolPrice,
-  useEstimatedFees,
-  usePublicKey,
-} from "@strata-foundation/react";
 import { Notification } from "../Notification";
 import { useProvider, useWallet } from "../contexts";
 import { Spinner } from "../Spinner";
@@ -115,9 +113,8 @@ export const Send = ({ finishRedirectUrl }: { finishRedirectUrl: string }) => {
   } = useTokenMetadata(mint);
 
   const { info: tokenRef, loading: refLoading } = useClaimedTokenRef(recipient);
-  const { info: metadata, loading: metadataLoading } = useAccount(
-    tokenRef?.tokenMetadata,
-    (_, acct) => decodeMetadata(acct.data)
+  const { metadata, loading: metadataLoading } = useTokenMetadata(
+    tokenRef?.tokenMetadata
   );
   const {
     result: image,
