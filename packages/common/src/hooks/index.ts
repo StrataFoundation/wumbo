@@ -3,3 +3,4 @@ export * from "./useTokenBondingInfo";
 export * from "./useTokenLargestAccounts";
 export * from "./useSetMetadata";
 export * from "./useUserTokenAccounts";
+export * from "./useUserTokensWithMeta";
