@@ -12,12 +12,15 @@ import {
 } from "@chakra-ui/react";
 import { RiCoinLine } from "react-icons/ri";
 import Fuse from "fuse.js";
-import { ITokenWithMetaAndAccount, useUserTokensWithMeta } from "../utils";
+import {
+  ITokenWithMetaAndAccount,
+  SplTokenCollective,
+} from "@strata-foundation/spl-token-collective";
+import { useUserTokensWithMeta } from "../hooks";
 import { useWallet } from "../contexts";
 import { TokenInfo } from "./Wallet";
 import { BiSearch } from "react-icons/bi";
 import { Spinner } from "../Spinner";
-import { WUMBO_INSTANCE_KEY } from "../constants";
 
 const SearchError = ({
   title = "",
@@ -49,7 +52,7 @@ export const SendSearch = React.memo(
     getSendLink: (tokenWithMeta: ITokenWithMetaAndAccount) => string;
   }) => {
     const { publicKey } = useWallet();
-    const { result: tokens, loading } = useUserTokensWithMeta(
+    const { data: tokens, loading } = useUserTokensWithMeta(
       publicKey || undefined
     );
     const [search, setSearch] = useState("");
@@ -60,7 +63,9 @@ export const SendSearch = React.memo(
       if (tokens) {
         const sorted = tokens
           ?.filter(
-            (t) => !!t.tokenRef && t.tokenRef.wumbo.equals(WUMBO_INSTANCE_KEY)
+            (t) =>
+              !!t.tokenRef &&
+              t.tokenRef.collective?.equals(SplTokenCollective.ID)
           )
           .sort((a, b) =>
             a.metadata!.data.name.localeCompare(b.metadata!.data.name)
