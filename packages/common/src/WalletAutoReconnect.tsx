@@ -1,7 +1,8 @@
-import { WalletName } from "@solana/wallet-adapter-wallets";
 import React, { useEffect } from "react";
+import { WalletName } from "@solana/wallet-adapter-wallets";
+import { useLocalStorage } from "@strata-foundation/react";
 import { useWallet } from "./contexts";
-import { useLocalStorage, usePrevious } from "./utils";
+import { usePrevious } from "./utils";
 
 export const WalletAutoReconnect: React.FC = () => {
   const { wallet, ready, select } = useWallet();
