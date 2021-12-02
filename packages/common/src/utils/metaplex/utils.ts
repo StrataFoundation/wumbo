@@ -1,6 +1,5 @@
 import {
   Creator,
-  Data,
   findProgramAddress,
   IMetadataExtension,
   MetadataCategory,
