@@ -8,7 +8,7 @@ export const useUserTokensWithMeta = (
   owner?: PublicKey
 ): {
   data: ITokenWithMetaAndAccount[];
-  loading: Boolean;
+  loading: boolean;
   error: Error | undefined;
 } => {
   const { tokenCollectiveSdk } = useStrataSdks();

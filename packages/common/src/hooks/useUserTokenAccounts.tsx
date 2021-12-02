@@ -9,12 +9,12 @@ export const useUserTokenAccounts = (
   owner?: PublicKey
 ): {
   data: TokenAccount[];
-  loading: Boolean;
+  loading: boolean;
   error: Error | undefined;
 } => {
   const connection = useConnection();
   const [data, setData] = useState<TokenAccount[]>([]);
-  const [loading, setLoading] = useState<Boolean>(false);
+  const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<Error | undefined>();
 
   useEffect(() => {

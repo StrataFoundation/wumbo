@@ -31,7 +31,8 @@ import {
 } from "@strata-foundation/react";
 import { ITokenWithMetaAndAccount } from "@strata-foundation/spl-token-collective";
 import { Spinner } from "../Spinner";
-import { useQuery, useReverseTwitter, useUserTokensWithMeta } from "../utils";
+import { useQuery, useReverseTwitter } from "../utils";
+import { useUserTokensWithMeta } from "../hooks";
 import { StatCard, StatCardWithIcon } from "../StatCard";
 import { MetadataAvatar, useWallet } from "..";
 import { TokenLeaderboard } from "../Leaderboard/TokenLeaderboard";
@@ -99,7 +100,7 @@ export const Profile = React.memo(
     const { data: { tokenRank } = {} } = apolloUseQuery<{
       tokenRank: number | undefined;
     }>(GET_TOKEN_RANK, {
-      variables: { tokenBonding: tokenRef?.tokenBonding.toBase58() },
+      variables: { tokenBonding: tokenRef?.tokenBonding?.toBase58() },
     });
 
     const mint = useMint(tokenBonding?.targetMint);
@@ -112,7 +113,7 @@ export const Profile = React.memo(
     const marketCap = (supply * coinPriceUsd).toFixed(2);
 
     const {
-      result: tokens,
+      data: tokens,
       loading: loadingCollectibles,
       error,
     } = useUserTokensWithMeta(ownerWalletKey);
