@@ -65,7 +65,9 @@ export const SendSearch = React.memo(
           ?.filter(
             (t) =>
               !!t.tokenRef &&
-              t.tokenRef.collective?.equals(SplTokenCollective.ID)
+              t.tokenRef.collective?.equals(
+                SplTokenCollective.OPEN_COLLECTIVE_ID
+              )
           )
           .sort((a, b) =>
             a.metadata!.data.name.localeCompare(b.metadata!.data.name)

@@ -20,8 +20,8 @@ import {
   DEV_TWITTER_VERIFIER,
   IS_DEV,
   TWITTER_REGISTRAR_SERVER_URL,
-  WUMBO_INSTANCE_KEY,
-  WUM_BONDING,
+  OPEN_COLLECTIVE_KEY,
+  OPEN_BONDING,
 } from "../constants/globals";
 import { getTwitterRegistryKey, getTwitterRegistry } from "../utils";
 import { WalletAdapter } from "@solana/wallet-adapter-base";
@@ -175,7 +175,7 @@ export function useCreateOrClaimCoin(): CreateState {
         console.log("Creator does not exist, creating");
 
         const args: ICreateSocialTokenArgs = {
-          collective: WUMBO_INSTANCE_KEY,
+          collective: OPEN_COLLECTIVE_KEY,
           name: isOwner ? undefined : twitterName,
           // Only claim it as my own if this is my handle
           owner: isOwner ? owner : undefined,
@@ -184,7 +184,7 @@ export function useCreateOrClaimCoin(): CreateState {
             symbol: isOwner ? twitterHandle.slice(0, 10) : "UNCLAIMED",
           },
           tokenBondingParams: {
-            curve: WUM_BONDING,
+            curve: OPEN_BONDING,
             buyBaseRoyaltyPercentage: 10,
             buyTargetRoyaltyPercentage: 0,
             sellBaseRoyaltyPercentage: 0,

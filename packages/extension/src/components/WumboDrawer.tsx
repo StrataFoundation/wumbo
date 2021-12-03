@@ -15,7 +15,7 @@ import {
   useWallet,
   replaceAll,
   Spinner,
-  WUM_BONDING,
+  OPEN_BONDING,
 } from "wumbo-common";
 import { useHistoryList } from "@/utils/history";
 import Logo from "../../public/assets/img/logo.svg";
@@ -231,7 +231,7 @@ WumboDrawer.Nav = () => {
           const replacedKeys = replaceAll(path, {
             ":tokenBondingKey":
               creatorInfo?.tokenBonding?.publicKey?.toBase58() ||
-              WUM_BONDING.toBase58(),
+              OPEN_BONDING.toBase58(),
             ":tokenRefKey": creatorInfo?.tokenRef?.publicKey.toBase58() || "",
             ":action": "buy",
           });

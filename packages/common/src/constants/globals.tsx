@@ -1,8 +1,5 @@
 import { Keypair, PublicKey } from "@solana/web3.js";
-import {
-  Token,
-  TOKEN_PROGRAM_ID as SPL_TOKEN_PROGRAM_ID,
-} from "@solana/spl-token";
+import { TOKEN_PROGRAM_ID as SPL_TOKEN_PROGRAM_ID } from "@solana/spl-token";
 
 export const DEFAULT_COMMITMENT = "processed";
 export const IS_DEV = process.env.REACT_APP_IS_DEV === "true";
@@ -42,10 +39,10 @@ export const TWITTER_REGISTRAR_SERVER_URL =
   process.env.REACT_APP_TWITTER_REGISTRAR_SERVER_URL!;
 
 // export const SOLANA_API_URL = "https://api.mainnet-beta.solana.com"
-export const WUM_BONDING = new PublicKey(process.env.REACT_APP_WUM_BONDING!);
-export const WUM_TOKEN = new PublicKey(process.env.REACT_APP_WUM_TOKEN!);
-export const WUMBO_INSTANCE_KEY: PublicKey = new PublicKey(
-  process.env.REACT_APP_WUMBO_INSTANCE_KEY!
+export const OPEN_BONDING = new PublicKey(process.env.REACT_APP_OPEN_BONDING!);
+export const OPEN_TOKEN = new PublicKey(process.env.REACT_APP_OPEN_TOKEN!);
+export const OPEN_COLLECTIVE_KEY = new PublicKey(
+  process.env.REACT_APP_OPEN_COLLECTIVE_KEY!
 );
 
 export const SOL_TOKEN = new PublicKey(

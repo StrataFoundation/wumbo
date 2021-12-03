@@ -16,7 +16,7 @@ import {
 } from "@strata-foundation/react";
 import {
   SOL_TOKEN,
-  WUM_TOKEN,
+  OPEN_TOKEN,
   useTokenBondingInfo,
   Spinner,
   SolanaIcon,
@@ -39,10 +39,10 @@ export const Swap = ({
 }: ISwapProps) => {
   const { handleErrors } = useErrorHandler();
   const {
-    metadata: wumMeta,
-    loading: wumMetaLoading,
-    error: wumMetaError,
-  } = useTokenMetadata(WUM_TOKEN);
+    metadata: openMeta,
+    loading: openMetaLoading,
+    error: openMetaError,
+  } = useTokenMetadata(OPEN_TOKEN);
   const [buy, { loading: buyLoading, error: buyError }] = useBuy();
   const [sell, { loading: sellLoading, error: sellError }] = useSell();
   const [internalError, setInternalError] = useState<Error | undefined>();
@@ -73,7 +73,7 @@ export const Swap = ({
   const ownedTarget = useOwnedAmount(tokenBonding?.targetMint);
 
   handleErrors(
-    wumMetaError,
+    openMetaError,
     buyError,
     feeError,
     sellError,
@@ -98,13 +98,13 @@ export const Swap = ({
   }, [tokenBonding, targetMint, curve, setSpendCap]);
 
   if (
-    wumMetaLoading ||
+    openMetaLoading ||
     tokenBondingLoading ||
     curveLoading ||
     solLoading ||
     !tokenBonding ||
     !curve ||
-    !wumMeta
+    !openMeta
   ) {
     return <Spinner />;
   }
@@ -119,18 +119,18 @@ export const Swap = ({
         publicKey: SOL_TOKEN,
       }
     : {
-        name: wumMeta.data.name,
-        ticker: wumMeta.data.symbol,
+        name: openMeta.data.name,
+        ticker: openMeta.data.symbol,
         icon: <WumboIcon w="full" h="full" />,
-        publicKey: WUM_TOKEN,
+        publicKey: OPEN_TOKEN,
       };
 
   const target = isBaseSol
     ? {
-        name: wumMeta.data.name,
-        ticker: wumMeta.data.symbol,
+        name: openMeta.data.name,
+        ticker: openMeta.data.symbol,
         icon: <WumboIcon w="full" h="full" />,
-        publicKey: WUM_TOKEN,
+        publicKey: OPEN_TOKEN,
       }
     : { name, ticker, icon, publicKey };
 
