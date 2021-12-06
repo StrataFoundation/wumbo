@@ -2,7 +2,7 @@ import React from "react";
 import AppContainer from "../common/AppContainer";
 import routes from "../../constants/routes";
 import { Alert, AlertIcon } from "@chakra-ui/react";
-import { Claim, useQuery, } from "wumbo-common";
+import { Claim, useQuery } from "wumbo-common";
 import { useHistory } from "react-router-dom";
 import WalletRedirect from "../Wallet/WalletRedirect";
 

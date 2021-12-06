@@ -12,7 +12,12 @@ export const WalletSelect = () => {
       {adapter?.connected ? (
         <VStack spacing={4} alignItems="start">
           <span className="test-sm">Wallet Connected!</span>
-          <Button w="full" size="lg" colorScheme="indigo" onClick={adapter?.disconnect}>
+          <Button
+            w="full"
+            size="lg"
+            colorScheme="indigo"
+            onClick={adapter?.disconnect}
+          >
             Disconnect
           </Button>
         </VStack>

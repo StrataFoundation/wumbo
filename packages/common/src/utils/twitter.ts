@@ -54,10 +54,7 @@ async function sendTransaction(
   });
 }
 
-export async function createTestTld(
-  connection: Connection,
-  wallet: Wallet
-) {
+export async function createTestTld(connection: Connection, wallet: Wallet) {
   if (IS_DEV) {
     const tld = await getNameAccountKey(await getHashedName(DEV_TWITTER_TLD));
     const account = await connection.getAccountInfo(tld);

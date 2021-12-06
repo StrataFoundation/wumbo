@@ -2,7 +2,7 @@ import React, { Fragment, useMemo } from "react";
 import {
   Spinner,
   ViewNft as CommonViewNft,
-  useTokenLargestAccounts
+  useTokenLargestAccounts,
 } from "wumbo-common";
 import { useTokenMetadata, useTokenAccount } from "@strata-foundation/react";
 import { useParams } from "react-router-dom";
@@ -23,9 +23,7 @@ export const ViewNftRoute = () => {
     result: res2,
     error: err2,
   } = useTokenLargestAccounts(token);
-  const { loading: loading3, info } = useTokenAccount(
-    res2?.value[0]?.address
-  );
+  const { loading: loading3, info } = useTokenAccount(res2?.value[0]?.address);
   const loading = loading1 || loading2 || loading3;
 
   if (loading) {

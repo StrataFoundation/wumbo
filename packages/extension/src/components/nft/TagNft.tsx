@@ -1,8 +1,9 @@
+import { TagNft as CommonTagNft, useTokenLargestAccounts } from "wumbo-common";
 import {
-  TagNft as CommonTagNft,
-  useTokenLargestAccounts
-} from "wumbo-common";
-import { useTokenMetadata, useTokenAccount, useErrorHandler } from "@strata-foundation/react";
+  useTokenMetadata,
+  useTokenAccount,
+  useErrorHandler,
+} from "@strata-foundation/react";
 import React, { Fragment, useMemo } from "react";
 import { WumboDrawer } from "../WumboDrawer";
 import { useParams } from "react-router-dom";
@@ -22,9 +23,7 @@ export const TagNft: React.FC = () => {
     result: res2,
     error: err2,
   } = useTokenLargestAccounts(token);
-  const { loading: loading3, info } = useTokenAccount(
-    res2?.value[0]?.address
-  );
+  const { loading: loading3, info } = useTokenAccount(res2?.value[0]?.address);
   const loading = loading1 || loading2 || loading3;
 
   handleErrors(err1, err2);

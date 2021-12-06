@@ -4,7 +4,7 @@ import {
   useSolOwnedAmount,
   useRentExemptAmount,
   useErrorHandler,
-  useFtxPayLink
+  useFtxPayLink,
 } from "@strata-foundation/react";
 import { useClaimTwitterHandle, useCreateOrClaimCoin } from "../utils/claim";
 import { TWITTER_REGISTRY_SIZE } from "../utils/twitter";

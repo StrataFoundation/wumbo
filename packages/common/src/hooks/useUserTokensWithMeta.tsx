@@ -1,6 +1,9 @@
 import { useState, useEffect } from "react";
 import { PublicKey } from "@solana/web3.js";
-import { useStrataSdks, useWalletTokenAccounts } from "@strata-foundation/react";
+import {
+  useStrataSdks,
+  useWalletTokenAccounts,
+} from "@strata-foundation/react";
 import { ITokenWithMetaAndAccount } from "@strata-foundation/spl-token-collective";
 
 export const useUserTokensWithMeta = (

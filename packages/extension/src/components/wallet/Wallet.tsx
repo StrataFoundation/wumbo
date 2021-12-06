@@ -6,11 +6,7 @@ import {
   wumNetWorthPath,
   routes,
 } from "@/constants/routes";
-import {
-  Wallet as CommonWallet,
-  OPEN_BONDING,
-  useWallet,
-} from "wumbo-common";
+import { Wallet as CommonWallet, OPEN_BONDING, useWallet } from "wumbo-common";
 import { useFtxPayLink } from "@strata-foundation/react";
 import { WumboDrawer } from "../WumboDrawer";
 

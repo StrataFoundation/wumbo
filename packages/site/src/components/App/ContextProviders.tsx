@@ -5,9 +5,13 @@ import {
   wumboApi,
   ThemeProvider,
   Notification,
-  SOLANA_API_URL
+  SOLANA_API_URL,
 } from "wumbo-common";
-import { AccountProvider, SolPriceProvider, ErrorHandlerProvider } from "@strata-foundation/react";
+import {
+  AccountProvider,
+  SolPriceProvider,
+  ErrorHandlerProvider,
+} from "@strata-foundation/react";
 import { ApolloProvider } from "@apollo/client";
 import {
   ConnectionProvider,
@@ -54,18 +58,20 @@ export const ContextProviders: React.FC = ({ children }) => {
 
   return (
     <ConnectionProvider endpoint={SOLANA_API_URL}>
-      <ErrorHandlerProvider
-        onError={onError}
-      >
+      <ErrorHandlerProvider onError={onError}>
         <ApolloProvider client={wumboApi}>
           <AccountProvider commitment="confirmed">
-              <ThemeProvider>
-                <SolPriceProvider>
-                  <WalletProvider wallets={wallets} onError={console.error} autoConnect>
-                    {children}
-                  </WalletProvider>
-                </SolPriceProvider>
-              </ThemeProvider>
+            <ThemeProvider>
+              <SolPriceProvider>
+                <WalletProvider
+                  wallets={wallets}
+                  onError={console.error}
+                  autoConnect
+                >
+                  {children}
+                </WalletProvider>
+              </SolPriceProvider>
+            </ThemeProvider>
           </AccountProvider>
         </ApolloProvider>
       </ErrorHandlerProvider>

@@ -2,10 +2,7 @@ import React from "react";
 import { PublicKey } from "@solana/web3.js";
 import { useParams } from "react-router";
 import AppContainer from "../../common/AppContainer";
-import {
-  Profile,
-  Spinner
-} from "wumbo-common";
+import { Profile, Spinner } from "wumbo-common";
 import { ITokenWithMetaAndAccount } from "@strata-foundation/spl-token-collective";
 import { useClaimedTokenRefKey } from "@strata-foundation/react";
 import { useHistory } from "react-router-dom";
@@ -54,8 +51,8 @@ export const ViewProfileRoute = () => {
           history.push(profilePath(tokenBondingKey));
         }}
         getNftLink={(token: ITokenWithMetaAndAccount) => {
-          const mint = token?.metadata?.mint
-          return mint ? nftPath(new PublicKey(mint)) : ""
+          const mint = token?.metadata?.mint;
+          return mint ? nftPath(new PublicKey(mint)) : "";
         }}
       />
     </AppContainer>

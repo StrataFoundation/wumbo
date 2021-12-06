@@ -1,7 +1,11 @@
 import React, { useCallback, useEffect, useState } from "react";
 import { Image, ImageProps } from "@chakra-ui/react";
 import { MeshViewer } from "./MeshViewer";
-import { IMetadataExtension, MetadataFile, getImageFromMeta } from "@strata-foundation/spl-utils";
+import {
+  IMetadataExtension,
+  MetadataFile,
+  getImageFromMeta,
+} from "@strata-foundation/spl-utils";
 import { Stream, StreamPlayerApi } from "@cloudflare/stream-react";
 import { useIsExtension } from "../utils";
 import { useLocation } from "react-router-dom";
