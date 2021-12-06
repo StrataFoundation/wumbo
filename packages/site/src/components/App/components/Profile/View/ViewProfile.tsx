@@ -1,6 +1,6 @@
 import React from "react";
 import { PublicKey } from "@solana/web3.js";
-import { useParams } from "react-router";
+import { useParams } from "react-router-dom";
 import { Profile, Spinner } from "wumbo-common";
 import { ITokenWithMetaAndAccount } from "@strata-foundation/spl-token-collective";
 import { useClaimedTokenRefKey } from "@strata-foundation/react";

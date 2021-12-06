@@ -1,6 +1,6 @@
 import { useWallet } from "@solana/wallet-adapter-react";
 import React from "react";
-import { Redirect, useLocation } from "react-router";
+import { Redirect, useLocation } from "react-router-dom";
 import { AppRoutes } from "../../../../constants/routes";
 
 export default React.memo(() => {

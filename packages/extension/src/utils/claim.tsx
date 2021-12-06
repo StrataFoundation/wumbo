@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { claimPath, routes } from "@/constants/routes";
-import { useHistory } from "react-router";
+import { useHistory } from "react-router-dom";
 import {
   useConnection,
   IClaimFlowOutput,
