@@ -4,14 +4,11 @@ import {
   WalletProvider,
   WALLET_PROVIDERS,
   EndpointSetter,
-  UsdWumboPriceProvider,
-  AccountCacheContextProvider,
   wumboApi,
   ThemeProvider,
-  SolPriceProvider,
-  ErrorHandlingContext,
   Notification,
 } from "wumbo-common";
+import { AccountProvider, SolPriceProvider, ErrorHandlerProvider } from "@strata-foundation/react";
 import { ApolloProvider } from "@apollo/client";
 import { ConnectionProvider, AccountsProvider } from "@oyster/common";
 
@@ -55,29 +52,25 @@ export const ContextProviders: React.FC = ({ children }) => {
 
   return (
     <ConnectionProvider>
-      <ErrorHandlingContext.Provider
-        value={{
-          onError,
-        }}
+      <ErrorHandlerProvider
+        onError={onError}
       >
         <ApolloProvider client={wumboApi}>
-          <AccountCacheContextProvider>
+          <AccountProvider commitment="confirmed">
             <EndpointSetter>
               <ThemeProvider>
                 <AccountsProvider>
                   <SolPriceProvider>
-                    <UsdWumboPriceProvider>
                       <WalletProvider wallets={wallets} onError={console.error}>
                         {children}
                       </WalletProvider>
-                    </UsdWumboPriceProvider>
                   </SolPriceProvider>
                 </AccountsProvider>
               </ThemeProvider>
             </EndpointSetter>
-          </AccountCacheContextProvider>
+          </AccountProvider>
         </ApolloProvider>
-      </ErrorHandlingContext.Provider>
+      </ErrorHandlerProvider>
     </ConnectionProvider>
   );
 };

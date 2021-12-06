@@ -5,32 +5,32 @@ import { routes, paths } from "@/constants/routes";
 import { ContextProviders } from "./ContextProviders";
 import { WumboDrawer } from "./WumboDrawer";
 
-import { Twitter } from "./twitter/Twitter";
-import { NftEnhancer } from "./nft/NftEnhancer";
+// import { Twitter } from "./twitter/Twitter";
+// import { NftEnhancer } from "./nft/NftEnhancer";
 
-import { Create } from "./create/Create";
-import { TradeRoute } from "./trade/Trade";
-import { Wallet } from "./wallet/Wallet";
-import { ManageWallet } from "./wallet/ManageWallet";
-import { ViewNft } from "./nft/ViewNft";
-import { TagNft } from "./nft/TagNft";
-import { Profile } from "./profile/Profile";
-import { TopTokens } from "./leaderboards/TopTokens";
-import { WumNetWorth } from "./leaderboards/WumNetWorth";
-import Claim from "./claim/Claim";
-import { EditProfileRoute } from "./profile/EditProfile";
-import { Send } from "./wallet/Send";
-import { SendSearch } from "./wallet/SendSearch";
+// import { Create } from "./create/Create";
+// import { TradeRoute } from "./trade/Trade";
+// import { Wallet } from "./wallet/Wallet";
+// import { ManageWallet } from "./wallet/ManageWallet";
+// import { ViewNft } from "./nft/ViewNft";
+// import { TagNft } from "./nft/TagNft";
+// import { Profile } from "./profile/Profile";
+// import { TopTokens } from "./leaderboards/TopTokens";
+// import { WumNetWorth } from "./leaderboards/WumNetWorth";
+// import Claim from "./claim/Claim";
+// import { EditProfileRoute } from "./profile/EditProfile";
+// import { Send } from "./wallet/Send";
+// import { SendSearch } from "./wallet/SendSearch";
 
 const App: FC = () => (
   <Router initialEntries={[routes.myTokens.path]} initialIndex={0}>
     <ContextProviders>
-      <NftEnhancer />
-      <Twitter />
+      {/* <NftEnhancer /> */}
+      {/* <Twitter /> */}
 
       <WumboDrawer>
         <Switch>
-          <Route path={routes.create.path} component={Create} />
+          {/* <Route path={routes.create.path} component={Create} />
           <Route path={routes.claim.path} component={Claim} />
           <Route path={routes.trade.path} component={TradeRoute} />
           <Route path={routes.myTokens.path} component={Wallet} />
@@ -43,7 +43,7 @@ const App: FC = () => (
           <Route path={routes.editProfile.path} component={EditProfileRoute} />
           <Route path={routes.profile.path} exact component={Profile} />
           <Route path={routes.sendSearch.path} exact component={SendSearch} />
-          <Route path={routes.send.path} component={Send} />
+          <Route path={routes.send.path} component={Send} /> */}
         </Switch>
       </WumboDrawer>
     </ContextProviders>
