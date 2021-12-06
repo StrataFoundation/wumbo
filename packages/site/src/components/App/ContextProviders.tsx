@@ -1,16 +1,18 @@
 import React, { useMemo, useCallback } from "react";
 import toast from "react-hot-toast";
 import {
-  WalletProvider,
   WALLET_PROVIDERS,
-  EndpointSetter,
   wumboApi,
   ThemeProvider,
   Notification,
+  SOLANA_API_URL
 } from "wumbo-common";
 import { AccountProvider, SolPriceProvider, ErrorHandlerProvider } from "@strata-foundation/react";
 import { ApolloProvider } from "@apollo/client";
-import { ConnectionProvider, AccountsProvider } from "@oyster/common";
+import {
+  ConnectionProvider,
+  WalletProvider,
+} from "@solana/wallet-adapter-react";
 
 export const ContextProviders: React.FC = ({ children }) => {
   const wallets = useMemo(() => WALLET_PROVIDERS, []);
@@ -51,23 +53,19 @@ export const ContextProviders: React.FC = ({ children }) => {
   );
 
   return (
-    <ConnectionProvider>
+    <ConnectionProvider endpoint={SOLANA_API_URL}>
       <ErrorHandlerProvider
         onError={onError}
       >
         <ApolloProvider client={wumboApi}>
           <AccountProvider commitment="confirmed">
-            <EndpointSetter>
               <ThemeProvider>
-                <AccountsProvider>
-                  <SolPriceProvider>
-                      <WalletProvider wallets={wallets} onError={console.error}>
-                        {children}
-                      </WalletProvider>
-                  </SolPriceProvider>
-                </AccountsProvider>
+                <SolPriceProvider>
+                  <WalletProvider wallets={wallets} onError={console.error} autoConnect>
+                    {children}
+                  </WalletProvider>
+                </SolPriceProvider>
               </ThemeProvider>
-            </EndpointSetter>
           </AccountProvider>
         </ApolloProvider>
       </ErrorHandlerProvider>

@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useAsyncCallback } from "react-async-hook";
-import { useConnection } from "@oyster/common";
+import { useConnection } from "@solana/wallet-adapter-react";
 import {
   PublicKey,
   sendAndConfirmRawTransaction,
@@ -11,9 +11,9 @@ import {
   useTokenMetadata,
   useTokenRef,
   useTokenBonding,
+  useProvider,
 } from "@strata-foundation/react";
 import { Data, ARWEAVE_UPLOAD_URL } from "@strata-foundation/spl-utils";
-import { useWallet } from "../contexts/walletContext";
 
 export interface ISetMetadataArgs {
   name: string;
@@ -56,8 +56,8 @@ export const useSetMetadata = (
     error: Error | undefined;
   }
 ] => {
-  const connection = useConnection();
-  const { publicKey: walletKey, signTransaction } = useWallet();
+  const { connection } = useConnection();
+  const { provider } = useProvider();
   const { tokenCollectiveSdk, tokenMetadataSdk } = useStrataSdks();
   const [loading, setLoading] = useState<boolean>(false);
   const [loadingState, setLoadingState] = useState<MetadataFiniteState>("idle");
@@ -72,7 +72,7 @@ export const useSetMetadata = (
   } = useTokenMetadata(tokenBonding?.targetMint);
 
   const exec = async (args: ISetMetadataArgs) => {
-    if (walletKey && tokenRefKey) {
+    if (provider && tokenRefKey) {
       setLoading(true);
       setLoadingState("gathering-files");
       let files: Map<string, Buffer> = new Map();
@@ -143,7 +143,7 @@ export const useSetMetadata = (
           });
 
         const transaction = new Transaction({
-          feePayer: walletKey || undefined,
+          feePayer: provider.wallet.publicKey || undefined,
           recentBlockhash: (await connection.getRecentBlockhash()).blockhash,
         });
 
@@ -152,7 +152,7 @@ export const useSetMetadata = (
           ...updateMetadataInstructions,
         ];
 
-        const prepayTxn = await signTransaction(transaction);
+        const prepayTxn = await provider.wallet.signTransaction(transaction);
         const txId = await sendAndConfirmRawTransaction(
           connection,
           prepayTxn.serialize()

@@ -1,4 +1,3 @@
-import { useConnection } from "../contexts/connection";
 import {
   createNameRegistry,
   getHashedName,
@@ -31,11 +30,13 @@ import {
   createVerifiedTwitterRegistry,
   getTwitterRegistry,
 } from "./testableNameServiceTwitter";
+import { Wallet } from "@project-serum/anchor";
+import { useConnection } from "@solana/wallet-adapter-react";
 
 async function sendTransaction(
   connection: Connection,
   instructions: TransactionInstruction[],
-  wallet: WalletAdapter,
+  wallet: Wallet,
   extraSigners?: Account[]
 ): Promise<string> {
   const transaction = new Transaction({
@@ -55,7 +56,7 @@ async function sendTransaction(
 
 export async function createTestTld(
   connection: Connection,
-  wallet: WalletAdapter
+  wallet: Wallet
 ) {
   if (IS_DEV) {
     const tld = await getNameAccountKey(await getHashedName(DEV_TWITTER_TLD));
@@ -205,7 +206,7 @@ interface ReverseTwitterState {
 export function useReverseTwitter(
   owner: PublicKey | undefined
 ): ReverseTwitterState {
-  const connection = useConnection();
+  const { connection } = useConnection();
   const {
     loading,
     error,

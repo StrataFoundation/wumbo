@@ -1,6 +1,6 @@
 import React from "react";
 import { Link as PlainLink } from "@chakra-ui/react";
-import { Metadata as MetaplexMetadata } from "@oyster/common";
+import { Metadata as MetaplexMetadata } from "@strata-foundation/spl-utils";
 import {
   useSocialTokenMetadata,
   useErrorHandler,

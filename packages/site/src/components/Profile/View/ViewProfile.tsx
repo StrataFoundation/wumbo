@@ -4,35 +4,24 @@ import { useParams } from "react-router";
 import AppContainer from "../../common/AppContainer";
 import {
   Profile,
-  Spinner,
-  useClaimedTokenRefKey,
-  useAccount,
-  TokenRef,
-  useWallet,
+  Spinner
 } from "wumbo-common";
+import { ITokenWithMetaAndAccount } from "@strata-foundation/spl-token-collective";
+import { useClaimedTokenRefKey } from "@strata-foundation/react";
 import { useHistory } from "react-router-dom";
 import routes, { profilePath, nftPath } from "../../../constants/routes";
 import WalletRedirect from "../../Wallet/WalletRedirect";
+import { useWallet } from "@solana/wallet-adapter-react";
 
 export const ViewProfileRoute = () => {
   const params = useParams<{ tokenRefKey: string | undefined }>();
-  const { connected, publicKey } = useWallet();
+  const { connected, adapter } = useWallet();
+  const publicKey = adapter?.publicKey;
   const walletTokenRefKey = useClaimedTokenRefKey(publicKey || undefined);
-  const { info: walletTokenRef } = useAccount(
-    walletTokenRefKey,
-    TokenRef,
-    true
-  );
-  const { info: passedTokenRef } = useAccount(
-    walletTokenRefKey,
-    TokenRef,
-    true
-  );
   const passedTokenRefKey = params.tokenRefKey
     ? new PublicKey(params.tokenRefKey)
     : undefined;
   const tokenRefKey = passedTokenRefKey || walletTokenRefKey;
-  const tokenRef = passedTokenRef || walletTokenRef;
 
   const history = useHistory();
 
@@ -64,9 +53,10 @@ export const ViewProfileRoute = () => {
         onAccountClick={(tokenBondingKey: PublicKey) => {
           history.push(profilePath(tokenBondingKey));
         }}
-        getNftLink={(token) =>
-          token?.metadata ? nftPath(token?.metadata?.mint) : ""
-        }
+        getNftLink={(token: ITokenWithMetaAndAccount) => {
+          const mint = token?.metadata?.mint
+          return mint ? nftPath(new PublicKey(mint)) : ""
+        }}
       />
     </AppContainer>
   );

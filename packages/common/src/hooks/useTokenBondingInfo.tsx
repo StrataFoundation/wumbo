@@ -72,7 +72,7 @@ export const useTokenBondingInfo = (
             ...tokenBondingInfo!,
           });
         }
-      } catch (e) {
+      } catch (e: any) {
         setError(e);
       } finally {
         if (metadataError) setError(metadataError);

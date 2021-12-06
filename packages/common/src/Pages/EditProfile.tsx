@@ -20,11 +20,11 @@ import {
   useTokenMetadata,
   useClaimedTokenRef,
   useErrorHandler,
+  useProvider,
 } from "@strata-foundation/react";
 import { ISetMetadataArgs, useSetMetadata } from "../hooks";
 import { TokenPill } from "../TokenPill";
 import { Avatar } from "../Avatar";
-import { useWallet } from "../contexts";
 
 interface IEditProfileProps {
   ownerWalletKey: PublicKey;
@@ -46,7 +46,7 @@ const validationSchema = yup
 export const EditProfile = React.memo(
   ({ ownerWalletKey, onComplete }: IEditProfileProps) => {
     const hiddenFileInput = React.useRef<HTMLInputElement>(null);
-    const { awaitingApproval } = useWallet();
+    const { awaitingApproval } = useProvider();
     const { handleErrors } = useErrorHandler();
     const { info: tokenRef } = useClaimedTokenRef(ownerWalletKey);
     const {

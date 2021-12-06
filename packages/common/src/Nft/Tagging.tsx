@@ -14,18 +14,18 @@ import { VStack, HStack, Box, Text, Checkbox, Button } from "@chakra-ui/react";
 import {
   useAccountFetchCache,
   useErrorHandler,
+  useProvider,
 } from "@strata-foundation/react";
 import {
   NFT_VERIFIER_URL,
   TAGGING_THRESHOLD,
-  useWallet,
-  useConnection,
   getNftNameRecordKey,
   truthy,
   ThemeProvider,
   Spinner,
   FloatPortal,
 } from "../";
+import { useConnection, useWallet } from "@solana/wallet-adapter-react";
 
 interface ITagArgs {
   imgUrls: string[];
@@ -54,7 +54,7 @@ const tag = async (
     const tx = Transaction.from(resp.data.data);
     const signed = await signTransaction(tx);
     await sendAndConfirmRawTransaction(connection, signed.serialize());
-  } catch (e) {
+  } catch (e: any) {
     if (e.response?.data?.message) {
       throw new Error(e.response.data.message);
     }
@@ -176,7 +176,7 @@ export const TaggableImages = ({
   src: string;
   refreshCounter: number;
 }) => {
-  const connection = useConnection();
+  const { connection } = useConnection();
   const images = useMemo(() => getUntaggedImages(), [refreshCounter]);
   const { result: img1, error: bufferError } = useAsync(getBufferFromUrl, [
     src,
@@ -186,7 +186,9 @@ export const TaggableImages = ({
   const [error, setError] = useState<Error>();
   const [selected, setSelected] = useState<Record<string, boolean>>({});
   const [allSelected, setAllSelected] = useState<boolean>(false);
-  const { awaitingApproval, publicKey, signTransaction } = useWallet();
+  const { adapter, signTransaction } = useWallet();
+  const { awaitingApproval } = useProvider();
+  const publicKey = adapter?.publicKey;
   const { handleErrors } = useErrorHandler();
 
   handleErrors(bufferError, error);
@@ -224,7 +226,7 @@ export const TaggableImages = ({
       .filter(([_, isSelected]) => isSelected)
       .map(([key]) => key);
 
-    await tag(connection, signTransaction, {
+    await tag(connection, signTransaction!, {
       imgUrls,
       tokenMetadata: metadata.toBase58(),
       feePayer: publicKey!.toBase58(),
@@ -309,7 +311,7 @@ export const TaggableImages = ({
             }, {} as Record<string, TagMatch>);
 
           setMatches(() => newMatches);
-        } catch (err) {
+        } catch (err: any) {
           setError(err);
         } finally {
           setLoading(false);

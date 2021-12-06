@@ -1,5 +1,5 @@
 import { WebAuth } from "auth0-js";
-import { useLocalStorageState } from "@oyster/common";
+import { useLocalStorage } from "@strata-foundation/react";
 import { SITE_URL } from "../constants";
 
 export const auth0Options = {
@@ -26,7 +26,7 @@ export function useClaimLink({
   handle: string;
   newTab?: boolean;
 }): { redirectUri: string; claim: () => Window | null } {
-  const setAuth0State = useLocalStorageState("auth0-state")[1];
+  const setAuth0State = useLocalStorage("auth0-state", "")[1];
   const redirectUri = `${SITE_URL}/claim?name=${handle}`;
   const claim = () => {
     const state = makeId(6);

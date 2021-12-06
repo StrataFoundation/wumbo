@@ -2,7 +2,7 @@ import React from "react";
 import { useHistory, useLocation } from "react-router-dom";
 import AppContainer from "../common/AppContainer";
 import routes, { swapPath } from "../../constants/routes";
-import { Swap } from "wumbo-common";
+import { PluggableSwap } from "@strata-foundation/react";
 
 export const SwapRoute = React.memo(() => {
   const history = useHistory();
@@ -10,20 +10,22 @@ export const SwapRoute = React.memo(() => {
 
   return (
     <AppContainer>
-      <Swap
-        onHandleConnectWallet={() => {
+      {/* <PluggableSwap
+      action=
+        tokenBondingKey={}
+        onConnectWallet={() => {
           history.push(
             routes.manageWallet.path +
               `?redirect=${location.pathname}${location.search}`
           );
         }}
-        onHandleFlipTokens={(tokenBonding, action) => {
+        onFlipTokens={(tokenBonding, action) => {
           history.push(swapPath(tokenBonding, action));
         }}
-        onHandleBuyBase={(tokenBonding) => {
+        onBuyBase={(tokenBonding) => {
           history.push(swapPath(tokenBonding, "buy"));
         }}
-      />
+      /> */}
     </AppContainer>
   );
 });

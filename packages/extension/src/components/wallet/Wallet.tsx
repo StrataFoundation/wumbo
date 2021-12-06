@@ -7,17 +7,17 @@ import {
   routes,
 } from "@/constants/routes";
 import {
-  useFtxPayLink,
-  useWallet,
   Wallet as CommonWallet,
   OPEN_BONDING,
+  useWallet,
 } from "wumbo-common";
+import { useFtxPayLink } from "@strata-foundation/react";
 import { WumboDrawer } from "../WumboDrawer";
 
 export const Wallet = () => {
   const solLink = useFtxPayLink();
-  const { publicKey } = useWallet();
-
+  const { adapter } = useWallet();
+  const publicKey = adapter?.publicKey;
   return (
     <Fragment>
       <WumboDrawer.Header title="Wallet" />

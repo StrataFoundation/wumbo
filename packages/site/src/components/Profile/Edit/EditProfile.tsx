@@ -2,7 +2,8 @@ import React, { useEffect, useMemo, useState } from "react";
 import AppContainer from "../../common/AppContainer";
 import { PublicKey } from "@solana/web3.js";
 import { useHistory, useParams } from "react-router-dom";
-import { EditProfile, useClaimedTokenRef } from "wumbo-common";
+import { EditProfile } from "wumbo-common";
+import { useClaimedTokenRef } from "@strata-foundation/react";
 import { profilePath } from "../../../constants/routes";
 import WalletRedirect from "../../Wallet/WalletRedirect";
 

@@ -23,7 +23,6 @@ import {
 } from "@strata-foundation/react";
 import { ITokenWithMetaAndAccount } from "@strata-foundation/spl-token-collective";
 import { useWumNetWorth, useUserTokensWithMeta } from "../hooks";
-import { useWallet } from "../contexts/walletContext";
 import {
   SOL_TOKEN,
   OPEN_TOKEN,
@@ -33,6 +32,7 @@ import { Avatar } from "../Avatar";
 import { Notification } from "../Notification";
 import { Spinner } from "../Spinner";
 import { WumboRankIcon } from "../svgs";
+import { useWallet } from "@solana/wallet-adapter-react";
 
 const SolLogoIcon = createIcon({
   displayName: "Solana",
@@ -166,7 +166,8 @@ export const Wallet = React.memo(
     const solPrice = useFiatPrice(SOL_TOKEN);
     const openPrice = useFiatPrice(OPEN_TOKEN);
     const openOwned = useOwnedAmount(OPEN_TOKEN);
-    const { publicKey } = useWallet();
+    const { adapter } = useWallet();
+    const publicKey = adapter?.publicKey;
     const { data: tokens, loading } = useUserTokensWithMeta(
       publicKey || undefined
     );

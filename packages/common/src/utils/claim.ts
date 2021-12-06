@@ -11,10 +11,9 @@ import {
   useAccountFetchCache,
   getTwitterClaimedTokenRefKey,
   getTwitterUnclaimedTokenRefKey,
+  useProvider,
 } from "@strata-foundation/react";
 import { ICreateSocialTokenArgs } from "@strata-foundation/spl-token-collective";
-import { useConnection } from "../contexts/connection";
-import { useWallet } from "../contexts/walletContext";
 import { createTestTld, getTld } from "./twitter";
 import {
   DEV_TWITTER_VERIFIER,
@@ -24,10 +23,11 @@ import {
   OPEN_BONDING,
 } from "../constants/globals";
 import { getTwitterRegistryKey, getTwitterRegistry } from "../utils";
-import { WalletAdapter } from "@solana/wallet-adapter-base";
 import axios from "axios";
 import { createVerifiedTwitterRegistry } from "./testableNameServiceTwitter";
 import { NAME_PROGRAM_ID } from "@bonfida/spl-name-service";
+import { useWallet, useConnection } from "@solana/wallet-adapter-react";
+import { Wallet } from "@project-serum/anchor";
 
 interface ClaimTransactionState {
   awaitingApproval: boolean;
@@ -45,7 +45,7 @@ export async function claimTwitterHandle({
   redirectUri: string;
   code: string;
   twitterHandle: string;
-  adapter?: WalletAdapter;
+  adapter?: Wallet;
   connection: Connection;
 }): Promise<void> {
   if (adapter) {
@@ -93,7 +93,7 @@ export async function claimTwitterHandle({
           commitment: "confirmed",
           preflightCommitment: "confirmed",
         });
-      } catch (e) {
+      } catch (e: any) {
         if (e.response?.data?.message) {
           throw new Error(e.response.data.message);
         }
@@ -110,14 +110,15 @@ export function useClaimTwitterHandle({
   redirectUri: string;
   code: string;
 }): ClaimTransactionState {
-  const connection = useConnection();
-  const { adapter, awaitingApproval } = useWallet();
+  const { connection } = useConnection();
+  const { provider, awaitingApproval } = useProvider();
   function exec(twitterHandle: string) {
     return claimTwitterHandle({
       redirectUri,
       code,
       twitterHandle,
-      adapter,
+      // @ts-ignore
+      adapter: provider?.wallet,
       connection,
     });
   }
@@ -143,8 +144,9 @@ interface CreateState {
 export function useCreateOrClaimCoin(): CreateState {
   const { tokenCollectiveSdk } = useStrataSdks();
   const cache = useAccountFetchCache();
-  const connection = useConnection();
-  const { publicKey } = useWallet();
+  const { connection } = useConnection();
+  const { adapter } = useWallet();
+  const publicKey = adapter?.publicKey;
   const [creating, setCreating] = useState<boolean>(false);
 
   async function exec(twitterHandle: string) {

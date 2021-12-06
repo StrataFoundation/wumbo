@@ -28,16 +28,18 @@ import {
   useClaimedTokenRefKey,
   useTokenMetadata,
   supplyAsNum,
+  useProvider,
 } from "@strata-foundation/react";
 import { ITokenWithMetaAndAccount } from "@strata-foundation/spl-token-collective";
 import { Spinner } from "../Spinner";
 import { useQuery, useReverseTwitter } from "../utils";
 import { useUserTokensWithMeta } from "../hooks";
 import { StatCard, StatCardWithIcon } from "../StatCard";
-import { MetadataAvatar, useWallet } from "..";
+import { MetadataAvatar } from "..";
 import { TokenLeaderboard } from "../Leaderboard/TokenLeaderboard";
 import { NftListRaw } from "../Nft";
 import { TROPHY_CREATOR } from "../constants/globals";
+import { useWallet } from "@solana/wallet-adapter-react";
 
 interface IProfileProps {
   tokenRefKey: PublicKey;
@@ -90,7 +92,9 @@ export const Profile = React.memo(
       loading: loadingMetadata,
       error: tokenMetadataError,
     } = useTokenMetadata(tokenBonding?.targetMint);
-    const { publicKey, awaitingApproval } = useWallet();
+    const { awaitingApproval } = useProvider();
+    const { adapter } = useWallet();
+    const publicKey = adapter?.publicKey;
     const myTokenRefKey = useClaimedTokenRefKey(publicKey || undefined);
     const { handle: walletTwitterHandle, error: reverseTwitterError } =
       useReverseTwitter(publicKey || undefined);

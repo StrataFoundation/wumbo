@@ -4,11 +4,11 @@ import {
   useSolOwnedAmount,
   useRentExemptAmount,
   useErrorHandler,
+  useFtxPayLink
 } from "@strata-foundation/react";
 import { useClaimTwitterHandle, useCreateOrClaimCoin } from "../utils/claim";
 import { TWITTER_REGISTRY_SIZE } from "../utils/twitter";
 import { Spinner } from "../Spinner";
-import { useFtxPayLink } from "../utils/ftxPay";
 import { PublicKey } from "@solana/web3.js";
 
 export interface IClaimProps {

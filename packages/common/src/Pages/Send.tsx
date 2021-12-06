@@ -24,6 +24,7 @@ import {
   useSolPrice,
   useEstimatedFees,
   usePublicKey,
+  useProvider,
 } from "@strata-foundation/react";
 import {
   Text,
@@ -45,10 +46,10 @@ import {
 import { AiOutlineExclamation } from "react-icons/ai";
 import { BiCheck } from "react-icons/bi";
 import { Notification } from "../Notification";
-import { useProvider, useWallet } from "../contexts";
 import { Spinner } from "../Spinner";
 import { Avatar } from "../Avatar";
-import { getImage } from "../utils";
+import { useWallet } from "@solana/wallet-adapter-react";
+import { SplTokenMetadata } from "@strata-foundation/spl-utils";
 
 type FormValues = { amount: number; recipient: string };
 
@@ -57,7 +58,9 @@ export const Send = ({ finishRedirectUrl }: { finishRedirectUrl: string }) => {
   const history = useHistory();
   const params = useParams<{ mint: string | undefined }>();
   const mint = usePublicKey(params.mint);
-  const { publicKey, awaitingApproval } = useWallet();
+  const { adapter } = useWallet();
+  const publicKey = adapter?.publicKey;
+  const { awaitingApproval, provider } = useProvider();
   const ownedAmount = useOwnedAmount(mint);
   const validationSchema = yup.object({
     amount: yup
@@ -120,7 +123,7 @@ export const Send = ({ finishRedirectUrl }: { finishRedirectUrl: string }) => {
     result: image,
     error: imageError,
     loading: imageLoading,
-  } = useAsync(getImage, [metadata?.data.uri]);
+  } = useAsync(SplTokenMetadata.getImage, [metadata?.data.uri]);
   const recipientLoading = refLoading || metadataLoading || imageLoading;
 
   const recipientRegister = register("recipient");
@@ -130,7 +133,6 @@ export const Send = ({ finishRedirectUrl }: { finishRedirectUrl: string }) => {
     setValue("amount", ownedAmount || 0);
   };
 
-  const provider = useProvider();
   const handleOnSubmit = async (values: FormValues) => {
     const tx = new Transaction();
     const recipient = new PublicKey(values.recipient);

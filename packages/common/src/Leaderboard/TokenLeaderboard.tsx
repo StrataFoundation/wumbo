@@ -5,10 +5,10 @@ import {
   useUserOwnedAmount,
   useSocialTokenMetadata,
 } from "@strata-foundation/react";
-import { useWallet } from "../contexts/walletContext";
 import { WumboUserLeaderboard } from "./WumboUserLeaderboard";
 import { UserLeaderboardElement } from "./UserLeaderboardElement";
 import { Spinner } from "@chakra-ui/react";
+import { useWallet } from "@solana/wallet-adapter-react";
 
 const GET_TOP_HOLDERS = gql`
   query GetTopHolders($mint: String!, $startRank: Int!, $stopRank: Int!) {
@@ -58,7 +58,8 @@ export const TokenLeaderboard = React.memo(
     mintKey: PublicKey | undefined;
     onAccountClick?: (tokenRefKey: PublicKey) => void;
   }) => {
-    const { publicKey } = useWallet();
+    const { adapter } = useWallet();
+    const publicKey = adapter?.publicKey;
     const client = useApolloClient();
 
     const getRank = useMemo(

@@ -1,8 +1,7 @@
 import { useState, useEffect } from "react";
 import { PublicKey } from "@solana/web3.js";
-import { useStrataSdks } from "@strata-foundation/react";
+import { useStrataSdks, useWalletTokenAccounts } from "@strata-foundation/react";
 import { ITokenWithMetaAndAccount } from "@strata-foundation/spl-token-collective";
-import { useUserTokenAccounts } from "../";
 
 export const useUserTokensWithMeta = (
   owner?: PublicKey
@@ -17,10 +16,10 @@ export const useUserTokensWithMeta = (
   const [error, setError] = useState<Error | undefined>();
 
   const {
-    data: tokenAccounts,
+    result: tokenAccounts,
     loading: loadingTokenAccounts,
     error: tokenAccountsError,
-  } = useUserTokenAccounts(owner);
+  } = useWalletTokenAccounts(owner);
 
   useEffect(() => {
     (async function () {
@@ -30,7 +29,7 @@ export const useUserTokensWithMeta = (
           const tokenAccountsWithMeta =
             await tokenCollectiveSdk!.getUserTokensWithMeta(tokenAccounts);
           setData(tokenAccountsWithMeta);
-        } catch (e) {
+        } catch (e: any) {
           setError(e);
         } finally {
           setLoading(false);

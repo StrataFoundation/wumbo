@@ -1,9 +1,9 @@
 import React, { useCallback, useEffect, useState } from "react";
 import { Image, ImageProps } from "@chakra-ui/react";
 import { MeshViewer } from "./MeshViewer";
-import { IMetadataExtension, MetadataFile } from "@oyster/common";
+import { IMetadataExtension, MetadataFile, getImageFromMeta } from "@strata-foundation/spl-utils";
 import { Stream, StreamPlayerApi } from "@cloudflare/stream-react";
-import { getImageFromMeta, useIsExtension } from "../utils";
+import { useIsExtension } from "../utils";
 import { useLocation } from "react-router-dom";
 import { SITE_URL } from "../constants";
 
@@ -84,11 +84,12 @@ const VideoArtContent = ({
     likelyVideo &&
     likelyVideo.startsWith("https://watch.videodelivery.net/") ? (
       <Stream
+        // @ts-ignore
         streamRef={(e: any) => playerRef(e)}
         src={likelyVideo.replace("https://watch.videodelivery.net/", "")}
         loop={true}
-        height={600}
-        width={600}
+        height="600"
+        width="600"
         controls={false}
         videoDimensions={{
           videoHeight: 700,
@@ -154,7 +155,7 @@ export const Nft: React.FC<{
   ).get("ext");
 
   const category = data?.properties.category;
-  const imageUri = image || getImageFromMeta(data);
+  const imageUri = image || getImageFromMeta(data.image);
   const imageComponent = (
     <Image src={imageUri} alt={data?.name} {...imageProps} />
   );

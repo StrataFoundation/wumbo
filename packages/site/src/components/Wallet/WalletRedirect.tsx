@@ -1,6 +1,6 @@
+import { useWallet } from "@solana/wallet-adapter-react";
 import React from "react";
 import { Redirect, useLocation } from "react-router";
-import { useWallet } from "wumbo-common";
 import routes from "../../constants/routes";
 
 export default React.memo(() => {

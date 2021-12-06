@@ -17,10 +17,10 @@ import {
   SplTokenCollective,
 } from "@strata-foundation/spl-token-collective";
 import { useUserTokensWithMeta } from "../hooks";
-import { useWallet } from "../contexts";
 import { TokenInfo } from "./Wallet";
 import { BiSearch } from "react-icons/bi";
 import { Spinner } from "../Spinner";
+import { useWallet } from "@solana/wallet-adapter-react";
 
 const SearchError = ({
   title = "",
@@ -51,7 +51,8 @@ export const SendSearch = React.memo(
   }: {
     getSendLink: (tokenWithMeta: ITokenWithMetaAndAccount) => string;
   }) => {
-    const { publicKey } = useWallet();
+    const { adapter } = useWallet();
+    const publicKey = adapter?.publicKey;
     const { data: tokens, loading } = useUserTokensWithMeta(
       publicKey || undefined
     );

@@ -3,8 +3,7 @@ import { VStack } from "@chakra-ui/react";
 import { HiOutlineRefresh } from "react-icons/hi";
 import { PublicKey } from "@solana/web3.js";
 import { useTokenMetadata, useErrorHandler } from "@strata-foundation/react";
-import { ITokenWithMeta } from "@strata-foundation/spl-utils";
-import { getImageFromMeta } from "../utils";
+import { ITokenWithMeta, getImageFromMeta } from "@strata-foundation/spl-utils";
 import { TaggableImages } from "./";
 import { NftSmallView } from "./NftSmallView";
 

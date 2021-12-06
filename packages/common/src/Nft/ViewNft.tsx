@@ -9,7 +9,7 @@ import {
   Button,
 } from "@chakra-ui/react";
 import { HiOutlineArrowsExpand } from "react-icons/hi";
-import { MetadataCategory } from "@oyster/common";
+import { MetadataCategory } from "@strata-foundation/spl-utils";
 import { PublicKey } from "@solana/web3.js";
 import {
   useTokenMetadata,
