@@ -19,5 +19,8 @@
     "watch:all": "lerna exec --parallel yarn run watch --scope wumbo-common --scope spl-token-bonding --scope @oyster/common --scope spl-wumbo --scope wumbo-extension",
     "start:site": "lerna exec yarn start --scope site",
     "prepare": "husky install"
+  },
+  "dependencies": {
+    "react-icons": "^4.3.1"
   }
 }
