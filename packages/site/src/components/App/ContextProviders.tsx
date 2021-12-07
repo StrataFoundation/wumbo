@@ -8,6 +8,7 @@ import {
   SOLANA_API_URL,
 } from "wumbo-common";
 import {
+  StrataSdksProvider,
   AccountProvider,
   SolPriceProvider,
   ErrorHandlerProvider,
@@ -58,23 +59,25 @@ export const ContextProviders: React.FC = ({ children }) => {
 
   return (
     <ConnectionProvider endpoint={SOLANA_API_URL}>
-      <ErrorHandlerProvider onError={onError}>
-        <ApolloProvider client={wumboApi}>
-          <AccountProvider commitment="confirmed">
-            <ThemeProvider>
-              <SolPriceProvider>
-                <WalletProvider
-                  wallets={wallets}
-                  onError={console.error}
-                  autoConnect
-                >
-                  {children}
-                </WalletProvider>
-              </SolPriceProvider>
-            </ThemeProvider>
-          </AccountProvider>
-        </ApolloProvider>
-      </ErrorHandlerProvider>
+      <ApolloProvider client={wumboApi}>
+        <ThemeProvider>
+          <ErrorHandlerProvider onError={onError}>
+            <StrataSdksProvider>
+              <AccountProvider commitment="confirmed">
+                <SolPriceProvider>
+                  <WalletProvider
+                    wallets={wallets}
+                    onError={console.error}
+                    autoConnect
+                  >
+                    {children}
+                  </WalletProvider>
+                </SolPriceProvider>
+              </AccountProvider>
+            </StrataSdksProvider>
+          </ErrorHandlerProvider>
+        </ThemeProvider>
+      </ApolloProvider>
     </ConnectionProvider>
   );
 };

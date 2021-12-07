@@ -133,6 +133,7 @@ export const Profile = React.memo(
       loading: claiming,
       error: claimError,
     } = useClaimFlow(handle);
+
     handleErrors(
       claimError,
       error,

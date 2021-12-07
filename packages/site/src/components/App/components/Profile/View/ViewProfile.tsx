@@ -22,7 +22,6 @@ export const ViewProfileRoute = () => {
     ? new PublicKey(params.tokenRefKey)
     : undefined;
   const tokenRefKey = passedTokenRefKey || walletTokenRefKey;
-
   const history = useHistory();
 
   if (!tokenRefKey) {
