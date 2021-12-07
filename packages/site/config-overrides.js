@@ -13,8 +13,9 @@ const supportMjs = () => (webpackConfig) => {
       ...webpackConfig.resolve,
       alias: {
         react: path.resolve("../../node_modules/react"),
-        "@solana/wallet-adapter-react": path.resolve("../../node_modules/@solana/wallet-adapter-react"),
-        "@strata-foundation/react": path.resolve("./node_modules/@strata-foundation/react")
+        // For local dev with linked packages:
+        // "@solana/wallet-adapter-react": path.resolve("../../node_modules/@solana/wallet-adapter-react"),
+        // "@strata-foundation/react": path.resolve("./node_modules/@strata-foundation/react")
       }
     }
     return webpackConfig;
