@@ -63,9 +63,7 @@ export const SendSearch = React.memo(
     const searched = useMemo(() => {
       if (tokens) {
         const sorted = tokens
-          ?.filter(
-            (t) => !!t.metadata
-          )
+          ?.filter((t) => !!t.metadata)
           .sort((a, b) =>
             a.metadata!.data.name.localeCompare(b.metadata!.data.name)
           );

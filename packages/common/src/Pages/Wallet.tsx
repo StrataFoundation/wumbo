@@ -249,9 +249,7 @@ export const Wallet = React.memo(
           )}
           {!loading &&
             tokens
-              ?.filter(
-                (t) => !!t.metadata
-              )
+              ?.filter((t) => !!t.metadata)
               .sort((a, b) =>
                 a.metadata!.data.name.localeCompare(b.metadata!.data.name)
               )
