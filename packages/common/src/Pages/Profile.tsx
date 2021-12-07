@@ -23,7 +23,7 @@ import {
   useTokenBonding,
   useBondingPricing,
   useMint,
-  useFiatPrice,
+  usePriceInUsd,
   useClaimedTokenRef,
   useClaimedTokenRefKey,
   useTokenMetadata,
@@ -110,7 +110,7 @@ export const Profile = React.memo(
     const mint = useMint(tokenBonding?.targetMint);
     const supply = mint ? supplyAsNum(mint) : 0;
     const { curve } = useBondingPricing(tokenBonding?.publicKey);
-    const fiatPrice = useFiatPrice(tokenBonding?.baseMint);
+    const fiatPrice = usePriceInUsd(tokenBonding?.baseMint);
     const toFiat = (a: number) => (fiatPrice || 0) * a;
     const coinPriceUsd = toFiat(curve?.current() || 0);
     const fiatLocked = mint && toFiat(curve?.locked() || 0).toFixed(2);

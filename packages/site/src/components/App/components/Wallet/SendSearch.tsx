@@ -9,7 +9,7 @@ export default React.memo(() => {
   return (
     <>
       <WalletRedirect />
-      <Box p={4}>
+      <Box p={4} w="full">
         <SendSearch
           getSendLink={(t: ITokenWithMetaAndAccount) =>
             sendPath(t.account!.mint)

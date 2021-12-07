@@ -11,6 +11,7 @@ import {
   AccountProvider,
   SolPriceProvider,
   ErrorHandlerProvider,
+  StrataSdksProvider
 } from "@strata-foundation/react";
 import { ApolloProvider } from "@apollo/client";
 import {
@@ -61,17 +62,19 @@ export const ContextProviders: React.FC = ({ children }) => {
       <ErrorHandlerProvider onError={onError}>
         <ApolloProvider client={wumboApi}>
           <AccountProvider commitment="confirmed">
-            <ThemeProvider>
-              <SolPriceProvider>
-                <WalletProvider
-                  wallets={wallets}
-                  onError={console.error}
-                  autoConnect
-                >
-                  {children}
-                </WalletProvider>
-              </SolPriceProvider>
-            </ThemeProvider>
+            <StrataSdksProvider>
+              <ThemeProvider>
+                <SolPriceProvider>
+                  <WalletProvider
+                    wallets={wallets}
+                    onError={console.error}
+                    autoConnect
+                  >
+                    {children}
+                  </WalletProvider>
+                </SolPriceProvider>
+              </ThemeProvider>
+            </StrataSdksProvider>
           </AccountProvider>
         </ApolloProvider>
       </ErrorHandlerProvider>

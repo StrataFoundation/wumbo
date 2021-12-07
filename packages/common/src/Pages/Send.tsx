@@ -19,7 +19,7 @@ import {
   useAssociatedTokenAddress,
   useClaimedTokenRef,
   useMint,
-  useFiatPrice,
+  usePriceInUsd,
   useOwnedAmount,
   useSolPrice,
   useEstimatedFees,
@@ -91,7 +91,7 @@ export const Send = ({ finishRedirectUrl }: { finishRedirectUrl: string }) => {
     },
   });
 
-  const fiatPrice = useFiatPrice(mint);
+  const fiatPrice = usePriceInUsd(mint);
   const solFiatPrice = useSolPrice();
   const toFiat = (a: number) => (fiatPrice ? fiatPrice * a : undefined);
 
@@ -182,7 +182,6 @@ export const Send = ({ finishRedirectUrl }: { finishRedirectUrl: string }) => {
   const noBalance = ata?.amount.toNumber() === 0;
   const noAta = !ataLoading && recipient && !ata;
   const invalidAddress = Boolean(!recipient && recipientStr);
-
   return (
     <form onSubmit={handleSubmit(handleOnSubmit)}>
       <VStack spacing={4}>
@@ -228,7 +227,7 @@ export const Send = ({ finishRedirectUrl }: { finishRedirectUrl: string }) => {
             <InputRightElement
               h="100%"
               width="inherit"
-              maxWidth="80px"
+              maxWidth="100px"
               minWidth="40px"
             >
               <Text color="gray.700">{baseMetadata?.data.symbol}</Text>
@@ -377,7 +376,7 @@ export const Send = ({ finishRedirectUrl }: { finishRedirectUrl: string }) => {
           <Flex justify="space-between" alignItems="center">
             <Text>Estimated Fees</Text>
             <Flex>
-              {fee} SOL ≈ $
+              {fee?.toFixed(4)} SOL ≈ $
               {solFiatPrice && fee
                 ? (solFiatPrice * fee).toFixed(2)
                 : undefined}

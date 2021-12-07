@@ -1,12 +1,14 @@
 import React from "react";
-import { Center } from "@chakra-ui/react";
+import { Box, Center } from "@chakra-ui/react";
 
 export const AppContainer = React.memo(({ children = null as any }) => {
   return (
-    <Center flexGrow={1}>
-      <Center bg="white" shadow="xl" rounded="lg" overflow="hidden" w="420px">
-        {children}
+    <Box w="full" h="full" overflow="auto" padding={14}>
+      <Center flexGrow={1}>
+        <Center bg="white" shadow="xl" rounded="lg" w="420px">
+          {children}
+        </Center>
       </Center>
-    </Center>
+    </Box>
   );
 });

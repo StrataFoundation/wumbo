@@ -17,17 +17,15 @@ export default React.memo(() => {
   return (
     <>
       <WalletRedirect />
-      <Box p={4}>
-        <Wallet
-          wumLeaderboardLink={publicKey ? wumNetWorthPath(publicKey) : ""}
-          getTokenLink={(t) =>
-            t.tokenRef?.publicKey ? profilePath(t.tokenRef?.publicKey) : ""
-          }
-          wumLink={""}
-          solLink={solLink}
-          sendLink={AppRoutes.sendSearch.path}
-        />
-      </Box>
+      <Wallet
+        wumLeaderboardLink={publicKey ? wumNetWorthPath(publicKey) : ""}
+        getTokenLink={(t) =>
+          t.tokenRef?.publicKey ? profilePath(t.tokenRef?.publicKey) : ""
+        }
+        wumLink={""}
+        solLink={solLink}
+        sendLink={AppRoutes.sendSearch.path}
+      />
     </>
   );
 });

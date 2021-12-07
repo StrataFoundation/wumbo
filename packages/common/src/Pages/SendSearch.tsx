@@ -64,11 +64,7 @@ export const SendSearch = React.memo(
       if (tokens) {
         const sorted = tokens
           ?.filter(
-            (t) =>
-              !!t.tokenRef &&
-              t.tokenRef.collective?.equals(
-                SplTokenCollective.OPEN_COLLECTIVE_ID
-              )
+            (t) => !!t.metadata
           )
           .sort((a, b) =>
             a.metadata!.data.name.localeCompare(b.metadata!.data.name)
@@ -103,7 +99,7 @@ export const SendSearch = React.memo(
     ));
 
     return (
-      <VStack>
+      <VStack w="full">
         <InputGroup>
           <InputLeftElement h="full" pointerEvents="none">
             <Center>
