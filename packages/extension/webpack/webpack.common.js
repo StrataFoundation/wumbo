@@ -8,7 +8,6 @@ const TsconfigPathsPlugin = require("tsconfig-paths-webpack-plugin");
 
 module.exports = {
   entry: {
-    popup: path.join(srcDir, "/pages/popup/index.tsx"),
     background: path.join(srcDir, "/pages/background/background.ts"),
     content_script: path.join(srcDir, "pages/content/index.tsx"),
     oauth: path.join((srcDir, "pages/oauth/index.tsx")),
@@ -70,6 +69,8 @@ module.exports = {
       "@solana/wallet-ledger": path.resolve(
         "../../node_modules/@solana/wallet-ledger/dist/lib/index.js"
       ),
+      "@solana/wallet-adapter-react": path.resolve("../../node_modules/@solana/wallet-adapter-react"),
+      "@strata-foundation/react": path.resolve("./node_modules/@strata-foundation/react")
     },
   },
   plugins: [

@@ -3,7 +3,7 @@ import { PublicKey } from "@solana/web3.js";
 import { gql, useApolloClient } from "@apollo/client";
 import {
   useBondingPricing,
-  useFiatPrice,
+  usePriceInUsd,
   useTokenRefFromBonding,
   useTokenBonding,
 } from "@strata-foundation/react";
@@ -33,7 +33,7 @@ const Element = React.memo(
   }) => {
     const { curve } = useBondingPricing(tokenBondingKey);
     const { info: tokenBonding } = useTokenBonding(tokenBondingKey);
-    const fiatPrice = useFiatPrice(tokenBonding?.baseMint);
+    const fiatPrice = usePriceInUsd(tokenBonding?.baseMint);
     const toFiat = (a: number) => (fiatPrice || 0) * a;
 
     const { info: tokenRef } = useTokenRefFromBonding(tokenBondingKey);

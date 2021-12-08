@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import isEqual from "lodash/isEqual";
-import { useInterval } from "wumbo-common";
+import { useInterval } from "@strata-foundation/react";
 import { getElementsBySelector } from "./elements";
 import * as Sentry from "@sentry/react";
 

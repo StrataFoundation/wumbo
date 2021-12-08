@@ -12,6 +12,7 @@ import {
   AccountProvider,
   SolPriceProvider,
   ErrorHandlerProvider,
+  StrataSdksProvider,
 } from "@strata-foundation/react";
 import { ApolloProvider } from "@apollo/client";
 import {
@@ -59,11 +60,11 @@ export const ContextProviders: React.FC = ({ children }) => {
 
   return (
     <ConnectionProvider endpoint={SOLANA_API_URL}>
-      <ApolloProvider client={wumboApi}>
-        <ThemeProvider>
-          <ErrorHandlerProvider onError={onError}>
+      <ErrorHandlerProvider onError={onError}>
+        <ApolloProvider client={wumboApi}>
+          <AccountProvider commitment="confirmed">
             <StrataSdksProvider>
-              <AccountProvider commitment="confirmed">
+              <ThemeProvider>
                 <SolPriceProvider>
                   <WalletProvider
                     wallets={wallets}
@@ -73,11 +74,11 @@ export const ContextProviders: React.FC = ({ children }) => {
                     {children}
                   </WalletProvider>
                 </SolPriceProvider>
-              </AccountProvider>
+              </ThemeProvider>
             </StrataSdksProvider>
-          </ErrorHandlerProvider>
-        </ThemeProvider>
-      </ApolloProvider>
+          </AccountProvider>
+        </ApolloProvider>
+      </ErrorHandlerProvider>
     </ConnectionProvider>
   );
 };

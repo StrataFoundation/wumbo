@@ -1,7 +1,8 @@
 import React, { Fragment, useEffect } from "react";
 import { useHistory } from "react-router-dom";
-import { useWallet, useQuery, WalletSelect, usePrevious } from "wumbo-common";
+import { useQuery, WalletSelect, usePrevious } from "wumbo-common";
 import { WumboDrawer } from "../WumboDrawer";
+import { useWallet } from "@solana/wallet-adapter-react";
 
 export const ManageWallet = () => {
   const history = useHistory();

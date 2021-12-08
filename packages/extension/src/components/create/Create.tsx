@@ -3,7 +3,9 @@ import { Link, useLocation } from "react-router-dom";
 import { Box, Button, Avatar, VStack, Text } from "@chakra-ui/react";
 import { WumboDrawer } from "../WumboDrawer";
 import { routes } from "@/constants/routes";
-import { useWallet, useQuery, SOL_TOKEN, useSolPrice } from "wumbo-common";
+import { useQuery, SOL_TOKEN } from "wumbo-common";
+import { useWallet } from "@solana/wallet-adapter-react";
+import { useSolPrice } from "@strata-foundation/react";
 import ClaimOrCreate from "./ClaimOrCreate";
 import { useUserInfo } from "@/utils/userState";
 

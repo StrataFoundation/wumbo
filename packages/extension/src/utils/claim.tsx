@@ -1,17 +1,14 @@
-import { useEffect, useState } from "react";
-import { claimPath, routes } from "@/constants/routes";
+import { routes } from "@/constants/routes";
+import { useConnection, useWallet } from "@solana/wallet-adapter-react";
+import { useAsyncCallback } from "react-async-hook";
 import { useHistory } from "react-router-dom";
 import {
-  useConnection,
+  claimTwitterHandle,
   IClaimFlowOutput,
   useClaimLink,
-  useClaimTwitterHandle,
   useCreateOrClaimCoin,
   useReverseTwitter,
-  useWallet,
-  claimTwitterHandle,
 } from "wumbo-common";
-import { useAsyncCallback } from "react-async-hook";
 
 let claimWindow: Window | undefined;
 
@@ -21,8 +18,9 @@ export function useClaimFlow(name?: string | null): IClaimFlowOutput {
     handle: `${name}`,
     newTab: true,
   });
-  const connection = useConnection();
-  const { publicKey, adapter } = useWallet();
+  const { connection } = useConnection();
+  const { adapter } = useWallet();
+  const publicKey = adapter?.publicKey;
   const { handle: ownerTwitterHandle, error: reverseTwitterError } =
     useReverseTwitter(publicKey || undefined);
   const {

@@ -6,8 +6,12 @@ import {
 import { PublicKey } from "@solana/web3.js";
 import { deserializeUnchecked } from "borsh";
 import { useTokenMetadata } from "@strata-foundation/react";
-import { AccountFetchCache } from "@strata-foundation/spl-utils";
+import {
+  AccountFetchCache,
+  decodeMetadata,
+} from "@strata-foundation/spl-utils";
 import { NFT_VERIFIER, NFT_VERIFIER_TLD } from "../constants/globals";
+import { SplTokenCollective } from "@strata-foundation/spl-token-collective";
 
 export async function getNftNameRecordKey(imgUrl: string): Promise<PublicKey> {
   return getNameAccountKey(
@@ -55,7 +59,18 @@ export async function getNftMint(
   imgUrl: string
 ): Promise<PublicKey | undefined> {
   const metadataKey = await getNftMetadataKey(cache, imgUrl);
-  const { tokenRef } = useTokenMetadata(metadataKey);
+  const metadata =
+    metadataKey &&
+    (await cache.search(
+      metadataKey,
+      (pubkey, account) => ({
+        pubkey,
+        account,
+        info: decodeMetadata(account.data),
+      }),
+      true
+    ));
+  const mintKey = metadata?.info && new PublicKey(metadata.info.mint);
 
-  return Promise.resolve(tokenRef?.mint);
+  return Promise.resolve(mintKey);
 }

@@ -3,7 +3,7 @@ import { Flex } from "@chakra-ui/react";
 import {
   useErrorHandler,
   useBondingPricing,
-  useFiatPrice,
+  usePriceInUsd,
   useTokenMetadata,
 } from "@strata-foundation/react";
 import {
@@ -74,7 +74,7 @@ export const TokenPill = React.memo(
     curve: curvePassed,
   }: TokenPillProps) => {
     const { curve: curveResolved } = useBondingPricing(tokenBonding.publicKey);
-    const fiatPrice = useFiatPrice(tokenBonding.baseMint);
+    const fiatPrice = usePriceInUsd(tokenBonding.baseMint);
     const toFiat = (a: number) => (fiatPrice || 0) * a;
     const history = useHistory();
     const curve = curvePassed || curveResolved;

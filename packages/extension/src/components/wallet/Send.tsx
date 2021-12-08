@@ -18,7 +18,7 @@ export const Send = () => {
     <Fragment>
       <WumboDrawer.Header title={`Send ${baseMetadata?.data.symbol}`} />
       <WumboDrawer.Content>
-        <Box padding={4}>
+        <Box>
           <CommonSend finishRedirectUrl={routes.myTokens.path} />
         </Box>
       </WumboDrawer.Content>
