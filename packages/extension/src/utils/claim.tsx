@@ -3,10 +3,11 @@ import { useConnection, useWallet } from "@solana/wallet-adapter-react";
 import { useAsyncCallback } from "react-async-hook";
 import { useHistory } from "react-router-dom";
 import {
-  claimTwitterHandle, IClaimFlowOutput,
+  claimTwitterHandle,
+  IClaimFlowOutput,
   useClaimLink,
   useCreateOrClaimCoin,
-  useReverseTwitter
+  useReverseTwitter,
 } from "wumbo-common";
 
 let claimWindow: Window | undefined;

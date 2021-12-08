@@ -2,10 +2,7 @@ import React, { FC } from "react";
 import { Link, useHistory } from "react-router-dom";
 import { Button, ButtonProps, SpinnerProps } from "@chakra-ui/react";
 import { useUserInfo } from "@/utils/userState";
-import {
-  Spinner,
-  useReverseTwitter,
-} from "wumbo-common";
+import { Spinner, useReverseTwitter } from "wumbo-common";
 import { useErrorHandler } from "@strata-foundation/react";
 import { useWallet } from "@solana/wallet-adapter-react";
 import { useDrawer } from "@/contexts/drawerContext";

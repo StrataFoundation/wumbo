@@ -74,10 +74,13 @@ export class InjectedWalletAdapter
   readyAsync(): Promise<boolean> {
     return (async () => {
       try {
-        const { ready } = await this.sendMessage({
-          type: MessageType.WALLET_READY,
-          name: this._name,
-        }, 500);
+        const { ready } = await this.sendMessage(
+          {
+            type: MessageType.WALLET_READY,
+            name: this._name,
+          },
+          500
+        );
 
         return ready;
       } catch (error: any) {
@@ -117,7 +120,7 @@ export class InjectedWalletAdapter
           reject(new WalletConnectionError("Not ready"));
         }, timeoutMs);
       }
-      
+
       const listener = (e: MessageEvent) => {
         const { error, ...rest } = e.data;
         timeout && clearTimeout(timeout);
