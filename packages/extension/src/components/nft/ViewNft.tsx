@@ -1,16 +1,17 @@
 import {
   ViewNft as CommonViewNft,
-  useTokenMetadata,
   useTokenLargestAccounts,
-  useAccount,
-  handleErrors,
 } from "wumbo-common";
+import { 
+  useErrorHandler,
+  useTokenMetadata,
+  useTokenAccount
+ } from "@strata-foundation/react";
 import React, { Fragment, useMemo } from "react";
 import { useOutsideOfDrawerRef, WumboDrawer } from "../WumboDrawer";
 import { useParams } from "react-router-dom";
 import { viewProfilePath, tagNftPath } from "@/constants/routes";
 import { PublicKey } from "@solana/web3.js";
-import { TokenAccountParser } from "@oyster/common";
 
 export const ViewNft: React.FC = () => {
   const params = useParams<{ mint: string | undefined }>();
@@ -19,6 +20,7 @@ export const ViewNft: React.FC = () => {
     [params.mint]
   );
 
+  const { handleErrors } = useErrorHandler();
   const modalRef = useOutsideOfDrawerRef();
 
   const { loading: loading1, metadata } = useTokenMetadata(token);
@@ -27,9 +29,8 @@ export const ViewNft: React.FC = () => {
     result: res2,
     error: err2,
   } = useTokenLargestAccounts(token);
-  const { loading: loading3, info } = useAccount(
-    res2?.value[0]?.address,
-    TokenAccountParser
+  const { loading: loading3, info } = useTokenAccount(
+    res2?.value[0]?.address
   );
   const loading = loading1 || loading2 || loading3;
   handleErrors(err2);
@@ -45,8 +46,8 @@ export const ViewNft: React.FC = () => {
         <CommonViewNft
           modalRef={modalRef}
           tagNftPath={token ? tagNftPath(token) : undefined}
-          token={token}
-          owner={info?.info?.owner}
+          token={token}j
+          owner={info?.owner}
           getCreatorLink={(c, t, tokenRef) => {
             return tokenRef
               ? viewProfilePath(tokenRef.publicKey)

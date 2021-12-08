@@ -1,17 +1,10 @@
-import { useEffect, useMemo, useState } from "react";
-import {
-  Curve,
-  ICurve,
-  TokenBonding,
-  ITokenRef,
-  useBondingPricing,
-  useWumboUsdPrice,
-  useAccount,
-  useMint,
-  useTwitterTokenRef,
-} from "wumbo-common";
 import { MintInfo } from "@solana/spl-token";
-import { TokenBondingV0 } from "@wum.bo/spl-token-bonding";
+import { useEffect, useMemo, useState } from "react";
+import { usePriceInUsd, useTokenBonding, useCurve, useBondingPricing, useTwitterTokenRef, useMint } from "@strata-foundation/react";
+import { ITokenBonding, ICurve } from "@strata-foundation/spl-token-bonding";
+import { ITokenRef } from "@strata-foundation/spl-token-collective";
+import { useAsync } from "react-async-hook";
+import { getTld } from "wumbo-common";
 
 interface UserState {
   tokenRef?: ITokenRef;
@@ -23,7 +16,7 @@ export interface UserInfo {
   coinPriceUsd: number;
   coinPrice: number;
   tokenRef: ITokenRef;
-  tokenBonding: TokenBondingV0;
+  tokenBonding: ITokenBonding;
   curve: ICurve;
   mint: MintInfo;
 }
@@ -34,23 +27,21 @@ export interface UserInfoState {
 
 export const useUserInfo = (name: string): UserInfoState => {
   const [result, setResult] = useState<UserInfo | undefined>();
-  const { info: creator, loading: loading1 } = useTwitterTokenRef(name);
+  const { result: tld } = useAsync(getTld, []);
+  const { info: creator, loading: loading1 } = useTwitterTokenRef(name, null, tld);
 
-  const { info: tokenBonding, loading: loading2 } = useAccount(
-    creator?.tokenBonding,
-    TokenBonding
+  const { info: tokenBonding, loading: loading2 } = useTokenBonding(
+    creator?.tokenBonding
   );
 
-  const { info: curve, loading: loading3 } = useAccount(
-    tokenBonding?.curve,
-    Curve,
-    true
+  const { info: curve, loading: loading3 } = useCurve(
+    tokenBonding?.curve
   );
 
   const mint = useMint(creator && tokenBonding?.targetMint);
-  const wumboUsdPrice = useWumboUsdPrice();
+  const coinPriceUsd = usePriceInUsd(creator?.mint);
 
-  const { curve: bondingCurve, loading: loading4 } = useBondingPricing(
+  const { pricing: bondingCurve, loading: loading4 } = useBondingPricing(
     creator?.tokenBonding
   );
 
@@ -88,7 +79,7 @@ export const useUserInfo = (name: string): UserInfoState => {
         tokenBonding,
         curve,
         coinPrice: current,
-        coinPriceUsd: current * (wumboUsdPrice || 0),
+        coinPriceUsd
       });
     }
   }, [setResult, current, curve, tokenBonding, mint, creator, loading]);

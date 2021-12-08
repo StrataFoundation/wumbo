@@ -17,28 +17,33 @@ import {
   Token,
   TOKEN_PROGRAM_ID,
 } from "@solana/spl-token";
-import { AccountInfo, PublicKey } from "@solana/web3.js";
+import { AccountInfo, Connection, PublicKey } from "@solana/web3.js";
 import {
   ThemeProvider,
   MetadataAvatar,
   AvatarProps,
+  truthy,
+  getTld,
+  Spinner,
+  getTwitterRegistry
+} from "wumbo-common";
+import { SplTokenCollective } from "@strata-foundation/spl-token-collective";
+import {
+  useStrataSdks,
   useTwitterTokenRef,
   useOwnedAmountForOwnerAndHandle,
-  getTwitterHandle,
   getTwitterClaimedTokenRefKey,
   getTwitterUnclaimedTokenRefKey,
-  truthy,
   useAccountFetchCache,
-  handleErrors,
-  Spinner,
+  useErrorHandler,
   useTokenMetadata,
-  TokenBonding,
-  useAccount,
-  TokenRef,
-  AccountFetchCache,
-} from "wumbo-common";
+  useTokenBonding
+} from "@strata-foundation/react";
+import {
+  AccountFetchCache
+} from "@strata-foundation/spl-utils";
 import { useAsync } from "react-async-hook";
-import { TokenAccountParser } from "@oyster/common";
+import { NameRegistryState } from "@bonfida/spl-name-service";
 
 const humanizeAmount = (amount: number) => {
   if (amount >= 1) return amount.toFixed(0);
@@ -53,9 +58,8 @@ interface IMentionTokenProps extends Pick<AvatarProps, "size"> {
 
 const MentionToken = ({ owner, mention, size }: IMentionTokenProps) => {
   const { info: tokenRef, loading: loading1 } = useTwitterTokenRef(mention);
-  const { loading: loading2, info: token } = useAccount(
-    tokenRef?.tokenBonding,
-    TokenBonding
+  const { loading: loading2, info: token } = useTokenBonding(
+    tokenRef?.tokenBonding
   );
   const { amount, loading: loading3 } = useOwnedAmountForOwnerAndHandle(
     owner,
@@ -84,9 +88,8 @@ interface IPopoverTokenProps {
 
 const PopoverToken = ({ owner, mention }: IPopoverTokenProps) => {
   const { loading: loading1, info: tokenRef } = useTwitterTokenRef(mention);
-  const { loading: loading2, info: token } = useAccount(
-    tokenRef?.tokenBonding,
-    TokenBonding
+  const { loading: loading2, info: token } = useTokenBonding(
+    tokenRef?.tokenBonding
   );
   const { loading: loading3, metadata } = useTokenMetadata(token?.targetMint);
   const { loading: loading4, amount } = useOwnedAmountForOwnerAndHandle(
@@ -152,8 +155,21 @@ interface IReplyTokensProps extends Pick<AvatarProps, "size"> {
   outsideRef: React.MutableRefObject<HTMLInputElement>;
 }
 
+const getTwitterHandle = async (
+  connection: Connection,
+  twitterHandle: string
+): Promise<NameRegistryState | null> => {
+  try {
+    return await getTwitterRegistry(connection, twitterHandle, await getTld());
+  } catch (e) {
+    console.error(e);
+    return null;
+  }
+};
+
 async function ownsTokensOf(
   owner: PublicKey,
+  tokenCollectiveSdk: SplTokenCollective,
   cache: AccountFetchCache,
   mint: PublicKey
 ): Promise<boolean> {
@@ -163,12 +179,13 @@ async function ownsTokensOf(
     mint,
     owner
   );
-  const { info: acct } = (await cache.search(ata, TokenAccountParser)) || {};
+  const { info: acct } = (await cache.search(ata, tokenCollectiveSdk.tokenRefDecoder)) || {};
   return (acct?.amount.toNumber() || 0) > 0;
 }
 
 const getMentionsWithTokens = async (
   owner: PublicKey | undefined,
+  tokenCollectiveSdk: SplTokenCollective | undefined,
   cache: AccountFetchCache,
   mentions: string[]
 ): Promise<string[]> => {
@@ -184,23 +201,21 @@ const getMentionsWithTokens = async (
             cache.connection,
             mention
           );
-          const TokenRefParser = (
-            pubkey: PublicKey,
-            account: AccountInfo<Buffer>
-          ) => ({ pubkey, account, info: TokenRef(pubkey, account) });
           const unclaimed = await getTwitterUnclaimedTokenRefKey(mention);
-          const claimedRef = await cache.search(claimed, TokenRefParser, true);
-          const unclaimedRef = await cache.search(
-            unclaimed,
-            TokenRefParser,
-            true
-          );
-          let tokenRef = claimedRef || unclaimedRef;
-          if (
-            tokenRef?.info &&
-            (await ownsTokensOf(owner, cache, tokenRef.info.mint))
-          ) {
-            return mention;
+          if (tokenCollectiveSdk) {
+            const claimedRef = await cache.search(claimed, tokenCollectiveSdk.tokenRefDecoder, true);
+            const unclaimedRef = await cache.search(
+              unclaimed,
+              tokenCollectiveSdk.tokenRefDecoder,
+              true
+            );
+            let tokenRef = claimedRef || unclaimedRef;
+            if (
+              tokenRef?.info &&
+              (await ownsTokensOf(owner, tokenCollectiveSdk, cache, tokenRef.info.mint))
+            ) {
+              return mention;
+            }
           }
         }
       })
@@ -215,16 +230,20 @@ export const ReplyTokens = ({
   outsideRef,
 }: IReplyTokensProps) => {
   const cache = useAccountFetchCache();
-  const { info: tokenRef, loading } = useTwitterTokenRef(creatorName);
+  const { tokenCollectiveSdk } = useStrataSdks();
+  const { result: tld } = useAsync(getTld, []);
+  const { info: tokenRef, loading } = useTwitterTokenRef(creatorName, null, tld);
   const {
     result: relevantMentions,
     loading: loadingRelevantMentions,
     error,
   } = useAsync(getMentionsWithTokens, [
     tokenRef?.owner as PublicKey | undefined,
+    tokenCollectiveSdk,
     cache,
     mentions,
   ]);
+  const { handleErrors } = useErrorHandler();
   handleErrors(error);
 
   const isLoading = loading || loadingRelevantMentions;
