@@ -77,7 +77,7 @@ export class InjectedWalletAdapter
         const { ready } = await this.sendMessage({
           type: MessageType.WALLET_READY,
           name: this._name,
-        });
+        }, 500);
 
         return ready;
       } catch (error: any) {
@@ -107,17 +107,20 @@ export class InjectedWalletAdapter
     return false;
   }
 
-  async sendMessage(m: Message): Promise<any> {
+  async sendMessage(m: Message, timeoutMs: number = -1): Promise<any> {
     return new Promise((resolve, reject) => {
       const messageChannel = new MessageChannel();
 
-      const timeout = setTimeout(() => {
-        reject(new WalletConnectionError("Not ready"));
-      }, 500);
+      let timeout: any;
+      if (timeoutMs > 0) {
+        timeout = setTimeout(() => {
+          reject(new WalletConnectionError("Not ready"));
+        }, timeoutMs);
+      }
+      
       const listener = (e: MessageEvent) => {
         const { error, ...rest } = e.data;
-        clearTimeout(timeout);
-
+        timeout && clearTimeout(timeout);
         if (error) {
           // errors are returned serialized
           // reconstruct them and reject them
