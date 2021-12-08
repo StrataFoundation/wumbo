@@ -25,7 +25,7 @@ import {
   truthy,
   getTld,
   Spinner,
-  getTwitterRegistry
+  getTwitterRegistry,
 } from "wumbo-common";
 import { SplTokenCollective } from "@strata-foundation/spl-token-collective";
 import {
@@ -37,11 +37,9 @@ import {
   useAccountFetchCache,
   useErrorHandler,
   useTokenMetadata,
-  useTokenBonding
+  useTokenBonding,
 } from "@strata-foundation/react";
-import {
-  AccountFetchCache
-} from "@strata-foundation/spl-utils";
+import { AccountFetchCache } from "@strata-foundation/spl-utils";
 import { useAsync } from "react-async-hook";
 import { NameRegistryState } from "@bonfida/spl-name-service";
 
@@ -179,7 +177,8 @@ async function ownsTokensOf(
     mint,
     owner
   );
-  const { info: acct } = (await cache.search(ata, tokenCollectiveSdk.tokenRefDecoder)) || {};
+  const { info: acct } =
+    (await cache.search(ata, tokenCollectiveSdk.tokenRefDecoder)) || {};
   return (acct?.amount.toNumber() || 0) > 0;
 }
 
@@ -203,7 +202,11 @@ const getMentionsWithTokens = async (
           );
           const unclaimed = await getTwitterUnclaimedTokenRefKey(mention);
           if (tokenCollectiveSdk) {
-            const claimedRef = await cache.search(claimed, tokenCollectiveSdk.tokenRefDecoder, true);
+            const claimedRef = await cache.search(
+              claimed,
+              tokenCollectiveSdk.tokenRefDecoder,
+              true
+            );
             const unclaimedRef = await cache.search(
               unclaimed,
               tokenCollectiveSdk.tokenRefDecoder,
@@ -212,7 +215,12 @@ const getMentionsWithTokens = async (
             let tokenRef = claimedRef || unclaimedRef;
             if (
               tokenRef?.info &&
-              (await ownsTokensOf(owner, tokenCollectiveSdk, cache, tokenRef.info.mint))
+              (await ownsTokensOf(
+                owner,
+                tokenCollectiveSdk,
+                cache,
+                tokenRef.info.mint
+              ))
             ) {
               return mention;
             }
@@ -232,7 +240,11 @@ export const ReplyTokens = ({
   const cache = useAccountFetchCache();
   const { tokenCollectiveSdk } = useStrataSdks();
   const { result: tld } = useAsync(getTld, []);
-  const { info: tokenRef, loading } = useTwitterTokenRef(creatorName, null, tld);
+  const { info: tokenRef, loading } = useTwitterTokenRef(
+    creatorName,
+    null,
+    tld
+  );
   const {
     result: relevantMentions,
     loading: loadingRelevantMentions,

@@ -2,11 +2,11 @@ import {
   ViewNft as CommonViewNft,
   useTokenLargestAccounts,
 } from "wumbo-common";
-import { 
+import {
   useErrorHandler,
   useTokenMetadata,
-  useTokenAccount
- } from "@strata-foundation/react";
+  useTokenAccount,
+} from "@strata-foundation/react";
 import React, { Fragment, useMemo } from "react";
 import { useOutsideOfDrawerRef, WumboDrawer } from "../WumboDrawer";
 import { useParams } from "react-router-dom";
@@ -29,9 +29,7 @@ export const ViewNft: React.FC = () => {
     result: res2,
     error: err2,
   } = useTokenLargestAccounts(token);
-  const { loading: loading3, info } = useTokenAccount(
-    res2?.value[0]?.address
-  );
+  const { loading: loading3, info } = useTokenAccount(res2?.value[0]?.address);
   const loading = loading1 || loading2 || loading3;
   handleErrors(err2);
 
@@ -46,7 +44,8 @@ export const ViewNft: React.FC = () => {
         <CommonViewNft
           modalRef={modalRef}
           tagNftPath={token ? tagNftPath(token) : undefined}
-          token={token}j
+          token={token}
+          j
           owner={info?.owner}
           getCreatorLink={(c, t, tokenRef) => {
             return tokenRef

@@ -6,13 +6,16 @@ import React, { useMemo } from "react";
 import { useAsyncCallback } from "react-async-hook";
 import { useHistory } from "react-router-dom";
 import {
-  getTld, getTwitterRegistryKey, useQuery, useReverseTwitter
+  getTld,
+  getTwitterRegistryKey,
+  useQuery,
+  useReverseTwitter,
 } from "wumbo-common";
 import { useWallet } from "@solana/wallet-adapter-react";
 import {
   useErrorHandler,
   useProvider,
-  useStrataSdks
+  useStrataSdks,
 } from "@strata-foundation/react";
 
 export default React.memo(() => {
@@ -40,8 +43,8 @@ export default React.memo(() => {
         buyBaseRoyaltyPercentage: 0,
         sellBaseRoyaltyPercentage: 0,
         buyTargetRoyaltyPercentage: 5,
-        sellTargetRoyaltyPercentage: 0
-      }
+        sellTargetRoyaltyPercentage: 0,
+      },
     });
     history.push(
       routes.trade.path.replace(":tokenBondingKey", tokenBonding!.toBase58()) +

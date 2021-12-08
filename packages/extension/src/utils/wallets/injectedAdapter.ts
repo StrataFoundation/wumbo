@@ -51,8 +51,12 @@ export class InjectedWalletAdapter
       }
     });
   }
-  
-  sendTransaction(transaction: Transaction, connection: Connection, options?: SendTransactionOptions): Promise<string> {
+
+  sendTransaction(
+    transaction: Transaction,
+    connection: Connection,
+    options?: SendTransactionOptions
+  ): Promise<string> {
     throw new Error("Method not implemented.");
   }
 
@@ -83,8 +87,8 @@ export class InjectedWalletAdapter
   }
 
   async waitForReady(): Promise<void> {
-    let ready = await this.readyAsync()
-    while(!ready) {
+    let ready = await this.readyAsync();
+    while (!ready) {
       ready = await this.readyAsync();
       await sleep(500);
       console.log("Injected wallet not ready, trying again...");
@@ -140,9 +144,8 @@ export class InjectedWalletAdapter
         }
         resolve(rest);
       };
-      
+
       messageChannel.port1.onmessage = listener;
-      
 
       // TODO: determrin security risks here
       window.postMessage(m, "*", [messageChannel.port2]);

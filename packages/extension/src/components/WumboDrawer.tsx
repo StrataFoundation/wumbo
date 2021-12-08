@@ -10,11 +10,7 @@ import { Toaster } from "react-hot-toast";
 import { useDrawer } from "@/contexts/drawerContext";
 import { routes, IRoutes } from "@/constants/routes";
 import { useUserInfo } from "@/utils/userState";
-import {
-  replaceAll,
-  Spinner,
-  OPEN_BONDING,
-} from "wumbo-common";
+import { replaceAll, Spinner, OPEN_BONDING } from "wumbo-common";
 import { useHistoryList } from "@/utils/history";
 import { useWallet } from "@solana/wallet-adapter-react";
 import Logo from "../../public/assets/img/logo.svg";

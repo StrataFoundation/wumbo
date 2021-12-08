@@ -1,8 +1,5 @@
 import { useEffect, useState } from "react";
-import {
-  getNftMint, getUntaggedImages,
-  truthy
-} from "wumbo-common";
+import { getNftMint, getUntaggedImages, truthy } from "wumbo-common";
 import { useAccountFetchCache } from "@strata-foundation/react";
 import { AccountFetchCache } from "@strata-foundation/spl-utils";
 

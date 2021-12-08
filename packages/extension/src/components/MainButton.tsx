@@ -2,9 +2,7 @@ import React, { FC } from "react";
 import { Link } from "react-router-dom";
 import { Button, ButtonProps, SpinnerProps } from "@chakra-ui/react";
 import { useUserInfo } from "@/utils/userState";
-import {
-  Spinner
-} from "wumbo-common";
+import { Spinner } from "wumbo-common";
 import { useDrawer } from "@/contexts/drawerContext";
 import { routes, viewProfilePath } from "@/constants/routes";
 

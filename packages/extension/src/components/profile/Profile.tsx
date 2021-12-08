@@ -1,10 +1,7 @@
 import React, { Fragment } from "react";
 import { useHistory, useParams } from "react-router-dom";
 import { PublicKey } from "@solana/web3.js";
-import {
-  Profile as CommonProfile,
-  
-} from "wumbo-common";
+import { Profile as CommonProfile } from "wumbo-common";
 import {
   useTokenRef,
   useClaimedTokenRefKey,
@@ -74,7 +71,9 @@ export const Profile = () => {
       <WumboDrawer.Header title={metadata?.data.name || "View Profile"} />
       <WumboDrawer.Content>
         <CommonProfile
-          topTokensPath={tokenRef?.tokenBonding ? topTokensPath(tokenRef.tokenBonding) : ""}
+          topTokensPath={
+            tokenRef?.tokenBonding ? topTokensPath(tokenRef.tokenBonding) : ""
+          }
           wumNetWorthPath={
             tokenRef?.owner ? wumNetWorthPath(tokenRef.owner as PublicKey) : ""
           }
@@ -85,7 +84,8 @@ export const Profile = () => {
             history.push(viewProfilePath(tokenRefKey))
           }
           onTradeClick={() =>
-            tokenRef?.tokenBonding && history.push(tradePath(tokenRef.tokenBonding, "buy"))
+            tokenRef?.tokenBonding &&
+            history.push(tradePath(tokenRef.tokenBonding, "buy"))
           }
           getNftLink={(token) =>
             tokenRef?.mint ? nftPath(tokenRef?.mint) : ""

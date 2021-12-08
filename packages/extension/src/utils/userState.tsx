@@ -1,6 +1,13 @@
 import { MintInfo } from "@solana/spl-token";
 import { useEffect, useMemo, useState } from "react";
-import { usePriceInUsd, useTokenBonding, useCurve, useBondingPricing, useTwitterTokenRef, useMint } from "@strata-foundation/react";
+import {
+  usePriceInUsd,
+  useTokenBonding,
+  useCurve,
+  useBondingPricing,
+  useTwitterTokenRef,
+  useMint,
+} from "@strata-foundation/react";
 import { ITokenBonding, ICurve } from "@strata-foundation/spl-token-bonding";
 import { ITokenRef } from "@strata-foundation/spl-token-collective";
 import { useAsync } from "react-async-hook";
@@ -28,15 +35,17 @@ export interface UserInfoState {
 export const useUserInfo = (name: string): UserInfoState => {
   const [result, setResult] = useState<UserInfo | undefined>();
   const { result: tld } = useAsync(getTld, []);
-  const { info: creator, loading: loading1 } = useTwitterTokenRef(name, null, tld);
+  const { info: creator, loading: loading1 } = useTwitterTokenRef(
+    name,
+    null,
+    tld
+  );
 
   const { info: tokenBonding, loading: loading2 } = useTokenBonding(
     creator?.tokenBonding
   );
 
-  const { info: curve, loading: loading3 } = useCurve(
-    tokenBonding?.curve
-  );
+  const { info: curve, loading: loading3 } = useCurve(tokenBonding?.curve);
 
   const mint = useMint(creator && tokenBonding?.targetMint);
   const coinPriceUsd = usePriceInUsd(creator?.mint);
@@ -79,7 +88,7 @@ export const useUserInfo = (name: string): UserInfoState => {
         tokenBonding,
         curve,
         coinPrice: current,
-        coinPriceUsd
+        coinPriceUsd,
       });
     }
   }, [setResult, current, curve, tokenBonding, mint, creator, loading]);
