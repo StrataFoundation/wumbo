@@ -8,6 +8,7 @@ import {
   SOLANA_API_URL,
 } from "wumbo-common";
 import {
+  StrataSdksProvider,
   AccountProvider,
   SolPriceProvider,
   ErrorHandlerProvider,
