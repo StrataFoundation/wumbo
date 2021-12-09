@@ -3,11 +3,10 @@ import { useConnection, useWallet } from "@solana/wallet-adapter-react";
 import { useAsyncCallback } from "react-async-hook";
 import { useHistory } from "react-router-dom";
 import {
-  claimTwitterHandle,
   IClaimFlowOutput,
   useClaimLink,
   useCreateOrClaimCoin,
-  useReverseTwitter,
+  useReverseTwitter
 } from "wumbo-common";
 
 let claimWindow: Window | undefined;
@@ -44,9 +43,7 @@ export function useClaimFlow(name?: string | null): IClaimFlowOutput {
       };
       chrome.runtime.onMessage.addListener(fn);
     });
-    await claimTwitterHandle({
-      connection,
-      adapter,
+    await create({
       redirectUri,
       ...oauthResult,
       twitterHandle: name,
@@ -56,9 +53,9 @@ export function useClaimFlow(name?: string | null): IClaimFlowOutput {
   const smartClaim = async () => {
     if (!ownerTwitterHandle) {
       await createTwitter();
+    } else {
+      name && (await create({ twitterHandle: name }));
     }
-
-    name && (await create(name));
     history.push(routes.editProfile.path);
   };
 

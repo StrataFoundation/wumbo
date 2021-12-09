@@ -18,7 +18,7 @@ import {
 import {
   useTokenBonding,
   useTokenMetadata,
-  useClaimedTokenRef,
+  usePrimaryClaimedTokenRef,
   useErrorHandler,
   useProvider,
 } from "@strata-foundation/react";
@@ -48,7 +48,7 @@ export const EditProfile = React.memo(
     const hiddenFileInput = React.useRef<HTMLInputElement>(null);
     const { awaitingApproval } = useProvider();
     const { handleErrors } = useErrorHandler();
-    const { info: tokenRef } = useClaimedTokenRef(ownerWalletKey);
+    const { info: tokenRef } = usePrimaryClaimedTokenRef(ownerWalletKey);
     const {
       watch,
       register,

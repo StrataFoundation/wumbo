@@ -69,7 +69,7 @@ export const SiteRoutes: ISiteRoutes = {
 
 export const AppRoutes: IAppRoutes = {
   root: { path: "/app" },
-  claim: { path: "/app/claimSite" },
+  claim: { path: "/app/claim" },
   manageWallet: { path: "/app/manage-wallet" },
   wallet: { path: "/app/wallet" },
   viewProfile: { path: "/app/profile/view/:tokenRefKey" },

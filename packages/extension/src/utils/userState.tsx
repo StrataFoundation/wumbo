@@ -5,13 +5,13 @@ import {
   useTokenBonding,
   useCurve,
   useBondingPricing,
-  useTwitterTokenRef,
+  useTokenRefForName,
   useMint,
 } from "@strata-foundation/react";
 import { ITokenBonding, ICurve } from "@strata-foundation/spl-token-bonding";
 import { ITokenRef } from "@strata-foundation/spl-token-collective";
 import { useAsync } from "react-async-hook";
-import { getTld } from "wumbo-common";
+import { getTwitterTld } from "wumbo-common";
 
 interface UserState {
   tokenRef?: ITokenRef;
@@ -20,7 +20,7 @@ interface UserState {
 
 export interface UserInfo {
   name: string;
-  coinPriceUsd: number;
+  coinPriceUsd?: number;
   coinPrice: number;
   tokenRef: ITokenRef;
   tokenBonding: ITokenBonding;
@@ -34,8 +34,8 @@ export interface UserInfoState {
 
 export const useUserInfo = (name: string): UserInfoState => {
   const [result, setResult] = useState<UserInfo | undefined>();
-  const { result: tld } = useAsync(getTld, []);
-  const { info: creator, loading: loading1 } = useTwitterTokenRef(
+  const { result: tld } = useAsync(getTwitterTld, []);
+  const { info: creator, loading: loading1 } = useTokenRefForName(
     name,
     null,
     tld
@@ -91,7 +91,7 @@ export const useUserInfo = (name: string): UserInfoState => {
         coinPriceUsd,
       });
     }
-  }, [setResult, current, curve, tokenBonding, mint, creator, loading]);
+  }, [setResult, current, curve, tokenBonding, mint, creator, loading, coinPriceUsd]);
 
   return { loading, userInfo: result };
 };

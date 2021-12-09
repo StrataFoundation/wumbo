@@ -25,18 +25,12 @@ export const ClaimButton: FC<Props> = ({
   const { toggleDrawer } = useDrawer();
   const creatorInfoState = useUserInfo(creatorName);
   const { userInfo: creatorInfo, loading } = creatorInfoState;
-  const {
-    claim,
-    loading: loadingClaim,
-    error: claimError,
-  } = useClaimFlow(creatorName);
   const { publicKey, connected } = useWallet();
   const { handle: ownerTwitterHandle, error: reverseTwitterError } =
     useReverseTwitter(publicKey || undefined);
   const { handleErrors } = useErrorHandler();
-  handleErrors(claimError);
 
-  if (loading || loadingClaim) {
+  if (loading) {
     return <Spinner size="sm" {...spinnerProps} />;
   }
 
@@ -61,7 +55,6 @@ export const ClaimButton: FC<Props> = ({
             isOpen: true,
             creator: { name: creatorName, img: creatorImg },
           });
-          connected && claim();
         }}
         {...btnProps}
       >
@@ -92,7 +85,7 @@ export const ClaimButton: FC<Props> = ({
       }
       {...btnProps}
     >
-      ${creatorInfo?.coinPriceUsd.toFixed(2)}
+      ${creatorInfo?.coinPriceUsd?.toFixed(2) || "0.00"}
     </Button>
   );
 };

@@ -69,6 +69,8 @@ module.exports = {
       "@solana/wallet-ledger": path.resolve(
         "../../node_modules/@solana/wallet-ledger/dist/lib/index.js"
       ),
+      // For local dev with linked packages:
+      "@chakra-ui/react": path.resolve("../../node_modules/@chakra-ui/react"),
       "@solana/wallet-adapter-react": path.resolve("../../node_modules/@solana/wallet-adapter-react"),
       "@strata-foundation/react": path.resolve("./node_modules/@strata-foundation/react")
     },
@@ -79,16 +81,13 @@ module.exports = {
       "REACT_APP_NFT_VERIFIER_TLD",
       "REACT_APP_NFT_VERIFIER",
       "REACT_APP_TROPHY_CREATOR",
-      "REACT_APP_TWITTER_REGISTRAR_SERVER_URL",
       "REACT_APP_OPEN_BONDING",
       "REACT_APP_OPEN_TOKEN",
       "REACT_APP_OPEN_COLLECTIVE_KEY",
       "REACT_APP_SOLANA_API_URL",
-      "REACT_APP_IS_DEV",
-      "REACT_APP_TWITTER_TLD",
-      "REACT_APP_TWITTER_VERIFIER",
       "REACT_APP_NFT_VERIFIER_URL",
-      "REACT_APP_WUMBO_API_URL",
+      "REACT_APP_STRATA_API_URL",
+      "REACT_APP_WUMBO_IDENTITY_SERVICE_URL",
       "REACT_APP_TAGGING_THRESHOLD",
       "REACT_APP_BASE_SLIPPAGE",
       "REACT_APP_ARWEAVE_UPLOAD_URL",

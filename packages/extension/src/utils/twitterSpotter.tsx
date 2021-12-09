@@ -1,8 +1,9 @@
 import { useEffect, useState } from "react";
 import isEqual from "lodash/isEqual";
 import { useInterval } from "@strata-foundation/react";
-import { getElementsBySelector } from "./elements";
+import { getVisibleElementsBySelector } from "./elements";
 import * as Sentry from "@sentry/react";
+import { truthy } from "wumbo-common";
 
 const twitterMentionRegex =
   /(?:^|[^a-zA-Z0-9_@＠])(@|＠)(?!\.)([a-zA-Z0-9_\.]{1,15})(?:\b(?!@)|$)/g;
@@ -140,13 +141,14 @@ export const useTweets = (): IParsedTweet[] | null => {
   const [tweets, setTweets] = useState<IParsedTweet[]>([]);
 
   useEffect(() => {
-    const cache = new Set<Element>();
+    const cache = new Map<Element, IParsedTweet>();
     const notCached = (el: Element): boolean => {
       return !cache.has(el);
     };
 
     const getTweets = () => {
-      const tweets = getElementsBySelector('[data-testid="tweet"]').filter(
+      const existingTweets = getVisibleElementsBySelector('[data-testid="tweet"]').map(cache.get.bind(cache)).filter(truthy);
+      const tweets = getVisibleElementsBySelector('[data-testid="tweet"]').filter(
         notCached
       );
       if (tweets.length > 0) {
@@ -159,8 +161,6 @@ export const useTweets = (): IParsedTweet[] | null => {
               const nameEl = buttonTarget.querySelector("a");
 
               if (nameEl) {
-                cache.add(tweet);
-
                 const name = nameEl.href.split("/").slice(-1)[0];
                 const imgEl = nameEl.querySelector("img");
                 let mentions: string[] | null = null;
@@ -181,15 +181,18 @@ export const useTweets = (): IParsedTweet[] | null => {
                   )[1].parentNode.parentNode.parentNode.parentNode;
                 }
 
+                const ret = {
+                  name,
+                  avatar: imgEl?.src,
+                  buttonTarget,
+                  mentions,
+                  replyTokensTarget,
+                }
+                cache.set(tweet, ret);
+
                 return [
                   ...acc,
-                  {
-                    name,
-                    avatar: imgEl?.src,
-                    buttonTarget,
-                    mentions,
-                    replyTokensTarget,
-                  },
+                  ret,
                 ];
               }
             }
@@ -199,7 +202,7 @@ export const useTweets = (): IParsedTweet[] | null => {
           []
         );
 
-        setTweets((oldTweets) => [...(oldTweets || []), ...parsedTweets]);
+        setTweets([...existingTweets, ...parsedTweets]);
       }
     };
 
@@ -219,7 +222,7 @@ export const useUserCells = (): IParsedUserCell[] | null => {
   const [userCells, setUserCells] = useState<IParsedUserCell[]>([]);
 
   useInterval(() => {
-    const userCells = getElementsBySelector('[data-testid="UserCell"]');
+    const userCells = getVisibleElementsBySelector('[data-testid="UserCell"]');
 
     if (userCells.length > 0) {
       const parsedUserCells = userCells.reduce((acc: any, cell: any) => {

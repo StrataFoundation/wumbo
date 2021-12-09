@@ -70,7 +70,7 @@ export const MainButton: FC<Props> = ({
       }
       {...btnProps}
     >
-      ${creatorInfo?.coinPriceUsd.toFixed(2)}
+      ${creatorInfo?.coinPriceUsd?.toFixed(2) || "0.00"}
     </Button>
   );
 };

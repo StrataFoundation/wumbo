@@ -25,7 +25,7 @@ export async function getNftMetadataKey(
   cache: AccountFetchCache,
   imgUrl: string
 ): Promise<PublicKey | undefined> {
-  const header = await cache.searchAndWatch(
+  const [header, dispose] = await cache.searchAndWatch(
     await getNftNameRecordKey(imgUrl),
     (pubkey, account) => {
       const header: NameRegistryState = deserializeUnchecked(
@@ -41,6 +41,8 @@ export async function getNftMetadataKey(
     },
     true
   );
+  // Keep cached for 2 seconds since nft fetcher runs every 1s
+  setTimeout(dispose, 2 * 1000);
 
   const tokenMetadata =
     header &&

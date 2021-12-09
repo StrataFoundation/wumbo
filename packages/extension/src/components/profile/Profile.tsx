@@ -13,7 +13,7 @@ import {
   nftPath,
   routes,
   topTokensPath,
-  tradePath,
+  swapPath,
   viewProfilePath,
   wumNetWorthPath,
 } from "@/constants/routes";
@@ -26,7 +26,7 @@ export const Profile = () => {
   const params = useParams<{ tokenRefKey: string | undefined }>();
   const { connected, adapter } = useWallet();
   const publicKey = adapter?.publicKey;
-  const walletTokenRefKey = useClaimedTokenRefKey(publicKey || undefined);
+  const walletTokenRefKey = useClaimedTokenRefKey(publicKey, null);
   const passedTokenRefKey = params.tokenRefKey
     ? new PublicKey(params.tokenRefKey)
     : undefined;
@@ -85,7 +85,7 @@ export const Profile = () => {
           }
           onTradeClick={() =>
             tokenRef?.tokenBonding &&
-            history.push(tradePath(tokenRef.tokenBonding, "buy"))
+            history.push(swapPath(tokenRef.tokenBonding, "buy"))
           }
           getNftLink={(token) =>
             tokenRef?.mint ? nftPath(tokenRef?.mint) : ""

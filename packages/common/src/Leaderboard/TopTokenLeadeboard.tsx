@@ -9,6 +9,7 @@ import {
 } from "@strata-foundation/react";
 import { WumboUserLeaderboard } from "./WumboUserLeaderboard";
 import { UserLeaderboardElement } from "./UserLeaderboardElement";
+import { NATIVE_MINT } from "@solana/spl-token";
 
 const GET_TOP_TOKENS = gql`
   query GetTopTokens($startRank: Int!, $stopRank: Int!) {
@@ -31,13 +32,13 @@ const Element = React.memo(
     tokenBondingKey: PublicKey;
     onClick?: (tokenRefKey: PublicKey) => void;
   }) => {
-    const { curve } = useBondingPricing(tokenBondingKey);
+    const { pricing } = useBondingPricing(tokenBondingKey);
     const { info: tokenBonding } = useTokenBonding(tokenBondingKey);
     const fiatPrice = usePriceInUsd(tokenBonding?.baseMint);
     const toFiat = (a: number) => (fiatPrice || 0) * a;
 
     const { info: tokenRef } = useTokenRefFromBonding(tokenBondingKey);
-    const current = curve?.current();
+    const current = pricing?.current(NATIVE_MINT);
     const amount = current ? "$" + toFiat(current).toFixed(2) : "";
 
     return (

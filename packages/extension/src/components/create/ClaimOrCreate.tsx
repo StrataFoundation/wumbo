@@ -1,4 +1,4 @@
-import { routes } from "@/constants/routes";
+import { routes, swapPath } from "@/constants/routes";
 import { useClaimFlow } from "@/utils/claim";
 import { useUserInfo } from "@/utils/userState";
 import { Box, Button, Text } from "@chakra-ui/react";
@@ -6,7 +6,7 @@ import React, { useMemo } from "react";
 import { useAsyncCallback } from "react-async-hook";
 import { useHistory } from "react-router-dom";
 import {
-  getTld,
+  getTwitterTld,
   getTwitterRegistryKey,
   useQuery,
   useReverseTwitter,
@@ -37,8 +37,8 @@ export default React.memo(() => {
         name: handle,
         symbol: "UNCLAIMED",
       },
-      name: await getTwitterRegistryKey(handle, await getTld()),
-      nameParent: await getTld(),
+      name: await getTwitterRegistryKey(handle, await getTwitterTld()),
+      nameParent: await getTwitterTld(),
       tokenBondingParams: {
         buyBaseRoyaltyPercentage: 0,
         sellBaseRoyaltyPercentage: 0,
@@ -47,8 +47,7 @@ export default React.memo(() => {
       },
     });
     history.push(
-      routes.trade.path.replace(":tokenBondingKey", tokenBonding!.toBase58()) +
-        `?name=${query.get("name")!}`
+      swapPath(tokenBonding!, "buy") + `?name=${query.get("name")!}`
     );
   };
 

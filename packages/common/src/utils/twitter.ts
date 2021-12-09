@@ -4,84 +4,53 @@ import {
   getNameAccountKey,
   NameRegistryState,
   NAME_PROGRAM_ID,
-  ReverseTwitterRegistryState,
+  ReverseTwitterRegistryState
 } from "@bonfida/spl-name-service";
-import { WalletAdapter } from "@solana/wallet-adapter-base";
+import { Provider, Wallet } from "@project-serum/common";
+import { useConnection } from "@solana/wallet-adapter-react";
 import {
   Account,
-  Connection,
-  Keypair,
-  sendAndConfirmRawTransaction,
+  Connection, PublicKey, sendAndConfirmRawTransaction,
   Transaction,
-  TransactionInstruction,
+  TransactionInstruction
 } from "@solana/web3.js";
-import { PublicKey } from "@solana/web3.js";
-import { useState } from "react";
-import { useAsync, useAsyncCallback } from "react-async-hook";
+import axios from "axios";
+import { useAsync } from "react-async-hook";
 import {
-  TWITTER_REGISTRAR_SERVER_URL,
-  IS_DEV,
-  DEV_TWITTER_TLD,
-  DEV_TWITTER_VERIFIER,
-  TWITTER_VERIFIER,
-  TWITTER_TLD,
+  WUMBO_IDENTITY_SERVICE_URL
 } from "../constants/globals";
 import {
   createVerifiedTwitterRegistry,
-  getTwitterRegistry,
+  getTwitterRegistry
 } from "./testableNameServiceTwitter";
-import { Wallet } from "@project-serum/anchor";
-import { useConnection } from "@solana/wallet-adapter-react";
 
-async function sendTransaction(
-  connection: Connection,
-  instructions: TransactionInstruction[],
-  wallet: Wallet,
-  extraSigners?: Account[]
-): Promise<string> {
-  const transaction = new Transaction({
-    feePayer: wallet.publicKey || undefined,
-    recentBlockhash: (await connection.getRecentBlockhash("confirmed"))
-      .blockhash,
-  });
-  transaction.instructions = instructions;
-
-  extraSigners && transaction.partialSign(...extraSigners);
-  const signed = await wallet.signTransaction(transaction);
-
-  return sendAndConfirmRawTransaction(connection, signed.serialize(), {
-    commitment: "confirmed",
-  });
-}
-
-export async function createTestTld(connection: Connection, wallet: Wallet) {
-  if (IS_DEV) {
-    const tld = await getNameAccountKey(await getHashedName(DEV_TWITTER_TLD));
-    const account = await connection.getAccountInfo(tld);
-    if (!account) {
-      console.log("Testing tld doesn't exist, creating...");
-      const createInstruction = await createNameRegistry(
-        connection,
-        DEV_TWITTER_TLD,
-        256,
-        wallet.publicKey!,
-        getTwitterVerifier()
-      );
-      console.log(
-        await sendTransaction(connection, [createInstruction], wallet)
-      );
-    }
+let twitterTld: PublicKey, twitterVerifier: PublicKey;
+async function fetchConfig(): Promise<void> {
+  try {
+    const config = await (await axios.get(WUMBO_IDENTITY_SERVICE_URL + "/config")).data
+    twitterTld = new PublicKey(config.tlds.twitter);
+    twitterVerifier = new PublicKey(config.verifiers.twitter)
+  } catch(e: any) {
+    console.error(e);
+    twitterTld = new PublicKey("Fhqd3ostRQQE65hzoA7xFMgT9kge2qPnsTNAKuL2yrnx");
+    twitterVerifier = new PublicKey("DTok7pfUzNeNPqU3Q6foySCezPQE82eRyhX1HdhVNLVC");
   }
 }
 
-export async function getTld(): Promise<PublicKey> {
-  return IS_DEV
-    ? await getNameAccountKey(await getHashedName(DEV_TWITTER_TLD))
-    : TWITTER_TLD;
+export async function getTwitterTld(): Promise<PublicKey> {
+  if (!twitterTld) {
+    await fetchConfig()
+  }
+
+  return twitterTld;
 }
 
-export function getTwitterVerifier(): PublicKey {
-  return IS_DEV ? DEV_TWITTER_VERIFIER.publicKey : TWITTER_VERIFIER;
+export async function getTwitterVerifier(): Promise<PublicKey> {
+  if (!twitterVerifier) {
+    await fetchConfig()
+  }
+
+  return twitterVerifier;
 }
 
 export const getTwitterHandle = async (
@@ -89,7 +58,7 @@ export const getTwitterHandle = async (
   twitterHandle: string
 ): Promise<NameRegistryState | null> => {
   try {
-    return await getTwitterRegistry(connection, twitterHandle, await getTld());
+    return await getTwitterRegistry(connection, twitterHandle, await getTwitterTld());
   } catch (e) {
     console.error(e);
     return null;
@@ -165,8 +134,8 @@ export async function claimTwitterTransactionInstructions(
     1_000,
     owner,
     NAME_PROGRAM_ID,
-    IS_DEV ? DEV_TWITTER_VERIFIER.publicKey : TWITTER_VERIFIER,
-    await getTld()
+    await getTwitterVerifier(),
+    await getTwitterTld()
   );
 }
 
@@ -177,8 +146,8 @@ export async function getTwitterReverse(
   const hashedName = await getHashedName(owner.toString());
   const key = await getNameAccountKey(
     hashedName,
-    IS_DEV ? DEV_TWITTER_VERIFIER.publicKey : TWITTER_VERIFIER,
-    await getTld()
+    await getTwitterVerifier(),
+    await getTwitterTld()
   );
 
   return ReverseTwitterRegistryState.retrieve(connection, key);
