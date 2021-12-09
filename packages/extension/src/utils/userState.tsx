@@ -91,7 +91,16 @@ export const useUserInfo = (name: string): UserInfoState => {
         coinPriceUsd,
       });
     }
-  }, [setResult, current, curve, tokenBonding, mint, creator, loading, coinPriceUsd]);
+  }, [
+    setResult,
+    current,
+    curve,
+    tokenBonding,
+    mint,
+    creator,
+    loading,
+    coinPriceUsd,
+  ]);
 
   return { loading, userInfo: result };
 };

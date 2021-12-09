@@ -73,7 +73,9 @@ export const TokenPill = React.memo(
     detailsPath,
     pricing: pricingPassed,
   }: TokenPillProps) => {
-    const { pricing: pricingResolved } = useBondingPricing(tokenBonding.publicKey);
+    const { pricing: pricingResolved } = useBondingPricing(
+      tokenBonding.publicKey
+    );
     const fiatPrice = usePriceInUsd(tokenBonding.baseMint);
     const toFiat = (a: number) => (fiatPrice || 0) * a;
     const history = useHistory();

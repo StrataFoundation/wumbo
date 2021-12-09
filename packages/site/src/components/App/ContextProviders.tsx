@@ -69,9 +69,7 @@ export const ContextProviders: React.FC = ({ children }) => {
                   onError={console.error}
                   autoConnect
                 >
-                  <StrataSdksProvider>
-                    {children}
-                  </StrataSdksProvider>
+                  <StrataSdksProvider>{children}</StrataSdksProvider>
                 </WalletProvider>
               </SolPriceProvider>
             </ThemeProvider>

@@ -25,7 +25,7 @@ import {
   truthy,
   getTwitterTld,
   useTwitterTld,
-  getTwitterRegistryKey
+  getTwitterRegistryKey,
 } from "wumbo-common";
 import { SplTokenCollective } from "@strata-foundation/spl-token-collective";
 import {
@@ -57,7 +57,11 @@ interface IMentionTokenProps extends Pick<AvatarProps, "size"> {
 
 const MentionToken = ({ owner, mention, size }: IMentionTokenProps) => {
   const tld = useTwitterTld();
-  const { info: tokenRef, loading: loading1 } = useTokenRefForName(mention, null, tld);
+  const { info: tokenRef, loading: loading1 } = useTokenRefForName(
+    mention,
+    null,
+    tld
+  );
   const { loading: loading2, info: token } = useTokenBonding(
     tokenRef?.tokenBonding
   );
@@ -90,7 +94,11 @@ interface IPopoverTokenProps {
 
 const PopoverToken = ({ owner, mention }: IPopoverTokenProps) => {
   const tld = useTwitterTld();
-  const { loading: loading1, info: tokenRef } = useTokenRefForName(mention, null, tld);
+  const { loading: loading1, info: tokenRef } = useTokenRefForName(
+    mention,
+    null,
+    tld
+  );
   const { loading: loading2, info: token } = useTokenBonding(
     tokenRef?.tokenBonding
   );
@@ -160,8 +168,14 @@ interface IReplyTokensProps extends Pick<AvatarProps, "size"> {
   outsideRef: React.MutableRefObject<HTMLInputElement>;
 }
 
-async function getTwitterRegistry(connection: Connection, twitterHandle: string): Promise<NameRegistryState | undefined> {
-  const name = await getTwitterRegistryKey(twitterHandle, await getTwitterTld());
+async function getTwitterRegistry(
+  connection: Connection,
+  twitterHandle: string
+): Promise<NameRegistryState | undefined> {
+  const name = await getTwitterRegistryKey(
+    twitterHandle,
+    await getTwitterTld()
+  );
   const acct = await connection.getAccountInfo(name);
 
   if (acct) {
@@ -177,7 +191,7 @@ const getTwitterHandle = async (
   connection: Connection,
   twitterHandle: string
 ): Promise<NameRegistryState | null> => {
-  return await getTwitterRegistry(connection, twitterHandle) || null;
+  return (await getTwitterRegistry(connection, twitterHandle)) || null;
 };
 
 async function ownsTokensOf(
@@ -206,7 +220,7 @@ const getMentionsWithTokens = async (
   if (!owner) {
     return [];
   }
-  const tld = await getTwitterTld()
+  const tld = await getTwitterTld();
 
   return (
     await Promise.all(
@@ -219,7 +233,11 @@ const getMentionsWithTokens = async (
             null,
             tld
           );
-          const unclaimed = await getUnclaimedTokenRefKeyForName(mention, null, tld);
+          const unclaimed = await getUnclaimedTokenRefKeyForName(
+            mention,
+            null,
+            tld
+          );
           if (tokenCollectiveSdk) {
             const claimedRef = await cache.search(
               claimed,

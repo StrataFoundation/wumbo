@@ -147,10 +147,14 @@ export const useTweets = (): IParsedTweet[] | null => {
     };
 
     const getTweets = () => {
-      const existingTweets = getVisibleElementsBySelector('[data-testid="tweet"]').map(cache.get.bind(cache)).filter(truthy);
-      const tweets = getVisibleElementsBySelector('[data-testid="tweet"]').filter(
-        notCached
-      );
+      const existingTweets = getVisibleElementsBySelector(
+        '[data-testid="tweet"]'
+      )
+        .map(cache.get.bind(cache))
+        .filter(truthy);
+      const tweets = getVisibleElementsBySelector(
+        '[data-testid="tweet"]'
+      ).filter(notCached);
       if (tweets.length > 0) {
         const parsedTweets = tweets.reduce(
           (acc: any, tweet: any, index: number): IParsedTweet[] => {
@@ -187,13 +191,10 @@ export const useTweets = (): IParsedTweet[] | null => {
                   buttonTarget,
                   mentions,
                   replyTokensTarget,
-                }
+                };
                 cache.set(tweet, ret);
 
-                return [
-                  ...acc,
-                  ret,
-                ];
+                return [...acc, ret];
               }
             }
 

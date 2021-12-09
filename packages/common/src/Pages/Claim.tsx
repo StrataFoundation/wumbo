@@ -93,8 +93,13 @@ export const Claim = React.memo(
           isLoading={loading}
           onClick={() => {
             const twitterHandleSanitized = twitterHandle.replace("@", "");
-            create({ twitterHandle: twitterHandleSanitized, code, redirectUri })
-              .then(() => onComplete({ tokenRef: tokenRef!, owner: adapter!.publicKey! }));
+            create({
+              twitterHandle: twitterHandleSanitized,
+              code,
+              redirectUri,
+            }).then(() =>
+              onComplete({ tokenRef: tokenRef!, owner: adapter!.publicKey! })
+            );
           }}
         >
           {awaitingApproval && "Awaiting Approval"}

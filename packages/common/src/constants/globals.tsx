@@ -8,7 +8,8 @@ export const TAGGING_THRESHOLD = Number(
 export const SITE_URL = process.env.REACT_APP_SITE_URL;
 export const ARWEAVE_UPLOAD_URL = process.env.REACT_APP_ARWEAVE_UPLOAD_URL!;
 export const STRATA_API_URL = process.env.REACT_APP_STRATA_API_URL!;
-export const WUMBO_IDENTITY_SERVICE_URL = process.env.REACT_APP_WUMBO_IDENTITY_SERVICE_URL!;
+export const WUMBO_IDENTITY_SERVICE_URL =
+  process.env.REACT_APP_WUMBO_IDENTITY_SERVICE_URL!;
 export const NFT_VERIFIER_URL = process.env.REACT_APP_NFT_VERIFIER_URL;
 
 export const NFT_VERIFIER_TLD = new PublicKey(

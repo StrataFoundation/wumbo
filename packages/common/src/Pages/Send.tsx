@@ -115,7 +115,8 @@ export const Send = ({ finishRedirectUrl }: { finishRedirectUrl: string }) => {
     error,
   } = useTokenMetadata(mint);
 
-  const { info: tokenRef, loading: refLoading } = usePrimaryClaimedTokenRef(recipient);
+  const { info: tokenRef, loading: refLoading } =
+    usePrimaryClaimedTokenRef(recipient);
   const { metadata, loading: metadataLoading } = useTokenMetadata(
     tokenRef?.tokenMetadata
   );

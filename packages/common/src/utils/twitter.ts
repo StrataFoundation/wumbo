@@ -4,42 +4,46 @@ import {
   getNameAccountKey,
   NameRegistryState,
   NAME_PROGRAM_ID,
-  ReverseTwitterRegistryState
+  ReverseTwitterRegistryState,
 } from "@bonfida/spl-name-service";
 import { Provider, Wallet } from "@project-serum/common";
 import { useConnection } from "@solana/wallet-adapter-react";
 import {
   Account,
-  Connection, PublicKey, sendAndConfirmRawTransaction,
+  Connection,
+  PublicKey,
+  sendAndConfirmRawTransaction,
   Transaction,
-  TransactionInstruction
+  TransactionInstruction,
 } from "@solana/web3.js";
 import axios from "axios";
 import { useAsync } from "react-async-hook";
-import {
-  WUMBO_IDENTITY_SERVICE_URL
-} from "../constants/globals";
+import { WUMBO_IDENTITY_SERVICE_URL } from "../constants/globals";
 import {
   createVerifiedTwitterRegistry,
-  getTwitterRegistry
+  getTwitterRegistry,
 } from "./testableNameServiceTwitter";
 
 let twitterTld: PublicKey, twitterVerifier: PublicKey;
 async function fetchConfig(): Promise<void> {
   try {
-    const config = await (await axios.get(WUMBO_IDENTITY_SERVICE_URL + "/config")).data
+    const config = await (
+      await axios.get(WUMBO_IDENTITY_SERVICE_URL + "/config")
+    ).data;
     twitterTld = new PublicKey(config.tlds.twitter);
-    twitterVerifier = new PublicKey(config.verifiers.twitter)
-  } catch(e: any) {
+    twitterVerifier = new PublicKey(config.verifiers.twitter);
+  } catch (e: any) {
     console.error(e);
     twitterTld = new PublicKey("Fhqd3ostRQQE65hzoA7xFMgT9kge2qPnsTNAKuL2yrnx");
-    twitterVerifier = new PublicKey("DTok7pfUzNeNPqU3Q6foySCezPQE82eRyhX1HdhVNLVC");
+    twitterVerifier = new PublicKey(
+      "DTok7pfUzNeNPqU3Q6foySCezPQE82eRyhX1HdhVNLVC"
+    );
   }
 }
 
 export async function getTwitterTld(): Promise<PublicKey> {
   if (!twitterTld) {
-    await fetchConfig()
+    await fetchConfig();
   }
 
   return twitterTld;
@@ -47,7 +51,7 @@ export async function getTwitterTld(): Promise<PublicKey> {
 
 export async function getTwitterVerifier(): Promise<PublicKey> {
   if (!twitterVerifier) {
-    await fetchConfig()
+    await fetchConfig();
   }
 
   return twitterVerifier;
@@ -58,7 +62,11 @@ export const getTwitterHandle = async (
   twitterHandle: string
 ): Promise<NameRegistryState | null> => {
   try {
-    return await getTwitterRegistry(connection, twitterHandle, await getTwitterTld());
+    return await getTwitterRegistry(
+      connection,
+      twitterHandle,
+      await getTwitterTld()
+    );
   } catch (e) {
     console.error(e);
     return null;

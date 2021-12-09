@@ -6,7 +6,7 @@ import {
   IClaimFlowOutput,
   useClaimLink,
   useCreateOrClaimCoin,
-  useReverseTwitter
+  useReverseTwitter,
 } from "wumbo-common";
 
 let claimWindow: Window | undefined;

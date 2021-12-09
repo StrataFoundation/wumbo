@@ -114,7 +114,8 @@ export const Profile = React.memo(
     const fiatPrice = usePriceInUsd(tokenBonding?.baseMint);
     const toFiat = (a: number) => (fiatPrice || 0) * a;
     const coinPriceUsd = toFiat(pricing?.current(NATIVE_MINT) || 0);
-    const fiatLocked = mint && toFiat(pricing?.locked(NATIVE_MINT) || 0).toFixed(2);
+    const fiatLocked =
+      mint && toFiat(pricing?.locked(NATIVE_MINT) || 0).toFixed(2);
     const marketCap = (supply * coinPriceUsd).toFixed(2);
 
     const {

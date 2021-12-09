@@ -29,10 +29,7 @@ export const App = () => (
         <Switch>
           <Route path={AppRoutes.claim.path} component={ClaimRoute} />
           <Route path={AppRoutes.wallet.path} component={Wallet} />
-          <Route
-            path={AppRoutes.manageWallet.path}
-            component={ManageWallet}
-          />
+          <Route path={AppRoutes.manageWallet.path} component={ManageWallet} />
           <Route
             path={AppRoutes.viewProfile.path}
             component={ViewProfileRoute}

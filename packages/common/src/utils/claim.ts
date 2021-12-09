@@ -2,19 +2,19 @@ import { useWallet } from "@solana/wallet-adapter-react";
 import { useProvider, useStrataSdks } from "@strata-foundation/react";
 import { useState } from "react";
 import { useAsyncCallback } from "react-async-hook";
-import {
-  WUMBO_IDENTITY_SERVICE_URL
-} from "../constants/globals";
+import { WUMBO_IDENTITY_SERVICE_URL } from "../constants/globals";
 import { exectuteRemoteTxn } from "./executeRemoteTxn";
 
-export type CreateArgs = { code?: string, redirectUri?: string, twitterHandle: string }
+export type CreateArgs = {
+  code?: string;
+  redirectUri?: string;
+  twitterHandle: string;
+};
 interface CreateState {
   awaitingApproval: boolean;
   creating: boolean;
   error: Error | undefined;
-  create: (
-    args: CreateArgs
-  ) => Promise<string[]>;
+  create: (args: CreateArgs) => Promise<string[]>;
 }
 
 export function useCreateOrClaimCoin(): CreateState {
@@ -32,12 +32,12 @@ export function useCreateOrClaimCoin(): CreateState {
         WUMBO_IDENTITY_SERVICE_URL + "/twitter/claim-or-create",
         {
           pubkey: adapter!.publicKey!.toBase58(),
-          code, 
+          code,
           redirectUri,
-          twitterHandle
+          twitterHandle,
         },
         tokenCollectiveSdk?.errors
-      )
+      );
     } finally {
       setCreating(false);
     }
