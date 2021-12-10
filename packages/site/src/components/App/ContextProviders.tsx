@@ -63,19 +63,17 @@ export const ContextProviders: React.FC = ({ children }) => {
       <ErrorHandlerProvider onError={onError}>
         <ApolloProvider client={wumboApi}>
           <AccountProvider commitment="confirmed">
-            <StrataSdksProvider>
-              <ThemeProvider>
-                <SolPriceProvider>
-                  <WalletProvider
-                    wallets={wallets}
-                    onError={console.error}
-                    autoConnect
-                  >
-                    {children}
-                  </WalletProvider>
-                </SolPriceProvider>
-              </ThemeProvider>
-            </StrataSdksProvider>
+            <ThemeProvider>
+              <SolPriceProvider>
+                <WalletProvider
+                  wallets={wallets}
+                  onError={console.error}
+                  autoConnect
+                >
+                  <StrataSdksProvider>{children}</StrataSdksProvider>
+                </WalletProvider>
+              </SolPriceProvider>
+            </ThemeProvider>
           </AccountProvider>
         </ApolloProvider>
       </ErrorHandlerProvider>

@@ -48,11 +48,14 @@ export const Create = () => {
           {!userInfo && !loading && (
             <Text w="full" fontSize="small">
               <Text fontWeight="bold">
-                You will be the first to mint & own this person's token!
+                You will be the first to mint & own this token!
               </Text>{" "}
-              It will remain unclaimed until this person claims it. Should the
-              person opt out, no new tokens may be purchased and exisiting
-              tokens may still be sold. It costs 0.03 SOL (~$
+              If this is your twitter account, you can claim this token for
+              free. If this is someone else's twitter account, you can found
+              their fan club by creating an unclaimed token for them. It will
+              remain unclaimed until this person claims it. Should the person
+              opt out, no new tokens may be purchased and exisiting tokens may
+              still be sold. It costs 0.03 SOL (~$
               {solPrice ? (solPrice * 0.03).toFixed(2) : ""}) to do this.
             </Text>
           )}

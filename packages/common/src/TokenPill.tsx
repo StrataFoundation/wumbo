@@ -8,7 +8,7 @@ import {
 } from "@strata-foundation/react";
 import {
   ITokenBonding,
-  IPricingCurve,
+  BondingPricing,
 } from "@strata-foundation/spl-token-bonding";
 import { Spinner } from "./";
 import { MetadataAvatar } from "./Avatar";
@@ -20,7 +20,7 @@ interface TokenPillProps {
   icon?: React.ReactElement;
   tokenBonding: ITokenBonding;
   detailsPath?: string;
-  curve?: IPricingCurve;
+  pricing?: BondingPricing;
 }
 
 interface MetadataTokenPillProps {
@@ -28,7 +28,7 @@ interface MetadataTokenPillProps {
   ticker?: string;
   tokenBonding: ITokenBonding;
   detailsPath?: string;
-  curve?: IPricingCurve;
+  pricing?: BondingPricing;
 }
 export const MetadataTokenPill = React.memo(
   ({
@@ -36,7 +36,7 @@ export const MetadataTokenPill = React.memo(
     ticker,
     tokenBonding,
     detailsPath,
-    curve,
+    pricing,
   }: MetadataTokenPillProps) => {
     const { handleErrors } = useErrorHandler();
     const { metadata, loading, error } = useTokenMetadata(
@@ -53,7 +53,7 @@ export const MetadataTokenPill = React.memo(
 
     return (
       <TokenPill
-        curve={curve}
+        pricing={pricing}
         name={displayName}
         ticker={displayTicker}
         icon={displayIcon}
@@ -71,13 +71,15 @@ export const TokenPill = React.memo(
     icon,
     tokenBonding,
     detailsPath,
-    curve: curvePassed,
+    pricing: pricingPassed,
   }: TokenPillProps) => {
-    const { curve: curveResolved } = useBondingPricing(tokenBonding.publicKey);
+    const { pricing: pricingResolved } = useBondingPricing(
+      tokenBonding.publicKey
+    );
     const fiatPrice = usePriceInUsd(tokenBonding.baseMint);
     const toFiat = (a: number) => (fiatPrice || 0) * a;
     const history = useHistory();
-    const curve = curvePassed || curveResolved;
+    const curve = pricingPassed || pricingResolved;
 
     return (
       <Flex

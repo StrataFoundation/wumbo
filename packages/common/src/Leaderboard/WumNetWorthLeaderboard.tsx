@@ -1,7 +1,7 @@
 import React, { useMemo } from "react";
 import { PublicKey } from "@solana/web3.js";
 import { gql, useApolloClient } from "@apollo/client";
-import { useClaimedTokenRef } from "@strata-foundation/react";
+import { usePrimaryClaimedTokenRef } from "@strata-foundation/react";
 import { WumboUserLeaderboard } from "./WumboUserLeaderboard";
 import { UserLeaderboardElement } from "./UserLeaderboardElement";
 import { useWumNetWorth } from "../hooks";
@@ -27,7 +27,7 @@ const Element = React.memo(
     wallet: PublicKey;
     onClick?: (tokenRefKey: PublicKey) => void;
   }) => {
-    const { info: tokenRef } = useClaimedTokenRef(wallet);
+    const { info: tokenRef } = usePrimaryClaimedTokenRef(wallet);
 
     const { wumNetWorth } = useWumNetWorth(wallet);
     const amount = wumNetWorth?.toFixed(2);

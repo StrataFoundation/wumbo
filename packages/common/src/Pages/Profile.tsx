@@ -24,7 +24,7 @@ import {
   useBondingPricing,
   useMint,
   usePriceInUsd,
-  useClaimedTokenRef,
+  usePrimaryClaimedTokenRef,
   useClaimedTokenRefKey,
   useTokenMetadata,
   supplyAsNum,
@@ -40,6 +40,7 @@ import { TokenLeaderboard } from "../Leaderboard/TokenLeaderboard";
 import { NftListRaw } from "../Nft";
 import { TROPHY_CREATOR } from "../constants/globals";
 import { useWallet } from "@solana/wallet-adapter-react";
+import { NATIVE_MINT } from "@solana/spl-token";
 
 interface IProfileProps {
   tokenRefKey: PublicKey;
@@ -84,7 +85,7 @@ export const Profile = React.memo(
     const { handleErrors } = useErrorHandler();
     const { info: tokenRef, loading } = useTokenRef(tokenRefKey);
     const ownerWalletKey = tokenRef?.owner as PublicKey | undefined;
-    const { info: walletTokenRef } = useClaimedTokenRef(ownerWalletKey);
+    const { info: walletTokenRef } = usePrimaryClaimedTokenRef(ownerWalletKey);
     const { info: tokenBonding, loading: tokenBondingLoading } =
       useTokenBonding(tokenRef?.tokenBonding);
     const {
@@ -95,7 +96,7 @@ export const Profile = React.memo(
     const { awaitingApproval } = useProvider();
     const { adapter } = useWallet();
     const publicKey = adapter?.publicKey;
-    const myTokenRefKey = useClaimedTokenRefKey(publicKey || undefined);
+    const myTokenRefKey = useClaimedTokenRefKey(publicKey, null);
     const { handle: walletTwitterHandle, error: reverseTwitterError } =
       useReverseTwitter(publicKey || undefined);
     const { data: { wumRank } = {} } = apolloUseQuery<{
@@ -109,11 +110,12 @@ export const Profile = React.memo(
 
     const mint = useMint(tokenBonding?.targetMint);
     const supply = mint ? supplyAsNum(mint) : 0;
-    const { curve } = useBondingPricing(tokenBonding?.publicKey);
+    const { pricing } = useBondingPricing(tokenBonding?.publicKey);
     const fiatPrice = usePriceInUsd(tokenBonding?.baseMint);
     const toFiat = (a: number) => (fiatPrice || 0) * a;
-    const coinPriceUsd = toFiat(curve?.current() || 0);
-    const fiatLocked = mint && toFiat(curve?.locked() || 0).toFixed(2);
+    const coinPriceUsd = toFiat(pricing?.current(NATIVE_MINT) || 0);
+    const fiatLocked =
+      mint && toFiat(pricing?.locked(NATIVE_MINT) || 0).toFixed(2);
     const marketCap = (supply * coinPriceUsd).toFixed(2);
 
     const {

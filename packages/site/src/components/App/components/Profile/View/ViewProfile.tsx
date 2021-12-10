@@ -17,7 +17,7 @@ export const ViewProfileRoute = () => {
   const params = useParams<{ tokenRefKey: string | undefined }>();
   const { connected, adapter } = useWallet();
   const publicKey = adapter?.publicKey;
-  const walletTokenRefKey = useClaimedTokenRefKey(publicKey || undefined);
+  const walletTokenRefKey = useClaimedTokenRefKey(publicKey, null);
   const passedTokenRefKey = params.tokenRefKey
     ? new PublicKey(params.tokenRefKey)
     : undefined;

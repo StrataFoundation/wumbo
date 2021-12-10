@@ -17,7 +17,7 @@ import {
   useTokenMetadata,
   useAssociatedAccount,
   useAssociatedTokenAddress,
-  useClaimedTokenRef,
+  usePrimaryClaimedTokenRef,
   useMint,
   usePriceInUsd,
   useOwnedAmount,
@@ -115,7 +115,8 @@ export const Send = ({ finishRedirectUrl }: { finishRedirectUrl: string }) => {
     error,
   } = useTokenMetadata(mint);
 
-  const { info: tokenRef, loading: refLoading } = useClaimedTokenRef(recipient);
+  const { info: tokenRef, loading: refLoading } =
+    usePrimaryClaimedTokenRef(recipient);
   const { metadata, loading: metadataLoading } = useTokenMetadata(
     tokenRef?.tokenMetadata
   );

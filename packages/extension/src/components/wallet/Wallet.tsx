@@ -2,7 +2,7 @@ import { Box } from "@chakra-ui/react";
 import React, { Fragment } from "react";
 import {
   viewProfilePath,
-  tradePath,
+  swapPath,
   wumNetWorthPath,
   routes,
 } from "@/constants/routes";
@@ -26,7 +26,7 @@ export const Wallet = () => {
             sendLink={routes.sendSearch.path}
             wumLeaderboardLink={publicKey ? wumNetWorthPath(publicKey) : ""}
             solLink={solLink}
-            wumLink={tradePath(OPEN_BONDING, "buy")}
+            wumLink={swapPath(OPEN_BONDING, "buy")}
             getTokenLink={(t) =>
               t.tokenRef ? viewProfilePath(t.tokenRef.publicKey) : ""
             }
