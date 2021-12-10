@@ -8,7 +8,6 @@ const TsconfigPathsPlugin = require("tsconfig-paths-webpack-plugin");
 
 module.exports = {
   entry: {
-    background: path.join(srcDir, "/pages/background/background.ts"),
     content_script: path.join(srcDir, "pages/content/index.tsx"),
     oauth: path.join((srcDir, "pages/oauth/index.tsx")),
     wallet_proxy: path.join((srcDir, "pages/wallet-proxy/index.ts")),
