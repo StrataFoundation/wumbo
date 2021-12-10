@@ -10,7 +10,7 @@ import {
   Input,
   FormHelperText,
   FormLabel,
-  Text,
+  Heading,
   Button,
   Alert,
   AlertIcon,
@@ -25,6 +25,7 @@ import {
 import { ISetMetadataArgs, useSetMetadata } from "../hooks";
 import { TokenPill } from "../TokenPill";
 import { Avatar } from "../Avatar";
+import { Spinner } from "../Spinner";
 
 interface IEditProfileProps {
   ownerWalletKey: PublicKey;
@@ -48,7 +49,8 @@ export const EditProfile = React.memo(
     const hiddenFileInput = React.useRef<HTMLInputElement>(null);
     const { awaitingApproval } = useProvider();
     const { handleErrors } = useErrorHandler();
-    const { info: tokenRef } = usePrimaryClaimedTokenRef(ownerWalletKey);
+    const { info: tokenRef, loading: loadingTokenRef } =
+      usePrimaryClaimedTokenRef(ownerWalletKey);
     const {
       watch,
       register,
@@ -60,19 +62,28 @@ export const EditProfile = React.memo(
       resolver: yupResolver(validationSchema),
     });
 
-    const { info: tokenBonding } = useTokenBonding(tokenRef?.tokenBonding);
+    const { info: tokenBonding, loading: loadingTokenBonding } =
+      useTokenBonding(tokenRef?.tokenBonding);
 
     const {
       image: metadataImage,
-      metadata,
-      error: tokenMetadataError,
+      metadata: targetMetadata,
+      error: targetMetadataError,
+      loading: targetMetadataLoading,
     } = useTokenMetadata(tokenBonding?.targetMint);
+
+    const {
+      metadata: baseMetadata,
+      error: baseMetadataError,
+      loading: baseMetadataLoading,
+    } = useTokenMetadata(tokenBonding?.baseMint);
+
     const { name = "", symbol = "", image } = watch();
     const [setMetadata, { loading, loadingState, error }] = useSetMetadata(
       tokenRef?.publicKey
     );
 
-    handleErrors(tokenMetadataError);
+    handleErrors(targetMetadataError || baseMetadataError);
     const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
       setValue("image", e.target.files![0] || null);
     };
@@ -113,8 +124,8 @@ export const EditProfile = React.memo(
 
       if (loadingState == "idle") {
         reset({
-          name: metadata?.data.name,
-          symbol: metadata?.data.symbol,
+          name: targetMetadata?.data.name,
+          symbol: targetMetadata?.data.symbol,
           sellBaseRoyaltyPercentage: humanRedablePercent(
             tokenBonding?.sellBaseRoyaltyPercentage
           ),
@@ -129,14 +140,24 @@ export const EditProfile = React.memo(
           ),
         });
       }
-    }, [metadata?.data.name, metadata?.data.symbol, metadataImage]);
+    }, [targetMetadata?.data.name, targetMetadata?.data.symbol, metadataImage]);
 
     const avatar = <Avatar src={imgUrl} name={symbol} />;
+
+    if (
+      (!tokenRef && !tokenBonding) ||
+      loadingTokenRef ||
+      loadingTokenBonding ||
+      targetMetadataLoading ||
+      baseMetadataLoading
+    ) {
+      return <Spinner />;
+    }
 
     return (
       <form onSubmit={handleSubmit(handleOnSubmit)}>
         <VStack w="full" spacing={6} padding={4} alignItems="start">
-          <Text fontSize="lg">Preview</Text>
+          <Heading fontSize="xl">Preview</Heading>
           {tokenRef && tokenBonding && (
             <TokenPill
               name={name}
@@ -145,7 +166,7 @@ export const EditProfile = React.memo(
               tokenBonding={tokenBonding}
             />
           )}
-          <Text fontSize="lg">Settings</Text>
+          <Heading fontSize="xl">Settings</Heading>
           <FormControl id="photo">
             <FormLabel>Photo</FormLabel>
             <HStack w="full" spacing={4}>
@@ -197,70 +218,83 @@ export const EditProfile = React.memo(
               Wum.bo.`}
             </FormHelperText>
           </FormControl>
-          <FormControl id="buyBaseRoyaltyPercentage" borderColor="gray.200">
-            <FormLabel>Royalties</FormLabel>
-            <Input
-              isRequired
-              type="number"
-              min={0}
-              max={100}
-              placeholder="5"
-              defaultValue={5}
-              {...register("buyBaseRoyaltyPercentage")}
-            />
-            <FormHelperText>
-              A Percentage of coin sales that will be sent to your wallet. We
-              recommend keep this less than 10%.
-            </FormHelperText>
-          </FormControl>
-          <FormControl id="sellBaseRoyaltyPercentage" borderColor="gray.200">
-            <FormLabel>Royalties</FormLabel>
-            <Input
-              isRequired
-              type="number"
-              min={0}
-              max={100}
-              placeholder="5"
-              defaultValue={5}
-              {...register("sellBaseRoyaltyPercentage")}
-            />
-            <FormHelperText>
-              A Percentage of coin sales that will be sent to your wallet. We
-              recommend keep this less than 10%.
-            </FormHelperText>
-          </FormControl>
-          <FormControl id="buyTargetRoyaltyPercentage" borderColor="gray.200">
-            <FormLabel>Royalties</FormLabel>
-            <Input
-              isRequired
-              type="number"
-              min={0}
-              max={100}
-              placeholder="5"
-              defaultValue={5}
-              {...register("buyTargetRoyaltyPercentage")}
-            />
-            <FormHelperText>
-              A Percentage of coin sales that will be sent to your wallet. We
-              recommend keep this less than 10%.
-            </FormHelperText>
-          </FormControl>
-          <FormControl id="sellTargetRoyaltyPercentage" borderColor="gray.200">
-            <FormLabel>Royalties</FormLabel>
-            <Input
-              isRequired
-              type="number"
-              min={0}
-              max={100}
-              placeholder="5"
-              defaultValue={5}
-              {...register("sellTargetRoyaltyPercentage")}
-            />
-            <FormHelperText>
-              A Percentage of coin sales that will be sent to your wallet. We
-              recommend keep this less than 10%.
-            </FormHelperText>
-          </FormControl>
+          <VStack align="left" w="full">
+            <Heading fontSize="xl" mb={4}>
+              Royalties
+            </Heading>
+            <HStack>
+              <FormControl
+                id="buyTargetRoyaltyPercentage"
+                borderColor="gray.200"
+              >
+                <FormLabel>
+                  {symbol || targetMetadata?.data.symbol} (Buy)
+                </FormLabel>
+                <Input
+                  isRequired
+                  type="number"
+                  min={0}
+                  max={100}
+                  placeholder="5"
+                  defaultValue={5}
+                  {...register("buyTargetRoyaltyPercentage")}
+                />
+              </FormControl>
+              <FormControl
+                id="sellTargetRoyaltyPercentage"
+                borderColor="gray.200"
+              >
+                <FormLabel>
+                  {symbol || targetMetadata?.data.symbol} (Sell)
+                </FormLabel>
+                <Input
+                  isRequired
+                  type="number"
+                  min={0}
+                  max={100}
+                  placeholder="5"
+                  defaultValue={5}
+                  {...register("sellTargetRoyaltyPercentage")}
+                />
+              </FormControl>
+            </HStack>
+            <HStack>
+              <FormControl id="buyBaseRoyaltyPercentage" borderColor="gray.200">
+                <FormLabel>{baseMetadata?.data.symbol} (Buy)</FormLabel>
+                <Input
+                  isRequired
+                  type="number"
+                  min={0}
+                  max={100}
+                  placeholder="5"
+                  defaultValue={5}
+                  {...register("buyBaseRoyaltyPercentage")}
+                />
+              </FormControl>
+              <FormControl
+                id="sellBaseRoyaltyPercentage"
+                borderColor="gray.200"
+              >
+                <FormLabel>{baseMetadata?.data.symbol} (Sell)</FormLabel>
+                <Input
+                  isRequired
+                  type="number"
+                  min={0}
+                  max={100}
+                  placeholder="5"
+                  defaultValue={5}
+                  {...register("sellBaseRoyaltyPercentage")}
+                />
+              </FormControl>
+            </HStack>
+            <FormControl>
+              <FormHelperText>
+                A Percentage of coin buys/sales that will be sent to your
+                wallet. We recommend to keep this less than a combined 10% for
+                buys/sales.
+              </FormHelperText>
+            </FormControl>
+          </VStack>
           {error && (
             <Alert status="error">
               <AlertIcon />

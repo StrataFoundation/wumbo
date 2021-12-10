@@ -15,23 +15,16 @@ import {
   SimpleGrid,
 } from "@chakra-ui/react";
 import {
-  useBondingPricing,
   usePriceInUsd,
   useOwnedAmount,
   useSolOwnedAmount,
-  useTokenMetadata,
 } from "@strata-foundation/react";
 import { ITokenWithMetaAndAccount } from "@strata-foundation/spl-token-collective";
-import { useWumNetWorth, useUserTokensWithMeta } from "../hooks";
-import {
-  SOL_TOKEN,
-  OPEN_TOKEN,
-  OPEN_COLLECTIVE_KEY,
-} from "../constants/globals";
+import { useUserTokensWithMeta } from "../hooks";
+import { SOL_TOKEN } from "../constants/globals";
 import { Avatar } from "../Avatar";
 import { Notification } from "../Notification";
 import { Spinner } from "../Spinner";
-import { WumboRankIcon } from "../svgs";
 import { useWallet } from "@solana/wallet-adapter-react";
 
 const SolLogoIcon = createIcon({
@@ -165,7 +158,6 @@ export const Wallet = React.memo(
     const { data: tokens, loading } = useUserTokensWithMeta(
       publicKey || undefined
     );
-    const { wumNetWorth } = useWumNetWorth(publicKey || undefined);
 
     return (
       <VStack

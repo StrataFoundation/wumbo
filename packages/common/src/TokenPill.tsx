@@ -79,7 +79,7 @@ export const TokenPill = React.memo(
     const fiatPrice = usePriceInUsd(tokenBonding.baseMint);
     const toFiat = (a: number) => (fiatPrice || 0) * a;
     const history = useHistory();
-    const curve = pricingPassed || pricingResolved;
+    const pricing = pricingPassed || pricingResolved;
 
     return (
       <Flex
@@ -104,8 +104,8 @@ export const TokenPill = React.memo(
           <Flex justify="space-between" fontSize="lg" fontWeight="medium">
             <span>{name}</span>
             <span>
-              {curve
-                ? "$" + toFiat(curve!.current() || 0).toFixed(2)
+              {pricing
+                ? "$" + toFiat(pricing!.current() || 0).toFixed(2)
                 : "Loading"}
             </span>
           </Flex>

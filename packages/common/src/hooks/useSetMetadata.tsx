@@ -86,8 +86,11 @@ export const useSetMetadata = (
         let arweaveLink;
         if (metadataChanged) {
           let imageName: string | undefined = undefined;
+          let fileBuffer: ArrayBuffer | undefined = undefined;
+
           if (args.image) {
-            files.set(args.image.name, Buffer.from(args.image as any));
+            fileBuffer = await args.image.arrayBuffer();
+            files.set(args.image.name, Buffer.from(fileBuffer));
           } else if (args.name === null) {
             // Intentionaly unset;
             files.clear();
@@ -95,7 +98,8 @@ export const useSetMetadata = (
             // Undefined, keep the old one
             const [file, fileName] = await getFileFromUrl(image!, "untitled");
             imageName = fileName;
-            files.set(fileName, Buffer.from(file as any));
+            fileBuffer = await file.arrayBuffer();
+            files.set(fileName, Buffer.from(fileBuffer));
           }
 
           setLoadingState("submit-solana");

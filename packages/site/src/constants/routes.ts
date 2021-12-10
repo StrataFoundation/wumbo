@@ -49,11 +49,6 @@ export const profilePath = (tokenRefKey: PublicKey): string =>
 export const nftPath = (mint: PublicKey): string =>
   replaceAll(AppRoutes.viewNft.path, { ":mint": mint.toBase58() });
 
-export const editProfile = (ownerWalletKey: PublicKey): string =>
-  replaceAll(AppRoutes.editProfile.path, {
-    ":ownerWalletKey": ownerWalletKey.toBase58(),
-  });
-
 export const swapPath = (
   tokenBondingKey: PublicKey,
   action: "buy" | "sell"
@@ -75,7 +70,7 @@ export const AppRoutes: IAppRoutes = {
   viewProfile: { path: "/app/profile/view/:tokenRefKey" },
   viewNft: { path: "/app/nft/view/:mint" },
   profile: { path: "/app/profile" },
-  editProfile: { path: "/app/profile/edit/:ownerWalletKey" },
+  editProfile: { path: "/app/profile/edit" },
   topTokens: { path: "/app/top-tokens/:tokenBondingKey" },
   wumNetWorth: { path: "/app/wum-net-worth/:wallet" },
   sendSearch: { path: "/app/send" },
