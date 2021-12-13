@@ -56,6 +56,8 @@ export const EditProfile = React.memo(
       register,
       handleSubmit,
       setValue,
+      setError,
+      clearErrors,
       reset,
       formState: { errors },
     } = useForm<ISetMetadataArgs>({
@@ -85,7 +87,21 @@ export const EditProfile = React.memo(
 
     handleErrors(targetMetadataError || baseMetadataError);
     const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-      setValue("image", e.target.files![0] || null);
+      const file = e.target.files![0];
+      const sizeKB = file.size / 1024;
+
+      if (sizeKB < 25) {
+        setError("image", {
+          type: "manual",
+          message: `The file ${file.name} is too small. It is ${
+            Math.round(10 * sizeKB) / 10
+          }KB but should be at least 25KB.`,
+        });
+        return;
+      }
+
+      setValue("image", file || null);
+      clearErrors("image");
     };
 
     const handleOnSubmit = async (values: ISetMetadataArgs) => {
@@ -100,21 +116,18 @@ export const EditProfile = React.memo(
       (p / 4294967295) * 100;
 
     const [imgUrl, setImgUrl] = useState<string>();
+
     useEffect(() => {
-      const reader = new FileReader();
-      function loadListiner() {
-        setImgUrl(reader.result?.toString());
-      }
-      reader.addEventListener("load", loadListiner);
       if (image) {
+        const reader = new FileReader();
+        reader.onload = (event) => {
+          setImgUrl((event.target?.result as string) || "");
+        };
+
         reader.readAsDataURL(image);
       } else {
         setImgUrl(undefined);
       }
-
-      return () => {
-        reader.removeEventListener("load", loadListiner);
-      };
     }, [image]);
 
     useEffect(() => {
@@ -183,7 +196,8 @@ export const EditProfile = React.memo(
             <input
               id="image"
               type="file"
-              accept="image/*"
+              accept=".png,.jpg,.gif,.mp4,.svg"
+              multiple={false}
               onChange={handleImageChange}
               ref={hiddenFileInput}
               style={{ display: "none" }}

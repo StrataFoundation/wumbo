@@ -4031,7 +4031,7 @@
     superstruct "^0.14.2"
     tweetnacl "^1.0.0"
 
-"@strata-foundation/react@1.2.5":
+"@strata-foundation/react@^1.2.5":
   version "1.2.5"
   resolved "https://registry.yarnpkg.com/@strata-foundation/react/-/react-1.2.5.tgz#86d47e2b4b4ba2c308b1c1c176461960a0297784"
   integrity sha512-iWwaNiL/+qqWGEKjhb4vswNi7NsD3RyOZ8ZaTMj9FaC+jDMWyf163q984LYRBaZywg4xzO4NizGgwD/YFFvJaQ==

@@ -3,12 +3,21 @@ const { override } = require("customize-cra");
 const path = require("path/posix");
 const webpack = require("webpack");
 
+const emptyFs = () => (webpackConfig) => ({
+  ...webpackConfig,
+  node: {
+    ...webpackConfig.node,
+    fs: "empty",
+  },
+});
+
 const supportMjs = () => (webpackConfig) => {
   webpackConfig.module.rules.push({
     test: /\.mjs$/,
     include: /node_modules/,
     type: "javascript/auto",
   });
+
   webpackConfig.resolve = {
     ...webpackConfig.resolve,
     alias: {
@@ -21,9 +30,13 @@ const supportMjs = () => (webpackConfig) => {
       "@strata-foundation/react": path.resolve(
         "./node_modules/@strata-foundation/react"
       ),
+      "@strata-foundation/spl-utils": path.resolve(
+        "./node_modules/@strata-foundation/spl-utils"
+      ),
     },
   };
+
   return webpackConfig;
 };
 
-module.exports = override(supportMjs());
+module.exports = override(emptyFs(), supportMjs());

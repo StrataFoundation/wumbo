@@ -75,7 +75,7 @@ export const useSetMetadata = (
     if (provider && tokenRefKey) {
       setLoading(true);
       setLoadingState("gathering-files");
-      let files: Map<string, Buffer> = new Map();
+      let files: File[] = [];
       let metadataChanged =
         args.image != undefined ||
         args.name != metadata?.data.name ||
@@ -86,20 +86,17 @@ export const useSetMetadata = (
         let arweaveLink;
         if (metadataChanged) {
           let imageName: string | undefined = undefined;
-          let fileBuffer: ArrayBuffer | undefined = undefined;
 
           if (args.image) {
-            fileBuffer = await args.image.arrayBuffer();
-            files.set(args.image.name, Buffer.from(fileBuffer));
+            files = [args.image];
           } else if (args.name === null) {
             // Intentionaly unset;
-            files.clear();
+            files = [];
           } else {
             // Undefined, keep the old one
             const [file, fileName] = await getFileFromUrl(image!, "untitled");
             imageName = fileName;
-            fileBuffer = await file.arrayBuffer();
-            files.set(fileName, Buffer.from(fileBuffer));
+            files = [file];
           }
 
           setLoadingState("submit-solana");
