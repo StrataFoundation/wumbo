@@ -6,12 +6,11 @@ import { swapPath } from "../../../../constants/routes";
 
 export const SwapRoute = () => {
   const history = useHistory();
-  const query =
-    useParams<{
-      tokenBondingKey: string;
-      baseMint: string;
-      targetMint: string;
-    }>();
+  const query = useParams<{
+    tokenBondingKey: string;
+    baseMint: string;
+    targetMint: string;
+  }>();
   const tokenBondingKey = usePublicKey(query.tokenBondingKey);
   const baseMint = usePublicKey(query.baseMint);
   const targetMint = usePublicKey(query.targetMint);
