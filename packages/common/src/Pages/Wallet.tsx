@@ -1,13 +1,20 @@
 import {
-  Button, Center,
+  Button,
+  Center,
   createIcon,
   Flex,
   HStack,
-  Icon, SimpleGrid, StackDivider, Text, VStack
+  Icon,
+  SimpleGrid,
+  StackDivider,
+  Text,
+  VStack,
 } from "@chakra-ui/react";
 import { useWallet } from "@solana/wallet-adapter-react";
 import {
-  useOwnedAmount, usePriceInUsd, useSolOwnedAmount
+  useOwnedAmount,
+  usePriceInUsd,
+  useSolOwnedAmount,
 } from "@strata-foundation/react";
 import { ITokenWithMetaAndAccount } from "@strata-foundation/spl-token-collective";
 import React from "react";
@@ -15,9 +22,7 @@ import toast from "react-hot-toast";
 import { RiCoinLine } from "react-icons/ri";
 import { Link } from "react-router-dom";
 import { Avatar } from "../Avatar";
-import {
-  SOL_TOKEN
-} from "../constants/globals";
+import { SOL_TOKEN } from "../constants/globals";
 import { useUserTokensWithMeta, useWumNetWorth } from "../hooks";
 import { Notification } from "../Notification";
 import { Spinner } from "../Spinner";

@@ -46,9 +46,15 @@ export default React.memo(() => {
         sellTargetRoyaltyPercentage: 0,
       },
     });
-    const tokenBondingAcct = (await tokenBondingSdk!.getTokenBonding(tokenBonding!))!
+    const tokenBondingAcct = (await tokenBondingSdk!.getTokenBonding(
+      tokenBonding!
+    ))!;
     history.push(
-      swapPath(tokenBonding!, tokenBondingAcct.baseMint, tokenBondingAcct.targetMint) + `?name=${query.get("name")!}`
+      swapPath(
+        tokenBonding!,
+        tokenBondingAcct.baseMint,
+        tokenBondingAcct.targetMint
+      ) + `?name=${query.get("name")!}`
     );
   };
 

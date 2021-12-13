@@ -1,8 +1,12 @@
 import { Keypair, PublicKey } from "@solana/web3.js";
 import { TOKEN_PROGRAM_ID as SPL_TOKEN_PROGRAM_ID } from "@solana/spl-token";
 
-export const WUMBO_TRANSACTION_FEE: number = Number(process.env.REACT_APP_WUMBO_TRANSACTION_FEE!);
-export const WUMBO_TRANSACTION_FEE_DESTINATION: PublicKey = new PublicKey(process.env.REACT_APP_WUMBO_TRANSACTION_FEE_DESTINATION!);
+export const WUMBO_TRANSACTION_FEE: number = Number(
+  process.env.REACT_APP_WUMBO_TRANSACTION_FEE!
+);
+export const WUMBO_TRANSACTION_FEE_DESTINATION: PublicKey = new PublicKey(
+  process.env.REACT_APP_WUMBO_TRANSACTION_FEE_DESTINATION!
+);
 export const DEFAULT_COMMITMENT = "processed";
 export const TAGGING_THRESHOLD = Number(
   process.env.REACT_APP_TAGGING_THRESHOLD!

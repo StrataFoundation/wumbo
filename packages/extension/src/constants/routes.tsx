@@ -64,7 +64,7 @@ export const swapPath = (
   replaceAll(routes.swap.path, {
     ":tokenBondingKey": tokenBondingKey.toBase58(),
     ":baseMint": baseMint.toBase58(),
-    ":targetMint": targetMint.toBase58()
+    ":targetMint": targetMint.toBase58(),
   });
 
 export function claimPath({

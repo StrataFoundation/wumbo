@@ -87,7 +87,13 @@ export const Profile = () => {
           }
           onTradeClick={() =>
             tokenRef?.tokenBonding &&
-            history.push(swapPath(tokenRef.tokenBonding, tokenBonding!.baseMint, tokenBonding!.targetMint))
+            history.push(
+              swapPath(
+                tokenRef.tokenBonding,
+                tokenBonding!.baseMint,
+                tokenBonding!.targetMint
+              )
+            )
           }
           getNftLink={(token) =>
             tokenRef?.mint ? nftPath(tokenRef?.mint) : ""
