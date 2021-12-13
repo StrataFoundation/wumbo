@@ -13,7 +13,11 @@ import {
   useTokenBonding,
   useProvider,
 } from "@strata-foundation/react";
-import { Data, ARWEAVE_UPLOAD_URL } from "@strata-foundation/spl-utils";
+import {
+  Data,
+  Creator,
+  ARWEAVE_UPLOAD_URL,
+} from "@strata-foundation/spl-utils";
 
 export interface ISetMetadataArgs {
   name: string;
@@ -75,7 +79,7 @@ export const useSetMetadata = (
     if (provider && tokenRefKey) {
       setLoading(true);
       setLoadingState("gathering-files");
-      let files: Map<string, Buffer> = new Map();
+      let files: File[] = [];
       let metadataChanged =
         args.image != undefined ||
         args.name != metadata?.data.name ||
@@ -84,19 +88,37 @@ export const useSetMetadata = (
       // No catch of errors as the useAsyncCallback and return handles it
       try {
         let arweaveLink;
+        let creators: Creator[] | null = null;
+
         if (metadataChanged) {
           let imageName: string | undefined = undefined;
+
           if (args.image) {
-            files.set(args.image.name, Buffer.from(args.image as any));
+            files = [args.image];
+            imageName = args.image.name;
           } else if (args.name === null) {
             // Intentionaly unset;
-            files.clear();
+            files = [];
           } else {
             // Undefined, keep the old one
             const [file, fileName] = await getFileFromUrl(image!, "untitled");
             imageName = fileName;
-            files.set(fileName, Buffer.from(file as any));
+            files = [file];
           }
+
+          creators = [
+            new Creator({
+              address: tokenRef!.owner!.toBase58(),
+              verified: false,
+              share: 99,
+            }),
+            // TODO: update auth here
+            /* new Creator({
+             *   address: ,
+             *   verified: false,
+             *   share: 1,
+             * }), */
+          ];
 
           setLoadingState("submit-solana");
           const { files: presignedFiles, txid } =
@@ -107,6 +129,7 @@ export const useSetMetadata = (
               files,
               env: "mainnet-beta",
               uploadUrl: ARWEAVE_UPLOAD_URL,
+              creators,
             });
 
           setLoadingState("submit-arweave");
@@ -138,7 +161,7 @@ export const useSetMetadata = (
               symbol: args.symbol,
               uri: arweaveLink,
               sellerFeeBasisPoints: 0,
-              creators: null,
+              creators,
             }),
           });
 

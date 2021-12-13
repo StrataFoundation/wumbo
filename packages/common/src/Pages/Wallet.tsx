@@ -8,13 +8,13 @@ import {
   SimpleGrid,
   StackDivider,
   Text,
-  VStack,
+  VStack
 } from "@chakra-ui/react";
 import { useWallet } from "@solana/wallet-adapter-react";
 import {
   useOwnedAmount,
   usePriceInUsd,
-  useSolOwnedAmount,
+  useSolOwnedAmount
 } from "@strata-foundation/react";
 import { ITokenWithMetaAndAccount } from "@strata-foundation/spl-token-collective";
 import React from "react";
@@ -23,7 +23,7 @@ import { RiCoinLine } from "react-icons/ri";
 import { Link } from "react-router-dom";
 import { Avatar } from "../Avatar";
 import { SOL_TOKEN } from "../constants/globals";
-import { useUserTokensWithMeta, useWumNetWorth } from "../hooks";
+import { useUserTokensWithMeta } from "../hooks";
 import { Notification } from "../Notification";
 import { Spinner } from "../Spinner";
 
@@ -156,7 +156,6 @@ export const Wallet = React.memo(
     const { data: tokens, loading } = useUserTokensWithMeta(
       publicKey || undefined
     );
-    const { wumNetWorth } = useWumNetWorth(publicKey || undefined);
 
     return (
       <VStack

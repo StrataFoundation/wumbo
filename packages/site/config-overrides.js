@@ -3,6 +3,14 @@ const { override } = require("customize-cra");
 const path = require("path/posix");
 const webpack = require("webpack");
 
+const emptyFs = () => (webpackConfig) => ({
+  ...webpackConfig,
+  node: {
+    ...webpackConfig.node,
+    fs: "empty",
+  },
+});
+
 const supportMjs = () => (webpackConfig) => {
     webpackConfig.module.rules.push({
         test: /\.mjs$/,
@@ -18,13 +26,14 @@ const supportMjs = () => (webpackConfig) => {
           "@chakra-ui/react": path.resolve("../../node_modules/@chakra-ui/react"),
           "@solana/wallet-adapter-react": path.resolve("../../node_modules/@solana/wallet-adapter-react"),
           "@strata-foundation/react": path.resolve("./node_modules/@strata-foundation/react"),
-          "@strata-foundation/spl-token-bonding": path.resolve("./node_modules/@strata-foundation/spl-token-bonding")
+          "@strata-foundation/spl-token-bonding": path.resolve("./node_modules/@strata-foundation/spl-token-bonding"),
+          "@strata-foundation/spl-utils": path.resolve(
+            "./node_modules/@strata-foundation/spl-utils"
+          ),
         } : {}
       }
     }
     return webpackConfig;
 };
 
-module.exports = override(
-    supportMjs()
-);  
+module.exports = override(emptyFs(), supportMjs());

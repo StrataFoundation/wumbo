@@ -11,7 +11,6 @@ import {
   AccountProvider,
   SolPriceProvider,
   ErrorHandlerProvider,
-  StrataSdksProvider,
 } from "@strata-foundation/react";
 import { ApolloProvider } from "@apollo/client";
 import {
