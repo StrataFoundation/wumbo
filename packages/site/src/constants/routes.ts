@@ -56,11 +56,13 @@ export const editProfile = (ownerWalletKey: PublicKey): string =>
 
 export const swapPath = (
   tokenBondingKey: PublicKey,
-  action: "buy" | "sell"
+  baseMint: PublicKey,
+  targetMint: PublicKey
 ): string =>
   replaceAll(AppRoutes.swap.path, {
     ":tokenBondingKey": tokenBondingKey.toBase58(),
-    ":action": action,
+    ":baseMint": baseMint.toBase58(),
+    ":targetMint": targetMint.toBase58()
   });
 
 export const SiteRoutes: ISiteRoutes = {
@@ -80,6 +82,6 @@ export const AppRoutes: IAppRoutes = {
   wumNetWorth: { path: "/app/wum-net-worth/:wallet" },
   sendSearch: { path: "/app/send" },
   send: { path: "/app/send/:mint" },
-  swap: { path: "/app/swap/:tokenBondingKey/:action" },
+  swap: { path: "/app/swap/:tokenBondingKey/:baseMint/:targetMint" },
   prototype: { path: "/app/prototype" },
 };

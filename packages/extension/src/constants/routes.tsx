@@ -58,11 +58,13 @@ export const tagNftPath = (mint: PublicKey): string =>
 
 export const swapPath = (
   tokenBondingKey: PublicKey,
-  action: "buy" | "sell"
+  baseMint: PublicKey,
+  targetMint: PublicKey
 ): string =>
   replaceAll(routes.swap.path, {
     ":tokenBondingKey": tokenBondingKey.toBase58(),
-    ":action": action,
+    ":baseMint": baseMint.toBase58(),
+    ":targetMint": targetMint.toBase58()
   });
 
 export function claimPath({
@@ -90,7 +92,7 @@ export const routes: IRoutes = {
   myTokens: { path: "/my-tokens", Icon: RiCoinLine, isDrawerNav: true },
   manageWallet: { path: "/manage-wallet", Icon: null, isDrawerNav: false },
   swap: {
-    path: "/swap/:tokenBondingKey/:action",
+    path: "/swap/:tokenBondingKey/:baseMint/:targetMint",
     Icon: RiArrowUpDownFill,
     isDrawerNav: true,
   },

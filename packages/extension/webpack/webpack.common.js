@@ -69,13 +69,15 @@ module.exports = {
         "../../node_modules/@solana/wallet-ledger/dist/lib/index.js"
       ),
       // For local dev with linked packages:
-      "@chakra-ui/react": path.resolve("../../node_modules/@chakra-ui/react"),
-      "@solana/wallet-adapter-react": path.resolve("../../node_modules/@solana/wallet-adapter-react"),
-      "@strata-foundation/react": path.resolve("./node_modules/@strata-foundation/react")
+      // "@chakra-ui/react": path.resolve("../../node_modules/@chakra-ui/react"),
+      // "@solana/wallet-adapter-react": path.resolve("../../node_modules/@solana/wallet-adapter-react"),
+      // "@strata-foundation/react": path.resolve("./node_modules/@strata-foundation/react")
     },
   },
   plugins: [
     new webpack.EnvironmentPlugin([
+      "REACT_APP_WUMBO_TRANSACTION_FEE",
+      "REACT_APP_WUMBO_TRANSACTION_FEE_DESTINATION",
       "REACT_APP_SITE_URL",
       "REACT_APP_NFT_VERIFIER_TLD",
       "REACT_APP_NFT_VERIFIER",
