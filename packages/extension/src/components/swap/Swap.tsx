@@ -1,4 +1,4 @@
-import { swapPath } from "@/constants/routes";
+import { routes, swapPath } from "@/constants/routes";
 import { usePublicKey } from "@strata-foundation/react";
 import React, { Fragment } from "react";
 import { useHistory, useLocation, useParams } from "react-router-dom";
@@ -16,13 +16,17 @@ export const SwapRoute = () => {
   const tokenBondingKey = usePublicKey(query.tokenBondingKey);
   const baseMint = usePublicKey(query.baseMint);
   const targetMint = usePublicKey(query.targetMint);
-  console.log(location);
+
+  const redirectUri =
+    routes.manageWallet.path +
+    `?redirect=${location.pathname}${location.search}`;
 
   return (
     <Fragment>
       <WumboDrawer.Header title="Trade" />
       <WumboDrawer.Content>
         <Swap
+          manageWalletPath={redirectUri}
           tokenBonding={tokenBondingKey}
           baseMint={baseMint}
           targetMint={targetMint}

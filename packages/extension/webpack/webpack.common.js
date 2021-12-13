@@ -68,10 +68,12 @@ module.exports = {
       "@solana/wallet-ledger": path.resolve(
         "../../node_modules/@solana/wallet-ledger/dist/lib/index.js"
       ),
-      // For local dev with linked packages:
-      // "@chakra-ui/react": path.resolve("../../node_modules/@chakra-ui/react"),
-      // "@solana/wallet-adapter-react": path.resolve("../../node_modules/@solana/wallet-adapter-react"),
-      // "@strata-foundation/react": path.resolve("./node_modules/@strata-foundation/react")
+      ...process.env.LINKED_DEV ? {
+        "@chakra-ui/react": path.resolve("../../node_modules/@chakra-ui/react"),
+        "@solana/wallet-adapter-react": path.resolve("../../node_modules/@solana/wallet-adapter-react"),
+        "@strata-foundation/react": path.resolve("./node_modules/@strata-foundation/react"),
+        "@strata-foundation/spl-token-bonding": path.resolve("./node_modules/@strata-foundation/spl-token-bonding")
+      } : {}
     },
   },
   plugins: [

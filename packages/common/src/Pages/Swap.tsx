@@ -7,33 +7,39 @@ import {
   TransactionInstruction,
 } from "@solana/web3.js";
 import {
-  ISwapProps,
+  ISwapDriverArgs,
+  SwapForm,
   Notification,
-  PluggableSwap,
+  useSwapDriver,
   useBondingPricing,
   useErrorHandler,
   useMint,
   useMintTokenRef,
   useSwap,
 } from "@strata-foundation/react";
-import { toNumber } from "@strata-foundation/spl-token-bonding";
+import { ISwapArgs, toNumber } from "@strata-foundation/spl-token-bonding";
 import React from "react";
 import toast from "react-hot-toast";
+import { useHistory, useLocation } from "react-router-dom";
 import {
   WUMBO_TRANSACTION_FEE,
   WUMBO_TRANSACTION_FEE_DESTINATION,
 } from "../constants/globals";
 
+const identity = () => {}
 export const Swap = ({
   onTradingMintsChange,
   tokenBonding,
   baseMint,
   targetMint,
+  manageWalletPath
 }: {
   tokenBonding?: PublicKey;
   baseMint?: PublicKey;
   targetMint?: PublicKey;
-} & Pick<ISwapProps, "onTradingMintsChange">) => {
+  manageWalletPath: string
+} & Pick<ISwapDriverArgs, "onTradingMintsChange">) => {
+  const history = useHistory();
   const { adapter } = useWallet();
   const { handleErrors } = useErrorHandler();
   const { info: targetTokenRef, loading: loadingTarget } =
@@ -84,48 +90,42 @@ export const Swap = ({
     },
   });
   handleErrors(error);
+  const { loading: driverLoading, ...swapProps } = useSwapDriver({
+    extraTransactionInfo:
+      hasFees
+        ? [
+          {
+            name: "Wum.bo Fee",
+            tooltip:
+              "A transaction fee to fund the ongoing development of Wum.bo. Only applies to purchasing social tokens, and not collective tokens",
+            amount: `${WUMBO_TRANSACTION_FEE}%`,
+          },
+        ]
+        : [],
+    tradingMints: { base: baseMint, target: targetMint },
+    onTradingMintsChange,
+    swap: (args: ISwapArgs & { ticker: string }) =>
+      execute(args).then(({ targetAmount }) => {
+        toast.custom((t) => (
+          <Notification
+            show={t.visible}
+            type="success"
+            heading="Transaction Succesful"
+            message={`Succesfully purchased ${Number(targetAmount).toFixed(
+              9
+            )} ${args.ticker}!`}
+            onDismiss={() => toast.dismiss(t.id)}
+          />
+        ));
+      }),
+    onConnectWallet: () => history.push(manageWalletPath),
+    tokenBondingKey: tokenBonding!
+  })
 
   return (
-    <PluggableSwap
-      extraTransactionInfo={
-        hasFees
-          ? [
-              {
-                name: "Wum.bo Fee",
-                tooltip:
-                  "A transaction fee to fund the ongoing development of Wum.bo. Only applies to purchasing social tokens, and not collective tokens",
-                amount: `${WUMBO_TRANSACTION_FEE}%`,
-              },
-            ]
-          : []
-      }
-      tradingMints={{ base: baseMint, target: targetMint }}
-      onTradingMintsChange={onTradingMintsChange}
-      loading={
-        loading ||
-        loadingBase ||
-        loadingTarget ||
-        !targetMintInfo ||
-        !baseMintInfo ||
-        !pricing
-      }
-      swap={(args) =>
-        execute(args).then(({ targetAmount }) => {
-          toast.custom((t) => (
-            <Notification
-              show={t.visible}
-              type="success"
-              heading="Transaction Succesful"
-              message={`Succesfully purchased ${Number(targetAmount).toFixed(
-                9
-              )} ${args.ticker}!`}
-              onDismiss={() => toast.dismiss(t.id)}
-            />
-          ));
-        })
-      }
-      onConnectWallet={() => {}}
-      tokenBondingKey={tokenBonding!}
+    <SwapForm
+      isSubmitting={loading}
+      {...swapProps}
     />
   );
 };

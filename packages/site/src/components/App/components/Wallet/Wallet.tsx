@@ -22,7 +22,6 @@ export default React.memo(() => {
         getTokenLink={(t) =>
           t.tokenRef?.publicKey ? profilePath(t.tokenRef?.publicKey) : ""
         }
-        wumLink={""}
         solLink={solLink}
         sendLink={AppRoutes.sendSearch.path}
       />
