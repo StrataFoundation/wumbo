@@ -144,7 +144,7 @@ export const Wallet = React.memo(
     solLink,
     sendLink,
   }: {
-    getTokenLink: (tokenWithMeta: ITokenWithMetaAndAccount) => string;
+    getTokenLink: (tokenWithMeta: ITokenWithMetaAndAccount) => string | null;
     solLink: string;
     wumLeaderboardLink: string;
     sendLink: string;

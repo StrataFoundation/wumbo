@@ -20,6 +20,9 @@
     "128": "assets/img/icon128.png",
     "512": "assets/img/icon512.png"
   },
+  "background": {
+    "service_worker": "background.js"
+  },
   "content_scripts": [
     {
       "matches": ["https://twitter.com/*"],
