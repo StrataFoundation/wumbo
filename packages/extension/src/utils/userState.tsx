@@ -34,7 +34,7 @@ export interface UserInfoState {
 
 export const useUserInfo = (name: string): UserInfoState => {
   const [result, setResult] = useState<UserInfo | undefined>();
-  const tld = useTwitterTld()
+  const tld = useTwitterTld();
   const { info: creator, loading: loading1 } = useTokenRefForName(
     name,
     null,
