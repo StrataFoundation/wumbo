@@ -13,11 +13,7 @@ import {
   useTokenBonding,
   useProvider,
 } from "@strata-foundation/react";
-import {
-  Data,
-  Creator,
-  ARWEAVE_UPLOAD_URL,
-} from "@strata-foundation/spl-utils";
+import { Data, ARWEAVE_UPLOAD_URL } from "@strata-foundation/spl-utils";
 
 export interface ISetMetadataArgs {
   name: string;
@@ -88,7 +84,6 @@ export const useSetMetadata = (
       // No catch of errors as the useAsyncCallback and return handles it
       try {
         let arweaveLink;
-        let creators: Creator[] | null = null;
 
         if (metadataChanged) {
           let imageName: string | undefined = undefined;
@@ -106,20 +101,6 @@ export const useSetMetadata = (
             files = [file];
           }
 
-          creators = [
-            new Creator({
-              address: tokenRef!.owner!.toBase58(),
-              verified: false,
-              share: 99,
-            }),
-            // TODO: update auth here
-            /* new Creator({
-             *   address: ,
-             *   verified: false,
-             *   share: 1,
-             * }), */
-          ];
-
           setLoadingState("submit-solana");
           const { files: presignedFiles, txid } =
             await tokenMetadataSdk!.presignCreateArweaveUrl({
@@ -129,7 +110,7 @@ export const useSetMetadata = (
               files,
               env: "mainnet-beta",
               uploadUrl: ARWEAVE_UPLOAD_URL,
-              creators,
+              creators: undefined,
             });
 
           setLoadingState("submit-arweave");
@@ -161,7 +142,7 @@ export const useSetMetadata = (
               symbol: args.symbol,
               uri: arweaveLink,
               sellerFeeBasisPoints: 0,
-              creators,
+              creators: null,
             }),
           });
 
