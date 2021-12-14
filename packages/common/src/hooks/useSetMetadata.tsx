@@ -1,23 +1,16 @@
-import { useState } from "react";
-import { useAsyncCallback } from "react-async-hook";
 import { useConnection } from "@solana/wallet-adapter-react";
 import {
-  PublicKey,
-  sendAndConfirmRawTransaction,
-  Transaction,
+  PublicKey, Signer, TransactionInstruction
 } from "@solana/web3.js";
 import {
-  useStrataSdks,
-  useTokenMetadata,
-  useTokenRef,
-  useTokenBonding,
-  useProvider,
+  useProvider, useStrataSdks, useTokenBonding, useTokenMetadata,
+  useTokenRef
 } from "@strata-foundation/react";
 import {
-  Data,
-  Creator,
-  ARWEAVE_UPLOAD_URL,
+  ARWEAVE_UPLOAD_URL, Creator, Data
 } from "@strata-foundation/spl-utils";
+import { useState } from "react";
+import { useAsyncCallback } from "react-async-hook";
 
 export interface ISetMetadataArgs {
   name: string;
@@ -106,19 +99,6 @@ export const useSetMetadata = (
             files = [file];
           }
 
-          creators = [
-            new Creator({
-              address: tokenRef!.owner!.toBase58(),
-              verified: false,
-              share: 99,
-            }),
-            // TODO: update auth here
-            /* new Creator({
-             *   address: ,
-             *   verified: false,
-             *   share: 1,
-             * }), */
-          ];
 
           setLoadingState("submit-solana");
           const { files: presignedFiles, txid } =
@@ -128,8 +108,7 @@ export const useSetMetadata = (
               image: imageName,
               files,
               env: "mainnet-beta",
-              uploadUrl: ARWEAVE_UPLOAD_URL,
-              creators,
+              uploadUrl: ARWEAVE_UPLOAD_URL
             });
 
           setLoadingState("submit-arweave");
@@ -144,16 +123,21 @@ export const useSetMetadata = (
         }
 
         setLoadingState("submit-solana");
-        const { instructions: updateTokenBondingInstructions } =
-          await tokenCollectiveSdk!.updateTokenBondingInstructions({
-            tokenRef: tokenRef!.publicKey,
-            buyBaseRoyaltyPercentage: args.buyBaseRoyaltyPercentage,
-            buyTargetRoyaltyPercentage: args.buyTargetRoyaltyPercentage,
-            sellBaseRoyaltyPercentage: args.sellBaseRoyaltyPercentage,
-            sellTargetRoyaltyPercentage: args.sellTargetRoyaltyPercentage,
-          });
 
-        const { instructions: updateMetadataInstructions } =
+        let updateTokenBondingInstructions: TransactionInstruction[] = [];
+        let updateTokenBondingSigners: Signer[] = [];
+        if (tokenRef?.authority) {
+          ({ instructions: updateTokenBondingInstructions, signers: updateTokenBondingSigners } =
+            await tokenCollectiveSdk!.updateTokenBondingInstructions({
+              tokenRef: tokenRef!.publicKey,
+              buyBaseRoyaltyPercentage: args.buyBaseRoyaltyPercentage,
+              buyTargetRoyaltyPercentage: args.buyTargetRoyaltyPercentage,
+              sellBaseRoyaltyPercentage: args.sellBaseRoyaltyPercentage,
+              sellTargetRoyaltyPercentage: args.sellTargetRoyaltyPercentage,
+            }));
+        }
+
+        const { instructions: updateMetadataInstructions, signers: updateMetadataSigners } =
           await tokenMetadataSdk!.updateMetadataInstructions({
             metadata: tokenRef!.tokenMetadata,
             data: new Data({
@@ -165,22 +149,13 @@ export const useSetMetadata = (
             }),
           });
 
-        const transaction = new Transaction({
-          feePayer: provider.wallet.publicKey || undefined,
-          recentBlockhash: (await connection.getRecentBlockhash()).blockhash,
-        });
-
-        transaction.instructions = [
-          ...updateTokenBondingInstructions,
-          ...updateMetadataInstructions,
-        ];
-
-        const prepayTxn = await provider.wallet.signTransaction(transaction);
-        const txId = await sendAndConfirmRawTransaction(
-          connection,
-          prepayTxn.serialize()
-        );
-        await connection.confirmTransaction(txId, "max");
+        await tokenCollectiveSdk?.sendInstructions(
+          [
+            ...updateTokenBondingInstructions,
+            ...updateMetadataInstructions,
+          ],
+          [...updateTokenBondingSigners, ...updateMetadataSigners]
+        )
 
         return {
           metadataAccount: metadataAccountKey,

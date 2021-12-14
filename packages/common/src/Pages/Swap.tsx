@@ -4,40 +4,35 @@ import {
   PublicKey,
   Signer,
   SystemProgram,
-  TransactionInstruction,
+  TransactionInstruction
 } from "@solana/web3.js";
 import {
-  ISwapDriverArgs,
-  SwapForm,
-  Notification,
-  useSwapDriver,
-  useBondingPricing,
+  ISwapDriverArgs, Notification, SwapForm, useBondingPricing,
   useErrorHandler,
   useMint,
   useMintTokenRef,
-  useSwap,
+  useSwap, useSwapDriver
 } from "@strata-foundation/react";
 import { ISwapArgs, toNumber } from "@strata-foundation/spl-token-bonding";
 import React from "react";
 import toast from "react-hot-toast";
-import { useHistory, useLocation } from "react-router-dom";
+import { useHistory } from "react-router-dom";
 import {
   WUMBO_TRANSACTION_FEE,
-  WUMBO_TRANSACTION_FEE_DESTINATION,
+  WUMBO_TRANSACTION_FEE_DESTINATION
 } from "../constants/globals";
 
-const identity = () => {}
 export const Swap = ({
   onTradingMintsChange,
   tokenBonding,
   baseMint,
   targetMint,
-  manageWalletPath
+  manageWalletPath,
 }: {
   tokenBonding?: PublicKey;
   baseMint?: PublicKey;
   targetMint?: PublicKey;
-  manageWalletPath: string
+  manageWalletPath: string;
 } & Pick<ISwapDriverArgs, "onTradingMintsChange">) => {
   const history = useHistory();
   const { adapter } = useWallet();
@@ -91,9 +86,8 @@ export const Swap = ({
   });
   handleErrors(error);
   const { loading: driverLoading, ...swapProps } = useSwapDriver({
-    extraTransactionInfo:
-      hasFees
-        ? [
+    extraTransactionInfo: hasFees
+      ? [
           {
             name: "Wum.bo Fee",
             tooltip:
@@ -101,7 +95,7 @@ export const Swap = ({
             amount: `${WUMBO_TRANSACTION_FEE}%`,
           },
         ]
-        : [],
+      : [],
     tradingMints: { base: baseMint, target: targetMint },
     onTradingMintsChange,
     swap: (args: ISwapArgs & { ticker: string }) =>
@@ -119,13 +113,8 @@ export const Swap = ({
         ));
       }),
     onConnectWallet: () => history.push(manageWalletPath),
-    tokenBondingKey: tokenBonding!
-  })
+    tokenBondingKey: tokenBonding!,
+  });
 
-  return (
-    <SwapForm
-      isSubmitting={loading}
-      {...swapProps}
-    />
-  );
+  return <SwapForm isSubmitting={loading} {...swapProps} />;
 };

@@ -8,13 +8,13 @@ import {
   SimpleGrid,
   StackDivider,
   Text,
-  VStack
+  VStack,
 } from "@chakra-ui/react";
 import { useWallet } from "@solana/wallet-adapter-react";
 import {
   useOwnedAmount,
   usePriceInUsd,
-  useSolOwnedAmount
+  useSolOwnedAmount,
 } from "@strata-foundation/react";
 import { ITokenWithMetaAndAccount } from "@strata-foundation/spl-token-collective";
 import React from "react";
