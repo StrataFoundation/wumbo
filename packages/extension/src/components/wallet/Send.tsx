@@ -3,10 +3,12 @@ import { Box } from "@chakra-ui/react";
 import React, { Fragment, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import {
-  Send as CommonSend,
+  Send as CommonSend
+} from "wumbo-common";
+import {
   usePublicKey,
   useTokenMetadata,
-} from "wumbo-common";
+} from "@strata-foundation/react";
 import { WumboDrawer } from "../WumboDrawer";
 
 export const Send = () => {
@@ -18,7 +20,7 @@ export const Send = () => {
     <Fragment>
       <WumboDrawer.Header title={`Send ${baseMetadata?.data.symbol}`} />
       <WumboDrawer.Content>
-        <Box>
+        <Box padding={4}>
           <CommonSend finishRedirectUrl={routes.myTokens.path} />
         </Box>
       </WumboDrawer.Content>
