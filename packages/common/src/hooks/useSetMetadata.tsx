@@ -1,19 +1,19 @@
-import { useState } from "react";
-import { useAsyncCallback } from "react-async-hook";
 import { useConnection } from "@solana/wallet-adapter-react";
+import { PublicKey, Signer, TransactionInstruction } from "@solana/web3.js";
 import {
-  PublicKey,
-  sendAndConfirmRawTransaction,
-  Transaction,
-} from "@solana/web3.js";
-import {
+  useProvider,
   useStrataSdks,
+  useTokenBonding,
   useTokenMetadata,
   useTokenRef,
-  useTokenBonding,
-  useProvider,
 } from "@strata-foundation/react";
-import { Data, ARWEAVE_UPLOAD_URL } from "@strata-foundation/spl-utils";
+import {
+  ARWEAVE_UPLOAD_URL,
+  Creator,
+  Data,
+} from "@strata-foundation/spl-utils";
+import { useState } from "react";
+import { useAsyncCallback } from "react-async-hook";
 
 export interface ISetMetadataArgs {
   name: string;
@@ -75,7 +75,7 @@ export const useSetMetadata = (
     if (provider && tokenRefKey) {
       setLoading(true);
       setLoadingState("gathering-files");
-      let files: Map<string, Buffer> = new Map();
+      let files: File[] = [];
       let metadataChanged =
         args.image != undefined ||
         args.name != metadata?.data.name ||
@@ -84,18 +84,22 @@ export const useSetMetadata = (
       // No catch of errors as the useAsyncCallback and return handles it
       try {
         let arweaveLink;
+        let creators: Creator[] | null = null;
+
         if (metadataChanged) {
           let imageName: string | undefined = undefined;
+
           if (args.image) {
-            files.set(args.image.name, Buffer.from(args.image as any));
+            files = [args.image];
+            imageName = args.image.name;
           } else if (args.name === null) {
             // Intentionaly unset;
-            files.clear();
+            files = [];
           } else {
             // Undefined, keep the old one
             const [file, fileName] = await getFileFromUrl(image!, "untitled");
             imageName = fileName;
-            files.set(fileName, Buffer.from(file as any));
+            files = [file];
           }
 
           setLoadingState("submit-solana");
@@ -121,43 +125,40 @@ export const useSetMetadata = (
         }
 
         setLoadingState("submit-solana");
-        const { instructions: updateTokenBondingInstructions } =
-          await tokenCollectiveSdk!.updateTokenBondingInstructions({
+
+        let updateTokenBondingInstructions: TransactionInstruction[] = [];
+        let updateTokenBondingSigners: Signer[] = [];
+        if (tokenRef?.authority) {
+          ({
+            instructions: updateTokenBondingInstructions,
+            signers: updateTokenBondingSigners,
+          } = await tokenCollectiveSdk!.updateTokenBondingInstructions({
             tokenRef: tokenRef!.publicKey,
             buyBaseRoyaltyPercentage: args.buyBaseRoyaltyPercentage,
             buyTargetRoyaltyPercentage: args.buyTargetRoyaltyPercentage,
             sellBaseRoyaltyPercentage: args.sellBaseRoyaltyPercentage,
             sellTargetRoyaltyPercentage: args.sellTargetRoyaltyPercentage,
-          });
+          }));
+        }
 
-        const { instructions: updateMetadataInstructions } =
-          await tokenMetadataSdk!.updateMetadataInstructions({
-            metadata: tokenRef!.tokenMetadata,
-            data: new Data({
-              name: args.name,
-              symbol: args.symbol,
-              uri: arweaveLink,
-              sellerFeeBasisPoints: 0,
-              creators: null,
-            }),
-          });
-
-        const transaction = new Transaction({
-          feePayer: provider.wallet.publicKey || undefined,
-          recentBlockhash: (await connection.getRecentBlockhash()).blockhash,
+        const {
+          instructions: updateMetadataInstructions,
+          signers: updateMetadataSigners,
+        } = await tokenMetadataSdk!.updateMetadataInstructions({
+          metadata: tokenRef!.tokenMetadata,
+          data: new Data({
+            name: args.name,
+            symbol: args.symbol,
+            uri: arweaveLink,
+            sellerFeeBasisPoints: 0,
+            creators,
+          }),
         });
 
-        transaction.instructions = [
-          ...updateTokenBondingInstructions,
-          ...updateMetadataInstructions,
-        ];
-
-        const prepayTxn = await provider.wallet.signTransaction(transaction);
-        const txId = await sendAndConfirmRawTransaction(
-          connection,
-          prepayTxn.serialize()
+        await tokenCollectiveSdk?.sendInstructions(
+          [...updateTokenBondingInstructions, ...updateMetadataInstructions],
+          [...updateTokenBondingSigners, ...updateMetadataSigners]
         );
-        await connection.confirmTransaction(txId, "max");
 
         return {
           metadataAccount: metadataAccountKey,

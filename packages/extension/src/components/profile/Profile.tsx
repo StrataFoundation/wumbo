@@ -7,6 +7,7 @@ import {
   useClaimedTokenRefKey,
   useTokenMetadata,
   useErrorHandler,
+  useTokenBonding,
 } from "@strata-foundation/react";
 import { WumboDrawer } from "../WumboDrawer";
 import {
@@ -32,6 +33,7 @@ export const Profile = () => {
     : undefined;
   const tokenRefKey = passedTokenRefKey || walletTokenRefKey;
   const { info: tokenRef, loading } = useTokenRef(tokenRefKey);
+  const { info: tokenBonding } = useTokenBonding(tokenRef?.tokenBonding);
   const {
     metadata,
     loading: loadingMetadata,
@@ -85,7 +87,13 @@ export const Profile = () => {
           }
           onTradeClick={() =>
             tokenRef?.tokenBonding &&
-            history.push(swapPath(tokenRef.tokenBonding, "buy"))
+            history.push(
+              swapPath(
+                tokenRef.tokenBonding,
+                tokenBonding!.baseMint,
+                tokenBonding!.targetMint
+              )
+            )
           }
           getNftLink={(token) =>
             tokenRef?.mint ? nftPath(tokenRef?.mint) : ""

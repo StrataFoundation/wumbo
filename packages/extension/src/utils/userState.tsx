@@ -11,7 +11,7 @@ import {
 import { ITokenBonding, ICurve } from "@strata-foundation/spl-token-bonding";
 import { ITokenRef } from "@strata-foundation/spl-token-collective";
 import { useAsync } from "react-async-hook";
-import { getTwitterTld } from "wumbo-common";
+import { getTwitterTld, useTwitterTld } from "wumbo-common";
 
 interface UserState {
   tokenRef?: ITokenRef;
@@ -34,7 +34,7 @@ export interface UserInfoState {
 
 export const useUserInfo = (name: string): UserInfoState => {
   const [result, setResult] = useState<UserInfo | undefined>();
-  const { result: tld } = useAsync(getTwitterTld, []);
+  const tld = useTwitterTld();
   const { info: creator, loading: loading1 } = useTokenRefForName(
     name,
     null,

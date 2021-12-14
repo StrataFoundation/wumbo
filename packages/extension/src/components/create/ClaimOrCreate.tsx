@@ -20,7 +20,7 @@ import {
 
 export default React.memo(() => {
   const history = useHistory();
-  const { tokenCollectiveSdk } = useStrataSdks();
+  const { tokenCollectiveSdk, tokenBondingSdk } = useStrataSdks();
   const query = useQuery();
   const { awaitingApproval } = useProvider();
   const { adapter } = useWallet();
@@ -46,8 +46,15 @@ export default React.memo(() => {
         sellTargetRoyaltyPercentage: 0,
       },
     });
+    const tokenBondingAcct = (await tokenBondingSdk!.getTokenBonding(
+      tokenBonding!
+    ))!;
     history.push(
-      swapPath(tokenBonding!, "buy") + `?name=${query.get("name")!}`
+      swapPath(
+        tokenBonding!,
+        tokenBondingAcct.baseMint,
+        tokenBondingAcct.targetMint
+      ) + `?name=${query.get("name")!}`
     );
   };
 

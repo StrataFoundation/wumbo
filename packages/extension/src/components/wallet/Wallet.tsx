@@ -6,7 +6,7 @@ import {
   wumNetWorthPath,
   routes,
 } from "@/constants/routes";
-import { Wallet as CommonWallet, OPEN_BONDING } from "wumbo-common";
+import { Wallet as CommonWallet } from "wumbo-common";
 import { useWallet } from "@solana/wallet-adapter-react";
 import { useFtxPayLink } from "@strata-foundation/react";
 import { WumboDrawer } from "../WumboDrawer";
@@ -26,7 +26,6 @@ export const Wallet = () => {
             sendLink={routes.sendSearch.path}
             wumLeaderboardLink={publicKey ? wumNetWorthPath(publicKey) : ""}
             solLink={solLink}
-            wumLink={swapPath(OPEN_BONDING, "buy")}
             getTokenLink={(t) =>
               t.tokenRef ? viewProfilePath(t.tokenRef.publicKey) : ""
             }

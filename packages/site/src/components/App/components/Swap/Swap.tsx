@@ -1,56 +1,34 @@
-import React, { Fragment } from "react";
+import { usePublicKey } from "@strata-foundation/react";
+import React from "react";
 import { useHistory, useLocation, useParams } from "react-router-dom";
-import {
-  PluggableSwap,
-  usePublicKey,
-  Notification,
-  useTokenBonding,
-  useTokenBondingFromMint,
-} from "@strata-foundation/react";
-import { swapPath, AppRoutes } from "../../../../constants/routes";
-
-import toast from "react-hot-toast";
+import { Swap } from "wumbo-common";
+import { AppRoutes, swapPath } from "../../../../constants/routes";
 
 export const SwapRoute = () => {
   const history = useHistory();
-  const location = useLocation();
-  const query =
-    useParams<{ tokenBondingKey: string; action: "buy" | "sell" }>();
+  const query = useParams<{
+    tokenBondingKey: string;
+    baseMint: string;
+    targetMint: string;
+  }>();
   const tokenBondingKey = usePublicKey(query.tokenBondingKey);
-  const { info: tokenBonding } = useTokenBonding(tokenBondingKey);
-  const { info: baseTokenBonding } = useTokenBondingFromMint(
-    tokenBonding?.baseMint
-  );
+  const baseMint = usePublicKey(query.baseMint);
+  const targetMint = usePublicKey(query.targetMint);
+  const location = useLocation();
+
+  const redirectUri =
+    AppRoutes.manageWallet.path +
+    `?redirect=${location.pathname}${location.search}`;
 
   return (
-    <PluggableSwap
-      action={query.action}
-      tokenBondingKey={tokenBondingKey!}
-      onConnectWallet={() => {
-        history.push(
-          AppRoutes.manageWallet.path +
-            `?redirect=${location.pathname}${location.search}`
-        );
-      }}
-      onFlipTokens={(tokenBonding, action) => {
-        history.push(swapPath(tokenBonding, action));
-      }}
-      onBuyBase={(tokenBonding) => {
-        if (baseTokenBonding) {
-          history.push(swapPath(baseTokenBonding.publicKey, "buy"));
-        }
-      }}
-      onSuccess={({ ticker, mint, amount }) => {
-        toast.custom((t) => (
-          <Notification
-            show={t.visible}
-            type="success"
-            heading="Transaction Succesful"
-            message={`You now own ${Number(amount).toFixed(4)} of ${ticker}`}
-            onDismiss={() => toast.dismiss(t.id)}
-          />
-        ));
-      }}
+    <Swap
+      manageWalletPath={redirectUri}
+      tokenBonding={tokenBondingKey}
+      baseMint={baseMint}
+      targetMint={targetMint}
+      onTradingMintsChange={({ base, target }) =>
+        history.push(swapPath(tokenBondingKey!, base, target))
+      }
     />
   );
 };

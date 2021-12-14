@@ -1,38 +1,31 @@
-import React from "react";
-import { Link } from "react-router-dom";
-import { RiCoinLine } from "react-icons/ri";
-import toast from "react-hot-toast";
 import {
-  Text,
+  Button,
   Center,
   createIcon,
   Flex,
   HStack,
   Icon,
-  StackDivider,
-  VStack,
-  Button,
   SimpleGrid,
+  StackDivider,
+  Text,
+  VStack,
 } from "@chakra-ui/react";
+import { useWallet } from "@solana/wallet-adapter-react";
 import {
-  useBondingPricing,
-  usePriceInUsd,
   useOwnedAmount,
+  usePriceInUsd,
   useSolOwnedAmount,
-  useTokenMetadata,
 } from "@strata-foundation/react";
 import { ITokenWithMetaAndAccount } from "@strata-foundation/spl-token-collective";
-import { useWumNetWorth, useUserTokensWithMeta } from "../hooks";
-import {
-  SOL_TOKEN,
-  OPEN_TOKEN,
-  OPEN_COLLECTIVE_KEY,
-} from "../constants/globals";
+import React from "react";
+import toast from "react-hot-toast";
+import { RiCoinLine } from "react-icons/ri";
+import { Link } from "react-router-dom";
 import { Avatar } from "../Avatar";
+import { SOL_TOKEN } from "../constants/globals";
+import { useUserTokensWithMeta } from "../hooks";
 import { Notification } from "../Notification";
 import { Spinner } from "../Spinner";
-import { WumboRankIcon } from "../svgs";
-import { useWallet } from "@solana/wallet-adapter-react";
 
 const SolLogoIcon = createIcon({
   displayName: "Solana",
@@ -148,12 +141,10 @@ export const Wallet = React.memo(
   ({
     wumLeaderboardLink,
     getTokenLink,
-    wumLink,
     solLink,
     sendLink,
   }: {
     getTokenLink: (tokenWithMeta: ITokenWithMetaAndAccount) => string;
-    wumLink: string;
     solLink: string;
     wumLeaderboardLink: string;
     sendLink: string;
@@ -165,7 +156,6 @@ export const Wallet = React.memo(
     const { data: tokens, loading } = useUserTokensWithMeta(
       publicKey || undefined
     );
-    const { wumNetWorth } = useWumNetWorth(publicKey || undefined);
 
     return (
       <VStack
