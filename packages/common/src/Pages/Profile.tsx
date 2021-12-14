@@ -1,6 +1,7 @@
 import React from "react";
 import { Link } from "react-router-dom";
 import { PublicKey } from "@solana/web3.js";
+import { useQuery as apolloUseQuery, gql } from "@apollo/client";
 import {
   VStack,
   HStack,
@@ -16,31 +17,30 @@ import {
   Link as PlainLink,
 } from "@chakra-ui/react";
 import { HiOutlinePencilAlt } from "react-icons/hi";
-import { useClaimedTokenRef, useClaimedTokenRefKey } from "../utils/tokenRef";
-import { Spinner } from "../Spinner";
-import { useAccount } from "../utils/account";
-import { TokenBonding } from "../utils/deserializers/spl-token-bonding";
 import {
-  TokenRef,
-  ITokenWithMeta,
-  supplyAsNum,
+  useErrorHandler,
+  useTokenRef,
+  useTokenBonding,
   useBondingPricing,
-  useFiatPrice,
   useMint,
-  useOwnedAmount,
-  useQuery,
-  useReverseTwitter,
+  usePriceInUsd,
+  usePrimaryClaimedTokenRef,
+  useClaimedTokenRefKey,
   useTokenMetadata,
-  useUserTokensWithMeta,
-  useClaimLink,
-} from "../utils";
+  supplyAsNum,
+  useProvider,
+} from "@strata-foundation/react";
+import { ITokenWithMetaAndAccount } from "@strata-foundation/spl-token-collective";
+import { Spinner } from "../Spinner";
+import { useQuery, useReverseTwitter } from "../utils";
+import { useUserTokensWithMeta } from "../hooks";
 import { StatCard, StatCardWithIcon } from "../StatCard";
-import { MetadataAvatar, useWallet } from "..";
+import { MetadataAvatar } from "..";
 import { TokenLeaderboard } from "../Leaderboard/TokenLeaderboard";
 import { NftListRaw } from "../Nft";
 import { TROPHY_CREATOR } from "../constants/globals";
-import { handleErrors } from "../contexts";
-import { useQuery as apolloUseQuery, gql } from "@apollo/client";
+import { useWallet } from "@solana/wallet-adapter-react";
+import { NATIVE_MINT } from "@solana/spl-token";
 
 interface IProfileProps {
   tokenRefKey: PublicKey;
@@ -49,7 +49,7 @@ interface IProfileProps {
   wumNetWorthPath: string;
   onAccountClick?: (tokenRefKey: PublicKey) => void;
   onTradeClick?: () => void;
-  getNftLink: (t: ITokenWithMeta) => string;
+  getNftLink: (t: ITokenWithMetaAndAccount) => string;
   useClaimFlow: (handle: string | undefined | null) => IClaimFlowOutput;
 }
 
@@ -82,20 +82,21 @@ export const Profile = React.memo(
     topTokensPath,
     wumNetWorthPath,
   }: IProfileProps) => {
-    const { info: tokenRef, loading } = useAccount(tokenRefKey, TokenRef, true);
+    const { handleErrors } = useErrorHandler();
+    const { info: tokenRef, loading } = useTokenRef(tokenRefKey);
     const ownerWalletKey = tokenRef?.owner as PublicKey | undefined;
-    const { info: walletTokenRef } = useClaimedTokenRef(ownerWalletKey);
-    const { info: tokenBonding, loading: tokenBondingLoading } = useAccount(
-      tokenRef?.tokenBonding,
-      TokenBonding
-    );
+    const { info: walletTokenRef } = usePrimaryClaimedTokenRef(ownerWalletKey);
+    const { info: tokenBonding, loading: tokenBondingLoading } =
+      useTokenBonding(tokenRef?.tokenBonding);
     const {
       metadata,
       loading: loadingMetadata,
       error: tokenMetadataError,
     } = useTokenMetadata(tokenBonding?.targetMint);
-    const { publicKey, awaitingApproval } = useWallet();
-    const myTokenRefKey = useClaimedTokenRefKey(publicKey || undefined);
+    const { awaitingApproval } = useProvider();
+    const { adapter } = useWallet();
+    const publicKey = adapter?.publicKey;
+    const myTokenRefKey = useClaimedTokenRefKey(publicKey, null);
     const { handle: walletTwitterHandle, error: reverseTwitterError } =
       useReverseTwitter(publicKey || undefined);
     const { data: { wumRank } = {} } = apolloUseQuery<{
@@ -104,20 +105,21 @@ export const Profile = React.memo(
     const { data: { tokenRank } = {} } = apolloUseQuery<{
       tokenRank: number | undefined;
     }>(GET_TOKEN_RANK, {
-      variables: { tokenBonding: tokenRef?.tokenBonding.toBase58() },
+      variables: { tokenBonding: tokenRef?.tokenBonding?.toBase58() },
     });
 
     const mint = useMint(tokenBonding?.targetMint);
     const supply = mint ? supplyAsNum(mint) : 0;
-    const { curve } = useBondingPricing(tokenBonding?.publicKey);
-    const fiatPrice = useFiatPrice(tokenBonding?.baseMint);
+    const { pricing } = useBondingPricing(tokenBonding?.publicKey);
+    const fiatPrice = usePriceInUsd(NATIVE_MINT);
     const toFiat = (a: number) => (fiatPrice || 0) * a;
-    const coinPriceUsd = toFiat(curve?.current() || 0);
-    const fiatLocked = mint && toFiat(curve?.locked() || 0).toFixed(2);
+    const coinPriceUsd = toFiat(pricing?.current(NATIVE_MINT) || 0);
+    const fiatLocked =
+      mint && toFiat(pricing?.locked(NATIVE_MINT) || 0).toFixed(2);
     const marketCap = (supply * coinPriceUsd).toFixed(2);
 
     const {
-      result: tokens,
+      data: tokens,
       loading: loadingCollectibles,
       error,
     } = useUserTokensWithMeta(ownerWalletKey);
@@ -133,6 +135,7 @@ export const Profile = React.memo(
       loading: claiming,
       error: claimError,
     } = useClaimFlow(handle);
+
     handleErrors(
       claimError,
       error,
@@ -145,7 +148,7 @@ export const Profile = React.memo(
       return <Spinner />;
     }
 
-    function isTrophy(t: ITokenWithMeta): boolean {
+    function isTrophy(t: ITokenWithMetaAndAccount): boolean {
       return Boolean(
         t.data?.properties?.creators?.some(
           // @ts-ignore

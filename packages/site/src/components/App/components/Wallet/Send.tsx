@@ -8,7 +8,7 @@ export default React.memo(() => {
   return (
     <>
       <WalletRedirect />
-      <Box p={4}>
+      <Box p={4} w="full">
         <Send finishRedirectUrl={AppRoutes.wallet.path} />
       </Box>
     </>

@@ -2,14 +2,12 @@ import React, { useMemo } from "react";
 import {
   Spinner,
   ViewNft as CommonViewNft,
-  useTokenMetadata,
   useTokenLargestAccounts,
-  useAccount,
 } from "wumbo-common";
+import { useTokenMetadata, useTokenAccount } from "@strata-foundation/react";
 import { useParams } from "react-router-dom";
 import { profilePath } from "../../../../../constants/routes";
 import { PublicKey } from "@solana/web3.js";
-import { TokenAccountParser } from "@oyster/common";
 
 export const ViewNftRoute = () => {
   const params = useParams<{ mint: string | undefined }>();
@@ -24,10 +22,7 @@ export const ViewNftRoute = () => {
     result: res2,
     error: err2,
   } = useTokenLargestAccounts(token);
-  const { loading: loading3, info } = useAccount(
-    res2?.value[0]?.address,
-    TokenAccountParser
-  );
+  const { loading: loading3, info } = useTokenAccount(res2?.value[0]?.address);
   const loading = loading1 || loading2 || loading3;
 
   if (loading) {
@@ -37,7 +32,7 @@ export const ViewNftRoute = () => {
   return (
     <CommonViewNft
       token={token}
-      owner={info?.info.owner}
+      owner={info?.owner}
       getCreatorLink={(c, t, tokenRef) => {
         return tokenRef
           ? profilePath(tokenRef.publicKey)

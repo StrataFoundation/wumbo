@@ -14,7 +14,7 @@ export interface IRoutes {
   create: Route;
   claim: Route;
   customize: Route;
-  trade: Route;
+  swap: Route;
   myTokens: Route;
   manageWallet: Route;
   profile: Route;
@@ -56,13 +56,15 @@ export function wumNetWorthPath(wallet: PublicKey): string {
 export const tagNftPath = (mint: PublicKey): string =>
   replaceAll(routes.tagNft.path, { ":mint": mint.toBase58() });
 
-export const tradePath = (
+export const swapPath = (
   tokenBondingKey: PublicKey,
-  action: "buy" | "sell"
+  baseMint: PublicKey,
+  targetMint: PublicKey
 ): string =>
-  replaceAll(routes.trade.path, {
+  replaceAll(routes.swap.path, {
     ":tokenBondingKey": tokenBondingKey.toBase58(),
-    ":action": action,
+    ":baseMint": baseMint.toBase58(),
+    ":targetMint": targetMint.toBase58(),
   });
 
 export function claimPath({
@@ -89,8 +91,8 @@ export const routes: IRoutes = {
   },
   myTokens: { path: "/my-tokens", Icon: RiCoinLine, isDrawerNav: true },
   manageWallet: { path: "/manage-wallet", Icon: null, isDrawerNav: false },
-  trade: {
-    path: "/swap/:tokenBondingKey/:action",
+  swap: {
+    path: "/swap/:tokenBondingKey/:baseMint/:targetMint",
     Icon: RiArrowUpDownFill,
     isDrawerNav: true,
   },

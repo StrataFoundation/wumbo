@@ -2,11 +2,8 @@ import { routes } from "@/constants/routes";
 import { Box } from "@chakra-ui/react";
 import React, { Fragment, useEffect } from "react";
 import { useParams } from "react-router-dom";
-import {
-  Send as CommonSend,
-  usePublicKey,
-  useTokenMetadata,
-} from "wumbo-common";
+import { Send as CommonSend } from "wumbo-common";
+import { usePublicKey, useTokenMetadata } from "@strata-foundation/react";
 import { WumboDrawer } from "../WumboDrawer";
 
 export const Send = () => {

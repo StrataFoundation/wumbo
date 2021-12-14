@@ -1,6 +1,7 @@
 import {
   EventEmitter,
   WalletAdapter,
+  SignerWalletAdapter,
   WalletAdapterEvents,
   WalletConnectionError,
   WalletDisconnectionError,
@@ -8,13 +9,15 @@ import {
   WalletNotConnectedError,
   WalletNotFoundError,
   WalletNotInstalledError,
-  WalletSignatureError,
+  WalletSignMessageError,
   WalletWindowClosedError,
+  SendTransactionOptions,
 } from "@solana/wallet-adapter-base";
-import { PublicKey, Transaction } from "@solana/web3.js";
+import { Connection, PublicKey, Transaction } from "@solana/web3.js";
 import { MessageType, Message } from "./types";
 import { deserializeError } from "serialize-error";
 import { WalletName } from "@solana/wallet-adapter-wallets";
+import { sleep } from "../utils";
 
 export interface IInjectedWalletAdapterConfig {
   name: WalletName | null;
@@ -22,7 +25,7 @@ export interface IInjectedWalletAdapterConfig {
 
 export class InjectedWalletAdapter
   extends EventEmitter<WalletAdapterEvents>
-  implements WalletAdapter
+  implements SignerWalletAdapter
 {
   private _name: WalletName | null;
   private _publicKey: PublicKey | null;
@@ -49,6 +52,14 @@ export class InjectedWalletAdapter
     });
   }
 
+  sendTransaction(
+    transaction: Transaction,
+    connection: Connection,
+    options?: SendTransactionOptions
+  ): Promise<string> {
+    throw new Error("Method not implemented.");
+  }
+
   get publicKey(): PublicKey | null {
     return this._publicKey;
   }
@@ -60,20 +71,31 @@ export class InjectedWalletAdapter
     return true;
   }
 
-  get readyAsync(): Promise<boolean> {
+  readyAsync(): Promise<boolean> {
     return (async () => {
       try {
-        const { ready } = await this.sendMessage({
-          type: MessageType.WALLET_READY,
-          name: this._name,
-        });
+        const { ready } = await this.sendMessage(
+          {
+            type: MessageType.WALLET_READY,
+            name: this._name,
+          },
+          500
+        );
 
         return ready;
-      } catch (error) {
-        if (error instanceof WalletError) throw error;
-        throw new WalletConnectionError(error?.message, error);
+      } catch (error: any) {
+        return false;
       }
     })();
+  }
+
+  async waitForReady(): Promise<void> {
+    let ready = await this.readyAsync();
+    while (!ready) {
+      ready = await this.readyAsync();
+      await sleep(500);
+      console.log("Injected wallet not ready, trying again...");
+    }
   }
 
   get connecting(): boolean {
@@ -88,13 +110,20 @@ export class InjectedWalletAdapter
     return false;
   }
 
-  async sendMessage(m: Message): Promise<any> {
+  async sendMessage(m: Message, timeoutMs: number = -1): Promise<any> {
     return new Promise((resolve, reject) => {
       const messageChannel = new MessageChannel();
 
-      messageChannel.port1.onmessage = (e: MessageEvent) => {
-        const { error, ...rest } = e.data;
+      let timeout: any;
+      if (timeoutMs > 0) {
+        timeout = setTimeout(() => {
+          reject(new WalletConnectionError("Not ready"));
+        }, timeoutMs);
+      }
 
+      const listener = (e: MessageEvent) => {
+        const { error, ...rest } = e.data;
+        timeout && clearTimeout(timeout);
         if (error) {
           // errors are returned serialized
           // reconstruct them and reject them
@@ -103,7 +132,7 @@ export class InjectedWalletAdapter
             WalletNotInstalledError: WalletNotInstalledError,
             WalletWindowClosedError: WalletWindowClosedError,
             WalletConnectionError: WalletConnectionError,
-            WalletSignatureError: WalletSignatureError,
+            WalletSignMessageError: WalletSignMessageError,
             WalletDisconnectError: WalletDisconnectionError,
             WalletError: WalletError,
           };
@@ -122,6 +151,8 @@ export class InjectedWalletAdapter
         resolve(rest);
       };
 
+      messageChannel.port1.onmessage = listener;
+
       // TODO: determrin security risks here
       window.postMessage(m, "*", [messageChannel.port2]);
     });
@@ -133,6 +164,7 @@ export class InjectedWalletAdapter
     try {
       if (this.connected || this.connecting) return;
       this._connecting = true;
+      await this.waitForReady();
 
       try {
         const { publicKey: responsePK } = await this.sendMessage({
@@ -144,7 +176,7 @@ export class InjectedWalletAdapter
         this._publicKey = publicKey;
         this._connected = true;
         this.emit("connect");
-      } catch (error) {
+      } catch (error: any) {
         if (error instanceof WalletError) throw error;
         throw new WalletConnectionError(error?.message, error);
       }
@@ -158,7 +190,7 @@ export class InjectedWalletAdapter
       try {
         await this.sendMessage({ type: MessageType.WALLET_DISCONNECT });
         this.emit("disconnect");
-      } catch (error) {
+      } catch (error: any) {
         throw new WalletDisconnectionError();
       }
     }
@@ -173,15 +205,15 @@ export class InjectedWalletAdapter
           type: MessageType.SIGN_TRANSACTION,
           transaction: transaction.serialize({
             requireAllSignatures: false,
-            verifySignatures: false,
+            verifySignatures: true,
           }),
         });
 
         const signed = Transaction.from(signedTransaction);
         transaction.signatures = signed.signatures;
         return signed;
-      } catch (error) {
-        throw new WalletSignatureError(error?.message, error);
+      } catch (error: any) {
+        throw new WalletSignMessageError(error?.message, error);
       }
     } catch (error) {
       throw error;
@@ -200,13 +232,14 @@ export class InjectedWalletAdapter
           transactions: transactions.map((t) =>
             t.serialize({
               requireAllSignatures: false,
-              verifySignatures: false,
+              verifySignatures: true,
             })
           ),
         });
-        return signedTransactions.map(Transaction.from);
-      } catch (error) {
-        throw new WalletSignatureError(error?.message, error);
+        const txns = signedTransactions.map(Transaction.from);
+        return txns;
+      } catch (error: any) {
+        throw new WalletSignMessageError(error?.message, error);
       }
     } catch (error) {
       throw error;

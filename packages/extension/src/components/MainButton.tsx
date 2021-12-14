@@ -2,12 +2,7 @@ import React, { FC } from "react";
 import { Link } from "react-router-dom";
 import { Button, ButtonProps, SpinnerProps } from "@chakra-ui/react";
 import { useUserInfo } from "@/utils/userState";
-import {
-  Spinner,
-  WUMBO_INSTANCE_KEY,
-  WumboInstance,
-  useAccount,
-} from "wumbo-common";
+import { Spinner } from "wumbo-common";
 import { useDrawer } from "@/contexts/drawerContext";
 import { routes, viewProfilePath } from "@/constants/routes";
 
@@ -27,13 +22,8 @@ export const MainButton: FC<Props> = ({
   const { toggleDrawer } = useDrawer();
   const creatorInfoState = useUserInfo(creatorName);
   const { userInfo: creatorInfo, loading } = creatorInfoState;
-  const { info: wumboInstance } = useAccount(
-    WUMBO_INSTANCE_KEY,
-    WumboInstance,
-    true
-  );
 
-  if (!loading && !creatorInfo && wumboInstance) {
+  if (!loading && !creatorInfo) {
     return (
       <Button
         as={Link}
@@ -58,7 +48,7 @@ export const MainButton: FC<Props> = ({
     );
   }
 
-  if (loading || !creatorInfo || !wumboInstance) {
+  if (loading || !creatorInfo) {
     return <Spinner size="sm" {...spinnerProps} />;
   }
 
@@ -80,7 +70,7 @@ export const MainButton: FC<Props> = ({
       }
       {...btnProps}
     >
-      ${creatorInfo?.coinPriceUsd.toFixed(2)}
+      ${creatorInfo?.coinPriceUsd?.toFixed(2) || "0.00"}
     </Button>
   );
 };

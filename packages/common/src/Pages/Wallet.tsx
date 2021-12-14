@@ -1,41 +1,31 @@
 import {
-  Text,
-  Box,
+  Button,
   Center,
   createIcon,
   Flex,
   HStack,
   Icon,
-  StackDivider,
-  VStack,
-  Button,
   SimpleGrid,
-  Divider,
+  StackDivider,
+  Text,
+  VStack,
 } from "@chakra-ui/react";
-import { SOL_TOKEN, WUMBO_INSTANCE_KEY, WUM_TOKEN } from "../constants/globals";
-import { TokenAccount } from "@oyster/common";
-import { Avatar } from "../Avatar";
-import { Notification } from "../Notification";
-import React from "react";
+import { useWallet } from "@solana/wallet-adapter-react";
 import {
-  useUserTokenAccounts,
-  useFiatPrice,
   useOwnedAmount,
+  usePriceInUsd,
   useSolOwnedAmount,
-  useTokenMetadata,
-  useUserTokensWithMeta,
-  ITokenWithMeta,
-  ITokenWithMetaAndAccount,
-  useBondingPricing,
-  amountAsNum,
-} from "../utils";
-import { RiCoinLine } from "react-icons/ri";
-import { useWallet } from "../contexts/walletContext";
-import { Spinner } from "../Spinner";
-import { Link } from "react-router-dom";
-import { WumboRankIcon } from "../svgs";
-import { useWumNetWorth } from "../hooks";
+} from "@strata-foundation/react";
+import { ITokenWithMetaAndAccount } from "@strata-foundation/spl-token-collective";
+import React from "react";
 import toast from "react-hot-toast";
+import { RiCoinLine } from "react-icons/ri";
+import { Link } from "react-router-dom";
+import { Avatar } from "../Avatar";
+import { SOL_TOKEN } from "../constants/globals";
+import { useUserTokensWithMeta } from "../hooks";
+import { Notification } from "../Notification";
+import { Spinner } from "../Spinner";
 
 const SolLogoIcon = createIcon({
   displayName: "Solana",
@@ -107,15 +97,14 @@ export const TokenInfo = React.memo(
   }: {
     highlighted?: boolean;
     tokenWithMeta: ITokenWithMetaAndAccount;
-    getTokenLink: (tokenWithMeta: ITokenWithMetaAndAccount) => string;
+    getTokenLink: (tokenWithMeta: ITokenWithMetaAndAccount) => string | null;
   }) => {
-    const { metadata, image, tokenRef, account } = tokenWithMeta;
-    const wumPrice = useFiatPrice(WUM_TOKEN);
-    const { curve } = useBondingPricing(tokenRef?.tokenBonding);
-    const fiatPrice = wumPrice && curve && wumPrice * curve.current();
+    const { metadata, image, account } = tokenWithMeta;
+    const fiatPrice = usePriceInUsd(account?.mint);
     const ownedAmount = useOwnedAmount(account?.mint);
 
     return (
+      // @ts-ignore there's a possibility this route is null. That's fine
       <Link to={getTokenLink(tokenWithMeta)}>
         <HStack
           padding={4}
@@ -153,61 +142,64 @@ export const Wallet = React.memo(
   ({
     wumLeaderboardLink,
     getTokenLink,
-    wumLink,
     solLink,
     sendLink,
   }: {
-    getTokenLink: (tokenWithMeta: ITokenWithMetaAndAccount) => string;
-    wumLink: string;
+    getTokenLink: (tokenWithMeta: ITokenWithMetaAndAccount) => string | null;
     solLink: string;
     wumLeaderboardLink: string;
     sendLink: string;
   }) => {
-    const { metadata: wumMetadata, image: wumImage } =
-      useTokenMetadata(WUM_TOKEN);
     const { amount: solOwned } = useSolOwnedAmount();
-    const solPrice = useFiatPrice(SOL_TOKEN);
-    const wumPrice = useFiatPrice(WUM_TOKEN);
-    const wumOwned = useOwnedAmount(WUM_TOKEN);
-    const { publicKey } = useWallet();
-    const { result: tokens, loading } = useUserTokensWithMeta(
+    const solPrice = usePriceInUsd(SOL_TOKEN);
+    const { adapter } = useWallet();
+    const publicKey = adapter?.publicKey;
+    const { data: tokens, loading } = useUserTokensWithMeta(
       publicKey || undefined
     );
-    const { wumNetWorth } = useWumNetWorth(publicKey || undefined);
 
     return (
       <VStack
+        overflow="auto"
         align="stretch"
         w="full"
+        h="full"
         spacing={4}
-        divider={<StackDivider borderColor="gray.200" />}
+        padding={2}
       >
         <VStack align="stretch" w="full" spacing={4}>
-          <Link to={wumLeaderboardLink}>
-            <VStack
-              _hover={{ opacity: 0.7 }}
-              color="white"
-              rounded={8}
-              bg="linear-gradient(227.94deg, #6F27E6 12.77%, #5856EB 85.19%)"
-              p="8px"
-              spacing={0}
+          <VStack
+            pt={2}
+            align="stretch"
+            divider={<StackDivider borderColor="gray.200" />}
+            spacing={4}
+            w="full"
+          >
+            <HStack
+              direction="row"
+              justifyContent="space-evenly"
+              divider={<StackDivider borderColor="gray.200" />}
             >
-              <HStack alignItems="center">
-                <WumboRankIcon h="21px" w="21px" />
-                <Text fontSize={26} fontWeight={800}>
-                  {wumNetWorth?.toFixed(2)}
-                </Text>
-              </HStack>
-              <HStack>
-                <Text fontSize={16}>WUM Net Worth</Text>
-                {wumNetWorth && wumPrice && (
-                  <Text fontSize={16} color="gray.400" mt={0}>
-                    (~${(wumPrice * wumNetWorth).toFixed(2)})
+              <VStack
+                flexGrow={1}
+                flexBasis={0}
+                onClick={() => window.open(solLink, "_blank")}
+                _hover={{ opacity: "0.5", cursor: "pointer" }}
+                spacing={1}
+                flexDir="column"
+                align="center"
+              >
+                <Icon as={SolLogoIcon} w={"48px"} h={"48px"} />
+                <HStack align="center" spacing={1}>
+                  <Icon as={RiCoinLine} w="16px" h="16px" />
+                  <Text>{solOwned?.toFixed(2)} SOL</Text>
+                  <Text color="gray.500">
+                    (~${((solPrice || 0) * solOwned).toFixed(2)})
                   </Text>
-                )}
-              </HStack>
-            </VStack>
-          </Link>
+                </HStack>
+              </VStack>
+            </HStack>
+          </VStack>
           <SimpleGrid spacing={2} columns={2}>
             <Button
               flexGrow={1}
@@ -233,57 +225,6 @@ export const Wallet = React.memo(
               </Button>
             </Link>
           </SimpleGrid>
-          <VStack
-            pt={2}
-            align="stretch"
-            divider={<StackDivider borderColor="gray.200" />}
-            spacing={4}
-            w="full"
-          >
-            <HStack
-              direction="row"
-              justifyContent="space-evenly"
-              divider={<StackDivider borderColor="gray.200" />}
-            >
-              <Link style={{ flexGrow: 1, flexBasis: 0 }} to={wumLink}>
-                <VStack
-                  _hover={{ opacity: "0.5", cursor: "pointer" }}
-                  spacing={1}
-                  align="center"
-                >
-                  <Avatar name={wumMetadata?.data.symbol} src={wumImage} />
-                  <HStack align="center" spacing={1}>
-                    <Icon as={RiCoinLine} w="16px" h="16px" />
-                    <Text>
-                      {wumOwned?.toFixed(2)} {wumMetadata?.data.symbol}
-                    </Text>
-                  </HStack>
-                  <Text color="gray.500">
-                    (~${((wumPrice || 0) * (wumOwned || 0)).toFixed(2)})
-                  </Text>
-                </VStack>
-              </Link>
-
-              <VStack
-                flexGrow={1}
-                flexBasis={0}
-                onClick={() => window.open(solLink, "_blank")}
-                _hover={{ opacity: "0.5", cursor: "pointer" }}
-                spacing={1}
-                flexDir="column"
-                align="center"
-              >
-                <Icon as={SolLogoIcon} w={"48px"} h={"48px"} />
-                <HStack align="center" spacing={1}>
-                  <Icon as={RiCoinLine} w="16px" h="16px" />
-                  <Text>{solOwned?.toFixed(2)} SOL</Text>
-                </HStack>
-                <Text color="gray.500">
-                  (~${((solPrice || 0) * solOwned).toFixed(2)})
-                </Text>
-              </VStack>
-            </HStack>
-          </VStack>
         </VStack>
         <VStack
           align="stretch"
@@ -299,10 +240,7 @@ export const Wallet = React.memo(
           )}
           {!loading &&
             tokens
-              ?.filter(
-                (t) =>
-                  !!t.tokenRef && t.tokenRef.wumbo.equals(WUMBO_INSTANCE_KEY)
-              )
+              ?.filter((t) => !!t.metadata)
               .sort((a, b) =>
                 a.metadata!.data.name.localeCompare(b.metadata!.data.name)
               )

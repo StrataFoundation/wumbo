@@ -1,6 +1,5 @@
 import React from "react";
 import {
-  HStack,
   VStack,
   Text,
   TextProps,
@@ -9,9 +8,9 @@ import {
   Stack,
   StackDirection,
 } from "@chakra-ui/react";
-import { Spinner, useTokenMetadata } from ".";
-import { handleErrors } from "./contexts";
-import { ITokenBonding } from "utils";
+import { useErrorHandler, useTokenMetadata } from "@strata-foundation/react";
+import { ITokenBonding } from "@strata-foundation/spl-token-bonding";
+import { Spinner } from "./";
 
 export interface AvatarProps extends ChakraAvatarProps {
   direction?: StackDirection;
@@ -55,6 +54,8 @@ export const MetadataAvatar = React.memo(
       loading,
       error,
     } = useTokenMetadata(tokenBonding?.targetMint);
+    const { handleErrors } = useErrorHandler();
+
     handleErrors(error);
 
     if (loading) {

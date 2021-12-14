@@ -1,17 +1,13 @@
-import { useEffect, useState } from "react";
-import { claimPath, routes } from "@/constants/routes";
-import { useHistory } from "react-router";
+import { routes } from "@/constants/routes";
+import { useConnection, useWallet } from "@solana/wallet-adapter-react";
+import { useAsyncCallback } from "react-async-hook";
+import { useHistory } from "react-router-dom";
 import {
-  useConnection,
   IClaimFlowOutput,
   useClaimLink,
-  useClaimTwitterHandle,
   useCreateOrClaimCoin,
   useReverseTwitter,
-  useWallet,
-  claimTwitterHandle,
 } from "wumbo-common";
-import { useAsyncCallback } from "react-async-hook";
 
 let claimWindow: Window | undefined;
 
@@ -21,8 +17,9 @@ export function useClaimFlow(name?: string | null): IClaimFlowOutput {
     handle: `${name}`,
     newTab: true,
   });
-  const connection = useConnection();
-  const { publicKey, adapter } = useWallet();
+  const { connection } = useConnection();
+  const { adapter } = useWallet();
+  const publicKey = adapter?.publicKey;
   const { handle: ownerTwitterHandle, error: reverseTwitterError } =
     useReverseTwitter(publicKey || undefined);
   const {
@@ -46,9 +43,7 @@ export function useClaimFlow(name?: string | null): IClaimFlowOutput {
       };
       chrome.runtime.onMessage.addListener(fn);
     });
-    await claimTwitterHandle({
-      connection,
-      adapter,
+    await create({
       redirectUri,
       ...oauthResult,
       twitterHandle: name,
@@ -58,9 +53,9 @@ export function useClaimFlow(name?: string | null): IClaimFlowOutput {
   const smartClaim = async () => {
     if (!ownerTwitterHandle) {
       await createTwitter();
+    } else {
+      name && (await create({ twitterHandle: name }));
     }
-
-    name && (await create(name));
     history.push(routes.editProfile.path);
   };
 

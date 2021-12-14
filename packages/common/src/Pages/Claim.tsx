@@ -1,13 +1,18 @@
 import React, { useState } from "react";
 import { Button, Alert, AlertIcon } from "@chakra-ui/react";
-import { useClaimTwitterHandle, useCreateOrClaimCoin } from "../utils/claim";
-import { useSolOwnedAmount } from "../utils/pricing";
-import { useRentExemptAmount } from "../hooks/fees";
+import {
+  useSolOwnedAmount,
+  useRentExemptAmount,
+  useErrorHandler,
+  useFtxPayLink,
+  useProvider,
+  useClaimedTokenRefKey,
+} from "@strata-foundation/react";
+import { useCreateOrClaimCoin } from "../utils/claim";
 import { TWITTER_REGISTRY_SIZE } from "../utils/twitter";
 import { Spinner } from "../Spinner";
-import { useFtxPayLink } from "../utils/ftxPay";
 import { PublicKey } from "@solana/web3.js";
-import { handleErrors } from "../contexts";
+import { useWallet } from "@solana/wallet-adapter-react";
 
 export interface IClaimProps {
   onComplete(result: { tokenRef: PublicKey; owner: PublicKey }): void;
@@ -17,14 +22,10 @@ export interface IClaimProps {
 }
 export const Claim = React.memo(
   ({ handle, redirectUri, code, onComplete }: IClaimProps) => {
+    const { handleErrors } = useErrorHandler();
     const ftxPayLink = useFtxPayLink();
     const [twitterHandle, setTwitterHandle] = useState<string>(handle || "");
-    const {
-      claim,
-      error,
-      awaitingApproval: claimAwaitingApproval,
-      claiming,
-    } = useClaimTwitterHandle({ redirectUri, code });
+    const { awaitingApproval } = useProvider();
     const {
       create,
       error: createCoinError,
@@ -38,10 +39,12 @@ export const Claim = React.memo(
       loading: amountNeededLoading,
       error: rentExemptError,
     } = useRentExemptAmount(
-      TWITTER_REGISTRY_SIZE + 512 + 2 * 512 // bonding, token refx2
+      TWITTER_REGISTRY_SIZE + 512 + 3 * 312 // bonding, token refx3
     );
+    const { adapter } = useWallet();
+    const tokenRef = useClaimedTokenRefKey(adapter?.publicKey, null);
 
-    handleErrors(rentExemptError, createCoinError, error);
+    handleErrors(rentExemptError, createCoinError);
 
     if (solLoading || amountNeededLoading) {
       return (
@@ -71,9 +74,7 @@ export const Claim = React.memo(
       );
     }
 
-    const loading =
-      claiming || creating || claimAwaitingApproval || createAwaitingApproval;
-    const awaitingApproval = claimAwaitingApproval || createAwaitingApproval;
+    const loading = creating || awaitingApproval;
 
     return (
       <div className="flex flex-col">
@@ -85,13 +86,6 @@ export const Claim = React.memo(
           className="p-2 border-1 mb-2 border-grey-300 rounded-lg hover:bg-grey-300"
         />
 
-        {error && (
-          <Alert status="error">
-            <AlertIcon />
-            {error.message}
-          </Alert>
-        )}
-
         <Button
           w="full"
           marginTop={2}
@@ -99,13 +93,16 @@ export const Claim = React.memo(
           isLoading={loading}
           onClick={() => {
             const twitterHandleSanitized = twitterHandle.replace("@", "");
-            claim(twitterHandleSanitized)
-              .then(() => create(twitterHandleSanitized))
-              .then(onComplete);
+            create({
+              twitterHandle: twitterHandleSanitized,
+              code,
+              redirectUri,
+            }).then(() =>
+              onComplete({ tokenRef: tokenRef!, owner: adapter!.publicKey! })
+            );
           }}
         >
           {awaitingApproval && "Awaiting Approval"}
-          {claiming && "Claiming"}
           {creating && "Creating your Coin"}
           {!(awaitingApproval || loading) && "Claim"}
         </Button>

@@ -1,10 +1,5 @@
 import React, { useEffect, useMemo, useState } from "react";
-import { ITokenWithMetaAndAccount, useUserTokensWithMeta } from "../utils";
-import { useWallet } from "../contexts";
-import { TokenInfo } from "./Wallet";
-import { BiSearch } from "react-icons/bi";
-import { Spinner } from "../Spinner";
-import { WUMBO_INSTANCE_KEY } from "../constants";
+import { useHistory } from "react-router-dom";
 import {
   StackDivider,
   Icon,
@@ -17,7 +12,15 @@ import {
 } from "@chakra-ui/react";
 import { RiCoinLine } from "react-icons/ri";
 import Fuse from "fuse.js";
-import { useHistory } from "react-router-dom";
+import {
+  ITokenWithMetaAndAccount,
+  SplTokenCollective,
+} from "@strata-foundation/spl-token-collective";
+import { useUserTokensWithMeta } from "../hooks";
+import { TokenInfo } from "./Wallet";
+import { BiSearch } from "react-icons/bi";
+import { Spinner } from "../Spinner";
+import { useWallet } from "@solana/wallet-adapter-react";
 
 const SearchError = ({
   title = "",
@@ -48,8 +51,9 @@ export const SendSearch = React.memo(
   }: {
     getSendLink: (tokenWithMeta: ITokenWithMetaAndAccount) => string;
   }) => {
-    const { publicKey } = useWallet();
-    const { result: tokens, loading } = useUserTokensWithMeta(
+    const { adapter } = useWallet();
+    const publicKey = adapter?.publicKey;
+    const { data: tokens, loading } = useUserTokensWithMeta(
       publicKey || undefined
     );
     const [search, setSearch] = useState("");
@@ -59,9 +63,7 @@ export const SendSearch = React.memo(
     const searched = useMemo(() => {
       if (tokens) {
         const sorted = tokens
-          ?.filter(
-            (t) => !!t.tokenRef && t.tokenRef.wumbo.equals(WUMBO_INSTANCE_KEY)
-          )
+          ?.filter((t) => !!t.metadata)
           .sort((a, b) =>
             a.metadata!.data.name.localeCompare(b.metadata!.data.name)
           );
@@ -95,7 +97,7 @@ export const SendSearch = React.memo(
     ));
 
     return (
-      <VStack>
+      <VStack w="full">
         <InputGroup>
           <InputLeftElement h="full" pointerEvents="none">
             <Center>

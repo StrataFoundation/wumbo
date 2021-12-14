@@ -1,9 +1,9 @@
 {
-  "manifest_version": 2,
+  "manifest_version": 3,
   "name": "Wum.bo",
   "description": "Wum.bo Creator Coins",
-  "version": "1.0.7",
-  "browser_action": {
+  "version": "1.1.0",
+  "action": {
     "default_title": "Wum.bo",
     "default_icon": {
       "16": "assets/img/icon16.png",
@@ -21,8 +21,7 @@
     "512": "assets/img/icon512.png"
   },
   "background": {
-    "page": "background.html",
-    "persistent": true
+    "service_worker": "background.js"
   },
   "content_scripts": [
     {
@@ -38,6 +37,19 @@
       "all_frames": true
     }
   ],
-  "web_accessible_resources": ["wallet_proxy.js"],
-  "permissions": ["tabs", "https://wum.bo/claim*", "https://twitter.com/*"]
+  "web_accessible_resources": [
+    {
+      "resources": [
+        "wallet_proxy.js"
+      ],
+      "matches": [
+        "https://twitter.com/*"
+      ]
+    }
+  ],
+  "permissions": ["tabs"],
+  "hostPermissions": [
+    "https://wum.bo/claim*", 
+    "https://twitter.com/*"
+  ]
 }

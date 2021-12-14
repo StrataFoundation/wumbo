@@ -1,24 +1,28 @@
 import React, { FC, useCallback, useMemo } from "react";
-import { ConnectionProvider, AccountsProvider } from "@oyster/common";
 import {
-  UsdWumboPriceProvider,
-  EndpointSetter,
   WALLET_PROVIDERS,
-  WalletProvider,
   Notification,
-  AccountCacheContextProvider,
   wumboApi,
-  ErrorHandlingContext,
   ThemeProvider,
-  SolPriceProvider,
   INJECTED_PROVIDERS,
+  SOLANA_API_URL,
 } from "wumbo-common";
+import {
+  AccountProvider,
+  SolPriceProvider,
+  ErrorHandlerProvider,
+  StrataSdksProvider,
+} from "@strata-foundation/react";
 import { ApolloProvider } from "@apollo/client";
 import { DrawerProvider } from "@/contexts/drawerContext";
 import { InjectedWalletAdapter } from "@/utils/wallets";
 import toast from "react-hot-toast";
 import { HistoryContextProvider } from "../utils/history";
 import * as Sentry from "@sentry/react";
+import {
+  ConnectionProvider,
+  WalletProvider,
+} from "@solana/wallet-adapter-react";
 
 export const ContextProviders: FC = ({ children }) => {
   const alteredWallets = useMemo(
@@ -75,35 +79,28 @@ export const ContextProviders: FC = ({ children }) => {
   );
 
   return (
-    <ConnectionProvider>
-      <ErrorHandlingContext.Provider
-        value={{
-          onError,
-        }}
-      >
+    <ConnectionProvider endpoint={SOLANA_API_URL}>
+      <ErrorHandlerProvider onError={onError}>
         <ApolloProvider client={wumboApi}>
-          <AccountCacheContextProvider>
-            <EndpointSetter>
-              <AccountsProvider>
-                <WalletProvider
-                  wallets={alteredWallets}
-                  onError={console.error}
-                >
-                  <SolPriceProvider>
-                    <UsdWumboPriceProvider>
-                      <HistoryContextProvider>
-                        <DrawerProvider>
-                          <ThemeProvider>{children}</ThemeProvider>
-                        </DrawerProvider>
-                      </HistoryContextProvider>
-                    </UsdWumboPriceProvider>
-                  </SolPriceProvider>
-                </WalletProvider>
-              </AccountsProvider>
-            </EndpointSetter>
-          </AccountCacheContextProvider>
+          <AccountProvider commitment="confirmed">
+            <WalletProvider
+              wallets={alteredWallets}
+              onError={console.error}
+              autoConnect
+            >
+              <StrataSdksProvider>
+                <SolPriceProvider>
+                  <HistoryContextProvider>
+                    <DrawerProvider>
+                      <ThemeProvider>{children}</ThemeProvider>
+                    </DrawerProvider>
+                  </HistoryContextProvider>
+                </SolPriceProvider>
+              </StrataSdksProvider>
+            </WalletProvider>
+          </AccountProvider>
         </ApolloProvider>
-      </ErrorHandlingContext.Provider>
+      </ErrorHandlerProvider>
     </ConnectionProvider>
   );
 };

@@ -4,7 +4,7 @@ import {
   RpcResponseAndContext,
   TokenAccountBalancePair,
 } from "@solana/web3.js";
-import { useConnection } from "../";
+import { useConnection } from "@solana/wallet-adapter-react";
 
 export const useTokenLargestAccounts = (
   tokenMint: PublicKey | undefined
@@ -13,7 +13,7 @@ export const useTokenLargestAccounts = (
   result: RpcResponseAndContext<TokenAccountBalancePair[]> | undefined;
   error: Error | undefined;
 } => {
-  const connection = useConnection();
+  const { connection } = useConnection();
   const [loading, setLoading] = useState<boolean>(false);
   const [result, setResult] = useState<
     RpcResponseAndContext<TokenAccountBalancePair[]> | undefined
@@ -27,7 +27,7 @@ export const useTokenLargestAccounts = (
         try {
           const result = await connection.getTokenLargestAccounts(tokenMint);
           setResult(result);
-        } catch (e) {
+        } catch (e: any) {
           setError(e);
         } finally {
           setLoading(false);

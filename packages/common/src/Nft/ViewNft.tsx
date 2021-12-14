@@ -9,13 +9,16 @@ import {
   Button,
 } from "@chakra-ui/react";
 import { HiOutlineArrowsExpand } from "react-icons/hi";
-import { MetadataCategory } from "@oyster/common";
+import { MetadataCategory } from "@strata-foundation/spl-utils";
 import { PublicKey } from "@solana/web3.js";
-import { ITokenWithMeta, useTokenMetadata } from "../utils";
+import {
+  useTokenMetadata,
+  useErrorHandler,
+  IUseTokenMetadataResult,
+} from "@strata-foundation/react";
 import { Creator, GetCreatorLink } from "./";
 // @ts-ignore
 import { ExpandedNft } from "./ExpandedNft";
-import { handleErrors } from "../contexts";
 import { NftSmallView } from "./NftSmallView";
 import { Link } from "react-router-dom";
 
@@ -46,7 +49,7 @@ export const ViewNftRaw = React.memo(
     tagNftPath,
     modalRef,
   }: {
-    token: ITokenWithMeta;
+    token: IUseTokenMetadataResult;
     owner: PublicKey | undefined;
     getCreatorLink: GetCreatorLink;
     tagNftPath?: string;
@@ -124,7 +127,7 @@ export const ViewNftRaw = React.memo(
                       _hover={{ color: "indigo.600" }}
                     >
                       <Creator
-                        creator={token.metadata.updateAuthority}
+                        creator={new PublicKey(token.metadata.updateAuthority)}
                         getCreatorLink={getCreatorLink}
                       />
                     </Text>
@@ -146,8 +149,8 @@ export const ViewNftRaw = React.memo(
                         ?.filter((c) => c.verified)
                         .map((creator) => (
                           <Creator
-                            key={creator.address.toBase58()}
-                            creator={creator.address}
+                            key={creator.address}
+                            creator={new PublicKey(creator.address)}
                             getCreatorLink={getCreatorLink}
                           />
                         ))}
@@ -206,7 +209,9 @@ export const ViewNft = React.memo(
     tagNftPath?: string;
     modalRef?: React.MutableRefObject<HTMLInputElement>;
   }) => {
+    const { handleErrors } = useErrorHandler();
     const tokenWithMeta = useTokenMetadata(token);
+
     handleErrors(tokenWithMeta.error);
 
     return (

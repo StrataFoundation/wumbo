@@ -1,20 +1,15 @@
 import React, { useMemo } from "react";
 import { PublicKey } from "@solana/web3.js";
 import { gql, useApolloClient } from "@apollo/client";
-import { WumboUserLeaderboard } from "./WumboUserLeaderboard";
 import {
   useBondingPricing,
-  useFiatPrice,
-  useUserOwnedAmount,
-} from "../utils/pricing";
-import {
-  TokenBonding,
-  useAccount,
-  useClaimedTokenRef,
-  useReverseTwitter,
+  usePriceInUsd,
   useTokenRefFromBonding,
-} from "../utils";
+  useTokenBonding,
+} from "@strata-foundation/react";
+import { WumboUserLeaderboard } from "./WumboUserLeaderboard";
 import { UserLeaderboardElement } from "./UserLeaderboardElement";
+import { NATIVE_MINT } from "@solana/spl-token";
 
 const GET_TOP_TOKENS = gql`
   query GetTopTokens($startRank: Int!, $stopRank: Int!) {
@@ -37,13 +32,13 @@ const Element = React.memo(
     tokenBondingKey: PublicKey;
     onClick?: (tokenRefKey: PublicKey) => void;
   }) => {
-    const { curve } = useBondingPricing(tokenBondingKey);
-    const { info: tokenBonding } = useAccount(tokenBondingKey, TokenBonding);
-    const fiatPrice = useFiatPrice(tokenBonding?.baseMint);
+    const { pricing } = useBondingPricing(tokenBondingKey);
+    const { info: tokenBonding } = useTokenBonding(tokenBondingKey);
+    const fiatPrice = usePriceInUsd(tokenBonding?.baseMint);
     const toFiat = (a: number) => (fiatPrice || 0) * a;
 
     const { info: tokenRef } = useTokenRefFromBonding(tokenBondingKey);
-    const current = curve?.current();
+    const current = pricing?.current(NATIVE_MINT);
     const amount = current ? "$" + toFiat(current).toFixed(2) : "";
 
     return (

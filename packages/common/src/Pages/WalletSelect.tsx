@@ -1,18 +1,23 @@
 import React, { Fragment } from "react";
 import { Wallet, WalletName } from "@solana/wallet-adapter-wallets";
-import { useWallet } from "../contexts/walletContext";
 import { WALLET_PROVIDERS } from "../constants/walletProviders";
 import { Box, Button, Text, Link, VStack } from "@chakra-ui/react";
+import { useWallet } from "@solana/wallet-adapter-react";
 
 export const WalletSelect = () => {
-  const { connected, disconnect, select } = useWallet();
+  const { adapter, select } = useWallet();
 
   return (
     <Box d="flex" flexDir="column" padding={4}>
-      {connected ? (
+      {adapter?.connected ? (
         <VStack spacing={4} alignItems="start">
           <span className="test-sm">Wallet Connected!</span>
-          <Button w="full" size="lg" colorScheme="indigo" onClick={disconnect}>
+          <Button
+            w="full"
+            size="lg"
+            colorScheme="indigo"
+            onClick={adapter?.disconnect}
+          >
             Disconnect
           </Button>
         </VStack>

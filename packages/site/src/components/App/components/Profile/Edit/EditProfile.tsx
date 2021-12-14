@@ -1,28 +1,26 @@
-import React, { useEffect, useMemo, useState } from "react";
-import { PublicKey } from "@solana/web3.js";
-import { useHistory, useParams } from "react-router-dom";
-import { EditProfile, useClaimedTokenRef } from "wumbo-common";
-import { profilePath } from "../../../../../constants/routes";
+import React from "react";
+import { useHistory } from "react-router-dom";
+import { useWallet } from "@solana/wallet-adapter-react";
+import { EditProfile } from "wumbo-common";
+import { AppRoutes } from "../../../../../constants/routes";
 import WalletRedirect from "../../Wallet/WalletRedirect";
 
-export const EditProfileRoute = React.memo(() => {
-  const params = useParams<{ ownerWalletKey: string }>();
-  const ownerWalletKey = useMemo(
-    () => new PublicKey(params.ownerWalletKey),
-    [params.ownerWalletKey]
-  );
-  const { info: tokenRef } = useClaimedTokenRef(ownerWalletKey);
-  const tokenBondingKey = tokenRef?.tokenBonding;
+export const EditProfileRoute: React.FC = () => {
+  const { connected, adapter } = useWallet();
+  const publicKey = adapter?.publicKey;
   const history = useHistory();
+
+  if (!connected || !publicKey) {
+    return <WalletRedirect />;
+  }
+
   return (
     <>
       <WalletRedirect />
       <EditProfile
-        ownerWalletKey={ownerWalletKey}
-        onComplete={() =>
-          tokenBondingKey && history.push(profilePath(tokenBondingKey))
-        }
+        ownerWalletKey={adapter?.publicKey!}
+        onComplete={() => history.push(AppRoutes.profile.path)}
       />
     </>
   );
-});
+};

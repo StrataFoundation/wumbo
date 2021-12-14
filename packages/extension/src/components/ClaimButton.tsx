@@ -2,15 +2,9 @@ import React, { FC } from "react";
 import { Link, useHistory } from "react-router-dom";
 import { Button, ButtonProps, SpinnerProps } from "@chakra-ui/react";
 import { useUserInfo } from "@/utils/userState";
-import {
-  Spinner,
-  WUMBO_INSTANCE_KEY,
-  WumboInstance,
-  useAccount,
-  handleErrors,
-  useReverseTwitter,
-  useWallet,
-} from "wumbo-common";
+import { Spinner, useReverseTwitter } from "wumbo-common";
+import { useErrorHandler } from "@strata-foundation/react";
+import { useWallet } from "@solana/wallet-adapter-react";
 import { useDrawer } from "@/contexts/drawerContext";
 import { routes, viewProfilePath } from "@/constants/routes";
 import { useClaimFlow } from "@/utils/claim";
@@ -31,17 +25,12 @@ export const ClaimButton: FC<Props> = ({
   const { toggleDrawer } = useDrawer();
   const creatorInfoState = useUserInfo(creatorName);
   const { userInfo: creatorInfo, loading } = creatorInfoState;
-  const {
-    claim,
-    loading: loadingClaim,
-    error: claimError,
-  } = useClaimFlow(creatorName);
   const { publicKey, connected } = useWallet();
   const { handle: ownerTwitterHandle, error: reverseTwitterError } =
     useReverseTwitter(publicKey || undefined);
-  handleErrors(claimError);
+  const { handleErrors } = useErrorHandler();
 
-  if (loading || loadingClaim) {
+  if (loading) {
     return <Spinner size="sm" {...spinnerProps} />;
   }
 
@@ -66,7 +55,6 @@ export const ClaimButton: FC<Props> = ({
             isOpen: true,
             creator: { name: creatorName, img: creatorImg },
           });
-          connected && claim();
         }}
         {...btnProps}
       >
@@ -97,7 +85,7 @@ export const ClaimButton: FC<Props> = ({
       }
       {...btnProps}
     >
-      ${creatorInfo?.coinPriceUsd.toFixed(2)}
+      ${creatorInfo?.coinPriceUsd?.toFixed(2) || "0.00"}
     </Button>
   );
 };

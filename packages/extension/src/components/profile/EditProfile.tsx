@@ -1,15 +1,17 @@
 import React, { Fragment } from "react";
 import { useHistory } from "react-router-dom";
-import { EditProfile, useWallet } from "wumbo-common";
+import { EditProfile } from "wumbo-common";
+import { useWallet } from "@solana/wallet-adapter-react";
 import { WumboDrawer } from "../WumboDrawer";
 import WalletRedirect from "../wallet/WalletRedirect";
 import { routes } from "@/constants/routes";
 
 export const EditProfileRoute = React.memo(() => {
-  const { connected, publicKey } = useWallet();
+  const { connected, adapter } = useWallet();
+  const publicKey = adapter?.publicKey;
   const history = useHistory();
 
-  if (!connected) {
+  if (!connected || !publicKey) {
     return <WalletRedirect />;
   }
 
@@ -19,7 +21,7 @@ export const EditProfileRoute = React.memo(() => {
       <WumboDrawer.Header title="Edit Profile" />
       <WumboDrawer.Content>
         <EditProfile
-          ownerWalletKey={publicKey!}
+          ownerWalletKey={publicKey}
           onComplete={() => history.push(routes.profile.path)}
         />
       </WumboDrawer.Content>

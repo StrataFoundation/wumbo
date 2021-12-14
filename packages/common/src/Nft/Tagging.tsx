@@ -1,28 +1,31 @@
 import React, { useEffect, useMemo, useState } from "react";
+import ReactShadow from "react-shadow/emotion";
+// @ts-ignore
+import compareImages from "resemblejs/compareImages";
+import axios from "axios";
+import { useAsync, useAsyncCallback } from "react-async-hook";
 import {
   Connection,
   PublicKey,
   Transaction,
   sendAndConfirmRawTransaction,
 } from "@solana/web3.js";
-import { useConnection } from "../contexts/connection";
 import { VStack, HStack, Box, Text, Checkbox, Button } from "@chakra-ui/react";
-import { Spinner } from "../";
-import ReactShadow from "react-shadow/emotion";
-// @ts-ignore
-import compareImages from "resemblejs/compareImages";
-import axios from "axios";
-import { useAsync, useAsyncCallback } from "react-async-hook";
-import { NFT_VERIFIER_URL, TAGGING_THRESHOLD } from "../constants/globals";
-import { handleErrors, useWallet } from "../contexts";
 import {
   useAccountFetchCache,
-  truthy,
+  useErrorHandler,
+  useProvider,
+} from "@strata-foundation/react";
+import {
+  NFT_VERIFIER_URL,
+  TAGGING_THRESHOLD,
   getNftNameRecordKey,
-  classNames,
-} from "../utils";
-import { ThemeProvider } from "../contexts/themeContext";
-import { FloatPortal } from "../Portals";
+  truthy,
+  ThemeProvider,
+  Spinner,
+  FloatPortal,
+} from "../";
+import { useConnection, useWallet } from "@solana/wallet-adapter-react";
 
 interface ITagArgs {
   imgUrls: string[];
@@ -51,7 +54,7 @@ const tag = async (
     const tx = Transaction.from(resp.data.data);
     const signed = await signTransaction(tx);
     await sendAndConfirmRawTransaction(connection, signed.serialize());
-  } catch (e) {
+  } catch (e: any) {
     if (e.response?.data?.message) {
       throw new Error(e.response.data.message);
     }
@@ -173,7 +176,7 @@ export const TaggableImages = ({
   src: string;
   refreshCounter: number;
 }) => {
-  const connection = useConnection();
+  const { connection } = useConnection();
   const images = useMemo(() => getUntaggedImages(), [refreshCounter]);
   const { result: img1, error: bufferError } = useAsync(getBufferFromUrl, [
     src,
@@ -183,7 +186,10 @@ export const TaggableImages = ({
   const [error, setError] = useState<Error>();
   const [selected, setSelected] = useState<Record<string, boolean>>({});
   const [allSelected, setAllSelected] = useState<boolean>(false);
-  const { awaitingApproval, publicKey, signTransaction } = useWallet();
+  const { adapter, signTransaction } = useWallet();
+  const { awaitingApproval } = useProvider();
+  const publicKey = adapter?.publicKey;
+  const { handleErrors } = useErrorHandler();
 
   handleErrors(bufferError, error);
   const cache = useAccountFetchCache();
@@ -220,7 +226,7 @@ export const TaggableImages = ({
       .filter(([_, isSelected]) => isSelected)
       .map(([key]) => key);
 
-    await tag(connection, signTransaction, {
+    await tag(connection, signTransaction!, {
       imgUrls,
       tokenMetadata: metadata.toBase58(),
       feePayer: publicKey!.toBase58(),
@@ -305,7 +311,7 @@ export const TaggableImages = ({
             }, {} as Record<string, TagMatch>);
 
           setMatches(() => newMatches);
-        } catch (err) {
+        } catch (err: any) {
           setError(err);
         } finally {
           setLoading(false);

@@ -1,6 +1,7 @@
 import React, { useEffect } from "react";
 import { useHistory } from "react-router-dom";
-import { useQuery, useWallet, WalletSelect } from "wumbo-common";
+import { useQuery, WalletSelect } from "wumbo-common";
+import { useWallet } from "@solana/wallet-adapter-react";
 
 export default React.memo(() => {
   const history = useHistory();

@@ -1,25 +1,15 @@
-import React, { useState, useRef } from "react";
+import React, { useState } from "react";
 import { VStack } from "@chakra-ui/react";
 import { HiOutlineRefresh } from "react-icons/hi";
 import { PublicKey } from "@solana/web3.js";
-import { getImageFromMeta, ITokenWithMeta, useTokenMetadata } from "../utils";
-import { GetCreatorLink, TaggableImages } from "./";
-// @ts-ignore
-import { handleErrors } from "../contexts";
+import { useTokenMetadata, useErrorHandler } from "@strata-foundation/react";
+import { ITokenWithMeta, getImageFromMeta } from "@strata-foundation/spl-utils";
+import { TaggableImages } from "./";
 import { NftSmallView } from "./NftSmallView";
 
 export const TagNftRaw = React.memo(({ token }: { token: ITokenWithMeta }) => {
   const [refreshCounter, setRefreshCounter] = useState<number>(0);
   const incRefreshCounter = () => setRefreshCounter(refreshCounter + 1);
-
-  // TODO expand logic
-
-  // TODO add redirect logic to site wallet
-  /* const { connected } = useWallet(); */
-
-  /* if (!connected && taggingMode) {
-   *   return <WalletSelect />;
-   * } */
 
   return (
     <>
@@ -40,6 +30,7 @@ export const TagNftRaw = React.memo(({ token }: { token: ITokenWithMeta }) => {
 });
 
 export const TagNft = React.memo(({ token }: { token?: PublicKey }) => {
+  const { handleErrors } = useErrorHandler();
   const tokenWithMeta = useTokenMetadata(token);
   handleErrors(tokenWithMeta.error);
 

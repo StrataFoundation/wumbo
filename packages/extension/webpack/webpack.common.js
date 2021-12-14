@@ -8,8 +8,7 @@ const TsconfigPathsPlugin = require("tsconfig-paths-webpack-plugin");
 
 module.exports = {
   entry: {
-    popup: path.join(srcDir, "/pages/popup/index.tsx"),
-    background: path.join(srcDir, "/pages/background/background.ts"),
+    background: path.join(srcDir, "pages/background/index.ts"),
     content_script: path.join(srcDir, "pages/content/index.tsx"),
     oauth: path.join((srcDir, "pages/oauth/index.tsx")),
     wallet_proxy: path.join((srcDir, "pages/wallet-proxy/index.ts")),
@@ -27,6 +26,14 @@ module.exports = {
   },
   module: {
     rules: [
+      {
+        test: /\.m?js$/,
+        include: /node_modules/,
+        type: "javascript/auto",
+        resolve: {
+          fullySpecified: false
+        }
+      },
       {
         test: /\.tsx?$/,
         loader: "esbuild-loader",
@@ -62,27 +69,34 @@ module.exports = {
       "@solana/wallet-ledger": path.resolve(
         "../../node_modules/@solana/wallet-ledger/dist/lib/index.js"
       ),
+      "@chakra-ui/react": path.resolve("../../node_modules/@chakra-ui/react"),
+      "@solana/wallet-adapter-react": path.resolve("../../node_modules/@solana/wallet-adapter-react"),
+      ...process.env.LINKED_DEV ? {
+        "@strata-foundation/react": path.resolve("./node_modules/@strata-foundation/react"),
+        "@strata-foundation/spl-token-bonding": path.resolve("./node_modules/@strata-foundation/spl-token-bonding"),
+        "@strata-foundation/spl-utils": path.resolve("./node_modules/@strata-foundation/spl-utils"),
+        "@strata-foundation/spl-token-collective": path.resolve("./node_modules/@strata-foundation/spl-token-collective")
+      } : {}
     },
   },
   plugins: [
     new webpack.EnvironmentPlugin([
-      'REACT_APP_SITE_URL',
-      'REACT_APP_NFT_VERIFIER_TLD',
-      'REACT_APP_NFT_VERIFIER',
-      'REACT_APP_TROPHY_CREATOR',
-      'REACT_APP_TWITTER_REGISTRAR_SERVER_URL',
-      'REACT_APP_WUM_BONDING',
-      'REACT_APP_WUM_TOKEN',
-      'REACT_APP_WUMBO_INSTANCE_KEY',
-      'REACT_APP_SOLANA_API_URL',
-      'REACT_APP_IS_DEV',
-      'REACT_APP_TWITTER_TLD',
-      'REACT_APP_TWITTER_VERIFIER',
-      'REACT_APP_NFT_VERIFIER_URL',
-      'REACT_APP_WUMBO_API_URL',
-      'REACT_APP_TAGGING_THRESHOLD',
-      'REACT_APP_BASE_SLIPPAGE',
-      'REACT_APP_ARWEAVE_UPLOAD_URL'
+      "REACT_APP_WUMBO_TRANSACTION_FEE",
+      "REACT_APP_WUMBO_TRANSACTION_FEE_DESTINATION",
+      "REACT_APP_SITE_URL",
+      "REACT_APP_NFT_VERIFIER_TLD",
+      "REACT_APP_NFT_VERIFIER",
+      "REACT_APP_TROPHY_CREATOR",
+      "REACT_APP_OPEN_BONDING",
+      "REACT_APP_OPEN_TOKEN",
+      "REACT_APP_OPEN_COLLECTIVE_KEY",
+      "REACT_APP_SOLANA_API_URL",
+      "REACT_APP_NFT_VERIFIER_URL",
+      "REACT_APP_STRATA_API_URL",
+      "REACT_APP_WUMBO_IDENTITY_SERVICE_URL",
+      "REACT_APP_TAGGING_THRESHOLD",
+      "REACT_APP_BASE_SLIPPAGE",
+      "REACT_APP_ARWEAVE_UPLOAD_URL",
     ]),
     new NodePolyfillPlugin(),
     new CopyPlugin({

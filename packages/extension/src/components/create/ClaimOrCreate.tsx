@@ -1,30 +1,30 @@
-import React, { useMemo, useState } from "react";
-import { useHistory } from "react-router-dom";
-import { Box, Text, Button } from "@chakra-ui/react";
-import { useConnection } from "@oyster/common";
-import { claimPath, routes } from "@/constants/routes";
-import {
-  WUMBO_INSTANCE_KEY,
-  getTwitterRegistryKey,
-  getTld,
-  useWallet,
-  useQuery,
-  useClaimLink,
-  usePrograms,
-  useAccountFetchCache,
-  TokenRef,
-  useReverseTwitter,
-  handleErrors,
-} from "wumbo-common";
-import { useAsyncCallback } from "react-async-hook";
+import { routes, swapPath } from "@/constants/routes";
 import { useClaimFlow } from "@/utils/claim";
 import { useUserInfo } from "@/utils/userState";
+import { Box, Button, Text } from "@chakra-ui/react";
+import React, { useMemo } from "react";
+import { useAsyncCallback } from "react-async-hook";
+import { useHistory } from "react-router-dom";
+import {
+  getTwitterTld,
+  getTwitterRegistryKey,
+  useQuery,
+  useReverseTwitter,
+} from "wumbo-common";
+import { useWallet } from "@solana/wallet-adapter-react";
+import {
+  useErrorHandler,
+  useProvider,
+  useStrataSdks,
+} from "@strata-foundation/react";
 
 export default React.memo(() => {
   const history = useHistory();
-  const { splWumboProgram } = usePrograms();
+  const { tokenCollectiveSdk, tokenBondingSdk } = useStrataSdks();
   const query = useQuery();
-  const { publicKey, awaitingApproval } = useWallet();
+  const { awaitingApproval } = useProvider();
+  const { adapter } = useWallet();
+  const publicKey = adapter?.publicKey;
   const { handle: ownerTwitterHandle, error: reverseTwitterError } =
     useReverseTwitter(publicKey || undefined);
   const { userInfo, loading: loading2 } = useUserInfo(query.get("name")!);
@@ -32,15 +32,29 @@ export default React.memo(() => {
   const createCreator = async () => {
     const handle = query.get("name")!;
 
-    const { tokenBonding } = await splWumboProgram!.createSocialToken({
-      wumbo: WUMBO_INSTANCE_KEY,
-      tokenName: handle,
-      name: await getTwitterRegistryKey(handle, await getTld()),
-      nameParent: await getTld(),
+    const { tokenBonding } = await tokenCollectiveSdk!.createSocialToken({
+      metadata: {
+        name: handle,
+        symbol: "UNCLAIMED",
+      },
+      name: await getTwitterRegistryKey(handle, await getTwitterTld()),
+      nameParent: await getTwitterTld(),
+      tokenBondingParams: {
+        buyBaseRoyaltyPercentage: 0,
+        sellBaseRoyaltyPercentage: 0,
+        buyTargetRoyaltyPercentage: 5,
+        sellTargetRoyaltyPercentage: 0,
+      },
     });
+    const tokenBondingAcct = (await tokenBondingSdk!.getTokenBonding(
+      tokenBonding!
+    ))!;
     history.push(
-      routes.trade.path.replace(":tokenBondingKey", tokenBonding.toBase58()) +
-        `?name=${query.get("name")!}`
+      swapPath(
+        tokenBonding!,
+        tokenBondingAcct.baseMint,
+        tokenBondingAcct.targetMint
+      ) + `?name=${query.get("name")!}`
     );
   };
 
@@ -50,6 +64,7 @@ export default React.memo(() => {
     error,
   } = useAsyncCallback(createCreator);
   const { claim, loading, error: claimError } = useClaimFlow(query.get("name"));
+  const { handleErrors } = useErrorHandler();
   handleErrors(reverseTwitterError, error, claimError);
   const showCreate = useMemo(
     () => !userInfo && !loading2,

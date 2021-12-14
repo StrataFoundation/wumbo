@@ -1,7 +1,7 @@
 import React from "react";
 import { AppRoutes } from "../../../../constants/routes";
 import { Alert, AlertIcon } from "@chakra-ui/react";
-import { Claim, useAccountFetchCache, useQuery, TokenRef } from "wumbo-common";
+import { Claim, useQuery } from "wumbo-common";
 import { useHistory } from "react-router-dom";
 import WalletRedirect from "../Wallet/WalletRedirect";
 
@@ -13,7 +13,6 @@ export const ClaimRoute = React.memo(() => {
     AppRoutes.claim.path
   }`;
   const history = useHistory();
-  const cache = useAccountFetchCache();
 
   if (!code) {
     return (

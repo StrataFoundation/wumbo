@@ -1,18 +1,23 @@
 import React, { useMemo, useCallback } from "react";
 import toast from "react-hot-toast";
 import {
-  WalletProvider,
   WALLET_PROVIDERS,
-  EndpointSetter,
-  UsdWumboPriceProvider,
-  AccountCacheContextProvider,
   wumboApi,
-  SolPriceProvider,
-  ErrorHandlingContext,
+  ThemeProvider,
   Notification,
+  SOLANA_API_URL,
 } from "wumbo-common";
+import {
+  AccountProvider,
+  SolPriceProvider,
+  ErrorHandlerProvider,
+  StrataSdksProvider,
+} from "@strata-foundation/react";
 import { ApolloProvider } from "@apollo/client";
-import { ConnectionProvider, AccountsProvider } from "@oyster/common";
+import {
+  ConnectionProvider,
+  WalletProvider,
+} from "@solana/wallet-adapter-react";
 
 export const ContextProviders: React.FC = ({ children }) => {
   const wallets = useMemo(() => WALLET_PROVIDERS, []);
@@ -53,28 +58,24 @@ export const ContextProviders: React.FC = ({ children }) => {
   );
 
   return (
-    <ConnectionProvider>
-      <ErrorHandlingContext.Provider
-        value={{
-          onError,
-        }}
-      >
+    <ConnectionProvider endpoint={SOLANA_API_URL}>
+      <ErrorHandlerProvider onError={onError}>
         <ApolloProvider client={wumboApi}>
-          <AccountCacheContextProvider>
-            <EndpointSetter>
-              <AccountsProvider>
-                <SolPriceProvider>
-                  <UsdWumboPriceProvider>
-                    <WalletProvider wallets={wallets} onError={console.error}>
-                      {children}
-                    </WalletProvider>
-                  </UsdWumboPriceProvider>
-                </SolPriceProvider>
-              </AccountsProvider>
-            </EndpointSetter>
-          </AccountCacheContextProvider>
+          <AccountProvider commitment="confirmed">
+            <ThemeProvider>
+              <SolPriceProvider>
+                <WalletProvider
+                  wallets={wallets}
+                  onError={console.error}
+                  autoConnect
+                >
+                  <StrataSdksProvider>{children}</StrataSdksProvider>
+                </WalletProvider>
+              </SolPriceProvider>
+            </ThemeProvider>
+          </AccountProvider>
         </ApolloProvider>
-      </ErrorHandlingContext.Provider>
+      </ErrorHandlerProvider>
     </ConnectionProvider>
   );
 };

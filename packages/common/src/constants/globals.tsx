@@ -1,31 +1,21 @@
 import { Keypair, PublicKey } from "@solana/web3.js";
-import {
-  Token,
-  TOKEN_PROGRAM_ID as SPL_TOKEN_PROGRAM_ID,
-} from "@solana/spl-token";
+import { TOKEN_PROGRAM_ID as SPL_TOKEN_PROGRAM_ID } from "@solana/spl-token";
 
+export const WUMBO_TRANSACTION_FEE: number = Number(
+  process.env.REACT_APP_WUMBO_TRANSACTION_FEE!
+);
+export const WUMBO_TRANSACTION_FEE_DESTINATION: PublicKey = new PublicKey(
+  process.env.REACT_APP_WUMBO_TRANSACTION_FEE_DESTINATION!
+);
 export const DEFAULT_COMMITMENT = "processed";
-export const IS_DEV = process.env.REACT_APP_IS_DEV === "true";
-export const DEV_TWITTER_TLD = "WumboDevTwitter10";
-export const TWITTER_TLD = new PublicKey(process.env.REACT_APP_TWITTER_TLD!);
-export const TWITTER_VERIFIER = new PublicKey(
-  process.env.REACT_APP_TWITTER_VERIFIER!
-);
-const key = [
-  243, 99, 226, 76, 228, 180, 49, 28, 35, 61, 133, 124, 225, 80, 78, 147, 2,
-  107, 58, 142, 6, 245, 23, 211, 113, 62, 255, 181, 222, 50, 4, 23, 51, 146, 66,
-  205, 166, 190, 240, 181, 45, 146, 254, 237, 136, 217, 114, 62, 55, 249, 200,
-  102, 79, 120, 51, 44, 187, 84, 64, 129, 102, 120, 70, 131,
-];
-export const DEV_TWITTER_VERIFIER: Keypair = Keypair.fromSecretKey(
-  Uint8Array.of(...key)
-);
 export const TAGGING_THRESHOLD = Number(
   process.env.REACT_APP_TAGGING_THRESHOLD!
 );
 export const SITE_URL = process.env.REACT_APP_SITE_URL;
 export const ARWEAVE_UPLOAD_URL = process.env.REACT_APP_ARWEAVE_UPLOAD_URL!;
-export const WUMBO_API_URL = process.env.REACT_APP_WUMBO_API_URL!;
+export const STRATA_API_URL = process.env.REACT_APP_STRATA_API_URL!;
+export const WUMBO_IDENTITY_SERVICE_URL =
+  process.env.REACT_APP_WUMBO_IDENTITY_SERVICE_URL!;
 export const NFT_VERIFIER_URL = process.env.REACT_APP_NFT_VERIFIER_URL;
 
 export const NFT_VERIFIER_TLD = new PublicKey(
@@ -38,14 +28,11 @@ export const TROPHY_CREATOR = new PublicKey(
   process.env.REACT_APP_TROPHY_CREATOR!
 );
 
-export const TWITTER_REGISTRAR_SERVER_URL =
-  process.env.REACT_APP_TWITTER_REGISTRAR_SERVER_URL!;
-
 // export const SOLANA_API_URL = "https://api.mainnet-beta.solana.com"
-export const WUM_BONDING = new PublicKey(process.env.REACT_APP_WUM_BONDING!);
-export const WUM_TOKEN = new PublicKey(process.env.REACT_APP_WUM_TOKEN!);
-export const WUMBO_INSTANCE_KEY: PublicKey = new PublicKey(
-  process.env.REACT_APP_WUMBO_INSTANCE_KEY!
+export const OPEN_BONDING = new PublicKey(process.env.REACT_APP_OPEN_BONDING!);
+export const OPEN_TOKEN = new PublicKey(process.env.REACT_APP_OPEN_TOKEN!);
+export const OPEN_COLLECTIVE_KEY = new PublicKey(
+  process.env.REACT_APP_OPEN_COLLECTIVE_KEY!
 );
 
 export const SOL_TOKEN = new PublicKey(

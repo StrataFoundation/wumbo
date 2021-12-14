@@ -3,11 +3,15 @@ import {
   getHashedName,
   NameRegistryState,
 } from "@bonfida/spl-name-service";
-import { Connection, PublicKey } from "@solana/web3.js";
-import { NFT_VERIFIER, NFT_VERIFIER_TLD } from "../constants/globals";
+import { PublicKey } from "@solana/web3.js";
 import { deserializeUnchecked } from "borsh";
-import { AccountFetchCache } from "./accountFetchCache/accountFetchCache";
-import { MetadataParser } from "./metaplex";
+import { useTokenMetadata } from "@strata-foundation/react";
+import {
+  AccountFetchCache,
+  decodeMetadata,
+} from "@strata-foundation/spl-utils";
+import { NFT_VERIFIER, NFT_VERIFIER_TLD } from "../constants/globals";
+import { SplTokenCollective } from "@strata-foundation/spl-token-collective";
 
 export async function getNftNameRecordKey(imgUrl: string): Promise<PublicKey> {
   return getNameAccountKey(
@@ -21,7 +25,7 @@ export async function getNftMetadataKey(
   cache: AccountFetchCache,
   imgUrl: string
 ): Promise<PublicKey | undefined> {
-  const header = await cache.searchAndWatch(
+  const [header, dispose] = await cache.searchAndWatch(
     await getNftNameRecordKey(imgUrl),
     (pubkey, account) => {
       const header: NameRegistryState = deserializeUnchecked(
@@ -37,6 +41,8 @@ export async function getNftMetadataKey(
     },
     true
   );
+  // Keep cached for 2 seconds since nft fetcher runs every 1s
+  setTimeout(dispose, 2 * 1000);
 
   const tokenMetadata =
     header &&
@@ -56,7 +62,17 @@ export async function getNftMint(
 ): Promise<PublicKey | undefined> {
   const metadataKey = await getNftMetadataKey(cache, imgUrl);
   const metadata =
-    metadataKey && (await cache.searchAndWatch(metadataKey, MetadataParser));
+    metadataKey &&
+    (await cache.search(
+      metadataKey,
+      (pubkey, account) => ({
+        pubkey,
+        account,
+        info: decodeMetadata(account.data),
+      }),
+      true
+    ));
+  const mintKey = metadata?.info && new PublicKey(metadata.info.mint);
 
-  return metadata?.info?.mint;
+  return Promise.resolve(mintKey);
 }

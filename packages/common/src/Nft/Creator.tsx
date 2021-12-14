@@ -1,11 +1,14 @@
 import React from "react";
 import { Link as PlainLink } from "@chakra-ui/react";
-import { Metadata as MetaplexMetadata } from "@oyster/common";
-import { ITokenBonding, ITokenRef, useSocialTokenMetadata } from "../utils";
+import { Metadata as MetaplexMetadata } from "@strata-foundation/spl-utils";
+import {
+  useSocialTokenMetadata,
+  useErrorHandler,
+} from "@strata-foundation/react";
+import { ITokenRef } from "@strata-foundation/spl-token-collective";
 import { Link } from "react-router-dom";
 import { PublicKey } from "@solana/web3.js";
 import { Avatar } from "../";
-import { handleErrors } from "../contexts";
 
 export type GetCreatorLink = (
   c: PublicKey,
@@ -21,8 +24,10 @@ export const Creator = React.memo(
     creator: PublicKey;
     getCreatorLink: GetCreatorLink;
   }) => {
+    const { handleErrors } = useErrorHandler();
     const { metadata, tokenRef, error, image } =
       useSocialTokenMetadata(creator);
+
     handleErrors(error);
 
     const truncatePubkey = (pkey: PublicKey): string => {
@@ -40,6 +45,7 @@ export const Creator = React.memo(
       </>
     );
 
+    // @ts-ignore
     const link = getCreatorLink(creator, metadata, tokenRef);
 
     if (link.includes("http")) {

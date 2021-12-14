@@ -1,18 +1,18 @@
-import React, { Fragment, useState } from "react";
+import React from "react";
 import { Flex } from "@chakra-ui/react";
-import { HiChevronRight } from "react-icons/hi";
 import {
+  useErrorHandler,
   useBondingPricing,
-  useFiatPrice,
-  useOwnedAmount,
-} from "./utils/pricing";
+  usePriceInUsd,
+  useTokenMetadata,
+} from "@strata-foundation/react";
+import {
+  ITokenBonding,
+  BondingPricing,
+} from "@strata-foundation/spl-token-bonding";
 import { Spinner } from "./";
-import { useTokenMetadata } from "./utils/metaplex";
 import { MetadataAvatar } from "./Avatar";
-import { Link, useHistory } from "react-router-dom";
-import { ITokenBonding } from "./utils/deserializers/spl-token-bonding";
-import { handleErrors } from "./contexts";
-import { Curve } from "@wum.bo/spl-token-bonding";
+import { useHistory } from "react-router-dom";
 
 interface TokenPillProps {
   name?: String;
@@ -20,7 +20,7 @@ interface TokenPillProps {
   icon?: React.ReactElement;
   tokenBonding: ITokenBonding;
   detailsPath?: string;
-  curve?: Curve;
+  pricing?: BondingPricing;
 }
 
 interface MetadataTokenPillProps {
@@ -28,7 +28,7 @@ interface MetadataTokenPillProps {
   ticker?: string;
   tokenBonding: ITokenBonding;
   detailsPath?: string;
-  curve?: Curve;
+  pricing?: BondingPricing;
 }
 export const MetadataTokenPill = React.memo(
   ({
@@ -36,8 +36,9 @@ export const MetadataTokenPill = React.memo(
     ticker,
     tokenBonding,
     detailsPath,
-    curve,
+    pricing,
   }: MetadataTokenPillProps) => {
+    const { handleErrors } = useErrorHandler();
     const { metadata, loading, error } = useTokenMetadata(
       tokenBonding?.targetMint
     );
@@ -52,7 +53,7 @@ export const MetadataTokenPill = React.memo(
 
     return (
       <TokenPill
-        curve={curve}
+        pricing={pricing}
         name={displayName}
         ticker={displayTicker}
         icon={displayIcon}
@@ -70,13 +71,15 @@ export const TokenPill = React.memo(
     icon,
     tokenBonding,
     detailsPath,
-    curve: curvePassed,
+    pricing: pricingPassed,
   }: TokenPillProps) => {
-    const { curve: curveResolved } = useBondingPricing(tokenBonding.publicKey);
-    const fiatPrice = useFiatPrice(tokenBonding.baseMint);
+    const { pricing: pricingResolved } = useBondingPricing(
+      tokenBonding.publicKey
+    );
+    const fiatPrice = usePriceInUsd(tokenBonding.baseMint);
     const toFiat = (a: number) => (fiatPrice || 0) * a;
     const history = useHistory();
-    const curve = curvePassed || curveResolved;
+    const pricing = pricingPassed || pricingResolved;
 
     return (
       <Flex
@@ -101,8 +104,8 @@ export const TokenPill = React.memo(
           <Flex justify="space-between" fontSize="lg" fontWeight="medium">
             <span>{name}</span>
             <span>
-              {curve
-                ? "$" + toFiat(curve!.current() || 0).toFixed(2)
+              {pricing
+                ? "$" + toFiat(pricing!.current() || 0).toFixed(2)
                 : "Loading"}
             </span>
           </Flex>

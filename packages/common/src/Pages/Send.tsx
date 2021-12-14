@@ -1,66 +1,66 @@
-import {
-  Text,
-  HStack,
-  VStack,
-  Center,
-  Box,
-  FormLabel,
-  Input,
-  FormControl,
-  InputRightElement,
-  InputGroup,
-  InputLeftElement,
-  Circle,
-  Textarea,
-  Button,
-  Alert,
-  AlertIcon,
-  Icon,
-  Flex,
-  ScaleFade,
-} from "@chakra-ui/react";
-import { PublicKey, Transaction } from "@solana/web3.js";
-import { decodeMetadata } from "@wum.bo/spl-utils";
-import { Notification } from "../Notification";
-import { handleErrors, useProvider, useWallet } from "../contexts";
-import React, { useMemo } from "react";
+import React from "react";
+import { useHistory, useParams } from "react-router-dom";
 import { useAsync } from "react-async-hook";
 import { useForm } from "react-hook-form";
-import { useHistory, useParams } from "react-router-dom";
-import { Spinner } from "../Spinner";
-import { Avatar } from "../Avatar";
-import {
-  getImage,
-  useAccount,
-  useAssociatedAccount,
-  useAssociatedTokenAddress,
-  useClaimedTokenRef,
-  useFiatPrice,
-  useMint,
-  useOwnedAmount,
-  useSolPrice,
-  useTokenMetadata,
-} from "../utils";
+import { PublicKey, Transaction } from "@solana/web3.js";
 import {
   AccountLayout,
   ASSOCIATED_TOKEN_PROGRAM_ID,
   Token,
   TOKEN_PROGRAM_ID,
 } from "@solana/spl-token";
-import { AiOutlineExclamation } from "react-icons/ai";
-import { BiCheck } from "react-icons/bi";
-import { useEstimatedFees, usePublicKey } from "../hooks";
 import * as yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
 import toast from "react-hot-toast";
+import {
+  useErrorHandler,
+  useTokenMetadata,
+  useAssociatedAccount,
+  useAssociatedTokenAddress,
+  usePrimaryClaimedTokenRef,
+  useMint,
+  usePriceInUsd,
+  useOwnedAmount,
+  useSolPrice,
+  useEstimatedFees,
+  usePublicKey,
+  useProvider,
+} from "@strata-foundation/react";
+import {
+  Text,
+  HStack,
+  VStack,
+  Center,
+  FormLabel,
+  Input,
+  FormControl,
+  InputRightElement,
+  InputGroup,
+  Circle,
+  Button,
+  Alert,
+  AlertIcon,
+  Icon,
+  Flex,
+} from "@chakra-ui/react";
+import { AiOutlineExclamation } from "react-icons/ai";
+import { BiCheck } from "react-icons/bi";
+import { Notification } from "../Notification";
+import { Spinner } from "../Spinner";
+import { Avatar } from "../Avatar";
+import { useWallet } from "@solana/wallet-adapter-react";
+import { SplTokenMetadata } from "@strata-foundation/spl-utils";
 
 type FormValues = { amount: number; recipient: string };
 
 export const Send = ({ finishRedirectUrl }: { finishRedirectUrl: string }) => {
+  const { handleErrors } = useErrorHandler();
   const history = useHistory();
   const params = useParams<{ mint: string | undefined }>();
   const mint = usePublicKey(params.mint);
-  const { publicKey, awaitingApproval } = useWallet();
+  const { adapter } = useWallet();
+  const publicKey = adapter?.publicKey;
+  const { awaitingApproval, provider } = useProvider();
   const ownedAmount = useOwnedAmount(mint);
   const validationSchema = yup.object({
     amount: yup
@@ -91,7 +91,7 @@ export const Send = ({ finishRedirectUrl }: { finishRedirectUrl: string }) => {
     },
   });
 
-  const fiatPrice = useFiatPrice(mint);
+  const fiatPrice = usePriceInUsd(mint);
   const solFiatPrice = useSolPrice();
   const toFiat = (a: number) => (fiatPrice ? fiatPrice * a : undefined);
 
@@ -115,16 +115,16 @@ export const Send = ({ finishRedirectUrl }: { finishRedirectUrl: string }) => {
     error,
   } = useTokenMetadata(mint);
 
-  const { info: tokenRef, loading: refLoading } = useClaimedTokenRef(recipient);
-  const { info: metadata, loading: metadataLoading } = useAccount(
-    tokenRef?.tokenMetadata,
-    (_, acct) => decodeMetadata(acct.data)
+  const { info: tokenRef, loading: refLoading } =
+    usePrimaryClaimedTokenRef(recipient);
+  const { metadata, loading: metadataLoading } = useTokenMetadata(
+    tokenRef?.tokenMetadata
   );
   const {
     result: image,
     error: imageError,
     loading: imageLoading,
-  } = useAsync(getImage, [metadata?.data.uri]);
+  } = useAsync(SplTokenMetadata.getImage, [metadata?.data.uri]);
   const recipientLoading = refLoading || metadataLoading || imageLoading;
 
   const recipientRegister = register("recipient");
@@ -134,7 +134,6 @@ export const Send = ({ finishRedirectUrl }: { finishRedirectUrl: string }) => {
     setValue("amount", ownedAmount || 0);
   };
 
-  const provider = useProvider();
   const handleOnSubmit = async (values: FormValues) => {
     const tx = new Transaction();
     const recipient = new PublicKey(values.recipient);
@@ -184,7 +183,6 @@ export const Send = ({ finishRedirectUrl }: { finishRedirectUrl: string }) => {
   const noBalance = ata?.amount.toNumber() === 0;
   const noAta = !ataLoading && recipient && !ata;
   const invalidAddress = Boolean(!recipient && recipientStr);
-
   return (
     <form onSubmit={handleSubmit(handleOnSubmit)}>
       <VStack spacing={4}>
@@ -230,7 +228,7 @@ export const Send = ({ finishRedirectUrl }: { finishRedirectUrl: string }) => {
             <InputRightElement
               h="100%"
               width="inherit"
-              maxWidth="80px"
+              maxWidth="100px"
               minWidth="40px"
             >
               <Text color="gray.700">{baseMetadata?.data.symbol}</Text>
@@ -379,7 +377,7 @@ export const Send = ({ finishRedirectUrl }: { finishRedirectUrl: string }) => {
           <Flex justify="space-between" alignItems="center">
             <Text>Estimated Fees</Text>
             <Flex>
-              {fee} SOL ≈ $
+              {fee?.toFixed(4)} SOL ≈ $
               {solFiatPrice && fee
                 ? (solFiatPrice * fee).toFixed(2)
                 : undefined}

@@ -10,22 +10,22 @@ import {
   Input,
   FormHelperText,
   FormLabel,
-  Text,
+  Heading,
   Button,
   Alert,
   AlertIcon,
 } from "@chakra-ui/react";
-import { useClaimedTokenRef } from "../utils/tokenRef";
 import {
-  SetMetadataArgs,
-  useSetMetadata,
+  useTokenBonding,
   useTokenMetadata,
-} from "../utils/metaplex";
-import { useAccount } from "../utils/account";
+  usePrimaryClaimedTokenRef,
+  useErrorHandler,
+  useProvider,
+} from "@strata-foundation/react";
+import { ISetMetadataArgs, useSetMetadata } from "../hooks";
 import { TokenPill } from "../TokenPill";
 import { Avatar } from "../Avatar";
-import { TokenBonding } from "../utils/deserializers/spl-token-bonding";
-import { handleErrors, useWallet } from "../contexts";
+import { Spinner } from "../Spinner";
 
 interface IEditProfileProps {
   ownerWalletKey: PublicKey;
@@ -36,7 +36,10 @@ const validationSchema = yup
   .object({
     name: yup.string().required().min(2),
     symbol: yup.string().required().min(2).max(10),
-    targetRoyaltyPercentage: yup.number().required(),
+    sellBaseRoyaltyPercentage: yup.number().required(),
+    buyBaseRoyaltyPercentage: yup.number().required(),
+    sellTargetRoyaltyPercentage: yup.number().required(),
+    buyTargetRoyaltyPercentage: yup.number().required(),
     image: yup.mixed(),
   })
   .required();
@@ -44,62 +47,87 @@ const validationSchema = yup
 export const EditProfile = React.memo(
   ({ ownerWalletKey, onComplete }: IEditProfileProps) => {
     const hiddenFileInput = React.useRef<HTMLInputElement>(null);
-    const { awaitingApproval } = useWallet();
-    const { info: tokenRef } = useClaimedTokenRef(ownerWalletKey);
+    const { awaitingApproval } = useProvider();
+    const { handleErrors } = useErrorHandler();
+    const { info: tokenRef, loading: loadingTokenRef } =
+      usePrimaryClaimedTokenRef(ownerWalletKey);
     const {
       watch,
       register,
       handleSubmit,
       setValue,
+      setError,
+      clearErrors,
       reset,
-      getValues,
       formState: { errors },
-    } = useForm<SetMetadataArgs>({
+    } = useForm<ISetMetadataArgs>({
       resolver: yupResolver(validationSchema),
     });
 
-    const { info: tokenBonding } = useAccount(
-      tokenRef?.tokenBonding,
-      TokenBonding
-    );
+    const { info: tokenBonding, loading: loadingTokenBonding } =
+      useTokenBonding(tokenRef?.tokenBonding);
 
     const {
       image: metadataImage,
-      metadata,
-      error: tokenMetadataError,
+      metadata: targetMetadata,
+      error: targetMetadataError,
+      loading: targetMetadataLoading,
     } = useTokenMetadata(tokenBonding?.targetMint);
-    const { name = "", symbol = "", targetRoyaltyPercentage, image } = watch();
-    const { setMetadata, state, error } = useSetMetadata(tokenRef?.publicKey);
 
-    handleErrors(tokenMetadataError, error);
+    const {
+      metadata: baseMetadata,
+      error: baseMetadataError,
+      loading: baseMetadataLoading,
+    } = useTokenMetadata(tokenBonding?.baseMint);
 
+    const { name = "", symbol = "", image } = watch();
+    const [setMetadata, { loading, loadingState, error }] = useSetMetadata(
+      tokenRef?.publicKey
+    );
+
+    handleErrors(targetMetadataError || baseMetadataError);
     const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-      setValue("image", e.target.files![0] || null);
+      const file = e.target.files![0];
+      const sizeKB = file.size / 1024;
+
+      if (sizeKB < 25) {
+        setError("image", {
+          type: "manual",
+          message: `The file ${file.name} is too small. It is ${
+            Math.round(10 * sizeKB) / 10
+          }KB but should be at least 25KB.`,
+        });
+        return;
+      }
+
+      setValue("image", file || null);
+      clearErrors("image");
     };
 
-    const handleOnSubmit = async (values: SetMetadataArgs) => {
+    const handleOnSubmit = async (values: ISetMetadataArgs) => {
       const result = await setMetadata(values);
-      if (result) {
-        onComplete(result);
+
+      if (result && result.metadataAccount) {
+        onComplete(result as any);
       }
     };
+
+    const humanRedablePercent = (p: number | undefined = 0) =>
+      (p / 4294967295) * 100;
 
     const [imgUrl, setImgUrl] = useState<string>();
+
     useEffect(() => {
-      const reader = new FileReader();
-      function loadListiner() {
-        setImgUrl(reader.result?.toString());
-      }
-      reader.addEventListener("load", loadListiner);
       if (image) {
+        const reader = new FileReader();
+        reader.onload = (event) => {
+          setImgUrl((event.target?.result as string) || "");
+        };
+
         reader.readAsDataURL(image);
       } else {
         setImgUrl(undefined);
       }
-
-      return () => {
-        reader.removeEventListener("load", loadListiner);
-      };
     }, [image]);
 
     useEffect(() => {
@@ -107,22 +135,42 @@ export const EditProfile = React.memo(
         setImgUrl(metadataImage);
       }
 
-      if (state == "idle") {
+      if (loadingState == "idle") {
         reset({
-          name: metadata?.data.name,
-          symbol: metadata?.data.symbol,
-          targetRoyaltyPercentage:
-            ((tokenBonding?.targetRoyaltyPercentage || 0) / 4294967295) * 100,
+          name: targetMetadata?.data.name,
+          symbol: targetMetadata?.data.symbol,
+          sellBaseRoyaltyPercentage: humanRedablePercent(
+            tokenBonding?.sellBaseRoyaltyPercentage
+          ),
+          buyBaseRoyaltyPercentage: humanRedablePercent(
+            tokenBonding?.buyBaseRoyaltyPercentage
+          ),
+          sellTargetRoyaltyPercentage: humanRedablePercent(
+            tokenBonding?.sellTargetRoyaltyPercentage
+          ),
+          buyTargetRoyaltyPercentage: humanRedablePercent(
+            tokenBonding?.buyTargetRoyaltyPercentage
+          ),
         });
       }
-    }, [metadata?.data.name, metadata?.data.symbol, metadataImage]);
+    }, [targetMetadata?.data.name, targetMetadata?.data.symbol, metadataImage]);
 
     const avatar = <Avatar src={imgUrl} name={symbol} />;
+
+    if (
+      (!tokenRef && !tokenBonding) ||
+      loadingTokenRef ||
+      loadingTokenBonding ||
+      targetMetadataLoading ||
+      baseMetadataLoading
+    ) {
+      return <Spinner />;
+    }
 
     return (
       <form onSubmit={handleSubmit(handleOnSubmit)}>
         <VStack w="full" spacing={6} padding={4} alignItems="start">
-          <Text fontSize="lg">Preview</Text>
+          <Heading fontSize="xl">Preview</Heading>
           {tokenRef && tokenBonding && (
             <TokenPill
               name={name}
@@ -131,7 +179,7 @@ export const EditProfile = React.memo(
               tokenBonding={tokenBonding}
             />
           )}
-          <Text fontSize="lg">Settings</Text>
+          <Heading fontSize="xl">Settings</Heading>
           <FormControl id="photo">
             <FormLabel>Photo</FormLabel>
             <HStack w="full" spacing={4}>
@@ -148,7 +196,8 @@ export const EditProfile = React.memo(
             <input
               id="image"
               type="file"
-              accept="image/*"
+              accept=".png,.jpg,.gif,.mp4,.svg"
+              multiple={false}
               onChange={handleImageChange}
               ref={hiddenFileInput}
               style={{ display: "none" }}
@@ -183,22 +232,87 @@ export const EditProfile = React.memo(
               Wum.bo.`}
             </FormHelperText>
           </FormControl>
-          <FormControl id="targetRoyaltyPercentage" borderColor="gray.200">
-            <FormLabel>Royalties</FormLabel>
-            <Input
-              isRequired
-              type="number"
-              min={0}
-              max={100}
-              placeholder="5"
-              defaultValue={5}
-              {...register("targetRoyaltyPercentage")}
-            />
-            <FormHelperText>
-              A Percentage of coin sales that will be sent to your wallet. We
-              recommend keep this less than 10%.
-            </FormHelperText>
-          </FormControl>
+          <VStack align="left" w="full">
+            <Heading fontSize="xl" mb={4}>
+              Royalties
+            </Heading>
+            <HStack>
+              <FormControl
+                id="buyTargetRoyaltyPercentage"
+                borderColor="gray.200"
+              >
+                <FormLabel>
+                  {symbol || targetMetadata?.data.symbol} (Buy)
+                </FormLabel>
+                <Input
+                  isRequired
+                  type="number"
+                  min={0}
+                  max={100}
+                  placeholder="5"
+                  defaultValue={5}
+                  step={0.00001}
+                  {...register("buyTargetRoyaltyPercentage")}
+                />
+              </FormControl>
+              <FormControl
+                id="sellTargetRoyaltyPercentage"
+                borderColor="gray.200"
+              >
+                <FormLabel>
+                  {symbol || targetMetadata?.data.symbol} (Sell)
+                </FormLabel>
+                <Input
+                  isRequired
+                  type="number"
+                  min={0}
+                  max={100}
+                  placeholder="5"
+                  defaultValue={5}
+                  step={0.00001}
+                  {...register("sellTargetRoyaltyPercentage")}
+                />
+              </FormControl>
+            </HStack>
+            <HStack>
+              <FormControl id="buyBaseRoyaltyPercentage" borderColor="gray.200">
+                <FormLabel>{baseMetadata?.data.symbol} (Buy)</FormLabel>
+                <Input
+                  isRequired
+                  type="number"
+                  min={0}
+                  max={100}
+                  placeholder="5"
+                  defaultValue={5}
+                  step={0.00001}
+                  {...register("buyBaseRoyaltyPercentage")}
+                />
+              </FormControl>
+              <FormControl
+                id="sellBaseRoyaltyPercentage"
+                borderColor="gray.200"
+              >
+                <FormLabel>{baseMetadata?.data.symbol} (Sell)</FormLabel>
+                <Input
+                  isRequired
+                  type="number"
+                  min={0}
+                  max={100}
+                  placeholder="5"
+                  defaultValue={5}
+                  step={0.00001}
+                  {...register("sellBaseRoyaltyPercentage")}
+                />
+              </FormControl>
+            </HStack>
+            <FormControl>
+              <FormHelperText>
+                A Percentage of coin buys/sales that will be sent to your
+                wallet. We recommend to keep this less than a combined 10% for
+                buys/sales.
+              </FormHelperText>
+            </FormControl>
+          </VStack>
           {error && (
             <Alert status="error">
               <AlertIcon />
@@ -209,14 +323,14 @@ export const EditProfile = React.memo(
             w="full"
             colorScheme="indigo"
             size="lg"
-            isLoading={state != "idle"}
+            isLoading={loading}
             type="submit"
             loadingText={
               awaitingApproval
                 ? "Awaiting Approval"
-                : state === "submit-solana"
+                : loadingState === "submit-solana"
                 ? "Sending to Solana"
-                : state === "submit-arweave"
+                : loadingState === "submit-arweave"
                 ? "Sending to Arweave"
                 : "Gathering Files"
             }
