@@ -97,13 +97,14 @@ export const TokenInfo = React.memo(
   }: {
     highlighted?: boolean;
     tokenWithMeta: ITokenWithMetaAndAccount;
-    getTokenLink: (tokenWithMeta: ITokenWithMetaAndAccount) => string;
+    getTokenLink: (tokenWithMeta: ITokenWithMetaAndAccount) => string | null;
   }) => {
     const { metadata, image, account } = tokenWithMeta;
     const fiatPrice = usePriceInUsd(account?.mint);
     const ownedAmount = useOwnedAmount(account?.mint);
 
     return (
+      // @ts-ignore there's a possibility this route is null. That's fine
       <Link to={getTokenLink(tokenWithMeta)}>
         <HStack
           padding={4}

@@ -4031,10 +4031,10 @@
     superstruct "^0.14.2"
     tweetnacl "^1.0.0"
 
-"@strata-foundation/react@^1.3.0":
-  version "1.3.0"
-  resolved "https://registry.yarnpkg.com/@strata-foundation/react/-/react-1.3.0.tgz#9a4b5433ea1248cbf961a4ec3eca4983b9354c76"
-  integrity sha512-Wmy4h5mO2gDz+gIDEzDmqXVpZhlZTJf9+CbZIeyIAnfX3AXOUPiWlkrO2FrcifL4kmWvPzFe1aXAIa2fNXTQUg==
+"@strata-foundation/react@^1.3.1":
+  version "1.3.1"
+  resolved "https://registry.yarnpkg.com/@strata-foundation/react/-/react-1.3.1.tgz#2b61686bf9c6cbd92b7118be29939fed006a900b"
+  integrity sha512-8+2/uOVv8Slmf2cntlCuFZwrGpONJL7LRjbaKRaq7Yi4ztsKlQsnuip6fOLpIkSMqxEb3ucbVGPCFsgPmrX7Ug==
   dependencies:
     "@chakra-ui/react" "^1.7.2"
     "@emotion/react" "^11.6.0"
@@ -4048,7 +4048,7 @@
     "@solana/wallet-adapter-wallets" "^0.11.1"
     "@solana/web3.js" "^1.29.2"
     "@strata-foundation/spl-token-bonding" "^1.3.0"
-    "@strata-foundation/spl-token-collective" "^1.3.0"
+    "@strata-foundation/spl-token-collective" "^1.3.1"
     "@strata-foundation/spl-utils" "^1.3.0"
     buffer "^6.0.3"
     dotenv "^10.0.0"
@@ -4073,10 +4073,10 @@
     bn.js "^5.2.0"
     copyfiles "^2.4.1"
 
-"@strata-foundation/spl-token-collective@^1.3.0":
-  version "1.3.0"
-  resolved "https://registry.yarnpkg.com/@strata-foundation/spl-token-collective/-/spl-token-collective-1.3.0.tgz#cc525d62e7d71b74024ac0f80cfeb6fb4446dbaa"
-  integrity sha512-taiyGM6K8QSfdZBcSoGo82Hho2DqJ8e/+o+bYO2/RCr/bk1lPRTSamuUBCM533Qhfhr/njQHBdAGwKa1Pp1ayQ==
+"@strata-foundation/spl-token-collective@^1.3.1":
+  version "1.3.1"
+  resolved "https://registry.yarnpkg.com/@strata-foundation/spl-token-collective/-/spl-token-collective-1.3.1.tgz#ddbed9c32978b749021712f6a718776524062f13"
+  integrity sha512-eNQsZ1bpVupzPdsnwd35wAeBJFRC5c9dP1Pv/8t46Uq4tRCvWhmGJKqS6Wa7jXu5u2FgN1wKvZLUvXSdFKlf5g==
   dependencies:
     "@bonfida/spl-name-service" "^0.1.22"
     "@project-serum/anchor" "^0.18.0"
