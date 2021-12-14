@@ -4,14 +4,18 @@ import {
   PublicKey,
   Signer,
   SystemProgram,
-  TransactionInstruction
+  TransactionInstruction,
 } from "@solana/web3.js";
 import {
-  ISwapDriverArgs, Notification, SwapForm, useBondingPricing,
+  ISwapDriverArgs,
+  Notification,
+  SwapForm,
+  useBondingPricing,
   useErrorHandler,
   useMint,
   useMintTokenRef,
-  useSwap, useSwapDriver
+  useSwap,
+  useSwapDriver,
 } from "@strata-foundation/react";
 import { ISwapArgs, toNumber } from "@strata-foundation/spl-token-bonding";
 import React from "react";
@@ -19,7 +23,7 @@ import toast from "react-hot-toast";
 import { useHistory } from "react-router-dom";
 import {
   WUMBO_TRANSACTION_FEE,
-  WUMBO_TRANSACTION_FEE_DESTINATION
+  WUMBO_TRANSACTION_FEE_DESTINATION,
 } from "../constants/globals";
 
 export const Swap = ({

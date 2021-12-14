@@ -1,13 +1,16 @@
 import { useConnection } from "@solana/wallet-adapter-react";
+import { PublicKey, Signer, TransactionInstruction } from "@solana/web3.js";
 import {
-  PublicKey, Signer, TransactionInstruction
-} from "@solana/web3.js";
-import {
-  useProvider, useStrataSdks, useTokenBonding, useTokenMetadata,
-  useTokenRef
+  useProvider,
+  useStrataSdks,
+  useTokenBonding,
+  useTokenMetadata,
+  useTokenRef,
 } from "@strata-foundation/react";
 import {
-  ARWEAVE_UPLOAD_URL, Creator, Data
+  ARWEAVE_UPLOAD_URL,
+  Creator,
+  Data,
 } from "@strata-foundation/spl-utils";
 import { useState } from "react";
 import { useAsyncCallback } from "react-async-hook";
@@ -99,7 +102,6 @@ export const useSetMetadata = (
             files = [file];
           }
 
-
           setLoadingState("submit-solana");
           const { files: presignedFiles, txid } =
             await tokenMetadataSdk!.presignCreateArweaveUrl({
@@ -108,7 +110,7 @@ export const useSetMetadata = (
               image: imageName,
               files,
               env: "mainnet-beta",
-              uploadUrl: ARWEAVE_UPLOAD_URL
+              uploadUrl: ARWEAVE_UPLOAD_URL,
             });
 
           setLoadingState("submit-arweave");
@@ -127,35 +129,36 @@ export const useSetMetadata = (
         let updateTokenBondingInstructions: TransactionInstruction[] = [];
         let updateTokenBondingSigners: Signer[] = [];
         if (tokenRef?.authority) {
-          ({ instructions: updateTokenBondingInstructions, signers: updateTokenBondingSigners } =
-            await tokenCollectiveSdk!.updateTokenBondingInstructions({
-              tokenRef: tokenRef!.publicKey,
-              buyBaseRoyaltyPercentage: args.buyBaseRoyaltyPercentage,
-              buyTargetRoyaltyPercentage: args.buyTargetRoyaltyPercentage,
-              sellBaseRoyaltyPercentage: args.sellBaseRoyaltyPercentage,
-              sellTargetRoyaltyPercentage: args.sellTargetRoyaltyPercentage,
-            }));
+          ({
+            instructions: updateTokenBondingInstructions,
+            signers: updateTokenBondingSigners,
+          } = await tokenCollectiveSdk!.updateTokenBondingInstructions({
+            tokenRef: tokenRef!.publicKey,
+            buyBaseRoyaltyPercentage: args.buyBaseRoyaltyPercentage,
+            buyTargetRoyaltyPercentage: args.buyTargetRoyaltyPercentage,
+            sellBaseRoyaltyPercentage: args.sellBaseRoyaltyPercentage,
+            sellTargetRoyaltyPercentage: args.sellTargetRoyaltyPercentage,
+          }));
         }
 
-        const { instructions: updateMetadataInstructions, signers: updateMetadataSigners } =
-          await tokenMetadataSdk!.updateMetadataInstructions({
-            metadata: tokenRef!.tokenMetadata,
-            data: new Data({
-              name: args.name,
-              symbol: args.symbol,
-              uri: arweaveLink,
-              sellerFeeBasisPoints: 0,
-              creators,
-            }),
-          });
+        const {
+          instructions: updateMetadataInstructions,
+          signers: updateMetadataSigners,
+        } = await tokenMetadataSdk!.updateMetadataInstructions({
+          metadata: tokenRef!.tokenMetadata,
+          data: new Data({
+            name: args.name,
+            symbol: args.symbol,
+            uri: arweaveLink,
+            sellerFeeBasisPoints: 0,
+            creators,
+          }),
+        });
 
         await tokenCollectiveSdk?.sendInstructions(
-          [
-            ...updateTokenBondingInstructions,
-            ...updateMetadataInstructions,
-          ],
+          [...updateTokenBondingInstructions, ...updateMetadataInstructions],
           [...updateTokenBondingSigners, ...updateMetadataSigners]
-        )
+        );
 
         return {
           metadataAccount: metadataAccountKey,
