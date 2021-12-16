@@ -3,6 +3,8 @@ import {
   ThemeProvider as ChakraThemeProvider,
   CSSReset,
   extendTheme,
+  theme as chakraTheme,
+  ChakraProvider
 } from "@chakra-ui/react";
 
 export const theme = extendTheme({
@@ -11,6 +13,7 @@ export const theme = extendTheme({
   },
   components: { Button: { baseStyle: { _focus: { boxShadow: "none" } } } },
   fonts: {
+    ...chakraTheme.fonts,
     body: `Avenir,Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol"`,
     heading: `Avenir,Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol"`,
   },
@@ -55,9 +58,7 @@ export const theme = extendTheme({
 });
 
 export const ThemeProvider: FC = ({ children }) => (
-  <ChakraThemeProvider theme={theme}>
-    <CSSReset />
-
+  <ChakraProvider resetCSS theme={theme}>
     {children}
-  </ChakraThemeProvider>
+  </ChakraProvider>
 );

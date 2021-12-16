@@ -30,7 +30,7 @@ const Element = React.memo(
     onClick,
   }: {
     tokenBondingKey: PublicKey;
-    onClick?: (tokenRefKey: PublicKey) => void;
+    onClick?: (mintKey: PublicKey) => void;
   }) => {
     const { pricing } = useBondingPricing(tokenBondingKey);
     const { info: tokenBonding } = useTokenBonding(tokenBondingKey);
@@ -44,7 +44,7 @@ const Element = React.memo(
     return (
       <UserLeaderboardElement
         amount={amount}
-        onClick={() => tokenRef && onClick && onClick(tokenRef.publicKey)}
+        onClick={() => tokenRef && onClick && onClick(tokenRef.mint)}
         tokenRef={tokenRef}
       />
     );

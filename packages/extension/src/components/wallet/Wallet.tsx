@@ -28,7 +28,7 @@ export const Wallet = () => {
             solLink={solLink}
             getTokenLink={(t) =>
               t.tokenRef
-                ? viewProfilePath(t.tokenRef.publicKey)
+                ? viewProfilePath(t.tokenRef.mint)
                 : t.tokenBonding
                 ? swapPath(
                     t.tokenBonding.publicKey,

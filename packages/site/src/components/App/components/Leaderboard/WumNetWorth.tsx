@@ -12,7 +12,7 @@ export const WumNetWorth = () => {
   return (
     <WumNetWorthLeaderboard
       wallet={passedWallet}
-      onAccountClick={(tokenRefKey) => history.push(profilePath(tokenRefKey))}
+      onAccountClick={(mintKey) => history.push(profilePath(mintKey))}
     />
   );
 };

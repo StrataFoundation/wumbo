@@ -18,8 +18,8 @@ export const TopTokens = () => {
       <WumboDrawer.Content>
         <TopTokenLeaderboard
           tokenBondingKey={passedTokenBondingKey}
-          onAccountClick={(tokenRefKey) =>
-            history.push(viewProfilePath(tokenRefKey))
+          onAccountClick={(mintKey) =>
+            history.push(viewProfilePath(mintKey))
           }
         />
       </WumboDrawer.Content>

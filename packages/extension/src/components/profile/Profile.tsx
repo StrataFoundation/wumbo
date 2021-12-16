@@ -5,9 +5,9 @@ import { Profile as CommonProfile } from "wumbo-common";
 import {
   useTokenRef,
   useClaimedTokenRefKey,
+  usePublicKey,
   useTokenMetadata,
-  useErrorHandler,
-  useTokenBonding,
+  useTokenBondingFromMint,
 } from "@strata-foundation/react";
 import { WumboDrawer } from "../WumboDrawer";
 import {
@@ -24,35 +24,25 @@ import { useClaimFlow } from "@/utils/claim";
 import { Box } from "@chakra-ui/react";
 
 export const Profile = () => {
-  const params = useParams<{ tokenRefKey: string | undefined }>();
+  const params = useParams<{ mint: string | undefined }>();
   const { connected, adapter } = useWallet();
   const publicKey = adapter?.publicKey;
-  const walletTokenRefKey = useClaimedTokenRefKey(publicKey, null);
-  const passedTokenRefKey = params.tokenRefKey
-    ? new PublicKey(params.tokenRefKey)
-    : undefined;
-  const tokenRefKey = passedTokenRefKey || walletTokenRefKey;
-  const { info: tokenRef, loading } = useTokenRef(tokenRefKey);
-  const { info: tokenBonding } = useTokenBonding(tokenRef?.tokenBonding);
-  const {
-    metadata,
-    loading: loadingMetadata,
-    error: tokenMetadataError,
-  } = useTokenMetadata(tokenRef?.mint);
-  const { handleErrors } = useErrorHandler();
-  handleErrors(tokenMetadataError);
-
+  const walletMintKey = useClaimedTokenRefKey(publicKey, null);
+  const { info: walletTokenRef, loading } = useTokenRef(walletMintKey);
+  const passedMintKey = usePublicKey(params.mint)
+  const mintKey = passedMintKey || walletTokenRef?.mint;
   const history = useHistory();
-
-  if (!tokenRefKey || !connected) {
+  const { info: tokenBonding } = useTokenBondingFromMint(mintKey);
+  const { metadata } = useTokenMetadata(mintKey)
+  if (!connected) {
     return <WalletRedirect />;
   }
 
-  if (loading || loadingMetadata) {
+  if (loading) {
     return <WumboDrawer.Loading />;
   }
 
-  if (!passedTokenRefKey && !tokenRef) {
+  if (!mintKey) {
     return (
       <Fragment>
         <WumboDrawer.Header title="Profile" />
@@ -73,31 +63,27 @@ export const Profile = () => {
       <WumboDrawer.Header title={metadata?.data.name || "View Profile"} />
       <WumboDrawer.Content>
         <CommonProfile
-          topTokensPath={
-            tokenRef?.tokenBonding ? topTokensPath(tokenRef.tokenBonding) : ""
-          }
-          wumNetWorthPath={
-            tokenRef?.owner ? wumNetWorthPath(tokenRef.owner as PublicKey) : ""
-          }
+          collectivePath={tokenBonding ? viewProfilePath(tokenBonding.baseMint) : null}
           editPath={routes.editProfile.path}
           useClaimFlow={useClaimFlow}
-          tokenRefKey={tokenRefKey}
-          onAccountClick={(tokenRefKey) =>
-            history.push(viewProfilePath(tokenRefKey))
+          mintKey={mintKey}
+          onAccountClick={(mintKey) =>
+            history.push(viewProfilePath(mintKey))
           }
           onTradeClick={() =>
-            tokenRef?.tokenBonding &&
+            tokenBonding &&
             history.push(
               swapPath(
-                tokenRef.tokenBonding,
+                tokenBonding.publicKey,
                 tokenBonding!.baseMint,
                 tokenBonding!.targetMint
               )
             )
           }
-          getNftLink={(token) =>
-            tokenRef?.mint ? nftPath(tokenRef?.mint) : ""
-          }
+          getNftLink={(token) => {
+            const mint = token?.metadata?.mint;
+            return mint ? nftPath(new PublicKey(mint)) : "";
+          }}
         />
       </WumboDrawer.Content>
       <WumboDrawer.Nav />

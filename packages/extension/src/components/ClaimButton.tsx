@@ -70,7 +70,7 @@ export const ClaimButton: FC<Props> = ({
   return (
     <Button
       as={Link}
-      to={`${viewProfilePath(creatorInfo.tokenRef.publicKey)}?name=${
+      to={`${viewProfilePath(creatorInfo.tokenRef.mint)}?name=${
         creatorInfo.name
       }`}
       size="xs"

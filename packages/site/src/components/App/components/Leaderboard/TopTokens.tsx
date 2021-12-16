@@ -14,7 +14,7 @@ export const TopTokens = () => {
   return (
     <TopTokenLeaderboard
       tokenBondingKey={passedTokenBondingKey}
-      onAccountClick={(tokenRefKey) => history.push(profilePath(tokenRefKey))}
+      onAccountClick={(mintKey) => history.push(profilePath(mintKey))}
     />
   );
 };

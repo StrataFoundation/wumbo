@@ -118,7 +118,7 @@ WumboDrawer.Header = (props: HeaderProps) => {
               }}
               to={historyList[historyList.length - 2]}
             >
-              <Box>
+              <Flex alignItems="center">
                 <Icon
                   mr={2}
                   w={5}
@@ -128,7 +128,7 @@ WumboDrawer.Header = (props: HeaderProps) => {
                   fontWeight="medium"
                   color="indigo.500"
                 />
-              </Box>
+              </Flex>
             </Link>
           )}
           {hasTitle && (
@@ -155,7 +155,7 @@ WumboDrawer.Header = (props: HeaderProps) => {
                   fontWeight="bold"
                   position="absolute"
                   left={-1}
-                  bottom={-1}
+                  bottom={0}
                   as={BiRadioCircleMarked}
                   color={connected ? "green.500" : "red.500"}
                 />
