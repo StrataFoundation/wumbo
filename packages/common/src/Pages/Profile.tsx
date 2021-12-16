@@ -45,10 +45,14 @@ import { TROPHY_CREATOR } from "../constants/globals";
 import { FaChevronRight } from "react-icons/fa";
 import { useWallet } from "@solana/wallet-adapter-react";
 import { NATIVE_MINT } from "@solana/spl-token";
-import { TokenBondingRecentTransactionsProvider, useTokenBondingRecentTransactions } from "../contexts";
+import {
+  TokenBondingRecentTransactionsProvider,
+  useTokenBondingRecentTransactions,
+} from "../contexts";
 import { TopTokenLeaderboard } from "../Leaderboard";
 
-interface IProfileProps extends Pick<ISocialTokenTabsProps, "onAccountClick" | "getNftLink"> {
+interface IProfileProps
+  extends Pick<ISocialTokenTabsProps, "onAccountClick" | "getNftLink"> {
   mintKey: PublicKey;
   editPath: string;
   collectivePath: string | null;
@@ -75,23 +79,32 @@ const GET_TOKEN_RANK = gql`
 `;
 
 const VolumeCard = ({ baseMint }: { baseMint: PublicKey }) => {
-  const { transactions, loading, error, hasMore } = useTokenBondingRecentTransactions();
+  const { transactions, loading, error, hasMore } =
+    useTokenBondingRecentTransactions();
   const coinPriceUsd = usePriceInUsd(baseMint);
 
   const { handleErrors } = useErrorHandler();
   handleErrors(error);
-  
+
   if (loading || !coinPriceUsd) {
-    return <StatCard label="24h Volume" value="Loading..." />
+    return <StatCard label="24h Volume" value="Loading..." />;
   }
 
   const totalBaseMintChange = (transactions || []).reduce((acc, txn) => {
-    return acc + Math.abs(txn.baseAmount)
-  }, 0)
+    return acc + Math.abs(txn.baseAmount);
+  }, 0);
 
-
-  return <StatCard label="24h Volume" value={"$" + (totalBaseMintChange * coinPriceUsd).toFixed(2) + (hasMore ? "+" : "")} />
-}
+  return (
+    <StatCard
+      label="24h Volume"
+      value={
+        "$" +
+        (totalBaseMintChange * coinPriceUsd).toFixed(2) +
+        (hasMore ? "+" : "")
+      }
+    />
+  );
+};
 
 export const Profile = React.memo(
   ({
@@ -120,7 +133,9 @@ export const Profile = React.memo(
       loading: loadingCollectiveMetadata,
       error: collectiveMetadataError,
     } = useTokenMetadata(tokenBonding?.baseMint);
-    const baseMintTokenBonding = useTokenBondingFromMint(tokenBonding?.baseMint);
+    const baseMintTokenBonding = useTokenBondingFromMint(
+      tokenBonding?.baseMint
+    );
     const baseIsCollective = !!baseMintTokenBonding.info;
 
     const { awaitingApproval } = useProvider();
@@ -143,7 +158,9 @@ export const Profile = React.memo(
     const coinPriceUsd = toFiat(pricing?.current(NATIVE_MINT) || 0);
     const nativeLocked = pricing?.locked(NATIVE_MINT);
     const fiatLocked =
-      mint && typeof nativeLocked !== "undefined" && toFiat(nativeLocked || 0).toFixed(2);
+      mint &&
+      typeof nativeLocked !== "undefined" &&
+      toFiat(nativeLocked || 0).toFixed(2);
 
     const query = useQuery();
     let { handle, error: reverseTwitterError2 } =
@@ -165,7 +182,13 @@ export const Profile = React.memo(
       collectiveMetadataError
     );
 
-    if (loading || tokenBondingLoading || !tokenBonding || loadingMetadata || loadingCollectiveMetadata) {
+    if (
+      loading ||
+      tokenBondingLoading ||
+      !tokenBonding ||
+      loadingMetadata ||
+      loadingCollectiveMetadata
+    ) {
       return <Spinner />;
     }
 
@@ -173,7 +196,9 @@ export const Profile = React.memo(
       <PlainLink href={`https://twitter.com/${handle}`}>@{handle}</PlainLink>
     );
     return (
-      <TokenBondingRecentTransactionsProvider tokenBonding={tokenBonding.publicKey}>
+      <TokenBondingRecentTransactionsProvider
+        tokenBonding={tokenBonding.publicKey}
+      >
         <VStack w="full" spacing={4} padding={4}>
           <HStack spacing={2} w="full" alignItems="start">
             <VStack spacing={"6px"} alignItems="start">
@@ -189,7 +214,10 @@ export const Profile = React.memo(
                 </Text>
                 {myTokenRefKey &&
                   walletTokenRef?.publicKey.equals(myTokenRefKey) && (
-                    <Link style={{ display: "flex" , alignItems: "center" }} to={editPath}>
+                    <Link
+                      style={{ display: "flex", alignItems: "center" }}
+                      to={editPath}
+                    >
                       <Icon
                         as={HiOutlinePencilAlt}
                         w={5}
@@ -211,26 +239,44 @@ export const Profile = React.memo(
             </VStack>
             <Spacer />
             <VStack spacing={2} alignItems="stretch">
-              { baseIsCollective && collectivePath && collectiveMetadata && <Link to={collectivePath}>
-                <HStack
-                  _hover={{ cursor: "pointer", bgColor: "gray.100" }}
-                  w="full"
-                  spacing={2}
-                  padding={2}
-                  rounded="lg"
-                  borderWidth="2px"
-                  borderColor="gray.100"
-                >
-                  <Avatar src={collectiveImage} w="24px" h="24px" />
-                  <Flex justifyContent="space-between" flexDir="column" flexGrow={1} lineHeight="normal">
-                    <Text lineHeight="14.4px" fontWeight={800} fontSize="12px">{ collectiveMetadata?.data.symbol }</Text>
-                    <Text fontSize="10px" color="gray.500">
-                      {collectiveMetadata?.data.name}
-                    </Text>
-                  </Flex>
-                  <Icon justifySelf="end" as={FaChevronRight} color="gray.400" height="16px" />
-                </HStack>
-              </Link> }
+              {baseIsCollective && collectivePath && collectiveMetadata && (
+                <Link to={collectivePath}>
+                  <HStack
+                    _hover={{ cursor: "pointer", bgColor: "gray.100" }}
+                    w="full"
+                    spacing={2}
+                    padding={2}
+                    rounded="lg"
+                    borderWidth="2px"
+                    borderColor="gray.100"
+                  >
+                    <Avatar src={collectiveImage} w="24px" h="24px" />
+                    <Flex
+                      justifyContent="space-between"
+                      flexDir="column"
+                      flexGrow={1}
+                      lineHeight="normal"
+                    >
+                      <Text
+                        lineHeight="14.4px"
+                        fontWeight={800}
+                        fontSize="12px"
+                      >
+                        {collectiveMetadata?.data.symbol}
+                      </Text>
+                      <Text fontSize="10px" color="gray.500">
+                        {collectiveMetadata?.data.name}
+                      </Text>
+                    </Flex>
+                    <Icon
+                      justifySelf="end"
+                      as={FaChevronRight}
+                      color="gray.400"
+                      height="16px"
+                    />
+                  </HStack>
+                </Link>
+              )}
             </VStack>
           </HStack>
           <HStack spacing={2} w="full">
@@ -261,13 +307,24 @@ export const Profile = React.memo(
           </HStack>
           <HStack spacing={4} w="full" alignItems="stretch">
             <StatCard label="Supply" value={supply.toFixed(2)} />
-            <StatCard label="Total Locked" value={fiatLocked ? "$" + fiatLocked : "Loading..."} />
+            <StatCard
+              label="Total Locked"
+              value={fiatLocked ? "$" + fiatLocked : "Loading..."}
+            />
             <VolumeCard baseMint={tokenBonding.baseMint} />
           </HStack>
-          { tokenRef ? 
-            <SocialTokenTabs onAccountClick={onAccountClick} mintKey={mintKey} getNftLink={getNftLink} /> : 
-            <CollectiveTabs onAccountClick={onAccountClick} tokenBondingKey={tokenBonding.publicKey} />
-          }
+          {tokenRef ? (
+            <SocialTokenTabs
+              onAccountClick={onAccountClick}
+              mintKey={mintKey}
+              getNftLink={getNftLink}
+            />
+          ) : (
+            <CollectiveTabs
+              onAccountClick={onAccountClick}
+              tokenBondingKey={tokenBonding.publicKey}
+            />
+          )}
         </VStack>
       </TokenBondingRecentTransactionsProvider>
     );
@@ -280,7 +337,11 @@ interface ISocialTokenTabsProps {
   getNftLink: (t: ITokenWithMetaAndAccount) => string;
 }
 
-function SocialTokenTabs({ mintKey, onAccountClick, getNftLink }: ISocialTokenTabsProps) {
+function SocialTokenTabs({
+  mintKey,
+  onAccountClick,
+  getNftLink,
+}: ISocialTokenTabsProps) {
   const { info: tokenRef, loading } = useMintTokenRef(mintKey);
   const ownerWalletKey = tokenRef?.owner as PublicKey | undefined;
 
@@ -291,10 +352,7 @@ function SocialTokenTabs({ mintKey, onAccountClick, getNftLink }: ISocialTokenTa
   } = useUserTokensWithMeta(ownerWalletKey);
   const { handleErrors } = useErrorHandler();
 
-  handleErrors(
-    error,
-  );
-
+  handleErrors(error);
 
   function isTrophy(t: ITokenWithMetaAndAccount): boolean {
     return Boolean(
@@ -309,79 +367,83 @@ function SocialTokenTabs({ mintKey, onAccountClick, getNftLink }: ISocialTokenTa
     );
   }
 
-  return <Tabs isFitted w="full">
-    <TabList>
-      <Tab
-        color="gray.300"
-        borderColor="gray.300"
-        _selected={{ color: "indigo.500", borderColor: "indigo.500" }}
-      >
-        Backers
-      </Tab>
-      <Tab
-        color="gray.300"
-        borderColor="gray.300"
-        _selected={{ color: "indigo.500", borderColor: "indigo.500" }}
-      >
-        Collectibles
-      </Tab>
-      <Tab
-        color="gray.300"
-        borderColor="gray.300"
-        _selected={{ color: "indigo.500", borderColor: "indigo.500" }}
-      >
-        Trophies
-      </Tab>
-    </TabList>
+  return (
+    <Tabs isFitted w="full">
+      <TabList>
+        <Tab
+          color="gray.300"
+          borderColor="gray.300"
+          _selected={{ color: "indigo.500", borderColor: "indigo.500" }}
+        >
+          Backers
+        </Tab>
+        <Tab
+          color="gray.300"
+          borderColor="gray.300"
+          _selected={{ color: "indigo.500", borderColor: "indigo.500" }}
+        >
+          Collectibles
+        </Tab>
+        <Tab
+          color="gray.300"
+          borderColor="gray.300"
+          _selected={{ color: "indigo.500", borderColor: "indigo.500" }}
+        >
+          Trophies
+        </Tab>
+      </TabList>
 
-    <TabPanels>
-      <TabPanel paddingX={0}>
-        <TokenLeaderboard
-          onAccountClick={onAccountClick}
-          mintKey={mintKey}
-        />
-      </TabPanel>
-      <TabPanel paddingX={0}>
-        <NftListRaw
-          loading={loadingCollectibles}
-          tokens={tokens?.filter((t) => !isTrophy(t))}
-          getLink={getNftLink}
-        />
-      </TabPanel>
-      <TabPanel paddingX={0}>
-        <NftListRaw
-          loading={loadingCollectibles}
-          tokens={tokens?.filter((t) => isTrophy(t))}
-          getLink={getNftLink}
-        />
-      </TabPanel>
-    </TabPanels>
-  </Tabs>
+      <TabPanels>
+        <TabPanel paddingX={0}>
+          <TokenLeaderboard onAccountClick={onAccountClick} mintKey={mintKey} />
+        </TabPanel>
+        <TabPanel paddingX={0}>
+          <NftListRaw
+            loading={loadingCollectibles}
+            tokens={tokens?.filter((t) => !isTrophy(t))}
+            getLink={getNftLink}
+          />
+        </TabPanel>
+        <TabPanel paddingX={0}>
+          <NftListRaw
+            loading={loadingCollectibles}
+            tokens={tokens?.filter((t) => isTrophy(t))}
+            getLink={getNftLink}
+          />
+        </TabPanel>
+      </TabPanels>
+    </Tabs>
+  );
 }
 
 interface ICollectiveTabsProps {
   tokenBondingKey: PublicKey;
   onAccountClick?: (mintKey: PublicKey) => void;
 }
-function CollectiveTabs({ tokenBondingKey, onAccountClick }: ICollectiveTabsProps) {
-  return <Tabs isFitted w="full">
-    <TabList>
-      <Tab
-        color="gray.300"
-        borderColor="gray.300"
-        _selected={{ color: "indigo.500", borderColor: "indigo.500" }}
-      >
-        Top Tokens
-      </Tab>
-    </TabList>
+function CollectiveTabs({
+  tokenBondingKey,
+  onAccountClick,
+}: ICollectiveTabsProps) {
+  return (
+    <Tabs isFitted w="full">
+      <TabList>
+        <Tab
+          color="gray.300"
+          borderColor="gray.300"
+          _selected={{ color: "indigo.500", borderColor: "indigo.500" }}
+        >
+          Top Tokens
+        </Tab>
+      </TabList>
 
-    <TabPanels>
-      <TabPanel paddingX={0}>
-        <TopTokenLeaderboard
-          onAccountClick={onAccountClick}
-          tokenBondingKey={tokenBondingKey}
-        />
-      </TabPanel>
-    </TabPanels>
-  </Tabs>
+      <TabPanels>
+        <TabPanel paddingX={0}>
+          <TopTokenLeaderboard
+            onAccountClick={onAccountClick}
+            tokenBondingKey={tokenBondingKey}
+          />
+        </TabPanel>
+      </TabPanels>
+    </Tabs>
+  );
 }

@@ -5,7 +5,13 @@ import { useWallet } from "@solana/wallet-adapter-react";
 import { Box } from "@chakra-ui/react";
 import { Profile, Spinner } from "wumbo-common";
 import { ITokenWithMetaAndAccount } from "@strata-foundation/spl-token-collective";
-import { useClaimedTokenRefKey, usePublicKey, useTokenBonding, useTokenBondingFromMint, useTokenRef } from "@strata-foundation/react";
+import {
+  useClaimedTokenRefKey,
+  usePublicKey,
+  useTokenBonding,
+  useTokenBondingFromMint,
+  useTokenRef,
+} from "@strata-foundation/react";
 import {
   AppRoutes,
   profilePath,
@@ -20,7 +26,7 @@ export const ViewProfileRoute: React.FC = () => {
   const publicKey = adapter?.publicKey;
   const walletMintKey = useClaimedTokenRefKey(publicKey, null);
   const { info: walletTokenRef, loading } = useTokenRef(walletMintKey);
-  const passedMintKey = usePublicKey(params.mint)
+  const passedMintKey = usePublicKey(params.mint);
   const mintKey = passedMintKey || walletTokenRef?.mint;
   const history = useHistory();
   const { info: tokenBonding } = useTokenBondingFromMint(mintKey);

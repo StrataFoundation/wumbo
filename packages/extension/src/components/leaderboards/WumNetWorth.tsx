@@ -16,9 +16,7 @@ export const WumNetWorth = () => {
       <WumboDrawer.Content>
         <WumNetWorthLeaderboard
           wallet={passedWallet}
-          onAccountClick={(mintKey) =>
-            history.push(viewProfilePath(mintKey))
-          }
+          onAccountClick={(mintKey) => history.push(viewProfilePath(mintKey))}
         />
       </WumboDrawer.Content>
       <WumboDrawer.Nav />

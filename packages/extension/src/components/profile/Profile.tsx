@@ -29,11 +29,11 @@ export const Profile = () => {
   const publicKey = adapter?.publicKey;
   const walletMintKey = useClaimedTokenRefKey(publicKey, null);
   const { info: walletTokenRef, loading } = useTokenRef(walletMintKey);
-  const passedMintKey = usePublicKey(params.mint)
+  const passedMintKey = usePublicKey(params.mint);
   const mintKey = passedMintKey || walletTokenRef?.mint;
   const history = useHistory();
   const { info: tokenBonding } = useTokenBondingFromMint(mintKey);
-  const { metadata } = useTokenMetadata(mintKey)
+  const { metadata } = useTokenMetadata(mintKey);
   if (!connected) {
     return <WalletRedirect />;
   }
@@ -63,13 +63,13 @@ export const Profile = () => {
       <WumboDrawer.Header title={metadata?.data.name || "View Profile"} />
       <WumboDrawer.Content>
         <CommonProfile
-          collectivePath={tokenBonding ? viewProfilePath(tokenBonding.baseMint) : null}
+          collectivePath={
+            tokenBonding ? viewProfilePath(tokenBonding.baseMint) : null
+          }
           editPath={routes.editProfile.path}
           useClaimFlow={useClaimFlow}
           mintKey={mintKey}
-          onAccountClick={(mintKey) =>
-            history.push(viewProfilePath(mintKey))
-          }
+          onAccountClick={(mintKey) => history.push(viewProfilePath(mintKey))}
           onTradeClick={() =>
             tokenBonding &&
             history.push(

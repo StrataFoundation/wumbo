@@ -4,7 +4,7 @@ import {
   CSSReset,
   extendTheme,
   theme as chakraTheme,
-  ChakraProvider
+  ChakraProvider,
 } from "@chakra-ui/react";
 
 export const theme = extendTheme({

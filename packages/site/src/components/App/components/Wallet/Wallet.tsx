@@ -22,14 +22,14 @@ export default React.memo(() => {
         wumLeaderboardLink={publicKey ? wumNetWorthPath(publicKey) : ""}
         getTokenLink={(t) =>
           t.tokenRef
-          ? profilePath(t.tokenRef.mint)
-          : t.tokenBonding
-          ? swapPath(
-              t.tokenBonding.publicKey,
-              t.tokenBonding.baseMint,
-              t.tokenBonding.targetMint
-            )
-          : null
+            ? profilePath(t.tokenRef.mint)
+            : t.tokenBonding
+            ? swapPath(
+                t.tokenBonding.publicKey,
+                t.tokenBonding.baseMint,
+                t.tokenBonding.targetMint
+              )
+            : null
         }
         solLink={solLink}
         sendLink={AppRoutes.sendSearch.path}
