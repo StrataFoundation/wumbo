@@ -251,6 +251,7 @@ export const EditProfile = React.memo(
                   max={100}
                   placeholder="5"
                   defaultValue={5}
+                  step={0.00001}
                   {...register("buyTargetRoyaltyPercentage")}
                 />
               </FormControl>
@@ -268,6 +269,7 @@ export const EditProfile = React.memo(
                   max={100}
                   placeholder="5"
                   defaultValue={5}
+                  step={0.00001}
                   {...register("sellTargetRoyaltyPercentage")}
                 />
               </FormControl>
@@ -282,6 +284,7 @@ export const EditProfile = React.memo(
                   max={100}
                   placeholder="5"
                   defaultValue={5}
+                  step={0.00001}
                   {...register("buyBaseRoyaltyPercentage")}
                 />
               </FormControl>
@@ -297,6 +300,7 @@ export const EditProfile = React.memo(
                   max={100}
                   placeholder="5"
                   defaultValue={5}
+                  step={0.00001}
                   {...register("sellBaseRoyaltyPercentage")}
                 />
               </FormControl>

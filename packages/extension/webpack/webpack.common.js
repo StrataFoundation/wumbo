@@ -8,6 +8,7 @@ const TsconfigPathsPlugin = require("tsconfig-paths-webpack-plugin");
 
 module.exports = {
   entry: {
+    background: path.join(srcDir, "pages/background/index.ts"),
     content_script: path.join(srcDir, "pages/content/index.tsx"),
     oauth: path.join((srcDir, "pages/oauth/index.tsx")),
     wallet_proxy: path.join((srcDir, "pages/wallet-proxy/index.ts")),
@@ -68,12 +69,13 @@ module.exports = {
       "@solana/wallet-ledger": path.resolve(
         "../../node_modules/@solana/wallet-ledger/dist/lib/index.js"
       ),
+      "@chakra-ui/react": path.resolve("../../node_modules/@chakra-ui/react"),
+      "@solana/wallet-adapter-react": path.resolve("../../node_modules/@solana/wallet-adapter-react"),
       ...process.env.LINKED_DEV ? {
-        "@chakra-ui/react": path.resolve("../../node_modules/@chakra-ui/react"),
-        "@solana/wallet-adapter-react": path.resolve("../../node_modules/@solana/wallet-adapter-react"),
         "@strata-foundation/react": path.resolve("./node_modules/@strata-foundation/react"),
         "@strata-foundation/spl-token-bonding": path.resolve("./node_modules/@strata-foundation/spl-token-bonding"),
-        "@strata-foundation/spl-utils": path.resolve("./node_modules/@strata-foundation/spl-utils")
+        "@strata-foundation/spl-utils": path.resolve("./node_modules/@strata-foundation/spl-utils"),
+        "@strata-foundation/spl-token-collective": path.resolve("./node_modules/@strata-foundation/spl-token-collective")
       } : {}
     },
   },

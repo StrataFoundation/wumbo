@@ -27,7 +27,15 @@ export const Wallet = () => {
             wumLeaderboardLink={publicKey ? wumNetWorthPath(publicKey) : ""}
             solLink={solLink}
             getTokenLink={(t) =>
-              t.tokenRef ? viewProfilePath(t.tokenRef.publicKey) : ""
+              t.tokenRef
+                ? viewProfilePath(t.tokenRef.publicKey)
+                : t.tokenBonding
+                ? swapPath(
+                    t.tokenBonding.publicKey,
+                    t.tokenBonding.baseMint,
+                    t.tokenBonding.targetMint
+                  )
+                : null
             }
           />
         </Box>
