@@ -1,13 +1,23 @@
 import React from "react";
-import { Center, HStack, Icon, Text, Button } from "@chakra-ui/react";
+import {
+  Center,
+  HStack,
+  Icon,
+  Text,
+  Button,
+  CenterProps,
+} from "@chakra-ui/react";
 import { WumboIcon } from "wumbo-common";
 import { useModal } from "../../../../contexts";
 
-export interface IHeaderProps {
+export interface IHeaderProps extends CenterProps {
   color?: "white";
 }
 
-export const Header = ({ color = "white" }: IHeaderProps) => {
+export const Header: React.FC<IHeaderProps> = ({
+  color = "white",
+  ...centerProps
+}) => {
   const { showModal } = useModal();
 
   return (
@@ -16,18 +26,15 @@ export const Header = ({ color = "white" }: IHeaderProps) => {
       justifyContent="space-between"
       alignItems="center"
       color={color}
+      {...centerProps}
     >
       <HStack spacing={4}>
         <Icon as={WumboIcon} w={10} h={10} />
         <Text fontSize="xl">Wum.bo</Text>
       </HStack>
-      <HStack spacing={6}>
-        <Button
-          size="md"
-          variant="ghost"
-          _hover={{ color: "indigo.500", bg: "white" }}
-        >
-          Read Whitepaper
+      <HStack spacing={12}>
+        <Button color="white" size="md" variant="link">
+          Blog
         </Button>
         <Button
           size="md"
@@ -36,7 +43,7 @@ export const Header = ({ color = "white" }: IHeaderProps) => {
           _hover={{ color: "indigo.500", bg: "white" }}
           onClick={() => showModal("BetaDownload")}
         >
-          Download Extension
+          Download Wumbo Now
         </Button>
       </HStack>
     </Center>
