@@ -28,14 +28,6 @@ export const TokenBondingRecentTransactions =
     hasMore: false,
   });
 
-function sanitizeSolMint(mint: PublicKey): PublicKey {
-  if (mint.equals(NATIVE_MINT)) {
-    return SplTokenBonding.WRAPPED_SOL_MINT;
-  }
-
-  return mint;
-}
-
 /**
  * Gets the last 24h of bonding transactions
  * @param connection

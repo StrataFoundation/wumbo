@@ -16,6 +16,7 @@ import {
   TabPanel,
   Link as PlainLink,
   Flex,
+  Box,
 } from "@chakra-ui/react";
 import { HiOutlinePencilAlt } from "react-icons/hi";
 import {
@@ -308,6 +309,9 @@ export const Profile = React.memo(
           <HStack spacing={4} w="full" alignItems="stretch">
             <StatCard label="Supply" value={supply.toFixed(2)} />
             <StatCard
+              _hover={{ cursor: "pointer", opacity: 0.8 }}
+              tag="#123"
+              tier="Green"
               label="Total Locked"
               value={fiatLocked ? "$" + fiatLocked : "Loading..."}
             />
