@@ -18,7 +18,7 @@ export const Hero: React.FC = () => {
     <Box
       bg="linear-gradient(272.23deg, #5D34A9 -0.32%, #413BB1 93.88%), #FFFFFF;"
       position="relative"
-      overflow="hidden"
+      overflow={isLargerThan1280 ? "visible" : "hidden"}
     >
       <LandingLayout>
         <Flex
