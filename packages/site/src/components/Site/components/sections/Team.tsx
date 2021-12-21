@@ -29,18 +29,13 @@ const TeamMember: React.FC<ITeamMemberProps> = ({
   discord,
 }) => (
   <VStack>
-    <Box padding={4}>
-      <Image
-        rounded="lg"
-        src={image}
-        w={{ base: "140px", md: "180px" }}
-        h={{ base: "140px", md: "180px" }}
-      />
+    <Box w={{ base: "140px", md: "180px" }} h={{ base: "140px", md: "180px" }}>
+      <Image w="100%" h="100%" objectFit="cover" rounded="lg" src={image} />
     </Box>
     <Text fontSize="lg" fontWeight="bold">
       {name}
     </Text>
-    <Text>{title}</Text>
+    <Text fontSize="">{title}</Text>
     <HStack>
       <Link to={{ pathname: twitter }} target="_blank">
         <Icon
@@ -84,7 +79,16 @@ export const Team: React.FC = () => (
           >
             Our Team
           </Heading>
-          <HStack alignItems="start">
+          <HStack
+            alignItems="start"
+            spacing={8}
+            wrap="wrap"
+            justify={{
+              base: "center",
+              md: "space-around",
+              xl: "space-between",
+            }}
+          >
             <TeamMember
               image={process.env.PUBLIC_URL + "noah.png"}
               name="Noah Prince"
@@ -98,6 +102,13 @@ export const Team: React.FC = () => (
               title="Co-Founder"
               twitter="https://twitter.com/bryzettler"
               discord="https://discordapp.com/users/471329633623605290"
+            />
+            <TeamMember
+              image={process.env.PUBLIC_URL + "frank.png"}
+              name="Frank Daniel de Czito"
+              title="Marketing & Community"
+              twitter="https://twitter.com/otterlytheotter"
+              discord="https://discordapp.com/users/865370454020325426"
             />
           </HStack>
         </VStack>

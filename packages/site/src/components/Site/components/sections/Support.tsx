@@ -29,6 +29,7 @@ const SupportItem: React.FC<ISupportItemProps> = ({
     >
       <Image
         src={image}
+        size="100%"
         w={{ base: "45px", md: "90px" }}
         h={{ base: "45px", md: "90px" }}
       />
