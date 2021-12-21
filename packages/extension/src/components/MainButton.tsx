@@ -11,6 +11,7 @@ type Props = {
   creatorImg: string;
   btnProps?: ButtonProps;
   spinnerProps?: SpinnerProps;
+  buttonTarget?: HTMLElement,
 };
 
 export const MainButton: FC<Props> = ({
@@ -18,6 +19,7 @@ export const MainButton: FC<Props> = ({
   creatorImg,
   btnProps = {},
   spinnerProps = {},
+  buttonTarget
 }: Props) => {
   const { toggleDrawer } = useDrawer();
   const tld = useTwitterTld();
@@ -58,6 +60,7 @@ export const MainButton: FC<Props> = ({
 
   return (
     <PriceButton
+      buttonTarget={buttonTarget}
       link={`${viewProfilePath(tokenRef.mint)}?name=${creatorName}`}
       onClick={() =>
         toggleDrawer({

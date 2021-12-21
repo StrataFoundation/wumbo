@@ -28,6 +28,7 @@ export const ProfileEnhancer = () => {
     const buttonEl = profile.buttonTarget ? (
       profile.type == "mine" ? (
         <ClaimButton
+          buttonTarget={profile.buttonTarget}
           creatorName={profile.name}
           creatorImg={profile.avatar || ""}
           btnProps={{
@@ -40,7 +41,8 @@ export const ProfileEnhancer = () => {
         />
       ) : (
         <MainButton
-          creatorName={profile.name}
+        buttonTarget={profile.buttonTarget}
+        creatorName={profile.name}
           creatorImg={profile.avatar || ""}
           btnProps={{
             size: "md",
