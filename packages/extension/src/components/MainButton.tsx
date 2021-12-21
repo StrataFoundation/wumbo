@@ -13,7 +13,6 @@ type Props = {
   spinnerProps?: SpinnerProps;
 };
 
-
 export const MainButton: FC<Props> = ({
   creatorName,
   creatorImg,
@@ -21,7 +20,7 @@ export const MainButton: FC<Props> = ({
   spinnerProps = {},
 }: Props) => {
   const { toggleDrawer } = useDrawer();
-  const tld = useTwitterTld()
+  const tld = useTwitterTld();
   const { info: tokenRef, loading } = useTokenRefForName(
     creatorName,
     null,
@@ -57,19 +56,17 @@ export const MainButton: FC<Props> = ({
     return <Spinner size="sm" {...spinnerProps} />;
   }
 
-  return <PriceButton
-    link={
-      `${viewProfilePath(tokenRef.mint)}?name=${
-        creatorName
-      }`
-    }
-    onClick={() =>
-      toggleDrawer({
-        isOpen: true,
-        creator: { name: creatorName, img: creatorImg },
-      })
-    }
-    tokenBonding={tokenRef.tokenBonding}
-    mint={tokenRef.mint}
-  />
+  return (
+    <PriceButton
+      link={`${viewProfilePath(tokenRef.mint)}?name=${creatorName}`}
+      onClick={() =>
+        toggleDrawer({
+          isOpen: true,
+          creator: { name: creatorName, img: creatorImg },
+        })
+      }
+      tokenBonding={tokenRef.tokenBonding}
+      mint={tokenRef.mint}
+    />
+  );
 };

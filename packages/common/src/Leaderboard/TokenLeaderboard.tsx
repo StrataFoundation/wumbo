@@ -3,7 +3,11 @@ import { Spinner } from "@chakra-ui/react";
 import { useWallet } from "@solana/wallet-adapter-react";
 import { PublicKey } from "@solana/web3.js";
 import {
-  useAssociatedTokenAddress, useMint, usePrimaryClaimedTokenRef, useTokenAccount, useTokenBonding
+  useAssociatedTokenAddress,
+  useMint,
+  usePrimaryClaimedTokenRef,
+  useTokenAccount,
+  useTokenBonding,
 } from "@strata-foundation/react";
 import { amountAsNum } from "@strata-foundation/spl-token-bonding";
 import React, { useMemo } from "react";
@@ -11,8 +15,16 @@ import { UserLeaderboardElement } from "./UserLeaderboardElement";
 import { WumboUserLeaderboard } from "./WumboUserLeaderboard";
 
 const GET_TOP_HOLDERS = gql`
-  query GetTopHolders($tokenBonding: String!, $startRank: Int!, $stopRank: Int!) {
-    topHolders(tokenBonding: $tokenBonding, startRank: $startRank, stopRank: $stopRank) {
+  query GetTopHolders(
+    $tokenBonding: String!
+    $startRank: Int!
+    $stopRank: Int!
+  ) {
+    topHolders(
+      tokenBonding: $tokenBonding
+      startRank: $startRank
+      stopRank: $stopRank
+    ) {
       publicKey
     }
   }
@@ -33,7 +45,8 @@ const Element = React.memo(
   }) => {
     const { info: tokenAccount, loading } = useTokenAccount(account);
     const mint = useMint(tokenAccount?.mint);
-    const { info: tokenRef, loading: loadingTokenRef } = usePrimaryClaimedTokenRef(tokenAccount?.owner)
+    const { info: tokenRef, loading: loadingTokenRef } =
+      usePrimaryClaimedTokenRef(tokenAccount?.owner);
 
     if (loading || loadingTokenRef) {
       return <Spinner />;
@@ -42,7 +55,11 @@ const Element = React.memo(
     return (
       <UserLeaderboardElement
         displayKey={tokenAccount?.owner}
-        amount={tokenAccount && mint && amountAsNum(tokenAccount.amount, mint).toFixed(2)}
+        amount={
+          tokenAccount &&
+          mint &&
+          amountAsNum(tokenAccount.amount, mint).toFixed(2)
+        }
         onClick={() => tokenRef && onClick && onClick(tokenRef.mint)}
         mint={tokenRef?.mint}
       />
@@ -61,7 +78,10 @@ export const TokenLeaderboard = React.memo(
     const { adapter } = useWallet();
     const publicKey = adapter?.publicKey;
     const { info: tokenBondingAcc } = useTokenBonding(tokenBonding);
-    const { result: ata } = useAssociatedTokenAddress(adapter?.publicKey, tokenBondingAcc?.targetMint);
+    const { result: ata } = useAssociatedTokenAddress(
+      adapter?.publicKey,
+      tokenBondingAcc?.targetMint
+    );
     const client = useApolloClient();
 
     const getRank = useMemo(

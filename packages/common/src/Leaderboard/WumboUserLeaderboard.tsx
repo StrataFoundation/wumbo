@@ -100,11 +100,10 @@ function useAccountsPagination(
   const [startIndex, setStartIndex] = useState<number>(0);
   const [stopIndex, setStopIndex] = useState<number>(initialFetchSize);
   const { handleErrors } = useErrorHandler();
-  const { result, loading, error } = useAsync((fn: GetTopAccounts, start: number, stop: number) => fn(start, stop), [
-    getTopWallets,
-    startIndex,
-    stopIndex,
-  ]);
+  const { result, loading, error } = useAsync(
+    (fn: GetTopAccounts, start: number, stop: number) => fn(start, stop),
+    [getTopWallets, startIndex, stopIndex]
+  );
 
   handleErrors(error);
 

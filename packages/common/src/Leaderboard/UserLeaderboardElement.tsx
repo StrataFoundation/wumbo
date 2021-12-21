@@ -19,7 +19,8 @@ export const UserLeaderboardElement = React.memo(
   }) => {
     const { metadata, image, loading, error } = useTokenMetadata(mint);
 
-    const name = metadata?.data.name || (displayKey && truncatePubkey(displayKey));
+    const name =
+      metadata?.data.name || (displayKey && truncatePubkey(displayKey));
     const symbol = metadata?.data.symbol;
 
     const { handleErrors } = useErrorHandler();

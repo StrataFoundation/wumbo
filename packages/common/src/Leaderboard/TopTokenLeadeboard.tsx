@@ -45,7 +45,9 @@ const Element = React.memo(
       <UserLeaderboardElement
         displayKey={tokenBonding?.targetMint}
         amount={amount}
-        onClick={() => tokenBonding && onClick && onClick(tokenBonding.targetMint)}
+        onClick={() =>
+          tokenBonding && onClick && onClick(tokenBonding.targetMint)
+        }
         mint={tokenBonding?.targetMint}
       />
     );
@@ -64,29 +66,26 @@ export const TopTokenLeaderboard = React.memo(
   }) => {
     const client = useApolloClient();
 
-    const getRank = useMemo(
-      () => {
-        if (tokenBondingKey && mintKey) {
-          return () => {
-            return client
-              .query<{
-                tokenRank: number | undefined;
-              }>({
-                query: GET_TOKEN_RANK,
-                variables: {
-                  tokenBonding: tokenBondingKey,
-                  baseMint: mintKey?.toBase58()
-                },
-              })
-              .then((result) => result.data.tokenRank)
-              .catch(() => undefined);
-          }
-        } else {
-          return () => Promise.resolve(undefined)
-        }
-      },
-      [tokenBondingKey, mintKey]
-    );
+    const getRank = useMemo(() => {
+      if (tokenBondingKey && mintKey) {
+        return () => {
+          return client
+            .query<{
+              tokenRank: number | undefined;
+            }>({
+              query: GET_TOKEN_RANK,
+              variables: {
+                tokenBonding: tokenBondingKey,
+                baseMint: mintKey?.toBase58(),
+              },
+            })
+            .then((result) => result.data.tokenRank)
+            .catch(() => undefined);
+        };
+      } else {
+        return () => Promise.resolve(undefined);
+      }
+    }, [tokenBondingKey, mintKey]);
 
     const getTopHolders = useMemo(() => {
       if (mintKey) {
@@ -103,15 +102,17 @@ export const TopTokenLeaderboard = React.memo(
               },
             })
             .then((result) =>
-              result.data.topTokens.map(({ publicKey }) => new PublicKey(publicKey))
+              result.data.topTokens.map(
+                ({ publicKey }) => new PublicKey(publicKey)
+              )
             )
             .catch(() => [] as PublicKey[]);
-        }
+        };
       } else {
-        return () => Promise.resolve<PublicKey[]>([])
+        return () => Promise.resolve<PublicKey[]>([]);
       }
-    }, [mintKey])
-      
+    }, [mintKey]);
+
     return (
       <WumboUserLeaderboard
         initialFetchSize={9}

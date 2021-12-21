@@ -14,12 +14,12 @@ export function PriceButton({
   tokenBonding,
   ...btnProps
 }: {
-  h?: number,
-  w?: number,
-  r?: number,
-  mint: PublicKey | undefined | null,
-  tokenBonding: PublicKey | undefined | null,
-  link?: string,
+  h?: number;
+  w?: number;
+  r?: number;
+  mint: PublicKey | undefined | null;
+  tokenBonding: PublicKey | undefined | null;
+  link?: string;
 } & ButtonProps) {
   const tier = useTokenTier(tokenBonding);
   const gradient = getTierGradient(tier);
@@ -33,10 +33,10 @@ export function PriceButton({
       borderRadius={r ? `${r}px` : "7.5px"}
     >
       <Button
-        h={`${h-4}px`}
+        h={`${h - 4}px`}
         as={link ? Link : undefined}
         _hover={{
-          background: "gray.300"
+          background: "gray.300",
         }}
         to={link}
         size="xs"

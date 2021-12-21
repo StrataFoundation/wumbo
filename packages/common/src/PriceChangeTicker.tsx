@@ -1,12 +1,13 @@
 import { Box, HStack, Icon, Text } from "@chakra-ui/react";
 import { PublicKey } from "@solana/web3.js";
 import {
-  Spinner, useBondingPricing,
+  Spinner,
+  useBondingPricing,
   useCurve,
   useErrorHandler,
   useMint,
   useTokenAccount,
-  useTokenBonding
+  useTokenBonding,
 } from "@strata-foundation/react";
 import { fromCurve, toBN } from "@strata-foundation/spl-token-bonding";
 import React, { useMemo } from "react";
@@ -25,7 +26,9 @@ export const PriceChangeTicker = ({
   const { info: baseStorage } = useTokenAccount(tokenBondingAcc?.baseStorage);
   const baseMint = useMint(tokenBondingAcc?.baseMint);
   const targetMint = useMint(tokenBondingAcc?.targetMint);
-  const { info: curve, loading: loadingCurve } = useCurve(tokenBondingAcc?.curve);
+  const { info: curve, loading: loadingCurve } = useCurve(
+    tokenBondingAcc?.curve
+  );
 
   const oldPricing = useMemo(() => {
     if (tokenBondingAcc && curve && baseStorage && baseMint && targetMint) {
@@ -39,17 +42,19 @@ export const PriceChangeTicker = ({
         curve,
         {
           ...baseStorage,
-          amount: baseStorage?.amount.sub(toBN(totalBaseMintChange, baseMint))
+          amount: baseStorage?.amount.sub(toBN(totalBaseMintChange, baseMint)),
         },
         baseMint,
         {
           ...targetMint,
-          supply: targetMint.supply.sub(toBN(totalTargetMintChange, targetMint))
+          supply: targetMint.supply.sub(
+            toBN(totalTargetMintChange, targetMint)
+          ),
         },
         tokenBondingAcc.goLiveUnixTime.toNumber()
-      )
+      );
     }
-  }, [transactions, tokenBondingAcc, curve, baseStorage, baseMint, targetMint])
+  }, [transactions, tokenBondingAcc, curve, baseStorage, baseMint, targetMint]);
   const currentPricing = useMemo(() => {
     if (tokenBondingAcc && curve && baseStorage && baseMint && targetMint) {
       return fromCurve(
@@ -58,10 +63,10 @@ export const PriceChangeTicker = ({
         baseMint,
         targetMint,
         tokenBondingAcc.goLiveUnixTime.toNumber()
-      )
+      );
     }
-  }, [tokenBondingAcc, curve, baseStorage, baseMint, targetMint])
-  
+  }, [tokenBondingAcc, curve, baseStorage, baseMint, targetMint]);
+
   const { handleErrors } = useErrorHandler();
   handleErrors(error);
 
@@ -79,10 +84,12 @@ export const PriceChangeTicker = ({
         <Spinner size="xs" />
       </Box>
     );
-  };
+  }
 
   const currentPrice = currentPricing!.current();
-  const prevPrice = oldPricing!.current((new Date().valueOf() / 1000) - (24 * 60 * 60));
+  const prevPrice = oldPricing!.current(
+    new Date().valueOf() / 1000 - 24 * 60 * 60
+  );
 
   return (
     <HStack

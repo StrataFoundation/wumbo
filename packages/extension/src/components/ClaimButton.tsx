@@ -5,7 +5,12 @@ import { useWallet } from "@solana/wallet-adapter-react";
 import { useErrorHandler, useTokenRefForName } from "@strata-foundation/react";
 import React, { FC } from "react";
 import { Link } from "react-router-dom";
-import { PriceButton, Spinner, useReverseTwitter, useTwitterTld } from "wumbo-common";
+import {
+  PriceButton,
+  Spinner,
+  useReverseTwitter,
+  useTwitterTld,
+} from "wumbo-common";
 
 type Props = {
   creatorName: string;
@@ -21,7 +26,7 @@ export const ClaimButton: FC<Props> = ({
   spinnerProps = {},
 }: Props) => {
   const { toggleDrawer } = useDrawer();
-  const tld = useTwitterTld()
+  const tld = useTwitterTld();
   const { info: tokenRef, loading } = useTokenRefForName(
     creatorName,
     null,
@@ -76,10 +81,7 @@ export const ClaimButton: FC<Props> = ({
       {...btnProps}
       r={100}
       h={36}
-      link={
-        `${viewProfilePath(tokenRef.mint)}?name=${creatorName
-        }`
-      }
+      link={`${viewProfilePath(tokenRef.mint)}?name=${creatorName}`}
       onClick={() =>
         toggleDrawer({
           isOpen: true,
