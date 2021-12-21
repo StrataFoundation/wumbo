@@ -30,6 +30,7 @@ export const TweetsEnhancer = () => {
       .map((tweet, tweetIndex) => {
         const buttonEl = tweet.buttonTarget ? (
           <MainButton
+            buttonTarget={tweet.buttonTarget}
             creatorName={tweet.name}
             creatorImg={tweet.avatar || ""}
           />

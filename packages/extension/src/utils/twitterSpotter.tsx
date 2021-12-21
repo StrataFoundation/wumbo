@@ -99,10 +99,10 @@ export const useStatus = (): { isStatus: boolean } | null => {
 
 interface IParsedTweet {
   name: string;
-  buttonTarget: Element | null;
+  buttonTarget: HTMLElement | null;
   avatar?: string;
   mentions?: string[] | null;
-  replyTokensTarget?: Element | null;
+  replyTokensTarget?: HTMLElement | null;
 }
 
 enum Elements {
@@ -112,10 +112,10 @@ enum Elements {
 }
 
 function findChildWithDimension(
-  el: Element,
+  el: HTMLElement,
   width: number,
   height: number
-): Element | undefined {
+): HTMLElement | undefined {
   const children = [...el.children];
   const childWithWidth = children.find((c) => {
     const computed = getComputedStyle(c);
@@ -124,10 +124,10 @@ function findChildWithDimension(
       computed.height == `${height}px` &&
       computed.position != "absolute"
     );
-  });
+  }) as HTMLElement;
   if (!childWithWidth) {
     for (const child of children) {
-      const found = findChildWithDimension(child, width, height);
+      const found = findChildWithDimension(child as HTMLElement, width, height);
       if (found) {
         return found;
       }
@@ -168,7 +168,7 @@ export const useTweets = (): IParsedTweet[] | null => {
                 const name = nameEl.href.split("/").slice(-1)[0];
                 const imgEl = nameEl.querySelector("img");
                 let mentions: string[] | null = null;
-                let replyTokensTarget: Element | undefined;
+                let replyTokensTarget: HTMLElement | undefined;
 
                 mentions = tweet.parentNode.innerText
                   .split("\n")

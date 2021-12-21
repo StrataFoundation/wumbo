@@ -35,7 +35,7 @@ export const ViewNftRoute = () => {
       owner={info?.owner}
       getCreatorLink={(c, t, tokenRef) => {
         return tokenRef
-          ? profilePath(tokenRef.publicKey)
+          ? profilePath(tokenRef.mint)
           : `https://explorer.solana.com/address/${c.toBase58()}`;
       }}
     />

@@ -1,9 +1,16 @@
+import { PublicKey } from "@solana/web3.js";
 import { useEffect, useRef, useState } from "react";
 import { useLocation } from "react-router-dom";
 
 export function classNames(...classes: (false | null | undefined | string)[]) {
   return classes.filter(Boolean).join(" ");
 }
+
+export const truncatePubkey = (pkey: PublicKey): string => {
+  const pkeyStr = pkey.toString();
+
+  return `${pkeyStr.substr(0, 4)}...${pkeyStr.substr(pkeyStr.length - 4)}`;
+};
 
 export function useIsExtension(): boolean {
   // @ts-ignore
