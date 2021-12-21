@@ -41,8 +41,8 @@ export const ProfileEnhancer = () => {
         />
       ) : (
         <MainButton
-        buttonTarget={profile.buttonTarget}
-        creatorName={profile.name}
+          buttonTarget={profile.buttonTarget}
+          creatorName={profile.name}
           creatorImg={profile.avatar || ""}
           btnProps={{
             size: "md",

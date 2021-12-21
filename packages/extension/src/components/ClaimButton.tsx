@@ -17,7 +17,7 @@ type Props = {
   creatorImg: string;
   btnProps?: ButtonProps;
   spinnerProps?: SpinnerProps;
-  buttonTarget?: HTMLInputElement
+  buttonTarget?: HTMLInputElement;
 };
 
 export const ClaimButton: FC<Props> = ({
@@ -25,7 +25,7 @@ export const ClaimButton: FC<Props> = ({
   creatorImg,
   btnProps = {},
   spinnerProps = {},
-  buttonTarget
+  buttonTarget,
 }: Props) => {
   const { toggleDrawer } = useDrawer();
   const tld = useTwitterTld();
