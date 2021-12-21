@@ -1,70 +1,88 @@
-import { Box, Center, HStack, Icon, Text } from "@chakra-ui/react";
+import { Box, HStack, Icon, Text } from "@chakra-ui/react";
 import { PublicKey } from "@solana/web3.js";
 import {
-  amountAsNum,
-  Spinner,
-  supplyAsNum,
-  useBondingPricing,
+  Spinner, useBondingPricing,
+  useCurve,
   useErrorHandler,
   useMint,
   useTokenAccount,
-  useTokenBonding,
+  useTokenBonding
 } from "@strata-foundation/react";
-import React from "react";
+import { fromCurve, toBN } from "@strata-foundation/spl-token-bonding";
+import React, { useMemo } from "react";
 import { AiFillCaretDown, AiFillCaretUp } from "react-icons/ai";
 import { useTokenBondingRecentTransactions } from "./contexts";
 
 export const PriceChangeTicker = ({
   tokenBonding,
 }: {
-  tokenBonding: PublicKey;
+  tokenBonding: PublicKey | undefined;
 }) => {
   const { transactions, loading, error, hasMore } =
     useTokenBondingRecentTransactions();
-  const {
-    pricing,
-    loading: loadingPricing,
-    error: pricingError,
-  } = useBondingPricing(tokenBonding);
   const { info: tokenBondingAcc, loading: loadingBonding } =
     useTokenBonding(tokenBonding);
   const { info: baseStorage } = useTokenAccount(tokenBondingAcc?.baseStorage);
   const baseMint = useMint(tokenBondingAcc?.baseMint);
   const targetMint = useMint(tokenBondingAcc?.targetMint);
+  const { info: curve, loading: loadingCurve } = useCurve(tokenBondingAcc?.curve);
 
+  const oldPricing = useMemo(() => {
+    if (tokenBondingAcc && curve && baseStorage && baseMint && targetMint) {
+      const totalTargetMintChange = (transactions || []).reduce((acc, txn) => {
+        return acc + txn.targetAmount;
+      }, 0);
+      const totalBaseMintChange = (transactions || []).reduce((acc, txn) => {
+        return acc + txn.baseAmount;
+      }, 0);
+      return fromCurve(
+        curve,
+        {
+          ...baseStorage,
+          amount: baseStorage?.amount.sub(toBN(totalBaseMintChange, baseMint))
+        },
+        baseMint,
+        {
+          ...targetMint,
+          supply: targetMint.supply.sub(toBN(totalTargetMintChange, targetMint))
+        },
+        tokenBondingAcc.goLiveUnixTime.toNumber()
+      )
+    }
+  }, [transactions, tokenBondingAcc, curve, baseStorage, baseMint, targetMint])
+  const currentPricing = useMemo(() => {
+    if (tokenBondingAcc && curve && baseStorage && baseMint && targetMint) {
+      return fromCurve(
+        curve,
+        baseStorage,
+        baseMint,
+        targetMint,
+        tokenBondingAcc.goLiveUnixTime.toNumber()
+      )
+    }
+  }, [tokenBondingAcc, curve, baseStorage, baseMint, targetMint])
+  
   const { handleErrors } = useErrorHandler();
-  handleErrors(error, pricingError);
+  handleErrors(error);
 
   if (
     loading ||
-    loadingPricing ||
     hasMore ||
     loadingBonding ||
     !baseMint ||
-    !baseStorage
+    !baseStorage ||
+    loadingCurve ||
+    !targetMint
   ) {
     return (
       <Box>
         <Spinner size="xs" />
       </Box>
     );
-  }
+  };
 
-  const totalTargetMintChange = (transactions || []).reduce((acc, txn) => {
-    return acc + txn.targetAmount;
-  }, 0);
-  const totalBaseMintChange = (transactions || []).reduce((acc, txn) => {
-    return acc + txn.baseAmount;
-  }, 0);
-
-  const pricingCurve = pricing!.hierarchy!.pricingCurve;
-  const R = amountAsNum(baseStorage.amount, baseMint);
-  const S = supplyAsNum(targetMint);
-  const prevPrice = pricingCurve.current();
-  const currentPrice = pricingCurve.current(
-    R - totalBaseMintChange,
-    S - totalTargetMintChange
-  );
+  const currentPrice = currentPricing!.current();
+  const prevPrice = oldPricing!.current((new Date().valueOf() / 1000) - (24 * 60 * 60));
 
   return (
     <HStack

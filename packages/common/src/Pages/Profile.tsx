@@ -1,56 +1,33 @@
-import React from "react";
-import { Link } from "react-router-dom";
-import { PublicKey } from "@solana/web3.js";
-import { useQuery as apolloUseQuery, gql } from "@apollo/client";
+import { gql, useQuery as apolloUseQuery } from "@apollo/client";
 import {
-  VStack,
-  HStack,
-  Spacer,
-  Icon,
-  Text,
-  Button,
-  Tabs,
-  TabList,
-  Tab,
-  TabPanels,
-  TabPanel,
-  Link as PlainLink,
-  Flex,
-  Box,
+  Button, Flex, Grid, HStack, Icon, Link as PlainLink, Spacer, Tab, TabList, TabPanel, TabPanels, Tabs, Text, VStack
 } from "@chakra-ui/react";
-import { HiOutlinePencilAlt } from "react-icons/hi";
+import { NATIVE_MINT } from "@solana/spl-token";
+import { useWallet } from "@solana/wallet-adapter-react";
+import { PublicKey } from "@solana/web3.js";
 import {
-  useErrorHandler,
-  useTokenRef,
-  useTokenBonding,
-  useBondingPricing,
-  useMint,
-  usePriceInUsd,
-  usePrimaryClaimedTokenRef,
-  useClaimedTokenRefKey,
-  useTokenMetadata,
-  supplyAsNum,
-  useProvider,
-  useMintTokenRef,
-  useTokenBondingFromMint,
+  supplyAsNum, useBondingPricing, useClaimedTokenRefKey, useErrorHandler, useMint, useMintTokenRef, usePriceInUsd,
+  usePrimaryClaimedTokenRef, useProvider, usePublicKey, useTokenBondingFromMint, useTokenMetadata, useTokenRefFromBonding
 } from "@strata-foundation/react";
 import { ITokenWithMetaAndAccount } from "@strata-foundation/spl-token-collective";
-import { Spinner } from "../Spinner";
-import { useQuery, useReverseTwitter } from "../utils";
-import { useUserTokensWithMeta } from "../hooks";
-import { StatCard, StatCardWithIcon } from "../StatCard";
-import { Avatar, MetadataAvatar, PriceChangeTicker } from "..";
-import { TokenLeaderboard } from "../Leaderboard/TokenLeaderboard";
-import { NftListRaw } from "../Nft";
-import { TROPHY_CREATOR } from "../constants/globals";
+import React from "react";
 import { FaChevronRight } from "react-icons/fa";
-import { useWallet } from "@solana/wallet-adapter-react";
-import { NATIVE_MINT } from "@solana/spl-token";
+import { HiOutlinePencilAlt } from "react-icons/hi";
+import { Link } from "react-router-dom";
+import { HashLink } from 'react-router-hash-link';
+import { Avatar, MetadataAvatar, PriceButton, PriceChangeTicker } from "..";
+import { TROPHY_CREATOR } from "../constants/globals";
 import {
   TokenBondingRecentTransactionsProvider,
-  useTokenBondingRecentTransactions,
+  useTokenBondingRecentTransactions
 } from "../contexts";
+import { useTokenTier, useUserTokensWithMeta } from "../hooks";
 import { TopTokenLeaderboard } from "../Leaderboard";
+import { TokenLeaderboard } from "../Leaderboard/TokenLeaderboard";
+import { NftListRaw } from "../Nft";
+import { Spinner } from "../Spinner";
+import { StatCard } from "../StatCard";
+import { useQuery, useReverseTwitter } from "../utils";
 
 interface IProfileProps
   extends Pick<ISocialTokenTabsProps, "onAccountClick" | "getNftLink"> {
@@ -67,15 +44,9 @@ export interface IClaimFlowOutput {
   claim: () => Promise<void>;
 }
 
-const GET_WUM_RANK = gql`
-  query GetWumRank($wallet: String!) {
-    wumRank(publicKey: $wallet)
-  }
-`;
-
 const GET_TOKEN_RANK = gql`
-  query GetTokenRank($tokenBonding: String!) {
-    tokenRank(tokenBondingKey: $tokenBonding)
+  query GetTokenRank($tokenBonding: String!, $baseMint: String!) {
+    tokenRank(tokenBonding: $tokenBonding, baseMint: $baseMint)
   }
 `;
 
@@ -127,7 +98,7 @@ export const Profile = React.memo(
       metadata,
       loading: loadingMetadata,
       error: tokenMetadataError,
-    } = useTokenMetadata(tokenBonding?.targetMint);
+    } = useTokenMetadata(mintKey);
     const {
       image: collectiveImage,
       metadata: collectiveMetadata,
@@ -148,7 +119,7 @@ export const Profile = React.memo(
     const { data: { tokenRank } = {} } = apolloUseQuery<{
       tokenRank: number | undefined;
     }>(GET_TOKEN_RANK, {
-      variables: { tokenBonding: tokenBonding?.publicKey.toBase58() },
+      variables: { tokenBonding: tokenBonding?.publicKey.toBase58(), baseMint: tokenBonding?.baseMint.toBase58() },
     });
 
     const mint = useMint(mintKey);
@@ -156,7 +127,6 @@ export const Profile = React.memo(
     const { pricing } = useBondingPricing(tokenBonding?.publicKey);
     const fiatPrice = usePriceInUsd(NATIVE_MINT);
     const toFiat = (a: number) => (fiatPrice || 0) * a;
-    const coinPriceUsd = toFiat(pricing?.current(NATIVE_MINT) || 0);
     const nativeLocked = pricing?.locked(NATIVE_MINT);
     const fiatLocked =
       mint &&
@@ -182,11 +152,11 @@ export const Profile = React.memo(
       tokenMetadataError,
       collectiveMetadataError
     );
+    const tier = useTokenTier(tokenBonding?.publicKey)
 
     if (
       loading ||
       tokenBondingLoading ||
-      !tokenBonding ||
       loadingMetadata ||
       loadingCollectiveMetadata
     ) {
@@ -198,7 +168,7 @@ export const Profile = React.memo(
     );
     return (
       <TokenBondingRecentTransactionsProvider
-        tokenBonding={tokenBonding.publicKey}
+        tokenBonding={tokenBonding?.publicKey}
       >
         <VStack w="full" spacing={4} padding={4}>
           <HStack spacing={2} w="full" alignItems="start">
@@ -206,7 +176,7 @@ export const Profile = React.memo(
               <MetadataAvatar
                 mb={"8px"}
                 size="lg"
-                tokenBonding={tokenBonding}
+                mint={mintKey}
                 name="UNCLAIMED"
               />
               <HStack spacing={2} alignItems="center">
@@ -281,13 +251,15 @@ export const Profile = React.memo(
             </VStack>
           </HStack>
           <HStack spacing={2} w="full">
-            <Button size="xs" colorScheme="indigo" onClick={onTradeClick}>
+            { tokenBonding && <Button size="xs" colorScheme="indigo" onClick={onTradeClick}>
               Trade
-            </Button>
-            <Button size="xs" colorScheme="green" onClick={onTradeClick}>
-              ${coinPriceUsd.toFixed(2)}
-            </Button>
-            <PriceChangeTicker tokenBonding={tokenBonding.publicKey} />
+            </Button> }
+            { tokenBonding && <PriceButton
+              tokenBonding={tokenBonding.publicKey}
+              mint={mintKey}
+              onClick={onTradeClick}
+            /> }
+            { tokenBonding && <PriceChangeTicker tokenBonding={tokenBonding.publicKey} /> }
             {tokenRef &&
               !tokenRef.isClaimed &&
               !walletTokenRef &&
@@ -306,27 +278,38 @@ export const Profile = React.memo(
                 </Button>
               )}
           </HStack>
-          <HStack spacing={4} w="full" alignItems="stretch">
+          { tokenBonding && <Grid templateColumns='repeat(3, 1fr)' gap={4} w="full" alignItems="stretch">
             <StatCard label="Supply" value={supply.toFixed(2)} />
-            <StatCard
-              _hover={{ cursor: "pointer", opacity: 0.8 }}
-              tag="#123"
-              tier="Green"
-              label="Total Locked"
-              value={fiatLocked ? "$" + fiatLocked : "Loading..."}
-            />
-            <VolumeCard baseMint={tokenBonding.baseMint} />
-          </HStack>
+            <HashLink
+              // @ts-ignore
+             to={collectivePath ? { 
+               hash: "#tabs",
+               search: `?tokenBonding=${tokenBonding?.publicKey.toBase58()}`,
+               pathname: collectivePath
+             } : {}}
+             style={{ flexGrow: 1, width: "100%", height: "100%" }}
+            >
+              <StatCard
+                tier={tier}
+                _hover={{ cursor: "pointer", opacity: 0.8 }}
+                tag={tokenRank == null ? undefined : `#${tokenRank + 1}`}
+                label="Total Locked"
+                value={fiatLocked ? "$" + fiatLocked : "Loading..."}
+              />
+            </HashLink>
+            <VolumeCard baseMint={mintKey} />
+          </Grid> }
+          <div id="tabs" />
           {tokenRef ? (
             <SocialTokenTabs
               onAccountClick={onAccountClick}
-              mintKey={mintKey}
+              tokenBondingKey={tokenBonding!.publicKey}
               getNftLink={getNftLink}
             />
           ) : (
             <CollectiveTabs
               onAccountClick={onAccountClick}
-              tokenBondingKey={tokenBonding.publicKey}
+              mintKey={mintKey}
             />
           )}
         </VStack>
@@ -336,17 +319,17 @@ export const Profile = React.memo(
 );
 
 interface ISocialTokenTabsProps {
-  mintKey: PublicKey;
+  tokenBondingKey: PublicKey;
   onAccountClick?: (mintKey: PublicKey) => void;
   getNftLink: (t: ITokenWithMetaAndAccount) => string;
 }
 
 function SocialTokenTabs({
-  mintKey,
+  tokenBondingKey,
   onAccountClick,
   getNftLink,
 }: ISocialTokenTabsProps) {
-  const { info: tokenRef, loading } = useMintTokenRef(mintKey);
+  const { info: tokenRef, loading } = useTokenRefFromBonding(tokenBondingKey);
   const ownerWalletKey = tokenRef?.owner as PublicKey | undefined;
 
   const {
@@ -399,7 +382,7 @@ function SocialTokenTabs({
 
       <TabPanels>
         <TabPanel paddingX={0}>
-          <TokenLeaderboard onAccountClick={onAccountClick} mintKey={mintKey} />
+          <TokenLeaderboard onAccountClick={onAccountClick} tokenBonding={tokenBondingKey} />
         </TabPanel>
         <TabPanel paddingX={0}>
           <NftListRaw
@@ -421,13 +404,16 @@ function SocialTokenTabs({
 }
 
 interface ICollectiveTabsProps {
-  tokenBondingKey: PublicKey;
+  mintKey: PublicKey;
   onAccountClick?: (mintKey: PublicKey) => void;
 }
 function CollectiveTabs({
-  tokenBondingKey,
+  mintKey: mintKey,
   onAccountClick,
 }: ICollectiveTabsProps) {
+  const query = useQuery();
+  const tokenBondingKey = usePublicKey(query.get("tokenBonding"));
+  
   return (
     <Tabs isFitted w="full">
       <TabList>
@@ -444,6 +430,7 @@ function CollectiveTabs({
         <TabPanel paddingX={0}>
           <TopTokenLeaderboard
             onAccountClick={onAccountClick}
+            mintKey={mintKey}
             tokenBondingKey={tokenBondingKey}
           />
         </TabPanel>

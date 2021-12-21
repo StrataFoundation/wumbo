@@ -1,36 +1,32 @@
-import React from "react";
+import { Box, Flex, Text } from "@chakra-ui/react";
 import { PublicKey } from "@solana/web3.js";
-import { Flex, Box, Text } from "@chakra-ui/react";
 import { useErrorHandler, useTokenMetadata } from "@strata-foundation/react";
-import { ITokenRef } from "@strata-foundation/spl-token-collective";
-import { useReverseTwitter } from "../utils";
-import { Spinner, Avatar } from "..";
+import React from "react";
+import { Avatar, Spinner } from "..";
+import { truncatePubkey } from "../utils";
 
 export const UserLeaderboardElement = React.memo(
   ({
     amount,
+    displayKey,
     onClick,
-    tokenRef,
+    mint,
   }: {
     onClick?: () => void;
+    displayKey: PublicKey | undefined;
     amount: string | undefined;
-    tokenRef: ITokenRef | undefined;
+    mint: PublicKey | undefined;
   }) => {
-    const { loading, image, metadata, error } = useTokenMetadata(
-      tokenRef?.mint
-    );
+    const { metadata, image, loading, error } = useTokenMetadata(mint);
 
-    const name = metadata?.data.name;
+    const name = metadata?.data.name || (displayKey && truncatePubkey(displayKey));
     const symbol = metadata?.data.symbol;
-    const { handle: reverseTwitterHandle, error: reverseTwitterError } =
-      useReverseTwitter(tokenRef?.owner as PublicKey | undefined);
 
     const { handleErrors } = useErrorHandler();
-    const handle = reverseTwitterHandle || name;
 
-    handleErrors(error, reverseTwitterError);
+    handleErrors(error);
 
-    if (loading || !tokenRef) {
+    if (loading) {
       return <Spinner />;
     }
 
@@ -60,14 +56,14 @@ export const UserLeaderboardElement = React.memo(
           >
             {name}
           </Text>
-          {symbol && handle && (
+          {symbol && name && (
             <Text
               isTruncated
               fontSize="xs"
               fontWeight="semiBold"
               color="gray.400"
             >
-              {symbol} | @{handle}
+              {symbol} | {name}
             </Text>
           )}
         </Flex>

@@ -1,50 +1,50 @@
-import React, { useMemo } from "react";
-import { PublicKey } from "@solana/web3.js";
 import { gql, useApolloClient } from "@apollo/client";
-import {
-  useUserOwnedAmount,
-  useSocialTokenMetadata,
-} from "@strata-foundation/react";
-import { WumboUserLeaderboard } from "./WumboUserLeaderboard";
-import { UserLeaderboardElement } from "./UserLeaderboardElement";
 import { Spinner } from "@chakra-ui/react";
 import { useWallet } from "@solana/wallet-adapter-react";
+import { PublicKey } from "@solana/web3.js";
+import {
+  useAssociatedTokenAddress, useMint, usePrimaryClaimedTokenRef, useTokenAccount, useTokenBonding
+} from "@strata-foundation/react";
+import { amountAsNum } from "@strata-foundation/spl-token-bonding";
+import React, { useMemo } from "react";
+import { UserLeaderboardElement } from "./UserLeaderboardElement";
+import { WumboUserLeaderboard } from "./WumboUserLeaderboard";
 
 const GET_TOP_HOLDERS = gql`
-  query GetTopHolders($mint: String!, $startRank: Int!, $stopRank: Int!) {
-    topHolders(mint: $mint, startRank: $startRank, stopRank: $stopRank) {
+  query GetTopHolders($tokenBonding: String!, $startRank: Int!, $stopRank: Int!) {
+    topHolders(tokenBonding: $tokenBonding, startRank: $startRank, stopRank: $stopRank) {
       publicKey
     }
   }
 `;
 const GET_HOLDER_RANK = gql`
-  query GetHolderRank($mint: String!, $key: String!) {
-    accountRank(mint: $mint, publicKey: $key)
+  query GetHolderRank($tokenBonding: String!, $account: String!) {
+    accountRank(tokenBonding: $tokenBonding, account: $account)
   }
 `;
 
 const Element = React.memo(
   ({
-    wallet,
-    mint,
+    account,
     onClick,
   }: {
-    mint: PublicKey | undefined;
-    wallet: PublicKey;
-    onClick?: (tokenRefKey: PublicKey) => void;
+    account: PublicKey;
+    onClick?: (mintKey: PublicKey) => void;
   }) => {
-    const amount = useUserOwnedAmount(wallet, mint)?.toFixed(2);
-    const { tokenRef, loading } = useSocialTokenMetadata(wallet);
+    const { info: tokenAccount, loading } = useTokenAccount(account);
+    const mint = useMint(tokenAccount?.mint);
+    const { info: tokenRef, loading: loadingTokenRef } = usePrimaryClaimedTokenRef(tokenAccount?.owner)
 
-    if (loading || !tokenRef) {
+    if (loading || loadingTokenRef) {
       return <Spinner />;
     }
 
     return (
       <UserLeaderboardElement
-        amount={amount}
-        onClick={() => tokenRef && onClick && onClick(tokenRef.publicKey)}
-        tokenRef={tokenRef}
+        displayKey={tokenAccount?.owner}
+        amount={tokenAccount && mint && amountAsNum(tokenAccount.amount, mint).toFixed(2)}
+        onClick={() => tokenRef && onClick && onClick(tokenRef.mint)}
+        mint={tokenRef?.mint}
       />
     );
   }
@@ -52,14 +52,16 @@ const Element = React.memo(
 
 export const TokenLeaderboard = React.memo(
   ({
-    mintKey,
+    tokenBonding,
     onAccountClick,
   }: {
-    mintKey: PublicKey | undefined;
-    onAccountClick?: (tokenRefKey: PublicKey) => void;
+    tokenBonding: PublicKey | undefined;
+    onAccountClick?: (mintKey: PublicKey) => void;
   }) => {
     const { adapter } = useWallet();
     const publicKey = adapter?.publicKey;
+    const { info: tokenBondingAcc } = useTokenBonding(tokenBonding);
+    const { result: ata } = useAssociatedTokenAddress(adapter?.publicKey, tokenBondingAcc?.targetMint);
     const client = useApolloClient();
 
     const getRank = useMemo(
@@ -70,14 +72,14 @@ export const TokenLeaderboard = React.memo(
           }>({
             query: GET_HOLDER_RANK,
             variables: {
-              mint: mintKey?.toBase58(),
-              key: publicKey?.toBase58(),
+              tokenBonding: tokenBonding?.toBase58(),
+              account: ata?.toBase58(),
             },
           })
           .then((result) => result.data.accountRank)
           .catch(() => undefined);
       },
-      [mintKey]
+      [tokenBonding]
     );
 
     const getTopHolders = (startIndex: number, stopIndex: number) =>
@@ -87,8 +89,7 @@ export const TokenLeaderboard = React.memo(
         }>({
           query: GET_TOP_HOLDERS,
           variables: {
-            mint: mintKey?.toBase58(),
-            key: publicKey?.toBase58(),
+            tokenBonding: tokenBonding?.toBase58(),
             startRank: startIndex,
             stopRank: stopIndex,
           },
@@ -103,10 +104,10 @@ export const TokenLeaderboard = React.memo(
     return (
       <WumboUserLeaderboard
         getRank={getRank}
-        getTopWallets={getTopHolders}
+        getTopAccounts={getTopHolders}
         selected={(key) => (publicKey ? key.equals(publicKey) : false)}
         Element={({ publicKey }) => (
-          <Element onClick={onAccountClick} wallet={publicKey} mint={mintKey} />
+          <Element onClick={onAccountClick} account={publicKey} />
         )}
       />
     );

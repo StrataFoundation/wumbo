@@ -87,7 +87,7 @@ async function getRecentBondingTransactions(
           )?.uiTokenAmount.uiAmount || 0;
 
         return {
-          baseAmount: preBaseBalance - postBaseBalance,
+          baseAmount: postBaseBalance - preBaseBalance,
           targetAmount: postTargetBalances - preTargetBalances,
         };
       }

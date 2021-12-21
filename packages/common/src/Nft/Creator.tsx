@@ -8,7 +8,7 @@ import {
 import { ITokenRef } from "@strata-foundation/spl-token-collective";
 import { Link } from "react-router-dom";
 import { PublicKey } from "@solana/web3.js";
-import { Avatar } from "../";
+import { Avatar, truncatePubkey } from "../";
 
 export type GetCreatorLink = (
   c: PublicKey,
@@ -29,12 +29,6 @@ export const Creator = React.memo(
       useSocialTokenMetadata(creator);
 
     handleErrors(error);
-
-    const truncatePubkey = (pkey: PublicKey): string => {
-      const pkeyStr = pkey.toString();
-
-      return `${pkeyStr.substr(0, 4)}...${pkeyStr.substr(pkeyStr.length - 4)}`;
-    };
 
     const children = (
       <>

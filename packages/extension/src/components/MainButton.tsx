@@ -1,10 +1,10 @@
+import { useTokenRefForName } from "@strata-foundation/react";
+import { routes, viewProfilePath } from "@/constants/routes";
+import { useDrawer } from "@/contexts/drawerContext";
+import { Button, ButtonProps, SpinnerProps } from "@chakra-ui/react";
 import React, { FC } from "react";
 import { Link } from "react-router-dom";
-import { Button, ButtonProps, SpinnerProps } from "@chakra-ui/react";
-import { useUserInfo } from "@/utils/userState";
-import { Spinner } from "wumbo-common";
-import { useDrawer } from "@/contexts/drawerContext";
-import { routes, viewProfilePath } from "@/constants/routes";
+import { PriceButton, Spinner, useTwitterTld } from "wumbo-common";
 
 type Props = {
   creatorName: string;
@@ -13,6 +13,7 @@ type Props = {
   spinnerProps?: SpinnerProps;
 };
 
+
 export const MainButton: FC<Props> = ({
   creatorName,
   creatorImg,
@@ -20,10 +21,14 @@ export const MainButton: FC<Props> = ({
   spinnerProps = {},
 }: Props) => {
   const { toggleDrawer } = useDrawer();
-  const creatorInfoState = useUserInfo(creatorName);
-  const { userInfo: creatorInfo, loading } = creatorInfoState;
+  const tld = useTwitterTld()
+  const { info: tokenRef, loading } = useTokenRefForName(
+    creatorName,
+    null,
+    tld
+  );
 
-  if (!loading && !creatorInfo) {
+  if (!loading && !tokenRef) {
     return (
       <Button
         as={Link}
@@ -48,29 +53,23 @@ export const MainButton: FC<Props> = ({
     );
   }
 
-  if (loading || !creatorInfo) {
+  if (loading || !tokenRef) {
     return <Spinner size="sm" {...spinnerProps} />;
   }
 
-  return (
-    <Button
-      as={Link}
-      to={`${viewProfilePath(creatorInfo.tokenRef.mint)}?name=${
-        creatorInfo.name
-      }`}
-      size="xs"
-      colorScheme="green"
-      color="green.800"
-      fontFamily="body"
-      onClick={() =>
-        toggleDrawer({
-          isOpen: true,
-          creator: { name: creatorName, img: creatorImg },
-        })
-      }
-      {...btnProps}
-    >
-      ${creatorInfo?.coinPriceUsd?.toFixed(2) || "0.00"}
-    </Button>
-  );
+  return <PriceButton
+    link={
+      `${viewProfilePath(tokenRef.mint)}?name=${
+        creatorName
+      }`
+    }
+    onClick={() =>
+      toggleDrawer({
+        isOpen: true,
+        creator: { name: creatorName, img: creatorImg },
+      })
+    }
+    tokenBonding={tokenRef.tokenBonding}
+    mint={tokenRef.mint}
+  />
 };

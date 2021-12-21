@@ -60,7 +60,7 @@ const PAGE_INCR = 10;
 
 function useLocalAccountsPagination(
   getRank: GetRank,
-  getTopWallets: GetTopWallets
+  getTopWallets: GetTopAccounts
 ): IAccountsPagination & { userRank?: number } {
   const [startIndex, setStartIndex] = useState<number>(0);
   const [stopIndex, setStopIndex] = useState<number>(0);
@@ -94,13 +94,14 @@ function useLocalAccountsPagination(
   };
 }
 function useAccountsPagination(
-  getTopWallets: GetTopWallets,
+  getTopWallets: GetTopAccounts,
   initialFetchSize: number
 ): IAccountsPagination {
   const [startIndex, setStartIndex] = useState<number>(0);
   const [stopIndex, setStopIndex] = useState<number>(initialFetchSize);
   const { handleErrors } = useErrorHandler();
-  const { result, loading, error } = useAsync(getTopWallets, [
+  const { result, loading, error } = useAsync((fn: GetTopAccounts, start: number, stop: number) => fn(start, stop), [
+    getTopWallets,
     startIndex,
     stopIndex,
   ]);
@@ -119,7 +120,7 @@ function useAccountsPagination(
   };
 }
 
-export type GetTopWallets = (
+export type GetTopAccounts = (
   startIndex: number,
   stopIndex: number
 ) => Promise<PublicKey[]>;
@@ -128,19 +129,19 @@ export type GetRank = () => Promise<number | undefined>;
 export const WumboUserLeaderboard = React.memo(
   ({
     getRank,
-    getTopWallets,
+    getTopAccounts: getTopAccounts,
     Element,
     selected,
     initialFetchSize = 3,
   }: {
     getRank: GetRank;
-    getTopWallets: GetTopWallets;
+    getTopAccounts: GetTopAccounts;
     Element: (props: { publicKey: PublicKey }) => React.ReactElement;
     selected: (key: PublicKey) => boolean;
     initialFetchSize?: number;
   }) => {
-    const top = useAccountsPagination(getTopWallets, initialFetchSize);
-    const local = useLocalAccountsPagination(getRank, getTopWallets);
+    const top = useAccountsPagination(getTopAccounts, initialFetchSize);
+    const local = useLocalAccountsPagination(getRank, getTopAccounts);
 
     if (top.loading || local.loading || !local.accounts || !top.accounts) {
       return (

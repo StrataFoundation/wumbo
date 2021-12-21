@@ -16,3 +16,4 @@ export * from "./StatCard";
 export * from "./Notification";
 export * from "./Nft";
 export * from "./PriceChangeTicker";
+export * from "./PriceButton";

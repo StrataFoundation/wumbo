@@ -1,13 +1,11 @@
-import React, { FC } from "react";
-import { Link, useHistory } from "react-router-dom";
-import { Button, ButtonProps, SpinnerProps } from "@chakra-ui/react";
-import { useUserInfo } from "@/utils/userState";
-import { Spinner, useReverseTwitter } from "wumbo-common";
-import { useErrorHandler } from "@strata-foundation/react";
-import { useWallet } from "@solana/wallet-adapter-react";
-import { useDrawer } from "@/contexts/drawerContext";
 import { routes, viewProfilePath } from "@/constants/routes";
-import { useClaimFlow } from "@/utils/claim";
+import { useDrawer } from "@/contexts/drawerContext";
+import { Button, ButtonProps, SpinnerProps } from "@chakra-ui/react";
+import { useWallet } from "@solana/wallet-adapter-react";
+import { useErrorHandler, useTokenRefForName } from "@strata-foundation/react";
+import React, { FC } from "react";
+import { Link } from "react-router-dom";
+import { PriceButton, Spinner, useReverseTwitter, useTwitterTld } from "wumbo-common";
 
 type Props = {
   creatorName: string;
@@ -23,9 +21,15 @@ export const ClaimButton: FC<Props> = ({
   spinnerProps = {},
 }: Props) => {
   const { toggleDrawer } = useDrawer();
-  const creatorInfoState = useUserInfo(creatorName);
-  const { userInfo: creatorInfo, loading } = creatorInfoState;
-  const { publicKey, connected } = useWallet();
+  const tld = useTwitterTld()
+  const { info: tokenRef, loading } = useTokenRefForName(
+    creatorName,
+    null,
+    tld
+  );
+
+  const { adapter, connected } = useWallet();
+  const publicKey = adapter?.publicKey;
   const { handle: ownerTwitterHandle, error: reverseTwitterError } =
     useReverseTwitter(publicKey || undefined);
   const { handleErrors } = useErrorHandler();
@@ -36,7 +40,7 @@ export const ClaimButton: FC<Props> = ({
 
   if (
     !loading &&
-    !creatorInfo?.tokenRef.isClaimed &&
+    !tokenRef?.isClaimed &&
     (!ownerTwitterHandle || ownerTwitterHandle == creatorName)
   ) {
     return (
@@ -63,29 +67,27 @@ export const ClaimButton: FC<Props> = ({
     );
   }
 
-  if (!creatorInfo) {
+  if (!tokenRef) {
     return null;
   }
 
   return (
-    <Button
-      as={Link}
-      to={`${viewProfilePath(creatorInfo.tokenRef.mint)}?name=${
-        creatorInfo.name
-      }`}
-      size="xs"
-      colorScheme="green"
-      color="green.800"
-      fontFamily="body"
+    <PriceButton
+      {...btnProps}
+      r={100}
+      h={36}
+      link={
+        `${viewProfilePath(tokenRef.mint)}?name=${creatorName
+        }`
+      }
       onClick={() =>
         toggleDrawer({
           isOpen: true,
           creator: { name: creatorName, img: creatorImg },
         })
       }
-      {...btnProps}
-    >
-      ${creatorInfo?.coinPriceUsd?.toFixed(2) || "0.00"}
-    </Button>
+      tokenBonding={tokenRef.tokenBonding}
+      mint={tokenRef.mint}
+    />
   );
 };
