@@ -110,7 +110,7 @@ export const Team: React.FC = () => (
             <TeamMember
               image={process.env.PUBLIC_URL + "frank.png"}
               name="Frank De Czito"
-              title="Marketing & Community"
+              title="Global Marketing"
             />
           </HStack>
         </VStack>
