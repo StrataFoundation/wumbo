@@ -17,8 +17,8 @@ interface ITeamMemberProps {
   image: string;
   name: string;
   title: string;
-  twitter: string;
-  discord: string;
+  twitter?: string;
+  discord?: string;
 }
 
 const TeamMember: React.FC<ITeamMemberProps> = ({
@@ -37,24 +37,28 @@ const TeamMember: React.FC<ITeamMemberProps> = ({
     </Text>
     <Text fontSize="">{title}</Text>
     <HStack>
-      <Link to={{ pathname: twitter }} target="_blank">
-        <Icon
-          color="gray.400"
-          _hover={{ color: "gray.500" }}
-          as={RiTwitterFill}
-          w={{ base: "30px", md: "40px" }}
-          h={{ base: "30px", md: "40px" }}
-        />
-      </Link>
-      <Link to={{ pathname: discord }} target="_blank">
-        <Icon
-          color="gray.400"
-          _hover={{ color: "gray.500" }}
-          as={RiDiscordFill}
-          w={{ base: "30px", md: "40px" }}
-          h={{ base: "30px", md: "40px" }}
-        />
-      </Link>
+      {twitter && (
+        <Link to={{ pathname: twitter }} target="_blank">
+          <Icon
+            color="gray.400"
+            _hover={{ color: "gray.500" }}
+            as={RiTwitterFill}
+            w={{ base: "30px", md: "40px" }}
+            h={{ base: "30px", md: "40px" }}
+          />
+        </Link>
+      )}
+      {discord && (
+        <Link to={{ pathname: discord }} target="_blank">
+          <Icon
+            color="gray.400"
+            _hover={{ color: "gray.500" }}
+            as={RiDiscordFill}
+            w={{ base: "30px", md: "40px" }}
+            h={{ base: "30px", md: "40px" }}
+          />
+        </Link>
+      )}
     </HStack>
   </VStack>
 );
@@ -105,10 +109,8 @@ export const Team: React.FC = () => (
             />
             <TeamMember
               image={process.env.PUBLIC_URL + "frank.png"}
-              name="Frank Daniel de Czito"
+              name="Frank De Czito"
               title="Marketing & Community"
-              twitter="https://twitter.com/otterlytheotter"
-              discord="https://discordapp.com/users/865370454020325426"
             />
           </HStack>
         </VStack>
