@@ -13,7 +13,9 @@ import { useUserInfo } from "@/utils/userState";
 import { replaceAll, Spinner, OPEN_BONDING } from "wumbo-common";
 import { useHistoryList } from "@/utils/history";
 import { useWallet } from "@solana/wallet-adapter-react";
+import { SplTokenCollective } from "@strata-foundation/spl-token-collective";
 import Logo from "../../public/assets/img/logo.svg";
+import { NATIVE_MINT } from "@solana/spl-token";
 
 export const OutsideOfDrawerRef =
   React.createContext<React.MutableRefObject<HTMLInputElement> | null>(null);
@@ -228,6 +230,8 @@ WumboDrawer.Nav = () => {
               OPEN_BONDING.toBase58(),
             ":tokenRefKey": creatorInfo?.tokenRef?.publicKey.toBase58() || "",
             ":action": "buy",
+            ":baseMint": NATIVE_MINT,
+            ":targetMint": SplTokenCollective.OPEN_COLLECTIVE_MINT_ID.toBase58()
           });
           filledPath = `${replacedKeys}${
             creatorInfo ? "?name=" + creatorInfo.name : ""

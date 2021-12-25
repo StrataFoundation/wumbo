@@ -1,4 +1,4 @@
-import { getTierGradient, useTokenTier } from "wumbo-common";
+import { getTierGradient, useTokenTier } from "./hooks";
 import { Button, ButtonProps } from "@chakra-ui/button";
 import { Box, Center } from "@chakra-ui/layout";
 import { PublicKey } from "@solana/web3.js";
@@ -79,7 +79,7 @@ export function PriceButton({
   const coinPriceUsd = usePriceInUsd(mint);
 
   const backgroundColor = useMemo(
-    () => getBackgroundColor(buttonTarget) || "white",
+    () => getBackgroundColor(buttonTarget) || "#ffffffff",
     [buttonTarget]
   );
   return (
