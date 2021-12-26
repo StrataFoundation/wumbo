@@ -30,8 +30,8 @@ export const TROPHY_CREATOR = new PublicKey(
 );
 
 // export const SOLANA_API_URL = "https://api.mainnet-beta.solana.com"
-export const OPEN_BONDING = SplTokenCollective.OPEN_COLLECTIVE_BONDING_ID
-export const OPEN_TOKEN = SplTokenCollective.OPEN_COLLECTIVE_MINT_ID
+export const OPEN_BONDING = SplTokenCollective.OPEN_COLLECTIVE_BONDING_ID;
+export const OPEN_TOKEN = SplTokenCollective.OPEN_COLLECTIVE_MINT_ID;
 
 export const SOL_TOKEN = new PublicKey(
   "So11111111111111111111111111111111111111112"

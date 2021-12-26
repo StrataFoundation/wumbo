@@ -231,7 +231,8 @@ WumboDrawer.Nav = () => {
             ":tokenRefKey": creatorInfo?.tokenRef?.publicKey.toBase58() || "",
             ":action": "buy",
             ":baseMint": NATIVE_MINT,
-            ":targetMint": SplTokenCollective.OPEN_COLLECTIVE_MINT_ID.toBase58()
+            ":targetMint":
+              SplTokenCollective.OPEN_COLLECTIVE_MINT_ID.toBase58(),
           });
           filledPath = `${replacedKeys}${
             creatorInfo ? "?name=" + creatorInfo.name : ""
