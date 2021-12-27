@@ -3,7 +3,6 @@ import { Switch, Route } from "react-router-dom";
 import { Flex } from "@chakra-ui/react";
 import { Header } from "./components/common/Header";
 import { Workspace } from "./components/common/Workspace";
-import { AppContainer } from "./components/common/AppContainer";
 import { Toaster } from "react-hot-toast";
 import { AppRoutes } from "../../constants/routes";
 import { ClaimRoute } from "./components/Claim/Claim";
@@ -16,13 +15,14 @@ import { ViewProfileRoute } from "./components/Profile/View/ViewProfile";
 import { ViewNftRoute } from "./components/Nft/View/ViewNft";
 import { SwapRoute } from "./components/Swap/Swap";
 import { PrototypeRoute } from "./components//Prototype";
+import { ContextProviders } from "./ContextProviders";
 
-export const App = () => (
-  <Flex w="full" h="100vh" flexDirection="column">
-    <Header />
+export const App: React.FC = () => (
+  <ContextProviders>
+    <Flex w="full" h="100vh" flexDirection="column">
+      <Header />
 
-    <Workspace>
-      <AppContainer>
+      <Workspace>
         <Switch>
           <Route path={AppRoutes.claim.path} component={ClaimRoute} />
           <Route path={AppRoutes.wallet.path} component={Wallet} />
@@ -50,14 +50,14 @@ export const App = () => (
           <Route path={AppRoutes.swap.path} component={SwapRoute} />
           <Route path={AppRoutes.prototype.path} component={PrototypeRoute} />
         </Switch>
-      </AppContainer>
-      <Toaster
-        position="bottom-center"
-        containerStyle={{
-          margin: "auto",
-          width: "420px",
-        }}
-      />
-    </Workspace>
-  </Flex>
+        <Toaster
+          position="bottom-center"
+          containerStyle={{
+            margin: "auto",
+            width: "420px",
+          }}
+        />
+      </Workspace>
+    </Flex>
+  </ContextProviders>
 );

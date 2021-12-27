@@ -4031,10 +4031,10 @@
     superstruct "^0.14.2"
     tweetnacl "^1.0.0"
 
-"@strata-foundation/react@^1.3.1":
-  version "1.3.1"
-  resolved "https://registry.yarnpkg.com/@strata-foundation/react/-/react-1.3.1.tgz#2b61686bf9c6cbd92b7118be29939fed006a900b"
-  integrity sha512-8+2/uOVv8Slmf2cntlCuFZwrGpONJL7LRjbaKRaq7Yi4ztsKlQsnuip6fOLpIkSMqxEb3ucbVGPCFsgPmrX7Ug==
+"@strata-foundation/react@^1.3.4":
+  version "1.3.4"
+  resolved "https://registry.yarnpkg.com/@strata-foundation/react/-/react-1.3.4.tgz#61fe063f75cc30768b05da2d62b174ff898eb787"
+  integrity sha512-rIqMvpPv3Ql/iJVGpTqgZIWUcHonb3p/gtizijesNTmjdIqvHNpZJx8y7uDgemFOCNkXcfHUmvx91p2OMRX2Bg==
   dependencies:
     "@chakra-ui/react" "^1.7.2"
     "@emotion/react" "^11.6.0"
@@ -4047,9 +4047,9 @@
     "@solana/wallet-adapter-react-ui" "^0.6.0"
     "@solana/wallet-adapter-wallets" "^0.11.1"
     "@solana/web3.js" "^1.29.2"
-    "@strata-foundation/spl-token-bonding" "^1.3.0"
-    "@strata-foundation/spl-token-collective" "^1.3.1"
-    "@strata-foundation/spl-utils" "^1.3.0"
+    "@strata-foundation/spl-token-bonding" "^1.3.4"
+    "@strata-foundation/spl-token-collective" "^1.3.4"
+    "@strata-foundation/spl-utils" "^1.3.2"
     buffer "^6.0.3"
     dotenv "^10.0.0"
     eventemitter3 "^4.0.7"
@@ -4061,48 +4061,48 @@
     react-icons "^4.3.1"
     yup "^0.32.11"
 
-"@strata-foundation/spl-token-bonding@^1.3.0":
-  version "1.3.0"
-  resolved "https://registry.yarnpkg.com/@strata-foundation/spl-token-bonding/-/spl-token-bonding-1.3.0.tgz#e534299b0de8430c7394a011b9e8e5d79417135a"
-  integrity sha512-zgLzxtc0wE3s1t8IDjEOiJyow2xmj3vlYE+edtdxSN6F1+bHfUoArpCoIysBX8+Cz/Ht0hry7QIU5xRF7Fxmqg==
+"@strata-foundation/spl-token-bonding@^1.3.4":
+  version "1.3.4"
+  resolved "https://registry.yarnpkg.com/@strata-foundation/spl-token-bonding/-/spl-token-bonding-1.3.4.tgz#a6df84921c48901a25ab5177619b6df05f9cbf02"
+  integrity sha512-3huIUQDCh/xue8+09FC+Z7CED219VdwB4EcP8plaNE2/JIXWP54OUI/BbUbcLqT48w2giWpnt5WRpCOvG/QyFQ==
   dependencies:
     "@project-serum/anchor" "^0.18.0"
     "@project-serum/common" "^0.0.1-beta.3"
     "@solana/web3.js" "^1.29.2"
-    "@strata-foundation/spl-utils" "^1.3.0"
+    "@strata-foundation/spl-utils" "^1.3.2"
     bn.js "^5.2.0"
     copyfiles "^2.4.1"
 
-"@strata-foundation/spl-token-collective@^1.3.1":
-  version "1.3.1"
-  resolved "https://registry.yarnpkg.com/@strata-foundation/spl-token-collective/-/spl-token-collective-1.3.1.tgz#ddbed9c32978b749021712f6a718776524062f13"
-  integrity sha512-eNQsZ1bpVupzPdsnwd35wAeBJFRC5c9dP1Pv/8t46Uq4tRCvWhmGJKqS6Wa7jXu5u2FgN1wKvZLUvXSdFKlf5g==
+"@strata-foundation/spl-token-collective@^1.3.4":
+  version "1.3.4"
+  resolved "https://registry.yarnpkg.com/@strata-foundation/spl-token-collective/-/spl-token-collective-1.3.4.tgz#2c4836fe18f6cc9a0ac1fc2807d1670239d4e0eb"
+  integrity sha512-eTzZG8F3//M9ydNyCb36qKIgOGVUwUPRkFqH7zxLVu3ZsPbxDsPswiTM3nGNOyROIumqtlSv4BUwBFcvWPQKew==
   dependencies:
     "@bonfida/spl-name-service" "^0.1.22"
     "@project-serum/anchor" "^0.18.0"
     "@project-serum/common" "^0.0.1-beta.3"
     "@solana/web3.js" "^1.29.2"
-    "@strata-foundation/spl-token-bonding" "^1.3.0"
-    "@strata-foundation/spl-token-staking" "^1.3.0"
-    "@strata-foundation/spl-utils" "^1.3.0"
+    "@strata-foundation/spl-token-bonding" "^1.3.4"
+    "@strata-foundation/spl-token-staking" "^1.3.2"
+    "@strata-foundation/spl-utils" "^1.3.2"
     bn.js "^5.2.0"
     copyfiles "^2.4.1"
 
-"@strata-foundation/spl-token-staking@^1.3.0":
-  version "1.3.0"
-  resolved "https://registry.yarnpkg.com/@strata-foundation/spl-token-staking/-/spl-token-staking-1.3.0.tgz#58f79a21ecb1f1b8f6b782e14bedf9313ddb97ab"
-  integrity sha512-GGn9I6tJZHcH/YxkxVm5+Ybm7/P0Y+H0NzDXEapRXRLQgo+C+rmTz8leF/hOmPFDcQLNr06z7MqXv4swphR8BQ==
+"@strata-foundation/spl-token-staking@^1.3.2":
+  version "1.3.2"
+  resolved "https://registry.yarnpkg.com/@strata-foundation/spl-token-staking/-/spl-token-staking-1.3.2.tgz#1d45ea628ad37bb5ff68af9f533aec2e35b94188"
+  integrity sha512-7K6r1Q9p/AROg9EfT1F/pMUJJvWSULFRL00Ybp6Rz75ks2UnzBSTg/oSiG0ArlMb84sorfZvZsFH7h8WW/grkw==
   dependencies:
     "@project-serum/common" "^0.0.1-beta.3"
     "@solana/web3.js" "^1.29.2"
-    "@strata-foundation/spl-utils" "^1.3.0"
+    "@strata-foundation/spl-utils" "^1.3.2"
     bn.js "^5.2.0"
     semver "^7.3.5"
 
-"@strata-foundation/spl-utils@^1.3.0":
-  version "1.3.0"
-  resolved "https://registry.yarnpkg.com/@strata-foundation/spl-utils/-/spl-utils-1.3.0.tgz#49663849ac11dc9e81a7fc311ecfc5703e54fb6b"
-  integrity sha512-wa/kp0iW7cMaEd58pzj571JDWJH1rdBSG9yC8fhau34e9sVNX49xdJdYKBGJs4q69KmUbmzBa4VBqFpatBsg/Q==
+"@strata-foundation/spl-utils@^1.3.2":
+  version "1.3.2"
+  resolved "https://registry.yarnpkg.com/@strata-foundation/spl-utils/-/spl-utils-1.3.2.tgz#cc25f82991a7a482e26ec34da12773d96d71a74d"
+  integrity sha512-oCljLtp25G5eFBgksfgyhLD89bKkKGcXbPATvkLS7q1edsG2SGXVHuBqg7PYybQVa88iNH/K3yxze7h1sf+czA==
   dependencies:
     "@metaplex/arweave-cost" "^2.0.0"
     "@metaplex/js" "^4.3.0"
@@ -4755,6 +4755,15 @@
   dependencies:
     "@types/react" "*"
 
+"@types/react-router-dom@*", "@types/react-router-dom@^5.1.8":
+  version "5.3.2"
+  resolved "https://registry.yarnpkg.com/@types/react-router-dom/-/react-router-dom-5.3.2.tgz#ebd8e145cf056db5c66eb1dac63c72f52e8542ee"
+  integrity sha512-ELEYRUie2czuJzaZ5+ziIp9Hhw+juEw8b7C11YNA4QdLCVbQ3qLi2l4aq8XnlqM7V31LZX8dxUuFUCrzHm6sqQ==
+  dependencies:
+    "@types/history" "*"
+    "@types/react" "*"
+    "@types/react-router" "*"
+
 "@types/react-router-dom@5.1.7":
   version "5.1.7"
   resolved "https://registry.yarnpkg.com/@types/react-router-dom/-/react-router-dom-5.1.7.tgz#a126d9ea76079ffbbdb0d9225073eb5797ab7271"
@@ -4764,14 +4773,13 @@
     "@types/react" "*"
     "@types/react-router" "*"
 
-"@types/react-router-dom@^5.1.8":
-  version "5.3.2"
-  resolved "https://registry.yarnpkg.com/@types/react-router-dom/-/react-router-dom-5.3.2.tgz#ebd8e145cf056db5c66eb1dac63c72f52e8542ee"
-  integrity sha512-ELEYRUie2czuJzaZ5+ziIp9Hhw+juEw8b7C11YNA4QdLCVbQ3qLi2l4aq8XnlqM7V31LZX8dxUuFUCrzHm6sqQ==
+"@types/react-router-hash-link@^2.4.4":
+  version "2.4.4"
+  resolved "https://registry.yarnpkg.com/@types/react-router-hash-link/-/react-router-hash-link-2.4.4.tgz#edbbf15d65890802d45d870845df455c0cfc4afe"
+  integrity sha512-YTP4OJouh3gsKDMxa9jKjDZdh6AT+34LGllCs5ZkDOS6Yii3L3TZeDiVmg0E8VFjFL+xsPKyyW4r2lkBDohudA==
   dependencies:
-    "@types/history" "*"
     "@types/react" "*"
-    "@types/react-router" "*"
+    "@types/react-router-dom" "*"
 
 "@types/react-router@*":
   version "5.1.17"
@@ -11339,17 +11347,6 @@ istanbul-lib-instrument@^4.0.3:
     "@babel/core" "^7.7.5"
     "@istanbuljs/schema" "^0.1.2"
     istanbul-lib-coverage "^3.0.0"
-    semver "^6.3.0"
-
-istanbul-lib-instrument@^5.0.4:
-  version "5.1.0"
-  resolved "https://registry.yarnpkg.com/istanbul-lib-instrument/-/istanbul-lib-instrument-5.1.0.tgz#7b49198b657b27a730b8e9cb601f1e1bff24c59a"
-  integrity sha512-czwUz525rkOFDJxfKK6mYfIs9zBKILyrZQxjz3ABhjQXhbhFsSbo1HW/BFcsDnfJYJWA6thRR5/TUY2qs5W99Q==
-  dependencies:
-    "@babel/core" "^7.12.3"
-    "@babel/parser" "^7.14.7"
-    "@istanbuljs/schema" "^0.1.2"
-    istanbul-lib-coverage "^3.2.0"
     semver "^6.3.0"
 
 istanbul-lib-instrument@^5.0.4:

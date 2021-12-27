@@ -1,10 +1,11 @@
-import { usePublicKey } from "@strata-foundation/react";
 import React from "react";
+import { usePublicKey } from "@strata-foundation/react";
 import { useHistory, useLocation, useParams } from "react-router-dom";
 import { Swap } from "wumbo-common";
 import { AppRoutes, swapPath } from "../../../../constants/routes";
+import { AppContainer } from "../common/AppContainer";
 
-export const SwapRoute = () => {
+export const SwapRoute: React.FC = () => {
   const history = useHistory();
   const query = useParams<{
     tokenBondingKey: string;
@@ -21,14 +22,16 @@ export const SwapRoute = () => {
     `?redirect=${location.pathname}${location.search}`;
 
   return (
-    <Swap
-      manageWalletPath={redirectUri}
-      tokenBonding={tokenBondingKey}
-      baseMint={baseMint}
-      targetMint={targetMint}
-      onTradingMintsChange={({ base, target }) =>
-        history.push(swapPath(tokenBondingKey!, base, target))
-      }
-    />
+    <AppContainer>
+      <Swap
+        manageWalletPath={redirectUri}
+        tokenBonding={tokenBondingKey}
+        baseMint={baseMint}
+        targetMint={targetMint}
+        onTradingMintsChange={({ base, target }) =>
+          history.push(swapPath(tokenBondingKey!, base, target))
+        }
+      />
+    </AppContainer>
   );
 };

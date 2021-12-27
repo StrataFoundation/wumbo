@@ -8,20 +8,17 @@ import { SiteRoutes, AppRoutes } from "./constants/routes";
 import { App } from "./components/App/App";
 import { Site } from "./components/Site/Site";
 import reportWebVitals from "./reportWebVitals";
-import { ContextProviders } from "./components/App/ContextProviders";
 
 ReactDOM.render(
   <React.StrictMode>
     <ThemeProvider>
       <ModalProvider>
-        <ContextProviders>
-          <BrowserRouter>
-            <Switch>
-              <Route path={AppRoutes.root.path} component={App} />
-              <Route path={SiteRoutes.root.path} component={Site} />
-            </Switch>
-          </BrowserRouter>
-        </ContextProviders>
+        <BrowserRouter>
+          <Switch>
+            <Route path={AppRoutes.root.path} component={App} />
+            <Route path={SiteRoutes.root.path} component={Site} />
+          </Switch>
+        </BrowserRouter>
       </ModalProvider>
     </ThemeProvider>
   </React.StrictMode>,

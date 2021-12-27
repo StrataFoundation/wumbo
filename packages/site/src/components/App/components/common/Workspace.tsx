@@ -7,7 +7,7 @@ export const Workspace: React.FC = ({ children }) => (
     flexGrow={1}
     h="full"
     bg="gray.100"
-    overflow="hidden"
+    overflow="scroll"
   >
     {children}
   </Flex>

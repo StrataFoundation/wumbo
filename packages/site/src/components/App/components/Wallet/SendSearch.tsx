@@ -3,11 +3,12 @@ import { ITokenWithMetaAndAccount } from "@strata-foundation/spl-token-collectiv
 import React from "react";
 import { SendSearch } from "wumbo-common";
 import { sendPath } from "../../../../constants/routes";
+import { AppContainer } from "../common/AppContainer";
 import WalletRedirect from "./WalletRedirect";
 
 export default React.memo(() => {
   return (
-    <>
+    <AppContainer>
       <WalletRedirect />
       <Box p={4} w="full">
         <SendSearch
@@ -16,6 +17,6 @@ export default React.memo(() => {
           }
         />
       </Box>
-    </>
+    </AppContainer>
   );
 });

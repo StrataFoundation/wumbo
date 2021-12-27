@@ -8,7 +8,6 @@ import { ITokenWithMetaAndAccount } from "@strata-foundation/spl-token-collectiv
 import {
   useClaimedTokenRefKey,
   usePublicKey,
-  useTokenBonding,
   useTokenBondingFromMint,
   useTokenRef,
 } from "@strata-foundation/react";
@@ -19,6 +18,7 @@ import {
   swapPath,
 } from "../../../../../constants/routes";
 import WalletRedirect from "../../Wallet/WalletRedirect";
+import { AppContainer } from "../../common/AppContainer";
 
 export const ViewProfileRoute: React.FC = () => {
   const params = useParams<{ mint: string | undefined }>();
@@ -41,41 +41,47 @@ export const ViewProfileRoute: React.FC = () => {
 
   if (!mintKey) {
     return (
-      <Box p={4}>
-        It looks like you haven't claimed a token yet. To claim your token,
-        navigate to your twitter profile and click the "Claim" button that
-        Wum.bo inserts next to Edit Profile.
-      </Box>
+      <AppContainer>
+        <Box p={4}>
+          It looks like you haven't claimed a token yet. To claim your token,
+          navigate to your twitter profile and click the "Claim" button that
+          Wum.bo inserts next to Edit Profile.
+        </Box>
+      </AppContainer>
     );
   }
 
   return (
-    <Profile
-      collectivePath={tokenBonding ? profilePath(tokenBonding.baseMint) : null}
-      useClaimFlow={() => ({
-        claim: () => Promise.resolve(),
-        loading: false,
-        error: undefined,
-      })}
-      onTradeClick={() =>
-        tokenBonding &&
-        history.push(
-          swapPath(
-            tokenBonding.publicKey,
-            tokenBonding!.baseMint,
-            tokenBonding!.targetMint
+    <AppContainer>
+      <Profile
+        collectivePath={
+          tokenBonding ? profilePath(tokenBonding.baseMint) : null
+        }
+        useClaimFlow={() => ({
+          claim: () => Promise.resolve(),
+          loading: false,
+          error: undefined,
+        })}
+        onTradeClick={() =>
+          tokenBonding &&
+          history.push(
+            swapPath(
+              tokenBonding.publicKey,
+              tokenBonding!.baseMint,
+              tokenBonding!.targetMint
+            )
           )
-        )
-      }
-      editPath={AppRoutes.editProfile.path}
-      mintKey={mintKey}
-      onAccountClick={(mintKey: PublicKey) => {
-        history.push(profilePath(mintKey));
-      }}
-      getNftLink={(token: ITokenWithMetaAndAccount) => {
-        const mint = token?.metadata?.mint;
-        return mint ? nftPath(new PublicKey(mint)) : "";
-      }}
-    />
+        }
+        editPath={AppRoutes.editProfile.path}
+        mintKey={mintKey}
+        onAccountClick={(mintKey: PublicKey) => {
+          history.push(profilePath(mintKey));
+        }}
+        getNftLink={(token: ITokenWithMetaAndAccount) => {
+          const mint = token?.metadata?.mint;
+          return mint ? nftPath(new PublicKey(mint)) : "";
+        }}
+      />
+    </AppContainer>
   );
 };

@@ -1,4 +1,3 @@
-import { Box } from "@chakra-ui/react";
 import { useWallet } from "@solana/wallet-adapter-react";
 import { useFtxPayLink } from "@strata-foundation/react";
 import React from "react";
@@ -9,6 +8,7 @@ import {
   swapPath,
   wumNetWorthPath,
 } from "../../../../constants/routes";
+import { AppContainer } from "../common/AppContainer";
 import WalletRedirect from "./WalletRedirect";
 
 export default React.memo(() => {
@@ -16,7 +16,7 @@ export default React.memo(() => {
   const { adapter } = useWallet();
   const publicKey = adapter?.publicKey;
   return (
-    <>
+    <AppContainer>
       <WalletRedirect />
       <Wallet
         wumLeaderboardLink={publicKey ? wumNetWorthPath(publicKey) : ""}
@@ -34,6 +34,6 @@ export default React.memo(() => {
         solLink={solLink}
         sendLink={AppRoutes.sendSearch.path}
       />
-    </>
+    </AppContainer>
   );
 });

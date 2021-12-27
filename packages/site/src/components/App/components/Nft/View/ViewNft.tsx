@@ -8,8 +8,9 @@ import { useTokenMetadata, useTokenAccount } from "@strata-foundation/react";
 import { useParams } from "react-router-dom";
 import { profilePath } from "../../../../../constants/routes";
 import { PublicKey } from "@solana/web3.js";
+import { AppContainer } from "../../common/AppContainer";
 
-export const ViewNftRoute = () => {
+export const ViewNftRoute: React.FC = () => {
   const params = useParams<{ mint: string | undefined }>();
   const token = useMemo(
     () => (params.mint ? new PublicKey(params.mint) : undefined),
@@ -26,18 +27,24 @@ export const ViewNftRoute = () => {
   const loading = loading1 || loading2 || loading3;
 
   if (loading) {
-    return <Spinner />;
+    return (
+      <AppContainer>
+        <Spinner />
+      </AppContainer>
+    );
   }
 
   return (
-    <CommonViewNft
-      token={token}
-      owner={info?.owner}
-      getCreatorLink={(c, t, tokenRef) => {
-        return tokenRef
-          ? profilePath(tokenRef.mint)
-          : `https://explorer.solana.com/address/${c.toBase58()}`;
-      }}
-    />
+    <AppContainer>
+      <CommonViewNft
+        token={token}
+        owner={info?.owner}
+        getCreatorLink={(c, t, tokenRef) => {
+          return tokenRef
+            ? profilePath(tokenRef.mint)
+            : `https://explorer.solana.com/address/${c.toBase58()}`;
+        }}
+      />
+    </AppContainer>
   );
 };

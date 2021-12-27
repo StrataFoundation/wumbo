@@ -48,7 +48,7 @@ export const MetadataTokenPill = React.memo(
     const displayIcon = loading ? (
       <Spinner />
     ) : (
-      <MetadataAvatar tokenBonding={tokenBonding} name={displayTicker} />
+      <MetadataAvatar name={displayTicker} mint={tokenBonding?.targetMint} />
     );
 
     return (
