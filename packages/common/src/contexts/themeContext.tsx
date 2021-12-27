@@ -1,4 +1,7 @@
 import React, { FC } from "react";
+<<<<<<< feature/splash-page
+import { extendTheme, ChakraProvider } from "@chakra-ui/react";
+=======
 import {
   ThemeProvider as ChakraThemeProvider,
   CSSReset,
@@ -6,6 +9,7 @@ import {
   theme as chakraTheme,
   ChakraProvider,
 } from "@chakra-ui/react";
+>>>>>>> master
 
 export const theme = extendTheme({
   shadows: {
