@@ -5,27 +5,33 @@ import { useWallet } from "@solana/wallet-adapter-react";
 import { Box } from "@chakra-ui/react";
 import { Profile, Spinner } from "wumbo-common";
 import { ITokenWithMetaAndAccount } from "@strata-foundation/spl-token-collective";
-import { useClaimedTokenRefKey, useTokenRef } from "@strata-foundation/react";
+import {
+  useClaimedTokenRefKey,
+  usePublicKey,
+  useTokenBonding,
+  useTokenBondingFromMint,
+  useTokenRef,
+} from "@strata-foundation/react";
 import {
   AppRoutes,
   profilePath,
   nftPath,
+  swapPath,
 } from "../../../../../constants/routes";
 import WalletRedirect from "../../Wallet/WalletRedirect";
 
 export const ViewProfileRoute: React.FC = () => {
-  const params = useParams<{ tokenRefKey: string | undefined }>();
+  const params = useParams<{ mint: string | undefined }>();
   const { connected, adapter } = useWallet();
   const publicKey = adapter?.publicKey;
-  const walletTokenRefKey = useClaimedTokenRefKey(publicKey, null);
-  const passedTokenRefKey = params.tokenRefKey
-    ? new PublicKey(params.tokenRefKey)
-    : undefined;
-  const tokenRefKey = passedTokenRefKey || walletTokenRefKey;
-  const { info: tokenRef, loading } = useTokenRef(tokenRefKey);
+  const walletMintKey = useClaimedTokenRefKey(publicKey, null);
+  const { info: walletTokenRef, loading } = useTokenRef(walletMintKey);
+  const passedMintKey = usePublicKey(params.mint);
+  const mintKey = passedMintKey || walletTokenRef?.mint;
   const history = useHistory();
+  const { info: tokenBonding } = useTokenBondingFromMint(mintKey);
 
-  if (!tokenRefKey || !connected) {
+  if (!connected) {
     return <WalletRedirect />;
   }
 
@@ -33,7 +39,7 @@ export const ViewProfileRoute: React.FC = () => {
     return <Spinner />;
   }
 
-  if (!passedTokenRefKey && !tokenRef) {
+  if (!mintKey) {
     return (
       <Box p={4}>
         It looks like you haven't claimed a token yet. To claim your token,
@@ -45,17 +51,26 @@ export const ViewProfileRoute: React.FC = () => {
 
   return (
     <Profile
-      wumNetWorthPath={""}
-      topTokensPath={""}
+      collectivePath={tokenBonding ? profilePath(tokenBonding.baseMint) : null}
       useClaimFlow={() => ({
         claim: () => Promise.resolve(),
         loading: false,
         error: undefined,
       })}
+      onTradeClick={() =>
+        tokenBonding &&
+        history.push(
+          swapPath(
+            tokenBonding.publicKey,
+            tokenBonding!.baseMint,
+            tokenBonding!.targetMint
+          )
+        )
+      }
       editPath={AppRoutes.editProfile.path}
-      tokenRefKey={tokenRefKey}
-      onAccountClick={(tokenBondingKey: PublicKey) => {
-        history.push(profilePath(tokenBondingKey));
+      mintKey={mintKey}
+      onAccountClick={(mintKey: PublicKey) => {
+        history.push(profilePath(mintKey));
       }}
       getNftLink={(token: ITokenWithMetaAndAccount) => {
         const mint = token?.metadata?.mint;

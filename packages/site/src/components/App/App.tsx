@@ -12,11 +12,8 @@ import ManageWallet from "./components/Wallet/ManageWallet";
 import Wallet from "./components/Wallet/Wallet";
 import Send from "./components/Wallet/Send";
 import SendSearch from "./components/Wallet/SendSearch";
-import { ContextProviders } from "./ContextProviders";
 import { ViewProfileRoute } from "./components/Profile/View/ViewProfile";
 import { ViewNftRoute } from "./components/Nft/View/ViewNft";
-import { TopTokens } from "./components/Leaderboard/TopTokens";
-import { WumNetWorth } from "./components/Leaderboard/WumNetWorth";
 import { SwapRoute } from "./components/Swap/Swap";
 import { PrototypeRoute } from "./components//Prototype";
 

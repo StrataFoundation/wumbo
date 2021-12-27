@@ -32,9 +32,9 @@ export function sendPath(mint: PublicKey): string {
   return routes.send.path.replace(":mint", mint.toBase58());
 }
 
-export const viewProfilePath = (tokenRefKey: PublicKey): string =>
+export const viewProfilePath = (mintKey: PublicKey): string =>
   replaceAll(routes.viewProfile.path, {
-    ":tokenRefKey": tokenRefKey.toBase58(),
+    ":mint": mintKey.toBase58(),
   });
 
 export const nftPath = (mint: PublicKey): string =>
@@ -98,7 +98,7 @@ export const routes: IRoutes = {
   },
   editProfile: { path: "/profile/edit", Icon: null, isDrawerNav: false },
   viewProfile: {
-    path: "/profile/view/:tokenRefKey",
+    path: "/profile/view/:mint",
     Icon: null,
     isDrawerNav: false,
   },

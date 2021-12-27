@@ -41,9 +41,9 @@ export function wumNetWorthPath(wallet: PublicKey): string {
   return AppRoutes.wumNetWorth.path.replace(":wallet", wallet.toBase58());
 }
 
-export const profilePath = (tokenRefKey: PublicKey): string =>
+export const profilePath = (mint: PublicKey): string =>
   replaceAll(AppRoutes.viewProfile.path, {
-    ":tokenRefKey": tokenRefKey.toBase58(),
+    ":mint": mint.toBase58(),
   });
 
 export const nftPath = (mint: PublicKey): string =>
@@ -69,7 +69,7 @@ export const AppRoutes: IAppRoutes = {
   claim: { path: "/app/claim" },
   manageWallet: { path: "/app/manage-wallet" },
   wallet: { path: "/app/wallet" },
-  viewProfile: { path: "/app/profile/view/:tokenRefKey" },
+  viewProfile: { path: "/app/profile/view/:mint" },
   viewNft: { path: "/app/nft/view/:mint" },
   profile: { path: "/app/profile" },
   editProfile: { path: "/app/profile/edit" },

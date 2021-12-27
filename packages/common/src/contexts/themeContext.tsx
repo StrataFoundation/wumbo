@@ -1,5 +1,15 @@
 import React, { FC } from "react";
+<<<<<<< feature/splash-page
 import { extendTheme, ChakraProvider } from "@chakra-ui/react";
+=======
+import {
+  ThemeProvider as ChakraThemeProvider,
+  CSSReset,
+  extendTheme,
+  theme as chakraTheme,
+  ChakraProvider,
+} from "@chakra-ui/react";
+>>>>>>> master
 
 export const theme = extendTheme({
   shadows: {
@@ -7,6 +17,7 @@ export const theme = extendTheme({
   },
   components: { Button: { baseStyle: { _focus: { boxShadow: "none" } } } },
   fonts: {
+    ...chakraTheme.fonts,
     body: `Avenir,Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol"`,
     heading: `Avenir,Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol"`,
   },

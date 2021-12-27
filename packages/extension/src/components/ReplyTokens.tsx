@@ -80,7 +80,7 @@ const MentionToken = ({ owner, mention, size }: IMentionTokenProps) => {
 
   return (
     <MetadataAvatar
-      tokenBonding={token}
+      mint={token?.targetMint}
       name={tokenRef!.name as string}
       size={size}
     />
@@ -122,7 +122,7 @@ const PopoverToken = ({ owner, mention }: IPopoverTokenProps) => {
   return (
     <HStack padding={2} spacing={2} fontFamily="body">
       <MetadataAvatar
-        tokenBonding={token}
+        mint={token?.targetMint}
         name={tokenRef!.name as string}
         size="md"
       />

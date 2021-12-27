@@ -11,6 +11,7 @@ import {
 import { useErrorHandler, useTokenMetadata } from "@strata-foundation/react";
 import { ITokenBonding } from "@strata-foundation/spl-token-bonding";
 import { Spinner } from "./";
+import { PublicKey } from "@solana/web3.js";
 
 export interface AvatarProps extends ChakraAvatarProps {
   direction?: StackDirection;
@@ -43,17 +44,17 @@ export const Avatar = ({
 );
 
 interface MetadataAvatarProps extends AvatarProps {
-  tokenBonding: ITokenBonding | undefined;
+  mint: PublicKey | undefined;
 }
 
 export const MetadataAvatar = React.memo(
-  ({ name, src, tokenBonding, ...props }: MetadataAvatarProps) => {
+  ({ name, src, mint, ...props }: MetadataAvatarProps) => {
     const {
       image: metadataImage,
       metadata,
       loading,
       error,
-    } = useTokenMetadata(tokenBonding?.targetMint);
+    } = useTokenMetadata(mint);
     const { handleErrors } = useErrorHandler();
 
     handleErrors(error);
