@@ -11,6 +11,7 @@ export default React.memo(() => {
 
   useEffect(() => {
     const redirect = location.search.replace("?redirect=", "");
+
     if (connected && redirect) {
       console.log(`Redirecting to ${redirect}`);
       history.replace(redirect);

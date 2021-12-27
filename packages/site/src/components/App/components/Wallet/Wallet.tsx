@@ -1,6 +1,6 @@
+import React from "react";
 import { useWallet } from "@solana/wallet-adapter-react";
 import { useFtxPayLink } from "@strata-foundation/react";
-import React from "react";
 import { Wallet } from "wumbo-common";
 import {
   AppRoutes,

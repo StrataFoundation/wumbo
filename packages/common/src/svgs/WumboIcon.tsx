@@ -13,16 +13,16 @@ export const WumboIcon = createIcon({
       y2="-88.2854"
       gradientUnits="userSpaceOnUse"
     >
-      <stop stop-color="#2323FF" />
-      <stop offset=".4183" stop-color="#4F51FF" />
-      <stop offset="1" stop-color="#A53EF4" />
+      <stop stopColor="#2323FF" />
+      <stop offset=".4183" stopColor="#4F51FF" />
+      <stop offset="1" stopColor="#A53EF4" />
     </linearGradient>,
     <circle cx="162" cy="162" r="162" fill="url(#a)" />,
     <path
       stroke="currentColor"
-      stroke-linecap="round"
-      stroke-linejoin="round"
-      stroke-width="36"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      strokeWidth="36"
       d="M91.088 138.345 127.341 200l37.613-61.655L200.261 200"
     />,
     <circle
@@ -31,7 +31,7 @@ export const WumboIcon = createIcon({
       r="15.338"
       fill="currentColor"
       stroke="currentColor"
-      stroke-width="3"
+      strokeWidth="3"
     />,
   ],
 });

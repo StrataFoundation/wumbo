@@ -1,10 +1,8 @@
 import React, { FC } from "react";
 import {
-  ThemeProvider as ChakraThemeProvider,
-  CSSReset,
   extendTheme,
-  theme as chakraTheme,
   ChakraProvider,
+  theme as chakraTheme,
 } from "@chakra-ui/react";
 
 export const theme = extendTheme({

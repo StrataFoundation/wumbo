@@ -1,6 +1,7 @@
 import "./bufferFill";
 import React from "react";
 import ReactDOM from "react-dom";
+import ReactGA from "react-ga";
 import { BrowserRouter, Switch, Route } from "react-router-dom";
 import { ThemeProvider } from "wumbo-common";
 import { ModalProvider } from "./contexts";
@@ -8,6 +9,10 @@ import { SiteRoutes, AppRoutes } from "./constants/routes";
 import { App } from "./components/App/App";
 import { Site } from "./components/Site/Site";
 import reportWebVitals from "./reportWebVitals";
+
+const TRACKING_ID = "G-3K3X1TLYCC";
+ReactGA.initialize(TRACKING_ID);
+ReactGA.pageview(window.location.pathname + window.location.search);
 
 ReactDOM.render(
   <React.StrictMode>

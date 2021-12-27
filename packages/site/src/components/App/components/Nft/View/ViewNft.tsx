@@ -4,13 +4,18 @@ import {
   ViewNft as CommonViewNft,
   useTokenLargestAccounts,
 } from "wumbo-common";
-import { useTokenMetadata, useTokenAccount } from "@strata-foundation/react";
+import {
+  useTokenMetadata,
+  useTokenAccount,
+  useErrorHandler,
+} from "@strata-foundation/react";
 import { useParams } from "react-router-dom";
 import { profilePath } from "../../../../../constants/routes";
 import { PublicKey } from "@solana/web3.js";
 import { AppContainer } from "../../common/AppContainer";
 
 export const ViewNftRoute: React.FC = () => {
+  const { handleErrors } = useErrorHandler();
   const params = useParams<{ mint: string | undefined }>();
   const token = useMemo(
     () => (params.mint ? new PublicKey(params.mint) : undefined),
@@ -25,6 +30,8 @@ export const ViewNftRoute: React.FC = () => {
   } = useTokenLargestAccounts(token);
   const { loading: loading3, info } = useTokenAccount(res2?.value[0]?.address);
   const loading = loading1 || loading2 || loading3;
+
+  handleErrors(err2);
 
   if (loading) {
     return (
