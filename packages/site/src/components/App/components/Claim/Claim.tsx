@@ -1,13 +1,16 @@
 import React from "react";
-import { AppRoutes } from "../../../../constants/routes";
-import { Alert, AlertIcon, Flex, Stack } from "@chakra-ui/react";
+import { Alert, AlertIcon, Flex } from "@chakra-ui/react";
 import { useQuery } from "wumbo-common";
 import { Claim1 } from "./Claim1";
+import { Claim2 } from "./Claim2";
+import { Claim3 } from "./Claim3";
+import { Claim4 } from "./Claim4";
 
 export const ClaimRoute = React.memo(() => {
   const query = useQuery();
   const step = query.get("step");
   const handle = query.get("handle");
+  const authCode = query.get("authCode");
 
   if (!step || !handle) {
     return (
@@ -29,13 +32,13 @@ export const ClaimRoute = React.memo(() => {
       {(() => {
         switch (step) {
           case "1":
-            return (
-              <Claim1
-                onNext={() => console.log("next")}
-                onCancel={() => console.log("cancel")}
-                handle={handle}
-              />
-            );
+            return <Claim1 handle={handle} />;
+          case "2":
+            return <Claim2 handle={handle} authCode={authCode} />;
+          case "3":
+            return <Claim3 handle={handle} authCode={authCode} />;
+          case "4":
+            return <Claim4 />;
         }
       })()}
     </Flex>

@@ -1,7 +1,7 @@
 import React from "react";
 import { Box, Flex, Stack, Heading, Text } from "@chakra-ui/react";
 import { LandingLayout } from "../layouts/LandingLayout";
-import { DownloadButton } from "../common/DownloadButton";
+import { DownloadButton } from "../../../common/DownloadButton";
 
 export const Download: React.FC = () => (
   <Box bg="linear-gradient(272.23deg, #5D34A9 -0.32%, #413BB1 93.88%), #FFFFFF;">

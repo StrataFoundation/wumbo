@@ -1,8 +1,9 @@
 import React, { useState } from "react";
+import { useHistory } from "react-router-dom";
 import { PublicKey } from "@solana/web3.js";
-import { useWallet } from "@solana/wallet-adapter-react";
 import { useErrorHandler } from "@strata-foundation/react";
 import {
+  Box,
   Flex,
   VStack,
   HStack,
@@ -11,24 +12,20 @@ import {
   Icon,
   Image,
   Button,
+  Link,
 } from "@chakra-ui/react";
 import { RiGift2Line } from "react-icons/ri";
 import { Spinner } from "wumbo-common";
+import { claimPath } from "../../../../constants/routes";
 import Claim1Illu from "../../../../assets/images/Claim1Illu.png";
 
 export interface IClaim1Props {
-  onNext: () => void;
-  onCancel: () => void;
   handle: string;
 }
 
-export const Claim1: React.FC<IClaim1Props> = ({
-  onNext,
-  onCancel,
-  handle: propsHandle,
-}) => {
+export const Claim1: React.FC<IClaim1Props> = ({ handle }) => {
+  const history = useHistory();
   const { handleErrors } = useErrorHandler();
-  const [handle, setHandle] = useState<string>(propsHandle);
   // remove after comp is done
   const [loading, setLoading] = useState<boolean>(false);
 
@@ -97,15 +94,37 @@ export const Claim1: React.FC<IClaim1Props> = ({
             isFullWidth
             colorScheme="indigo"
             variant="outline"
-            onClick={onNext}
+            onClick={() => history.push(claimPath({ step: 2, handle }))}
           >
             Next
           </Button>
-          <Button colorScheme="indigo" variant="link" onClick={onCancel}>
+          <Button
+            colorScheme="indigo"
+            variant="link"
+            onClick={() => history.push("/")}
+          >
             Cancel
           </Button>
         </VStack>
       </Flex>
+      <Box
+        full
+        border="1px solid"
+        borderColor="gray.300"
+        py={12}
+        justifyContent="center"
+        align="center"
+        rounded="md"
+      >
+        <Text fontWeight="bold">Worried about potential legal problems?</Text>
+        <Link
+          href="https://teamwumbo.medium.com/wum-bo-hello-world-hello-twitter-fa3a7b8b6957"
+          color="indigo.500"
+          isExternal
+        >
+          Read "Legality of Wumbo"
+        </Link>
+      </Box>
     </VStack>
   );
 };

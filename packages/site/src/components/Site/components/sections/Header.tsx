@@ -3,7 +3,7 @@ import { Link, LinkProps } from "react-router-dom";
 import { Box, Flex, Text, FlexProps, Icon } from "@chakra-ui/react";
 import { WumboIcon } from "wumbo-common";
 import { LandingLayout } from "../layouts/LandingLayout";
-import { DownloadButton } from "../common/DownloadButton";
+import { DownloadButton } from "../../../common/DownloadButton";
 
 interface IMenuItemProps extends LinkProps {
   isLast?: boolean;

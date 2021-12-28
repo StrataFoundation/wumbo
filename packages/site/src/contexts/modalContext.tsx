@@ -7,7 +7,7 @@ import {
   useCallback,
 } from "react";
 
-export type Modals = "BetaDownload";
+export type Modals = "BetaDownload" | "WalletSelect";
 
 export interface IModalProviderProps {
   children: ReactNode;

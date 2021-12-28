@@ -1,8 +1,8 @@
 import React, { Fragment } from "react";
-import { Wallet, WalletName } from "@solana/wallet-adapter-wallets";
-import { WALLET_PROVIDERS } from "../constants/walletProviders";
-import { Box, Button, Text, Link, VStack } from "@chakra-ui/react";
 import { useWallet } from "@solana/wallet-adapter-react";
+import { Wallet, WalletName } from "@solana/wallet-adapter-wallets";
+import { Box, Button, Text, Link, VStack } from "@chakra-ui/react";
+import { WALLET_PROVIDERS } from "../constants/walletProviders";
 
 export const WalletSelect = () => {
   const { adapter, select } = useWallet();
