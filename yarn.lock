@@ -4031,7 +4031,7 @@
     superstruct "^0.14.2"
     tweetnacl "^1.0.0"
 
-"@strata-foundation/react@^2.0.1":
+"@strata-foundation/react@^2.0.0":
   version "2.0.1"
   resolved "https://registry.yarnpkg.com/@strata-foundation/react/-/react-2.0.1.tgz#26fce67647ab5ba2bb575dadcc83368625943b80"
   integrity sha512-sVu5LSXHrxqu4f4c91hc5n6Rkg+bSq3yt4u361LOSu+USXcAlwK0TT41hM38LkJz+UUcGekz/0nzUzP+4aUxVw==
@@ -4073,7 +4073,7 @@
     bn.js "^5.2.0"
     copyfiles "^2.4.1"
 
-"@strata-foundation/spl-token-collective@^2.0.1":
+"@strata-foundation/spl-token-collective@^2.0.0", "@strata-foundation/spl-token-collective@^2.0.1":
   version "2.0.1"
   resolved "https://registry.yarnpkg.com/@strata-foundation/spl-token-collective/-/spl-token-collective-2.0.1.tgz#2d28bbe610847209db4c21bd626b15582bafe29d"
   integrity sha512-Acxz7jPBeScb/uoWgyDVJ2iLZJqB/38TahSWF0eOiaVCD8MxccJvZOmgf0dJcGHS7Ui9adaRXHyxu8pNcmze0A==

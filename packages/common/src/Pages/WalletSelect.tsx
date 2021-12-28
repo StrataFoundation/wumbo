@@ -16,7 +16,7 @@ export const WalletSelect = () => {
             w="full"
             size="lg"
             colorScheme="indigo"
-            onClick={adapter?.disconnect}
+            onClick={adapter?.disconnect.bind(adapter)}
           >
             Disconnect
           </Button>

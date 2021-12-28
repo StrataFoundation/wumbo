@@ -1,17 +1,10 @@
-import React from "react";
 import { Flex } from "@chakra-ui/react";
+import { useBondingPricing, usePriceInUsd } from "@strata-foundation/react";
 import {
-  useErrorHandler,
-  useBondingPricing,
-  usePriceInUsd,
-  useTokenMetadata,
-} from "@strata-foundation/react";
-import {
-  ITokenBonding,
   BondingPricing,
+  ITokenBonding,
 } from "@strata-foundation/spl-token-bonding";
-import { Spinner } from "./";
-import { MetadataAvatar } from "./Avatar";
+import React from "react";
 import { useHistory } from "react-router-dom";
 
 interface TokenPillProps {
@@ -22,47 +15,6 @@ interface TokenPillProps {
   detailsPath?: string;
   pricing?: BondingPricing;
 }
-
-interface MetadataTokenPillProps {
-  name?: string;
-  ticker?: string;
-  tokenBonding: ITokenBonding;
-  detailsPath?: string;
-  pricing?: BondingPricing;
-}
-export const MetadataTokenPill = React.memo(
-  ({
-    name,
-    ticker,
-    tokenBonding,
-    detailsPath,
-    pricing,
-  }: MetadataTokenPillProps) => {
-    const { handleErrors } = useErrorHandler();
-    const { metadata, loading, error } = useTokenMetadata(
-      tokenBonding?.targetMint
-    );
-    const displayTicker = metadata?.data.symbol || ticker;
-    const displayName = metadata?.data.name || name;
-    handleErrors(error);
-    const displayIcon = loading ? (
-      <Spinner />
-    ) : (
-      <MetadataAvatar name={displayTicker} mint={tokenBonding?.targetMint} />
-    );
-
-    return (
-      <TokenPill
-        pricing={pricing}
-        name={displayName}
-        ticker={displayTicker}
-        icon={displayIcon}
-        tokenBonding={tokenBonding}
-        detailsPath={detailsPath}
-      />
-    );
-  }
-);
 
 export const TokenPill = React.memo(
   ({

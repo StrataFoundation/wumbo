@@ -1,5 +1,5 @@
 import { Button, ButtonProps } from "@chakra-ui/button";
-import { Box, Center } from "@chakra-ui/layout";
+import { Center } from "@chakra-ui/layout";
 import { PublicKey } from "@solana/web3.js";
 import React, { useMemo } from "react";
 import { usePriceInUsd } from "@strata-foundation/react";
@@ -79,7 +79,7 @@ export function PriceButton({
   const coinPriceUsd = usePriceInUsd(mint);
 
   const backgroundColor = useMemo(
-    () => getBackgroundColor(buttonTarget) || "white",
+    () => getBackgroundColor(buttonTarget) || "#ffffffff",
     [buttonTarget]
   );
   return (
