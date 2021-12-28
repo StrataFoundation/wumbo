@@ -7,14 +7,14 @@ export default React.memo(() => {
   const history = useHistory();
   const query = useQuery();
   const { connected } = useWallet();
+  const redirect = query.get("redirect");
 
   useEffect(() => {
-    const redirect = query.get("redirect");
     if (connected && redirect) {
       console.log(`Redirecting to ${redirect}`);
       history.replace(redirect);
     }
-  }, [connected, query.get("redirect"), history]);
+  }, [connected, redirect, history]);
 
   return <WalletSelect />;
 });
