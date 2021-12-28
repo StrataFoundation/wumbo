@@ -1,6 +1,7 @@
 import {
-  ChakraProvider, extendTheme,
-  theme as chakraTheme
+  ChakraProvider,
+  extendTheme,
+  theme as chakraTheme,
 } from "@chakra-ui/react";
 import React, { FC } from "react";
 
