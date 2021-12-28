@@ -58,8 +58,8 @@ export const StatCard = ({
         _hover={_hover}
         position="relative"
         w="100%"
-        borderRadius="9px"
-        padding={"1px"}
+        borderRadius="10px"
+        padding={"2px"}
         background={getTierGradient(tier) || "gray.100"}
       >
         {Inner}

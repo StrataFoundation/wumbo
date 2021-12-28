@@ -52,7 +52,7 @@ export const Create = () => {
               </Text>{" "}
               If this is your twitter account, you can claim this token for
               free. If this is someone else's twitter account, you can found
-              their fan club by creating an unclaimed token for them. It will
+              an unclaimed token for them. It will
               remain unclaimed until this person claims it. Should the person
               opt out, no new tokens may be purchased and exisiting tokens may
               still be sold. It costs 0.03 SOL (~$
