@@ -1,5 +1,6 @@
 import { Keypair, PublicKey } from "@solana/web3.js";
 import { TOKEN_PROGRAM_ID as SPL_TOKEN_PROGRAM_ID } from "@solana/spl-token";
+import { SplTokenCollective } from "@strata-foundation/spl-token-collective";
 
 export const WUMBO_TRANSACTION_FEE: number = Number(
   process.env.REACT_APP_WUMBO_TRANSACTION_FEE!
@@ -29,11 +30,8 @@ export const TROPHY_CREATOR = new PublicKey(
 );
 
 // export const SOLANA_API_URL = "https://api.mainnet-beta.solana.com"
-export const OPEN_BONDING = new PublicKey(process.env.REACT_APP_OPEN_BONDING!);
-export const OPEN_TOKEN = new PublicKey(process.env.REACT_APP_OPEN_TOKEN!);
-export const OPEN_COLLECTIVE_KEY = new PublicKey(
-  process.env.REACT_APP_OPEN_COLLECTIVE_KEY!
-);
+export const OPEN_BONDING = SplTokenCollective.OPEN_COLLECTIVE_BONDING_ID;
+export const OPEN_TOKEN = SplTokenCollective.OPEN_COLLECTIVE_MINT_ID;
 
 export const SOL_TOKEN = new PublicKey(
   "So11111111111111111111111111111111111111112"

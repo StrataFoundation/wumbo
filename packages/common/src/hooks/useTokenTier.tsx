@@ -9,12 +9,9 @@ import {
 export type TokenTier = "Platinum" | "Gold" | "Silver";
 
 export const TierCutoffs: Record<TokenTier, number> = {
-  // Platinum: 1_000_000,
-  // Gold: 100_000,
-  // Silver: 10_000,
-  Platinum: 1_00,
-  Gold: 10,
-  Silver: 1,
+  Platinum: 1_000_000,
+  Gold: 100_000,
+  Silver: 10_000,
 };
 
 const TierGradients: Record<TokenTier, string> = {

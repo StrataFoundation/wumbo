@@ -7,13 +7,13 @@ import {
   TransactionSignature,
 } from "@solana/web3.js";
 import { useTokenBonding } from "@strata-foundation/react";
-import { truthy } from "@strata-foundation/react/dist/lib/utils";
 import {
   ITokenBonding,
   SplTokenBonding,
 } from "@strata-foundation/spl-token-bonding";
 import React, { createContext } from "react";
 import { useAsync } from "react-async-hook";
+import { truthy } from "../utils";
 
 const MAX_TXNS = 200;
 export interface ITokenBondingTransactions {

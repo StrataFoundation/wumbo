@@ -16,6 +16,7 @@ import { ViewProfileRoute } from "./components/Profile/View/ViewProfile";
 import { ViewNftRoute } from "./components/Nft/View/ViewNft";
 import { SwapRoute } from "./components/Swap/Swap";
 import { PrototypeRoute } from "./components//Prototype";
+import { ContextProviders } from "./ContextProviders";
 
 export const App: React.FC = () => (
   <ContextProviders>
@@ -45,8 +46,6 @@ export const App: React.FC = () => (
               path={AppRoutes.editProfile.path}
               component={EditProfileRoute}
             />
-            <Route path={AppRoutes.topTokens.path} component={TopTokens} />
-            <Route path={AppRoutes.wumNetWorth.path} component={WumNetWorth} />
             <Route
               path={AppRoutes.sendSearch.path}
               exact
