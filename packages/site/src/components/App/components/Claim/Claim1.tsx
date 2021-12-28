@@ -1,7 +1,10 @@
 import React, { useState } from "react";
 import { useHistory } from "react-router-dom";
 import { PublicKey } from "@solana/web3.js";
-import { useErrorHandler } from "@strata-foundation/react";
+import {
+  useErrorHandler,
+  useUnclaimedTokenRefKeyForName,
+} from "@strata-foundation/react";
 import {
   Box,
   Flex,
@@ -15,7 +18,7 @@ import {
   Link,
 } from "@chakra-ui/react";
 import { RiGift2Line } from "react-icons/ri";
-import { Spinner } from "wumbo-common";
+import { Spinner, useTwitterTld } from "wumbo-common";
 import { claimPath } from "../../../../constants/routes";
 import Claim1Illu from "../../../../assets/images/Claim1Illu.png";
 
@@ -26,8 +29,12 @@ export interface IClaim1Props {
 export const Claim1: React.FC<IClaim1Props> = ({ handle }) => {
   const history = useHistory();
   const { handleErrors } = useErrorHandler();
-  // remove after comp is done
-  const [loading, setLoading] = useState<boolean>(false);
+  const tld = useTwitterTld();
+  const { result: tokenRef, loading } = useUnclaimedTokenRefKeyForName(
+    handle,
+    null,
+    tld
+  );
 
   if (loading) {
     return (
