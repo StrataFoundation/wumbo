@@ -16,7 +16,10 @@ export default React.memo(() => {
       <Box p={4} w="full">
         <SendSearch
           getSendLink={(t: ITokenWithMetaAndAccount) =>
-            sendPath(t.account!.mint, recipient ? new PublicKey(recipient) : undefined)
+            sendPath(
+              t.account!.mint,
+              recipient ? new PublicKey(recipient) : undefined
+            )
           }
         />
       </Box>

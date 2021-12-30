@@ -29,7 +29,10 @@ export interface IRoutes {
 }
 
 export function sendPath(mint: PublicKey, recipient?: PublicKey): string {
-  return routes.send.path.replace(":mint", mint.toBase58()) + (recipient ? `?recipient=${recipient}` : "");
+  return (
+    routes.send.path.replace(":mint", mint.toBase58()) +
+    (recipient ? `?recipient=${recipient}` : "")
+  );
 }
 
 export function sendSearchPath(recipient?: PublicKey): string {

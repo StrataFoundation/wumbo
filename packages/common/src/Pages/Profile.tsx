@@ -113,7 +113,7 @@ export const Profile = React.memo(
     getNftLink,
     editPath,
     collectivePath,
-    sendPath
+    sendPath,
   }: IProfileProps) => {
     const { handleErrors } = useErrorHandler();
     const { info: tokenRef, loading } = useMintTokenRef(mintKey);
@@ -201,7 +201,12 @@ export const Profile = React.memo(
         tokenBonding={tokenBonding?.publicKey}
       >
         <VStack w="full" spacing={4} padding={4} alignItems="start">
-          <HStack spacing={2} w="full" alignItems="start" justify="space-between">
+          <HStack
+            spacing={2}
+            w="full"
+            alignItems="start"
+            justify="space-between"
+          >
             <MetadataAvatar
               mb={"8px"}
               size="lg"
@@ -227,11 +232,7 @@ export const Profile = React.memo(
                     flexGrow={1}
                     lineHeight="normal"
                   >
-                    <Text
-                      lineHeight="14.4px"
-                      fontWeight={800}
-                      fontSize="12px"
-                    >
+                    <Text lineHeight="14.4px" fontWeight={800} fontSize="12px">
                       {collectiveMetadata?.data.symbol}
                     </Text>
                     <Text fontSize="10px" color="gray.500">
@@ -294,7 +295,7 @@ export const Profile = React.memo(
               <Text fontSize="14px">UNCLAIMED |&nbsp;{handleLink}</Text>
             )}
           </VStack>
-          
+
           <HStack spacing={2} w="full">
             {tokenBonding && (
               <Button size="xs" colorScheme="indigo" onClick={onTradeClick}>

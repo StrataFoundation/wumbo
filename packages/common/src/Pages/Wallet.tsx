@@ -96,13 +96,16 @@ const SolLogoIcon = createIcon({
   ],
 });
 
-async function unwrapTwSol(tokenBondingSdk: SplTokenBonding | undefined, account: PublicKey | undefined): Promise<void> {
+async function unwrapTwSol(
+  tokenBondingSdk: SplTokenBonding | undefined,
+  account: PublicKey | undefined
+): Promise<void> {
   if (tokenBondingSdk) {
     await tokenBondingSdk.sellBondingWrappedSol({
       amount: 0, // ignored because of all
       all: true,
-      source: account
-    })
+      source: account,
+    });
   }
 }
 
@@ -138,11 +141,7 @@ export const TokenInfo = React.memo(
           borderWidth={highlighted ? "1px" : undefined}
           borderRadius={highlighted ? "4px" : undefined}
         >
-          <HStack
-            padding={4}
-            spacing={3}
-            align="center"
-          >
+          <HStack padding={4} spacing={3} align="center">
             <Avatar name={metadata?.data.symbol} src={image} />
             <Flex flexDir="column">
               <Text>{metadata?.data.name}</Text>
@@ -161,7 +160,7 @@ export const TokenInfo = React.memo(
               </HStack>
             </Flex>
           </HStack>
-          {twSol && account && twSol.equals(account.mint) && 
+          {twSol && account && twSol.equals(account.mint) && (
             <Button
               isLoading={loading}
               onClick={() => unwrap(tokenBondingSdk, account?.address)}
@@ -170,7 +169,7 @@ export const TokenInfo = React.memo(
             >
               Unwrap
             </Button>
-          }
+          )}
         </HStack>
       </Link>
     );
@@ -282,9 +281,11 @@ export const Wallet = React.memo(
             tokens
               ?.filter((t) => !!t.metadata && t.mint?.decimals != 0)
               .sort((a, b) =>
-                (twSol && a.account!.mint!.equals(twSol)) ? -1 : 
-                  (twSol && b.account!.mint.equals(twSol)) ? 1 :
-                    a.metadata!.data.name.localeCompare(b.metadata!.data.name)
+                twSol && a.account!.mint!.equals(twSol)
+                  ? -1
+                  : twSol && b.account!.mint.equals(twSol)
+                  ? 1
+                  : a.metadata!.data.name.localeCompare(b.metadata!.data.name)
               )
               .map((tokenWithMeta) => (
                 <TokenInfo

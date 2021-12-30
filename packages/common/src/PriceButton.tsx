@@ -106,7 +106,13 @@ export function PriceButton({
         {...btnProps}
         borderRadius={r ? `${r - 1}px` : "4.4px"}
       >
-        {coinPriceUsd ? "$" + coinPriceUsd.toFixed(2) : <Box w="30px"><Spinner size="xs" /></Box> }
+        {coinPriceUsd ? (
+          "$" + coinPriceUsd.toFixed(2)
+        ) : (
+          <Box w="30px">
+            <Spinner size="xs" />
+          </Box>
+        )}
       </Button>
     </Center>
   );

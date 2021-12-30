@@ -50,7 +50,7 @@ import { Spinner } from "../Spinner";
 import { Avatar } from "../Avatar";
 import { useWallet } from "@solana/wallet-adapter-react";
 import { SplTokenMetadata } from "@strata-foundation/spl-utils";
-import { useQuery } from "../utils"
+import { useQuery } from "../utils";
 
 type FormValues = { amount: number; recipient: string };
 
@@ -102,7 +102,7 @@ export const Send = ({ finishRedirectUrl }: { finishRedirectUrl: string }) => {
   const recipientStr = watch("recipient");
   const amount = watch("amount");
   const recipient = usePublicKey(recipientStr);
-  console.log(recipientRaw, recipientStr, recipient)
+  console.log(recipientRaw, recipientStr, recipient);
   const {
     associatedAccount: ata,
     loading: ataLoading,
@@ -136,9 +136,9 @@ export const Send = ({ finishRedirectUrl }: { finishRedirectUrl: string }) => {
   const recipientRef = React.useRef<HTMLParagraphElement>(null);
   useEffect(() => {
     if (recipientRef.current) {
-      recipientRef.current.innerHTML = recipientRaw
+      recipientRef.current.innerHTML = recipientRaw;
     }
-  }, [recipientRef, recipientRaw])
+  }, [recipientRef, recipientRaw]);
   handleErrors(imageError, error, feeError);
 
   const handleUseMax = () => {

@@ -33,7 +33,9 @@ export default React.memo(() => {
   const createCreator = async () => {
     const handle = query.get("name")!;
 
-    const collectiveAcct = (await tokenCollectiveSdk?.getCollective(SplTokenCollective.OPEN_COLLECTIVE_ID))!;
+    const collectiveAcct = (await tokenCollectiveSdk?.getCollective(
+      SplTokenCollective.OPEN_COLLECTIVE_ID
+    ))!;
     const config = collectiveAcct.config.unclaimedTokenBondingSettings as any;
     const { tokenBonding } = await tokenCollectiveSdk!.createSocialToken({
       metadata: {

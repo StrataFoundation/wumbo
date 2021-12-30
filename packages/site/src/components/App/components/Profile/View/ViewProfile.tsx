@@ -3,15 +3,20 @@ import { useWallet } from "@solana/wallet-adapter-react";
 import { PublicKey } from "@solana/web3.js";
 import {
   useClaimedTokenRefKey,
-  usePublicKey, useTokenBondingFromMint,
-  useTokenRef
+  usePublicKey,
+  useTokenBondingFromMint,
+  useTokenRef,
 } from "@strata-foundation/react";
 import { ITokenWithMetaAndAccount } from "@strata-foundation/spl-token-collective";
 import React from "react";
 import { useHistory, useParams } from "react-router-dom";
 import { Profile, Spinner } from "wumbo-common";
 import {
-  AppRoutes, nftPath, profilePath, swapPath, sendSearchPath
+  AppRoutes,
+  nftPath,
+  profilePath,
+  swapPath,
+  sendSearchPath,
 } from "../../../../../constants/routes";
 import WalletRedirect from "../../Wallet/WalletRedirect";
 

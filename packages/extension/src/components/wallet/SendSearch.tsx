@@ -5,7 +5,7 @@ import React, { Fragment } from "react";
 import {
   ITokenWithMetaAndAccount,
   SendSearch as CommonSendSearch,
-  useQuery
+  useQuery,
 } from "wumbo-common";
 import { WumboDrawer } from "../WumboDrawer";
 
@@ -20,7 +20,10 @@ export const SendSearch = () => {
         <Box padding={4}>
           <CommonSendSearch
             getSendLink={(t: ITokenWithMetaAndAccount) =>
-              sendPath(t.account!.mint, recipient ? new PublicKey(recipient) : undefined)
+              sendPath(
+                t.account!.mint,
+                recipient ? new PublicKey(recipient) : undefined
+              )
             }
           />
         </Box>

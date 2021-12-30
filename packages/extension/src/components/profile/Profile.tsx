@@ -1,7 +1,9 @@
 import {
   nftPath,
-  routes, sendSearchPath, swapPath,
-  viewProfilePath
+  routes,
+  sendSearchPath,
+  swapPath,
+  viewProfilePath,
 } from "@/constants/routes";
 import { useClaimFlow } from "@/utils/claim";
 import { Box } from "@chakra-ui/react";
@@ -9,7 +11,10 @@ import { useWallet } from "@solana/wallet-adapter-react";
 import { PublicKey } from "@solana/web3.js";
 import {
   useClaimedTokenRefKey,
-  usePublicKey, useTokenBondingFromMint, useTokenMetadata, useTokenRef
+  usePublicKey,
+  useTokenBondingFromMint,
+  useTokenMetadata,
+  useTokenRef,
 } from "@strata-foundation/react";
 import React, { Fragment } from "react";
 import { useHistory, useParams } from "react-router-dom";
