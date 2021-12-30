@@ -83,7 +83,7 @@ export const ClaimButton: FC<Props> = ({
       buttonTarget={buttonTarget}
       {...btnProps}
       r={100}
-      h={36}
+      h={"36px"}
       link={`${viewProfilePath(tokenRef.mint)}?name=${creatorName}`}
       onClick={() =>
         toggleDrawer({

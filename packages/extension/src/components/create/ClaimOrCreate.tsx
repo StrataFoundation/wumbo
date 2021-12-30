@@ -17,6 +17,7 @@ import {
   useProvider,
   useStrataSdks,
 } from "@strata-foundation/react";
+import { SplTokenCollective } from "@strata-foundation/spl-token-collective";
 
 export default React.memo(() => {
   const history = useHistory();
@@ -32,6 +33,8 @@ export default React.memo(() => {
   const createCreator = async () => {
     const handle = query.get("name")!;
 
+    const collectiveAcct = (await tokenCollectiveSdk?.getCollective(SplTokenCollective.OPEN_COLLECTIVE_ID))!;
+    const config = collectiveAcct.config.unclaimedTokenBondingSettings as any;
     const { tokenBonding } = await tokenCollectiveSdk!.createSocialToken({
       metadata: {
         name: handle,
@@ -40,10 +43,10 @@ export default React.memo(() => {
       name: await getTwitterRegistryKey(handle, await getTwitterTld()),
       nameParent: await getTwitterTld(),
       tokenBondingParams: {
-        buyBaseRoyaltyPercentage: 0,
-        sellBaseRoyaltyPercentage: 0,
-        buyTargetRoyaltyPercentage: 5,
-        sellTargetRoyaltyPercentage: 0,
+        buyBaseRoyaltyPercentage: config.minBuyBaseRoyaltyPercentage,
+        sellBaseRoyaltyPercentage: config.minSellBaseRoyaltyPercentage,
+        buyTargetRoyaltyPercentage: config.minBuyTargetRoyaltyPercentage,
+        sellTargetRoyaltyPercentage: config.minSellTargetRoyaltyPercentage,
       },
     });
     const tokenBondingAcct = (await tokenBondingSdk!.getTokenBonding(

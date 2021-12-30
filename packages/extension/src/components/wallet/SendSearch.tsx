@@ -1,14 +1,18 @@
+import { sendPath } from "@/constants/routes";
 import { Box } from "@chakra-ui/react";
-import React, { Fragment, useEffect } from "react";
-import { useParams } from "react-router-dom";
+import { PublicKey } from "@solana/web3.js";
+import React, { Fragment } from "react";
 import {
   ITokenWithMetaAndAccount,
   SendSearch as CommonSendSearch,
+  useQuery
 } from "wumbo-common";
 import { WumboDrawer } from "../WumboDrawer";
-import { sendPath } from "@/constants/routes";
 
 export const SendSearch = () => {
+  const query = useQuery();
+  const recipient = query.get("recipient");
+
   return (
     <Fragment>
       <WumboDrawer.Header title="Send" />
@@ -16,7 +20,7 @@ export const SendSearch = () => {
         <Box padding={4}>
           <CommonSendSearch
             getSendLink={(t: ITokenWithMetaAndAccount) =>
-              sendPath(t.account!.mint)
+              sendPath(t.account!.mint, recipient ? new PublicKey(recipient) : undefined)
             }
           />
         </Box>

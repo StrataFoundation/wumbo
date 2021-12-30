@@ -1,22 +1,17 @@
-import React from "react";
-import { PublicKey } from "@solana/web3.js";
-import { useParams, useHistory } from "react-router-dom";
-import { useWallet } from "@solana/wallet-adapter-react";
 import { Box } from "@chakra-ui/react";
-import { Profile, Spinner } from "wumbo-common";
-import { ITokenWithMetaAndAccount } from "@strata-foundation/spl-token-collective";
+import { useWallet } from "@solana/wallet-adapter-react";
+import { PublicKey } from "@solana/web3.js";
 import {
   useClaimedTokenRefKey,
-  usePublicKey,
-  useTokenBonding,
-  useTokenBondingFromMint,
-  useTokenRef,
+  usePublicKey, useTokenBondingFromMint,
+  useTokenRef
 } from "@strata-foundation/react";
+import { ITokenWithMetaAndAccount } from "@strata-foundation/spl-token-collective";
+import React from "react";
+import { useHistory, useParams } from "react-router-dom";
+import { Profile, Spinner } from "wumbo-common";
 import {
-  AppRoutes,
-  profilePath,
-  nftPath,
-  swapPath,
+  AppRoutes, nftPath, profilePath, swapPath, sendSearchPath
 } from "../../../../../constants/routes";
 import WalletRedirect from "../../Wallet/WalletRedirect";
 
@@ -51,6 +46,7 @@ export const ViewProfileRoute: React.FC = () => {
 
   return (
     <Profile
+      sendPath={sendSearchPath(walletTokenRef?.owner || undefined)}
       collectivePath={tokenBonding ? profilePath(tokenBonding.baseMint) : null}
       useClaimFlow={() => ({
         claim: () => Promise.resolve(),

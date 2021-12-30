@@ -28,8 +28,12 @@ export interface IRoutes {
   send: Route;
 }
 
-export function sendPath(mint: PublicKey): string {
-  return routes.send.path.replace(":mint", mint.toBase58());
+export function sendPath(mint: PublicKey, recipient?: PublicKey): string {
+  return routes.send.path.replace(":mint", mint.toBase58()) + (recipient ? `?recipient=${recipient}` : "");
+}
+
+export function sendSearchPath(recipient?: PublicKey): string {
+  return routes.sendSearch.path + (recipient ? `?recipient=${recipient}` : "");
 }
 
 export const viewProfilePath = (mintKey: PublicKey): string =>

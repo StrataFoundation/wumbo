@@ -26,8 +26,12 @@ interface IAppRoutes {
   prototype: Route;
 }
 
-export function sendPath(mint: PublicKey): string {
-  return AppRoutes.send.path.replace(":mint", mint.toBase58());
+export function sendPath(mint: PublicKey, recipient?: PublicKey): string {
+  return AppRoutes.send.path.replace(":mint", mint.toBase58()) + (recipient ? `?recipient=${recipient}` : "");
+}
+
+export function sendSearchPath(recipient?: PublicKey): string {
+  return AppRoutes.sendSearch.path + (recipient ? `?recipient=${recipient}` : "");
 }
 
 export function topTokensPath(tokenBondingKey: PublicKey): string {

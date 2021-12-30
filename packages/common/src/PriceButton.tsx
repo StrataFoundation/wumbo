@@ -5,6 +5,7 @@ import { PublicKey } from "@solana/web3.js";
 import React, { useMemo } from "react";
 import { usePriceInUsd } from "@strata-foundation/react";
 import { Link } from "react-router-dom";
+import { Spinner } from "./Spinner";
 
 function isTransparent(color: string) {
   switch ((color || "").replace(/\s+/g, "").toLowerCase()) {
@@ -58,7 +59,7 @@ function isDark(color: any): boolean {
 }
 
 export function PriceButton({
-  h = 22,
+  h = "var(--chakra-sizes-6)",
   r,
   link,
   mint,
@@ -66,7 +67,7 @@ export function PriceButton({
   buttonTarget,
   ...btnProps
 }: {
-  h?: number;
+  h?: string;
   w?: number;
   r?: number;
   buttonTarget?: HTMLElement;
@@ -84,14 +85,14 @@ export function PriceButton({
   );
   return (
     <Center
-      h={`${h}px`}
+      h={h}
       background={gradient || "green.500"}
       padding="2px"
-      borderRadius={r ? `${r}px` : "7.5px"}
+      borderRadius={r ? `${r}px` : "6px"}
     >
       <Button
         backgroundColor={backgroundColor}
-        h={`${h - 4}px`}
+        h={`calc(${h} - 4px)`}
         as={link ? Link : undefined}
         _hover={{
           background: isDark(backgroundColor) ? "gray.600" : "gray.300",
@@ -103,8 +104,9 @@ export function PriceButton({
         color={isDark(backgroundColor) ? "white" : "black"}
         fontFamily="body"
         {...btnProps}
+        borderRadius={r ? `${r - 1}px` : "4.4px"}
       >
-        ${coinPriceUsd?.toFixed(2) || "0.00"}
+        {coinPriceUsd ? "$" + coinPriceUsd.toFixed(2) : <Box w="30px"><Spinner size="xs" /></Box> }
       </Button>
     </Center>
   );
