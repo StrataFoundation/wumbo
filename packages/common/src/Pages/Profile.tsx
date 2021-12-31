@@ -19,6 +19,7 @@ import {
   VStack,
 } from "@chakra-ui/react";
 import { NATIVE_MINT } from "@solana/spl-token";
+import { AiOutlineSend } from "react-icons/ai";
 import { useWallet } from "@solana/wallet-adapter-react";
 import { PublicKey } from "@solana/web3.js";
 import {
