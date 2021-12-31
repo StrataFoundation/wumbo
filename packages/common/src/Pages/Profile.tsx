@@ -16,6 +16,7 @@ import {
   VStack,
 } from "@chakra-ui/react";
 import { NATIVE_MINT } from "@solana/spl-token";
+import { AiOutlineSend } from "react-icons/ai";
 import { useWallet } from "@solana/wallet-adapter-react";
 import { PublicKey } from "@solana/web3.js";
 import {
@@ -57,6 +58,7 @@ interface IProfileProps
   extends Pick<ISocialTokenTabsProps, "onAccountClick" | "getNftLink"> {
   mintKey: PublicKey;
   editPath: string;
+  sendPath: string;
   collectivePath: string | null;
   onTradeClick?: () => void;
   useClaimFlow: (handle: string | undefined | null) => IClaimFlowOutput;
@@ -111,6 +113,7 @@ export const Profile = React.memo(
     getNftLink,
     editPath,
     collectivePath,
+    sendPath,
   }: IProfileProps) => {
     const { handleErrors } = useErrorHandler();
     const { info: tokenRef, loading } = useMintTokenRef(mintKey);
@@ -197,86 +200,102 @@ export const Profile = React.memo(
       <TokenBondingRecentTransactionsProvider
         tokenBonding={tokenBonding?.publicKey}
       >
-        <VStack w="full" spacing={4} padding={4}>
-          <HStack spacing={2} w="full" alignItems="start">
-            <VStack spacing={"6px"} alignItems="start">
-              <MetadataAvatar
-                mb={"8px"}
-                size="lg"
-                mint={mintKey}
-                name="UNCLAIMED"
-              />
-              <HStack spacing={2} alignItems="center">
-                <Text fontSize="18px" lineHeight="none">
-                  {metadata?.data.name || handleLink}
-                </Text>
-                {myTokenRefKey &&
-                  walletTokenRef?.publicKey.equals(myTokenRefKey) && (
-                    <Link
-                      style={{ display: "flex", alignItems: "center" }}
-                      to={editPath}
-                    >
-                      <Icon
-                        as={HiOutlinePencilAlt}
-                        w={5}
-                        h={5}
-                        color="indigo.500"
-                        _hover={{ color: "indigo.700", cursor: "pointer" }}
-                      />
-                    </Link>
-                  )}
-              </HStack>
-              {metadata && (
-                <Text fontSize="14px">
-                  {metadata.data.symbol} |&nbsp;{handleLink}
-                </Text>
-              )}
-              {!metadata && (
-                <Text fontSize="14px">UNCLAIMED |&nbsp;{handleLink}</Text>
-              )}
-            </VStack>
-            <Spacer />
-            <VStack spacing={2} alignItems="stretch">
-              {baseIsCollective && collectivePath && collectiveMetadata && (
-                <Link to={collectivePath}>
-                  <HStack
-                    _hover={{ cursor: "pointer", bgColor: "gray.100" }}
-                    w="full"
-                    spacing={2}
-                    padding={2}
-                    rounded="lg"
-                    borderWidth="2px"
-                    borderColor="gray.100"
+        <VStack w="full" spacing={4} padding={4} alignItems="start">
+          <HStack
+            spacing={2}
+            w="full"
+            alignItems="start"
+            justify="space-between"
+          >
+            <MetadataAvatar
+              mb={"8px"}
+              size="lg"
+              mint={mintKey}
+              name="UNCLAIMED"
+              marginBottom="-var(--chakra-sizes-4)"
+            />
+            {baseIsCollective && collectivePath && collectiveMetadata && (
+              <Link to={collectivePath}>
+                <HStack
+                  _hover={{ cursor: "pointer", bgColor: "gray.100" }}
+                  w="full"
+                  spacing={2}
+                  padding={2}
+                  rounded="lg"
+                  borderWidth="2px"
+                  borderColor="gray.100"
+                >
+                  <Avatar src={collectiveImage} w="24px" h="24px" />
+                  <Flex
+                    justifyContent="space-between"
+                    flexDir="column"
+                    flexGrow={1}
+                    lineHeight="normal"
                   >
-                    <Avatar src={collectiveImage} w="24px" h="24px" />
-                    <Flex
-                      justifyContent="space-between"
-                      flexDir="column"
-                      flexGrow={1}
-                      lineHeight="normal"
-                    >
-                      <Text
-                        lineHeight="14.4px"
-                        fontWeight={800}
-                        fontSize="12px"
-                      >
-                        {collectiveMetadata?.data.symbol}
-                      </Text>
-                      <Text fontSize="10px" color="gray.500">
-                        {collectiveMetadata?.data.name}
-                      </Text>
-                    </Flex>
-                    <Icon
-                      justifySelf="end"
-                      as={FaChevronRight}
-                      color="gray.400"
-                      height="16px"
-                    />
-                  </HStack>
-                </Link>
-              )}
-            </VStack>
+                    <Text lineHeight="14.4px" fontWeight={800} fontSize="12px">
+                      {collectiveMetadata?.data.symbol}
+                    </Text>
+                    <Text fontSize="10px" color="gray.500">
+                      {collectiveMetadata?.data.name}
+                    </Text>
+                  </Flex>
+                  <Icon
+                    justifySelf="end"
+                    as={FaChevronRight}
+                    color="gray.400"
+                    height="16px"
+                  />
+                </HStack>
+              </Link>
+            )}
           </HStack>
+          <VStack alignItems="start" spacing="6px">
+            <HStack spacing={2} alignItems="center">
+              <Text fontSize="18px" lineHeight="none">
+                {metadata?.data.name || handleLink}
+              </Text>
+              {myTokenRefKey &&
+                walletTokenRef?.publicKey.equals(myTokenRefKey) && (
+                  <Link
+                    title="Edit Profile"
+                    style={{ display: "flex", alignItems: "center" }}
+                    to={editPath}
+                  >
+                    <Icon
+                      as={HiOutlinePencilAlt}
+                      w={5}
+                      h={5}
+                      color="indigo.500"
+                      _hover={{ color: "indigo.700", cursor: "pointer" }}
+                    />
+                  </Link>
+                )}
+
+              <Link
+                title="Send Tokens"
+                style={{ display: "flex", alignItems: "center" }}
+                to={sendPath}
+              >
+                <Icon
+                  as={AiOutlineSend}
+                  w={5}
+                  h={5}
+                  color="indigo.500"
+                  _hover={{ color: "indigo.700", cursor: "pointer" }}
+                />
+              </Link>
+            </HStack>
+
+            {metadata && (
+              <Text fontSize="14px">
+                {metadata.data.symbol} |&nbsp;{handleLink}
+              </Text>
+            )}
+            {!metadata && (
+              <Text fontSize="14px">UNCLAIMED |&nbsp;{handleLink}</Text>
+            )}
+          </VStack>
+
           <HStack spacing={2} w="full">
             {tokenBonding && (
               <Button size="xs" colorScheme="indigo" onClick={onTradeClick}>
@@ -340,7 +359,7 @@ export const Profile = React.memo(
                   value={fiatLocked ? "$" + fiatLocked : "Loading..."}
                 />
               </HashLink>
-              <VolumeCard baseMint={mintKey} />
+              <VolumeCard baseMint={tokenBonding.baseMint} />
             </Grid>
           )}
           <div id="tabs" />

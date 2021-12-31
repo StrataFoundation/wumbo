@@ -61,6 +61,13 @@ export const MainButton: FC<Props> = ({
   return (
     <PriceButton
       buttonTarget={buttonTarget}
+      {...btnProps}
+      {...(btnProps.borderRadius == "full"
+        ? {
+            r: 100,
+            h: "36px",
+          }
+        : {})}
       link={`${viewProfilePath(tokenRef.mint)}?name=${creatorName}`}
       onClick={() =>
         toggleDrawer({

@@ -10,14 +10,21 @@ import {
   Text,
   VStack,
 } from "@chakra-ui/react";
+import { AccountInfo } from "@solana/spl-token";
 import { useWallet } from "@solana/wallet-adapter-react";
+import { PublicKey } from "@solana/web3.js";
 import {
+  useErrorHandler,
   useOwnedAmount,
   usePriceInUsd,
   useSolOwnedAmount,
+  useStrataSdks,
+  useTwWrappedSolMint,
 } from "@strata-foundation/react";
+import { SplTokenBonding } from "@strata-foundation/spl-token-bonding";
 import { ITokenWithMetaAndAccount } from "@strata-foundation/spl-token-collective";
 import React from "react";
+import { useAsync, useAsyncCallback } from "react-async-hook";
 import toast from "react-hot-toast";
 import { RiCoinLine } from "react-icons/ri";
 import { Link } from "react-router-dom";
@@ -89,6 +96,19 @@ const SolLogoIcon = createIcon({
   ],
 });
 
+async function unwrapTwSol(
+  tokenBondingSdk: SplTokenBonding | undefined,
+  account: PublicKey | undefined
+): Promise<void> {
+  if (tokenBondingSdk) {
+    await tokenBondingSdk.sellBondingWrappedSol({
+      amount: 0, // ignored because of all
+      all: true,
+      source: account,
+    });
+  }
+}
+
 export const TokenInfo = React.memo(
   ({
     tokenWithMeta,
@@ -102,36 +122,54 @@ export const TokenInfo = React.memo(
     const { metadata, image, account } = tokenWithMeta;
     const fiatPrice = usePriceInUsd(account?.mint);
     const ownedAmount = useOwnedAmount(account?.mint);
+    const twSol = useTwWrappedSolMint();
+    const { tokenBondingSdk } = useStrataSdks();
+    const { execute: unwrap, loading, error } = useAsyncCallback(unwrapTwSol);
+
+    const { handleErrors } = useErrorHandler();
+    handleErrors(error);
 
     return (
       // @ts-ignore there's a possibility this route is null. That's fine
       <Link to={getTokenLink(tokenWithMeta)}>
         <HStack
-          padding={4}
-          spacing={3}
-          align="center"
+          alignItems="center"
+          justify="space-between"
+          justifyItems="center"
           _hover={{ opacity: "0.5" }}
           borderColor={highlighted ? "indigo.500" : undefined}
           borderWidth={highlighted ? "1px" : undefined}
           borderRadius={highlighted ? "4px" : undefined}
         >
-          <Avatar name={metadata?.data.symbol} src={image} />
-          <Flex flexDir="column">
-            <Text>{metadata?.data.name}</Text>
-            <HStack align="center" spacing={1}>
-              <Icon as={RiCoinLine} w="16px" h="16px" />
-              <Text>
-                {ownedAmount?.toFixed(2)} {metadata?.data.symbol}
-              </Text>
-              <Text color="gray.500">
-                (~$
-                {fiatPrice &&
-                  ownedAmount &&
-                  (fiatPrice * ownedAmount).toFixed(2)}
-                )
-              </Text>
-            </HStack>
-          </Flex>
+          <HStack padding={4} spacing={3} align="center">
+            <Avatar name={metadata?.data.symbol} src={image} />
+            <Flex flexDir="column">
+              <Text>{metadata?.data.name}</Text>
+              <HStack align="center" spacing={1}>
+                <Icon as={RiCoinLine} w="16px" h="16px" />
+                <Text>
+                  {ownedAmount?.toFixed(2)} {metadata?.data.symbol}
+                </Text>
+                <Text color="gray.500">
+                  (~$
+                  {fiatPrice &&
+                    ownedAmount &&
+                    (fiatPrice * ownedAmount).toFixed(2)}
+                  )
+                </Text>
+              </HStack>
+            </Flex>
+          </HStack>
+          {twSol && account && twSol.equals(account.mint) && (
+            <Button
+              isLoading={loading}
+              onClick={() => unwrap(tokenBondingSdk, account?.address)}
+              colorScheme="indigo"
+              size="xs"
+            >
+              Unwrap
+            </Button>
+          )}
         </HStack>
       </Link>
     );
@@ -157,6 +195,7 @@ export const Wallet = React.memo(
     const { data: tokens, loading } = useUserTokensWithMeta(
       publicKey || undefined
     );
+    const twSol = useTwWrappedSolMint();
 
     return (
       <VStack
@@ -242,7 +281,11 @@ export const Wallet = React.memo(
             tokens
               ?.filter((t) => !!t.metadata && t.mint?.decimals != 0)
               .sort((a, b) =>
-                a.metadata!.data.name.localeCompare(b.metadata!.data.name)
+                twSol && a.account!.mint!.equals(twSol)
+                  ? -1
+                  : twSol && b.account!.mint.equals(twSol)
+                  ? 1
+                  : a.metadata!.data.name.localeCompare(b.metadata!.data.name)
               )
               .map((tokenWithMeta) => (
                 <TokenInfo
