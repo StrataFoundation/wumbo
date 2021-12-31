@@ -47,11 +47,12 @@ export const Create = () => {
           </Box>
           {!userInfo && !loading && (
             <Text w="full" fontSize="small">
-               <Text fontWeight="bold">
-                 If this is your profile, you can link your wallet to show off your collectibles!
-                </Text>
+              <Text fontWeight="bold">
+                If this is your profile, you can link your wallet to show off
+                your collectibles!
+              </Text>
 
-            {/* TODO: Uncomment when token creation is live */}
+              {/* TODO: Uncomment when token creation is live */}
               {/* <Text fontWeight="bold">
                 You will be the first to mint & own this token!
               </Text>{" "}

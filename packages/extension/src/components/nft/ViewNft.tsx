@@ -50,7 +50,8 @@ export const ViewNft: React.FC = () => {
           getCreatorLink={(c, t, tokenRef, handle) => {
             return tokenRef
               ? viewProfilePath(tokenRef.mint)
-              : handle ? `https://twitter.com/${handle}`
+              : handle
+              ? `https://twitter.com/${handle}`
               : `https://explorer.solana.com/address/${c.toBase58()}`;
           }}
         />

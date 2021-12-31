@@ -4,7 +4,12 @@ import { useDrawer } from "@/contexts/drawerContext";
 import { Button, ButtonProps, SpinnerProps } from "@chakra-ui/react";
 import React, { FC } from "react";
 import { Link, useHistory } from "react-router-dom";
-import { PriceButton, Spinner, useTwitterOwner, useTwitterTld } from "wumbo-common";
+import {
+  PriceButton,
+  Spinner,
+  useTwitterOwner,
+  useTwitterTld,
+} from "wumbo-common";
 
 type Props = {
   creatorName: string;
@@ -35,7 +40,10 @@ export const MainButton: FC<Props> = ({
     return (
       <Button
         as={Link}
-        to={(owner ? routes.profile.path : routes.create.path) + `?name=${creatorName}&src=${creatorImg}`}
+        to={
+          (owner ? routes.profile.path : routes.create.path) +
+          `?name=${creatorName}&src=${creatorImg}`
+        }
         size="xs"
         fontFamily="body"
         colorScheme="indigo"
@@ -47,11 +55,11 @@ export const MainButton: FC<Props> = ({
           toggleDrawer({
             isOpen: true,
             creator: { name: creatorName, img: creatorImg },
-          })
+          });
         }}
         {...btnProps}
       >
-        { owner ? "View" : "Mint" }
+        {owner ? "View" : "Mint"}
       </Button>
     );
   }

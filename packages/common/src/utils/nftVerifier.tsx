@@ -1,10 +1,12 @@
 import {
-  getHashedName, getNameAccountKey, NameRegistryState
+  getHashedName,
+  getNameAccountKey,
+  NameRegistryState,
 } from "@bonfida/spl-name-service";
 import { PublicKey } from "@solana/web3.js";
 import {
   AccountFetchCache,
-  decodeMetadata
+  decodeMetadata,
 } from "@strata-foundation/spl-utils";
 import { deserializeUnchecked } from "borsh";
 import { NFT_VERIFIER, NFT_VERIFIER_TLD } from "../constants/globals";

@@ -8,7 +8,7 @@ import {
   useCreateOrClaimCoin,
   useReverseTwitter,
   executeRemoteTxn,
-  WUMBO_IDENTITY_SERVICE_URL
+  WUMBO_IDENTITY_SERVICE_URL,
 } from "wumbo-common";
 import { useProvider } from "@strata-foundation/react";
 
@@ -81,10 +81,14 @@ export function useClaimFlow(name?: string | null): IClaimFlowOutput {
       );
       history.push(routes.profile.path);
     }
-  }
+  };
 
   const { loading, execute, error } = useAsyncCallback(smartClaim);
-  const { loading: linkLoading, execute: linkExec, error: linkError } = useAsyncCallback(link);
+  const {
+    loading: linkLoading,
+    execute: linkExec,
+    error: linkError,
+  } = useAsyncCallback(link);
 
   return {
     claim: execute,

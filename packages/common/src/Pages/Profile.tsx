@@ -9,13 +9,14 @@ import {
   Popover,
   PopoverBody,
   PopoverContent,
-  PopoverTrigger, Tab,
+  PopoverTrigger,
+  Tab,
   TabList,
   TabPanel,
   TabPanels,
   Tabs,
   Text,
-  VStack
+  VStack,
 } from "@chakra-ui/react";
 import { NATIVE_MINT } from "@solana/spl-token";
 import { useWallet } from "@solana/wallet-adapter-react";
@@ -35,7 +36,7 @@ import {
   useTokenAccount,
   useTokenBondingFromMint,
   useTokenMetadata,
-  useTokenRefFromBonding
+  useTokenRefFromBonding,
 } from "@strata-foundation/react";
 import { ITokenWithMetaAndAccount } from "@strata-foundation/spl-token-collective";
 import React from "react";
@@ -48,7 +49,7 @@ import { Avatar, MetadataAvatar, PriceButton, PriceChangeTicker } from "..";
 import { TROPHY_CREATOR } from "../constants/globals";
 import {
   TokenBondingRecentTransactionsProvider,
-  useTokenBondingRecentTransactions
+  useTokenBondingRecentTransactions,
 } from "../contexts";
 import { useTokenTier, useUserTokensWithMeta } from "../hooks";
 import { TopTokenLeaderboard } from "../Leaderboard";
@@ -121,7 +122,7 @@ export const Profile = React.memo(
     editPath,
     collectivePath,
     sendPath,
-    createPath
+    createPath,
   }: IProfileProps) => {
     const { handleErrors } = useErrorHandler();
     const { info: tokenRef, loading } = useMintTokenRef(mintKey);
@@ -170,15 +171,27 @@ export const Profile = React.memo(
       typeof nativeLocked !== "undefined" &&
       toFiat(nativeLocked || 0).toFixed(2);
 
-    const { info: buyTargetRoyalties } = useTokenAccount(tokenBonding?.buyTargetRoyalties);
+    const { info: buyTargetRoyalties } = useTokenAccount(
+      tokenBonding?.buyTargetRoyalties
+    );
     const targetMint = useMint(tokenBonding?.targetMint);
-    const buyTargetRoyaltiesAmount = buyTargetRoyalties && targetMint && amountAsNum(buyTargetRoyalties?.amount, targetMint);
-    const claimAmount =  buyTargetRoyaltiesAmount && fiatPrice && pricing && (toFiat(pricing.current(NATIVE_MINT)) * buyTargetRoyaltiesAmount);
+    const buyTargetRoyaltiesAmount =
+      buyTargetRoyalties &&
+      targetMint &&
+      amountAsNum(buyTargetRoyalties?.amount, targetMint);
+    const claimAmount =
+      buyTargetRoyaltiesAmount &&
+      fiatPrice &&
+      pricing &&
+      toFiat(pricing.current(NATIVE_MINT)) * buyTargetRoyaltiesAmount;
 
     const query = useQuery();
     let { handle: reverseLookupHandle, error: reverseTwitterError2 } =
       useReverseTwitter(tokenRef?.owner || undefined);
-    let handle = (tokenRef && !tokenRef.isClaimed) ? metadata?.data.name : reverseLookupHandle;
+    let handle =
+      tokenRef && !tokenRef.isClaimed
+        ? metadata?.data.name
+        : reverseLookupHandle;
 
     if (!handle) {
       handle = query.get("name") || metadata?.data.name;
@@ -361,32 +374,29 @@ export const Profile = React.memo(
                 </Popover>
 
               )} */}
-            {!ownerWalletKey &&
+            {!ownerWalletKey && (
               <Button
                 size="xs"
                 colorScheme="twitter"
                 variant="outline"
                 onClick={link}
                 isLoading={linking}
-                loadingText={
-                  awaitingApproval ? "Awaiting Approval" : "Linking"
-                }
+                loadingText={awaitingApproval ? "Awaiting Approval" : "Linking"}
               >
                 Link Wallet
               </Button>
-            }
-            {!tokenRef &&
-              (
-                <Button
-                  as={Link}
-                  to={createPath}
-                  size="xs"
-                  colorScheme="indigo"
-                  variant="outline"
-                >
-                  Mint
-                </Button>
-              )}
+            )}
+            {!tokenRef && (
+              <Button
+                as={Link}
+                to={createPath}
+                size="xs"
+                colorScheme="indigo"
+                variant="outline"
+              >
+                Mint
+              </Button>
+            )}
             {tokenBonding && (
               <PriceChangeTicker tokenBonding={tokenBonding.publicKey} />
             )}
@@ -433,10 +443,9 @@ export const Profile = React.memo(
             />
           ) : tokenBonding ? (
             <CollectiveTabs onAccountClick={onAccountClick} mintKey={mintKey} />
-          ) : ownerWalletKey ? 
-            <LinkedTabs getNftLink={getNftLink} wallet={ownerWalletKey} /> : 
-            null
-          }
+          ) : ownerWalletKey ? (
+            <LinkedTabs getNftLink={getNftLink} wallet={ownerWalletKey} />
+          ) : null}
         </VStack>
       </TokenBondingRecentTransactionsProvider>
     );
@@ -457,7 +466,7 @@ function SocialTokenTabs({
   getNftLink,
 }: ISocialTokenTabsProps) {
   const { info: tokenRef, loading } = useTokenRefFromBonding(tokenBondingKey);
-  const ownerWalletKey = wallet || tokenRef?.owner as PublicKey | undefined;
+  const ownerWalletKey = wallet || (tokenRef?.owner as PublicKey | undefined);
 
   const {
     data: tokens,
@@ -569,16 +578,12 @@ function CollectiveTabs({
   );
 }
 
-
 interface ILinkedTabsProps {
   wallet: PublicKey;
   getNftLink: (t: ITokenWithMetaAndAccount) => string;
 }
 
-function LinkedTabs({
-  wallet,
-  getNftLink,
-}: ILinkedTabsProps) {
+function LinkedTabs({ wallet, getNftLink }: ILinkedTabsProps) {
   const {
     data: tokens,
     loading: loadingCollectibles,

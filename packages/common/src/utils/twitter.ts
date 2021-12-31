@@ -24,7 +24,10 @@ import {
   createVerifiedTwitterRegistry,
   getTwitterRegistry,
 } from "./testableNameServiceTwitter";
-import { useAccountFetchCache, getOwnerForName } from "@strata-foundation/react";
+import {
+  useAccountFetchCache,
+  getOwnerForName,
+} from "@strata-foundation/react";
 import { useTwitterTld } from "../hooks";
 
 let twitterTld: PublicKey, twitterVerifier: PublicKey;
@@ -163,9 +166,13 @@ export async function getTwitterReverse(
 
   const reverseTwitterAccount = await connection.getAccountInfo(key);
   if (!reverseTwitterAccount) {
-      throw new Error('Invalid reverse Twitter account provided');
+    throw new Error("Invalid reverse Twitter account provided");
   }
-  return deserializeUnchecked(ReverseTwitterRegistryState.schema, ReverseTwitterRegistryState, reverseTwitterAccount.data.slice(NameRegistryState.HEADER_LEN));
+  return deserializeUnchecked(
+    ReverseTwitterRegistryState.schema,
+    ReverseTwitterRegistryState,
+    reverseTwitterAccount.data.slice(NameRegistryState.HEADER_LEN)
+  );
 }
 
 async function getTwitterName(
@@ -208,9 +215,7 @@ interface TwitterState {
   owner: PublicKey | undefined;
   error: Error | undefined;
 }
-export function useTwitterOwner(
-  handle: string | undefined
-): TwitterState {
+export function useTwitterOwner(handle: string | undefined): TwitterState {
   const cache = useAccountFetchCache();
   const tld = useTwitterTld();
   const {

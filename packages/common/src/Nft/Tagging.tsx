@@ -166,10 +166,11 @@ export function getUntaggedImages(): HTMLImageElement[] {
   ]) as HTMLImageElement[];
 }
 
-export function useBufferFromUrl(url: string): { result: Blob | undefined, error?: Error } {
-  return useAsync(getBufferFromUrl, [
-    url,
-  ]);
+export function useBufferFromUrl(url: string): {
+  result: Blob | undefined;
+  error?: Error;
+} {
+  return useAsync(getBufferFromUrl, [url]);
 }
 
 type TagMatch = { percent: number; els: HTMLImageElement[] };

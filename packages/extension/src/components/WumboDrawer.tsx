@@ -10,7 +10,12 @@ import { Toaster } from "react-hot-toast";
 import { useDrawer } from "@/contexts/drawerContext";
 import { routes, IRoutes } from "@/constants/routes";
 import { useUserInfo } from "@/utils/userState";
-import { replaceAll, Spinner, OPEN_BONDING, useReverseTwitter } from "wumbo-common";
+import {
+  replaceAll,
+  Spinner,
+  OPEN_BONDING,
+  useReverseTwitter,
+} from "wumbo-common";
 import { useHistoryList } from "@/utils/history";
 import { useWallet } from "@solana/wallet-adapter-react";
 import { SplTokenCollective } from "@strata-foundation/spl-token-collective";
@@ -190,7 +195,7 @@ WumboDrawer.Nav = () => {
   const { adapter } = useWallet();
   const wallet = adapter?.publicKey;
   const { handle: reverseHandle } = useReverseTwitter(wallet || undefined);
-  const handle = creator?.name || reverseHandle || ""
+  const handle = creator?.name || reverseHandle || "";
   const creatorInfoState = useUserInfo(handle);
   const { userInfo: creatorInfo, loading } = creatorInfoState;
 

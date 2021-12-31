@@ -6,19 +6,21 @@ import { useWallet } from "@solana/wallet-adapter-react";
 import {
   useErrorHandler,
   useProvider,
-  useStrataSdks
+  useStrataSdks,
 } from "@strata-foundation/react";
 import { SplTokenCollective } from "@strata-foundation/spl-token-collective";
 import React, { useMemo } from "react";
 import { useAsyncCallback } from "react-async-hook";
 import { useHistory } from "react-router-dom";
 import {
-  getTwitterRegistryKey, getTwitterTld, useQuery,
-  useReverseTwitter
+  getTwitterRegistryKey,
+  getTwitterTld,
+  useQuery,
+  useReverseTwitter,
 } from "wumbo-common";
 
 function toPercent(u32: number) {
-  return (u32 / 4294967295) * 100
+  return (u32 / 4294967295) * 100;
 }
 export default React.memo(() => {
   const history = useHistory();
@@ -47,9 +49,15 @@ export default React.memo(() => {
       nameParent: await getTwitterTld(),
       tokenBondingParams: {
         buyBaseRoyaltyPercentage: toPercent(config.minBuyBaseRoyaltyPercentage),
-        sellBaseRoyaltyPercentage: toPercent(config.minSellBaseRoyaltyPercentage),
-        buyTargetRoyaltyPercentage: toPercent(config.minBuyTargetRoyaltyPercentage),
-        sellTargetRoyaltyPercentage: toPercent(config.minSellTargetRoyaltyPercentage),
+        sellBaseRoyaltyPercentage: toPercent(
+          config.minSellBaseRoyaltyPercentage
+        ),
+        buyTargetRoyaltyPercentage: toPercent(
+          config.minBuyTargetRoyaltyPercentage
+        ),
+        sellTargetRoyaltyPercentage: toPercent(
+          config.minSellTargetRoyaltyPercentage
+        ),
       },
     });
     const tokenBondingAcct = (await tokenBondingSdk!.getTokenBonding(
@@ -63,26 +71,34 @@ export default React.memo(() => {
       ) + `?name=${query.get("name")!}`
     );
   };
-  const { provider } = useProvider()
+  const { provider } = useProvider();
 
   const {
     execute,
     loading: creationLoading,
     error,
   } = useAsyncCallback(createCreator);
-  const { link, claim, claimLoading: loading, linkLoading, error: claimError } = useClaimFlow(query.get("name"));
-  const  { handleErrors } = useErrorHandler();
+  const {
+    link,
+    claim,
+    claimLoading: loading,
+    linkLoading,
+    error: claimError,
+  } = useClaimFlow(query.get("name"));
+  const { handleErrors } = useErrorHandler();
   handleErrors(reverseTwitterError, error, claimError);
   const showCreate = useMemo(
     () => !userInfo && !loading2,
     [userInfo, loading2]
   );
 
-  const or = <Box d="flex" justifyContent="center">
-    <Text fontSize="lg" color="gray.500">
-      Or
-    </Text>
-  </Box>
+  const or = (
+    <Box d="flex" justifyContent="center">
+      <Text fontSize="lg" color="gray.500">
+        Or
+      </Text>
+    </Box>
+  );
   return (
     <>
       {/* TODO: Uncomment when token creation is live */}
@@ -119,7 +135,7 @@ export default React.memo(() => {
       )} */}
       {!ownerTwitterHandle && (
         <>
-            {/* TODO: Uncomment when token creation is live */}
+          {/* TODO: Uncomment when token creation is live */}
           {/* {showCreate && (
             or
           )} */}

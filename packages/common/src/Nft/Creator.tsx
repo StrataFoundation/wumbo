@@ -29,8 +29,7 @@ export const Creator = React.memo(
     const { metadata, tokenRef, error, image } =
       useSocialTokenMetadata(creator);
 
-    const  { handle, error: reverseTwitterError2 } =
-      useReverseTwitter(creator);
+    const { handle, error: reverseTwitterError2 } = useReverseTwitter(creator);
     handleErrors(error, reverseTwitterError2);
 
     const children = (
@@ -39,7 +38,7 @@ export const Creator = React.memo(
           <Avatar showDetails size="xs" src={image} name={metadata.data.name} />
         )}
         {!metadata && !handle && truncatePubkey(creator)}
-        { handle && `@${handle}`}
+        {handle && `@${handle}`}
       </>
     );
 

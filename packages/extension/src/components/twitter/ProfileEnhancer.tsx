@@ -1,7 +1,14 @@
 import React, { Fragment, useEffect, useState, useCallback } from "react";
 import ReactShadow from "react-shadow/emotion";
 import { Box, Button, HStack } from "@chakra-ui/react";
-import { ThemeProvider, AppendChildPortal, usePrevious, TAGGING_THRESHOLD, useUserTokensWithMeta, truthy } from "wumbo-common";
+import {
+  ThemeProvider,
+  AppendChildPortal,
+  usePrevious,
+  TAGGING_THRESHOLD,
+  useUserTokensWithMeta,
+  truthy,
+} from "wumbo-common";
 import { useProfile } from "../../utils/twitterSpotter";
 import { MainButton } from "../MainButton";
 import { ClaimButton } from "../ClaimButton";
@@ -15,28 +22,37 @@ import { useHistory } from "react-router-dom";
 import { useDrawer } from "../../contexts/drawerContext";
 import { tagNftPath } from "@/constants/routes";
 
-async function imagesMatch(img1: Blob | undefined, img2Src: string): Promise<boolean> {
+async function imagesMatch(
+  img1: Blob | undefined,
+  img2Src: string
+): Promise<boolean> {
   const img2 = await getBufferFromUrl(img2Src);
   const mismatchPercent = +(
     await compareImages(img1, img2, { scaleToSameSize: true })
   ).misMatchPercentage;
-  return mismatchPercent <= TAGGING_THRESHOLD
+  return mismatchPercent <= TAGGING_THRESHOLD;
 }
 
-
-async function getTaggableNft(img1: Blob | undefined, tokens: ITokenWithMetaAndAccount[] | undefined): Promise<ITokenWithMetaAndAccount | undefined> {
+async function getTaggableNft(
+  img1: Blob | undefined,
+  tokens: ITokenWithMetaAndAccount[] | undefined
+): Promise<ITokenWithMetaAndAccount | undefined> {
   if (!img1 || !tokens) {
-    return
+    return;
   }
 
-  return Promise.any(tokens.filter(token => token.mint?.decimals == 0).map(async token => {
-    const isMatch = token.image && await imagesMatch(img1, token.image);
-    if (isMatch) {
-      return token;
-    } else {
-      throw "Not a match";
-    }
-  })).catch((e: any) => {
+  return Promise.any(
+    tokens
+      .filter((token) => token.mint?.decimals == 0)
+      .map(async (token) => {
+        const isMatch = token.image && (await imagesMatch(img1, token.image));
+        if (isMatch) {
+          return token;
+        } else {
+          throw "Not a match";
+        }
+      })
+  ).catch((e: any) => {
     console.error(e);
     return undefined;
   });
@@ -61,10 +77,20 @@ export const ProfileEnhancer = () => {
       }
     }
   }, [previousProfile, profile, triggerRemount]);
-  const { result: img1, error: bufferError } = useBufferFromUrl(profile?.avatar);
-  const { data: tokens, error, loading: loadingTokens } = useUserTokensWithMeta(adapter?.publicKey || undefined);
+  const { result: img1, error: bufferError } = useBufferFromUrl(
+    profile?.avatar
+  );
+  const {
+    data: tokens,
+    error,
+    loading: loadingTokens,
+  } = useUserTokensWithMeta(adapter?.publicKey || undefined);
   const { handleErrors } = useErrorHandler();
-  const { result: pfpMatch, error: pfpMatcherError, loading } = useAsync(getTaggableNft, [img1, tokens]);
+  const {
+    result: pfpMatch,
+    error: pfpMatcherError,
+    loading,
+  } = useAsync(getTaggableNft, [img1, tokens]);
   handleErrors(error, bufferError, pfpMatcherError);
   const { toggleDrawer } = useDrawer();
 
@@ -114,10 +140,8 @@ export const ProfileEnhancer = () => {
                   spacing={1}
                 >
                   {buttonEl}
-                  { (loading || loadingTokens) &&
-                    <Spinner />
-                  }
-                  { pfpMatch &&
+                  {(loading || loadingTokens) && <Spinner />}
+                  {pfpMatch && (
                     <Button
                       fontFamily="body"
                       colorScheme="indigo"
@@ -125,16 +149,16 @@ export const ProfileEnhancer = () => {
                       borderRadius="full"
                       size="md"
                       onClick={() => {
-                        history.push(tagNftPath(pfpMatch.account!.mint))
+                        history.push(tagNftPath(pfpMatch.account!.mint));
                         toggleDrawer({
                           isOpen: true,
                           creator: { name: profile.name, img: profile.avatar },
                         });
                       }}
                     >
-                      { pfpMatch && "Verify PFP" }
+                      {pfpMatch && "Verify PFP"}
                     </Button>
-                  }
+                  )}
                 </HStack>
               </ThemeProvider>
             </ReactShadow.div>
