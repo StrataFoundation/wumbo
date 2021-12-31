@@ -1,30 +1,62 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { useHistory } from "react-router-dom";
-import { PublicKey } from "@solana/web3.js";
 import { useWallet } from "@solana/wallet-adapter-react";
 import { Flex, VStack, Heading, Text, Button } from "@chakra-ui/react";
-import { claimPath } from "../../../../constants/routes";
+import { useErrorHandler } from "@strata-foundation/react";
+import { useClaimLink, useCreateOrClaimCoin } from "wumbo-common";
 
 export interface IClaim3Props {
   handle: string;
-  authCode: string | null | undefined;
+  code?: string;
+  incrementStep: () => void;
+  decrementStep: () => void;
 }
 
-export const Claim3: React.FC<IClaim3Props> = ({ handle, authCode }) => {
+export const Claim3: React.FC<IClaim3Props> = ({
+  handle,
+  code,
+  incrementStep,
+  decrementStep,
+}) => {
   const history = useHistory();
+  const [attemptedToClaim, setAttemptedToClaim] = useState(false);
   const { connected } = useWallet();
+  const { handleErrors } = useErrorHandler();
+  const { claim, redirectUri } = useClaimLink({
+    handle: `${handle}`,
+  });
+
+  const {
+    create,
+    error: createCoinError,
+    creating,
+    awaitingApproval,
+  } = useCreateOrClaimCoin();
 
   useEffect(() => {
     if (!connected) {
-      history.push(claimPath({ step: 2, authCode, handle }));
+      decrementStep();
     }
-  }, [connected, history, claimPath]);
+  }, [connected, decrementStep]);
 
   useEffect(() => {
-    if (connected && authCode) {
-      history.push(claimPath({ step: 4, authCode, handle }));
-    }
-  }, [connected, history, claimPath, authCode]);
+    (async () => {
+      if (connected && code && !attemptedToClaim) {
+        try {
+          setAttemptedToClaim(true);
+          await create({
+            redirectUri,
+            code,
+            twitterHandle: handle,
+          });
+        } catch (e) {
+          console.log(e);
+        }
+      }
+    })();
+  }, [connected, code, create, attemptedToClaim, setAttemptedToClaim]);
+
+  handleErrors(createCoinError);
 
   return (
     <VStack spacing={8} align="left">
@@ -47,7 +79,9 @@ export const Claim3: React.FC<IClaim3Props> = ({ handle, authCode }) => {
           <Button
             isFullWidth
             colorScheme="twitter"
-            onClick={() => console.log("twitter auth flow")}
+            onClick={claim}
+            isLoading={awaitingApproval || creating}
+            loadingText={awaitingApproval ? "Awaiting Approval" : "Claiming"}
           >
             Log in with Twitter
           </Button>

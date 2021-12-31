@@ -1,16 +1,33 @@
-import React from "react";
-import { Alert, AlertIcon, Flex } from "@chakra-ui/react";
+import React, { useEffect, useCallback } from "react";
+import { useHistory } from "react-router-dom";
 import { useQuery } from "wumbo-common";
+import { Alert, AlertIcon, Flex } from "@chakra-ui/react";
+import { claimPath } from "../../../../constants/routes";
 import { Claim1 } from "./Claim1";
 import { Claim2 } from "./Claim2";
 import { Claim3 } from "./Claim3";
 import { Claim4 } from "./Claim4";
 
 export const ClaimRoute = React.memo(() => {
+  const history = useHistory();
   const query = useQuery();
-  const step = query.get("step");
-  const handle = query.get("handle");
-  const authCode = query.get("authCode");
+  const step = query.get("step") || 1;
+  const handle = query.get("handle") || undefined;
+  const code = query.get("code") || undefined;
+
+  const incrementStep = useCallback(
+    () => history.push(claimPath({ step: `${+step + 1}`, handle, code })),
+    [step, handle, code, history, claimPath]
+  );
+
+  const decrementStep = useCallback(
+    () => history.push(claimPath({ step: `${+step - 1}`, handle, code })),
+    [step, handle, code, history, claimPath]
+  );
+
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [step]);
 
   if (!step || !handle) {
     return (
@@ -25,22 +42,33 @@ export const ClaimRoute = React.memo(() => {
     <Flex
       direction="column"
       align="center"
-      maxW={{ md: "686px" }}
+      maxW={{ md: "760px" }}
       m="0 auto"
       p={10}
     >
-      {(() => {
-        switch (step) {
-          case "1":
-            return <Claim1 handle={handle} />;
-          case "2":
-            return <Claim2 handle={handle} authCode={authCode} />;
-          case "3":
-            return <Claim3 handle={handle} authCode={authCode} />;
-          case "4":
-            return <Claim4 />;
-        }
-      })()}
+      {step === "1" && (
+        <Claim1
+          handle={handle}
+          incrementStep={incrementStep}
+          decrementStep={decrementStep}
+        />
+      )}
+      {step === "2" && (
+        <Claim2
+          handle={handle}
+          incrementStep={incrementStep}
+          decrementStep={decrementStep}
+        />
+      )}
+      {step === "3" && (
+        <Claim3
+          handle={handle}
+          code={code}
+          incrementStep={incrementStep}
+          decrementStep={decrementStep}
+        />
+      )}
+      {step === "4" && <Claim4 />}
     </Flex>
   );
 });

@@ -1,5 +1,5 @@
 import { routes } from "@/constants/routes";
-import { useConnection, useWallet } from "@solana/wallet-adapter-react";
+import { useWallet } from "@solana/wallet-adapter-react";
 import { useAsyncCallback } from "react-async-hook";
 import { useHistory } from "react-router-dom";
 import {
@@ -17,7 +17,6 @@ export function useClaimFlow(name?: string | null): IClaimFlowOutput {
     handle: `${name}`,
     newTab: true,
   });
-  const { connection } = useConnection();
   const { adapter } = useWallet();
   const publicKey = adapter?.publicKey;
   const { handle: ownerTwitterHandle, error: reverseTwitterError } =

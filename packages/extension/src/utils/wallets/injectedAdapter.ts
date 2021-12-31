@@ -1,6 +1,5 @@
 import {
   EventEmitter,
-  WalletAdapter,
   SignerWalletAdapter,
   WalletAdapterEvents,
   WalletConnectionError,
@@ -17,7 +16,7 @@ import { Connection, PublicKey, Transaction } from "@solana/web3.js";
 import { MessageType, Message } from "./types";
 import { deserializeError } from "serialize-error";
 import { WalletName } from "@solana/wallet-adapter-wallets";
-import { sleep } from "../utils";
+import { sleep } from "wumbo-common";
 
 export interface IInjectedWalletAdapterConfig {
   name: WalletName | null;

@@ -1,37 +1,40 @@
 import React, { useEffect } from "react";
-import { useHistory } from "react-router-dom";
-import { PublicKey } from "@solana/web3.js";
 import { useWallet } from "@solana/wallet-adapter-react";
+import { WalletName } from "@solana/wallet-adapter-wallets";
 import {
   Box,
   Flex,
   VStack,
   Heading,
   Text,
-  Image,
   Button,
   Link,
+  Image,
 } from "@chakra-ui/react";
 import { useModal } from "../../../../contexts";
-import Claim1Illu from "../../../../assets/images/Claim1Illu.png";
-import { claimPath } from "../../../../constants/routes";
+import claim1illu from "../../../../assets/images/claim1illu.png";
+import TorusBlack from "../../../../assets/images/torusblack.png";
+import { useErrorHandler } from "@strata-foundation/react";
 
 export interface IClaim2Props {
   handle: string;
-  authCode: string | null | undefined;
+  incrementStep: () => void;
+  decrementStep: () => void;
 }
 
-export const Claim2: React.FC<IClaim2Props> = ({ handle, authCode }) => {
-  const history = useHistory();
-  const { connected } = useWallet();
+export const Claim2: React.FC<IClaim2Props> = ({ handle, incrementStep }) => {
+  const { connected, select, connect } = useWallet();
+  const { handleErrors } = useErrorHandler();
   const { showModal, hideModal } = useModal();
 
   useEffect(() => {
     if (connected) {
       hideModal();
-      history.push(claimPath({ step: 3, authCode, handle }));
+      incrementStep();
     }
-  }, [connected, hideModal, history, claimPath]);
+  }, [connected, hideModal, incrementStep]);
+
+  if (connected) return null;
 
   return (
     <VStack spacing={8} align="left">
@@ -43,13 +46,13 @@ export const Claim2: React.FC<IClaim2Props> = ({ handle, authCode }) => {
           Set up a Wallet
         </Heading>
       </div>
-      <Image src={Claim1Illu} />
+      <Image src={claim1illu} />
       <Heading as="h2" size="lg" fontWeight="500">
         How do you set up a wallet?
       </Heading>
       <VStack spacing={6} color="gray.600">
         <Text size="md">
-          Setting up a wallet is easy! You can use any digital wallt that
+          Setting up a wallet is easy! You can use any digital wallet that
           supports Solana tokens or platforms. There are several to choose from.
           If you already have one, you're one step ahead.
         </Text>
@@ -77,14 +80,15 @@ export const Claim2: React.FC<IClaim2Props> = ({ handle, authCode }) => {
             colorScheme="gray"
             borderColor="black"
             variant="outline"
-            onClick={() => console.log("Login with Torus")}
+            onClick={() => select(WalletName.Torus)}
+            leftIcon={<Image src={TorusBlack} w={8} h={8} />}
           >
             Log in with Social
           </Button>
         </VStack>
       </Flex>
       <Box
-        full
+        w="full"
         border="1px solid"
         borderColor="gray.300"
         py={12}

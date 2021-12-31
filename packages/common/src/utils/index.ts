@@ -5,3 +5,4 @@ export * from "./claim";
 export * from "./nftVerifier";
 export * from "./truthy";
 export * from "./testableNameServiceTwitter";
+export * from "./sleep";

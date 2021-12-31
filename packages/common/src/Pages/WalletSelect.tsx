@@ -1,11 +1,23 @@
-import React, { Fragment } from "react";
+import React from "react";
 import { useWallet } from "@solana/wallet-adapter-react";
 import { Wallet, WalletName } from "@solana/wallet-adapter-wallets";
-import { Box, Button, Text, Link, VStack } from "@chakra-ui/react";
+import { Flex, Box, Button, Text, VStack } from "@chakra-ui/react";
 import { WALLET_PROVIDERS } from "../constants/walletProviders";
 
-export const WalletSelect = () => {
+export interface IWalletSelect {
+  onSelect?: (name: WalletName) => void;
+  selectedWallet?: WalletName | null;
+}
+
+export const WalletSelect: React.FC<IWalletSelect> = ({
+  onSelect,
+  selectedWallet,
+}) => {
   const { adapter, select } = useWallet();
+
+  const handleOnSelect = (name: WalletName) => {
+    onSelect ? onSelect(name) : select(name);
+  };
 
   return (
     <Box d="flex" flexDir="column" padding={4}>
@@ -25,13 +37,14 @@ export const WalletSelect = () => {
         <VStack spacing={4} alignItems="start">
           <Text fontSize="lg">
             New to Crypto & dont have an existing wallet?&nbsp;
-            <Link
-              href="#"
-              onClick={() => select(WalletName.Torus)}
+            <Button
+              colorScheme="indigo"
+              variant="link"
+              onClick={() => handleOnSelect(WalletName.Torus)}
               color="indigo.600"
             >
               Connect with Social.
-            </Link>
+            </Button>
           </Text>
           {WALLET_PROVIDERS.map((provider: Wallet, idx: number) => (
             <Button
@@ -39,9 +52,17 @@ export const WalletSelect = () => {
               w="full"
               size="lg"
               colorScheme="indigo"
-              justifyContent="left"
-              onClick={() => select(provider.name)}
-              leftIcon={
+              justifyItems="center"
+              onClick={() => handleOnSelect(provider.name)}
+              opacity={
+                selectedWallet && provider.name !== selectedWallet ? "0.8" : "1"
+              }
+              _hover={{
+                opacity: "1",
+              }}
+            >
+              <Flex w="full" justifyContent="space-between">
+                <Text fontSize="md">{provider.name}</Text>
                 <Box w={5} h={5}>
                   <img
                     alt={`${provider.name}`}
@@ -49,9 +70,7 @@ export const WalletSelect = () => {
                     style={{ width: "100%", height: "100%" }}
                   />
                 </Box>
-              }
-            >
-              <Text fontSize="md">{provider.name}</Text>
+              </Flex>
             </Button>
           ))}
         </VStack>

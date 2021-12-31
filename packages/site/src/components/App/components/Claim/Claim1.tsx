@@ -1,9 +1,14 @@
-import React, { useState } from "react";
+import React from "react";
 import { useHistory } from "react-router-dom";
-import { PublicKey } from "@solana/web3.js";
+import { NATIVE_MINT } from "@solana/spl-token";
 import {
-  useErrorHandler,
-  useUnclaimedTokenRefKeyForName,
+  useBondingPricing,
+  useMint,
+  usePriceInUsd,
+  useTokenBondingFromMint,
+  useTokenRefForName,
+  useTokenAccount,
+  amountAsNum,
 } from "@strata-foundation/react";
 import {
   Box,
@@ -18,32 +23,44 @@ import {
   Link,
 } from "@chakra-ui/react";
 import { RiGift2Line } from "react-icons/ri";
-import { Spinner, useTwitterTld } from "wumbo-common";
-import { claimPath } from "../../../../constants/routes";
-import Claim1Illu from "../../../../assets/images/Claim1Illu.png";
+import { useTwitterTld } from "wumbo-common";
+import claim1illu from "../../../../assets/images/claim1illu.png";
+import claim1banner from "../../../../assets/images/claim1banner.png";
 
 export interface IClaim1Props {
   handle: string;
+  incrementStep: () => void;
+  decrementStep: () => void;
 }
 
-export const Claim1: React.FC<IClaim1Props> = ({ handle }) => {
+export const Claim1: React.FC<IClaim1Props> = ({
+  handle,
+  incrementStep,
+  decrementStep,
+}) => {
   const history = useHistory();
-  const { handleErrors } = useErrorHandler();
   const tld = useTwitterTld();
-  const { result: tokenRef, loading } = useUnclaimedTokenRefKeyForName(
-    handle,
-    null,
-    tld
+  const { info: tokenRef } = useTokenRefForName(handle, null, tld);
+  const { info: tokenBonding } = useTokenBondingFromMint(tokenRef?.mint);
+  const { info: buyRoyaltiesAcct } = useTokenAccount(
+    tokenBonding?.buyTargetRoyalties
   );
+  const mint = useMint(tokenRef?.mint);
+  const { pricing } = useBondingPricing(tokenBonding?.publicKey);
+  const nativeFiatPrice = usePriceInUsd(NATIVE_MINT);
+  const fiatPrice = usePriceInUsd(buyRoyaltiesAcct?.mint);
+  const toFiat = (a: number, price: number = 0) => price * a;
+  const nativeLocked = pricing?.locked(NATIVE_MINT);
 
-  if (loading) {
-    return (
-      <VStack>
-        <Spinner size="md" />
-        <Text size="md">Retreving Stats</Text>
-      </VStack>
-    );
-  }
+  const fiatLocked =
+    mint &&
+    typeof nativeLocked !== "undefined" &&
+    toFiat(nativeLocked || 0, nativeFiatPrice).toFixed(2);
+
+  const claimable =
+    buyRoyaltiesAcct &&
+    typeof nativeLocked !== "undefined" &&
+    toFiat(amountAsNum(buyRoyaltiesAcct.amount, mint), fiatPrice).toFixed(2);
 
   return (
     <VStack spacing={8} align="left">
@@ -63,22 +80,28 @@ export const Claim1: React.FC<IClaim1Props> = ({ handle }) => {
           py={5}
           px={8}
           spacing={6}
-          bg="linear-gradient(180deg, #3D3AB1 0%, #6631A5 100%);"
+          bgImg={{
+            base: "linear-gradient(180deg, #3D3AB1 0%, #6631A5 100%);",
+            md: `url(${claim1banner}), linear-gradient(180deg, #3D3AB1 0%, #6631A5 100%);`,
+          }}
+          bgPos="right"
+          bgRepeat="no-repeat"
+          bgSize="contain"
         >
           <Icon as={RiGift2Line} w="29px" h="29px" />
           <Text maxW="346px">
             Your fans have already put{" "}
             <Text as="span" fontWeight="bold">
-              $9,209
+              {fiatLocked ? "$" + fiatLocked : "Loading...."}
             </Text>{" "}
             into your social token, you'll get{" "}
             <Text as="span" fontWeight="bold">
-              $298
+              {claimable ? "$" + claimable : "Loading..."}
             </Text>{" "}
-            if you claim!
+            worth of your own token if you claim!
           </Text>
         </HStack>
-        <Image src={Claim1Illu} />
+        <Image src={claim1illu} />
       </VStack>
       <Heading as="h2" size="lg" fontWeight="500">
         What is a social token?
@@ -101,7 +124,7 @@ export const Claim1: React.FC<IClaim1Props> = ({ handle }) => {
             isFullWidth
             colorScheme="indigo"
             variant="outline"
-            onClick={() => history.push(claimPath({ step: 2, handle }))}
+            onClick={incrementStep}
           >
             Next
           </Button>
@@ -115,7 +138,7 @@ export const Claim1: React.FC<IClaim1Props> = ({ handle }) => {
         </VStack>
       </Flex>
       <Box
-        full
+        w="full"
         border="1px solid"
         borderColor="gray.300"
         py={12}

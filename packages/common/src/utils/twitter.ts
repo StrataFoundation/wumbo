@@ -1,21 +1,12 @@
 import {
-  createNameRegistry,
   getHashedName,
   getNameAccountKey,
   NameRegistryState,
   NAME_PROGRAM_ID,
   ReverseTwitterRegistryState,
 } from "@bonfida/spl-name-service";
-import { Provider, Wallet } from "@project-serum/common";
 import { useConnection } from "@solana/wallet-adapter-react";
-import {
-  Account,
-  Connection,
-  PublicKey,
-  sendAndConfirmRawTransaction,
-  Transaction,
-  TransactionInstruction,
-} from "@solana/web3.js";
+import { Connection, PublicKey } from "@solana/web3.js";
 import axios from "axios";
 import { useAsync } from "react-async-hook";
 import { WUMBO_IDENTITY_SERVICE_URL } from "../constants/globals";
