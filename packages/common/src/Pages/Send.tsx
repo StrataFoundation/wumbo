@@ -135,7 +135,7 @@ export const Send = ({ finishRedirectUrl }: { finishRedirectUrl: string }) => {
   const recipientRegister = register("recipient");
   const recipientRef = React.useRef<HTMLParagraphElement>(null);
   useEffect(() => {
-    if (recipientRef.current) {
+    if (recipientRef.current && recipientRaw) {
       recipientRef.current.innerHTML = recipientRaw;
     }
   }, [recipientRef, recipientRaw]);

@@ -28,6 +28,7 @@ const NftBadge = ({
 
   return (
     <Box
+      title="Check the verified NFT profile"
       position="absolute"
       bottom={`-${Math.floor(dimension / 4)}px`}
       right={`-${Math.floor(dimension / 4)}px`}
@@ -66,7 +67,7 @@ export const NftEnhancer: React.FC = () => {
             <FloatPortal
               key={nft.img.id}
               container={nft.img}
-              clearance={{ top: 1, right: 1 }}
+              clearance={{ top: 10, right: 10 }}
             >
               <ReactShadow.div>
                 <ThemeProvider>

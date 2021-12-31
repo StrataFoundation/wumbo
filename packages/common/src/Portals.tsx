@@ -108,6 +108,7 @@ export class FloatPortal extends React.Component<IFloatPortal> {
     this.div = document.createElement("div");
 
     this.div.style.position = "absolute";
+    this.div.style.pointerEvents = "none";
     this.div.style.top =
       imgRect.top - parentRect.top - pxToNum(parentComp.borderTopWidth) + "px";
     this.div.style.left =

@@ -1,17 +1,13 @@
 import {
-  getNameAccountKey,
-  getHashedName,
-  NameRegistryState,
+  getHashedName, getNameAccountKey, NameRegistryState
 } from "@bonfida/spl-name-service";
 import { PublicKey } from "@solana/web3.js";
-import { deserializeUnchecked } from "borsh";
-import { useTokenMetadata } from "@strata-foundation/react";
 import {
   AccountFetchCache,
-  decodeMetadata,
+  decodeMetadata
 } from "@strata-foundation/spl-utils";
+import { deserializeUnchecked } from "borsh";
 import { NFT_VERIFIER, NFT_VERIFIER_TLD } from "../constants/globals";
-import { SplTokenCollective } from "@strata-foundation/spl-token-collective";
 
 export async function getNftNameRecordKey(imgUrl: string): Promise<PublicKey> {
   return getNameAccountKey(
