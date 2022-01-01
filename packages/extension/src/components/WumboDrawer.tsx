@@ -10,7 +10,12 @@ import { Toaster } from "react-hot-toast";
 import { useDrawer } from "@/contexts/drawerContext";
 import { routes, IRoutes } from "@/constants/routes";
 import { useUserInfo } from "@/utils/userState";
-import { replaceAll, Spinner, OPEN_BONDING } from "wumbo-common";
+import {
+  replaceAll,
+  Spinner,
+  OPEN_BONDING,
+  useReverseTwitter,
+} from "wumbo-common";
 import { useHistoryList } from "@/utils/history";
 import { useWallet } from "@solana/wallet-adapter-react";
 import { SplTokenCollective } from "@strata-foundation/spl-token-collective";
@@ -187,7 +192,11 @@ WumboDrawer.Content = (props: { children: ReactNode }) => (
 
 WumboDrawer.Nav = () => {
   const { creator } = useDrawer();
-  const creatorInfoState = useUserInfo(creator?.name!);
+  const { adapter } = useWallet();
+  const wallet = adapter?.publicKey;
+  const { handle: reverseHandle } = useReverseTwitter(wallet || undefined);
+  const handle = creator?.name || reverseHandle || "";
+  const creatorInfoState = useUserInfo(handle);
   const { userInfo: creatorInfo, loading } = creatorInfoState;
 
   return (
@@ -235,7 +244,7 @@ WumboDrawer.Nav = () => {
               SplTokenCollective.OPEN_COLLECTIVE_MINT_ID.toBase58(),
           });
           filledPath = `${replacedKeys}${
-            creatorInfo ? "?name=" + creatorInfo.name : ""
+            reverseHandle ? "?name=" + reverseHandle : ""
           }`;
 
           if (isDrawerNav && Icon) {

@@ -48,6 +48,12 @@ export const Create = () => {
           {!userInfo && !loading && (
             <Text w="full" fontSize="small">
               <Text fontWeight="bold">
+                If this is your profile, you can link your wallet to show off
+                your collectibles!
+              </Text>
+
+              {/* TODO: Uncomment when token creation is live */}
+              {/* <Text fontWeight="bold">
                 You will be the first to mint & own this token!
               </Text>{" "}
               If this is your twitter account, you can claim this token for
@@ -56,7 +62,7 @@ export const Create = () => {
               person claims it. Should the person opt out, no new tokens may be
               purchased and exisiting tokens may still be sold. It costs 0.03
               SOL (~$
-              {solPrice ? (solPrice * 0.03).toFixed(2) : ""}) to do this.
+              {solPrice ? (solPrice * 0.03).toFixed(2) : ""}) to do this. */}
             </Text>
           )}
           {connected && publicKey ? (

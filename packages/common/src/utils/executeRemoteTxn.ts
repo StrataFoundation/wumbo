@@ -22,7 +22,7 @@ async function promiseAllInOrder<T>(
  * @param errors
  * @returns
  */
-export async function exectuteRemoteTxn(
+export async function executeRemoteTxn(
   provider: Provider,
   url: string,
   body: any,

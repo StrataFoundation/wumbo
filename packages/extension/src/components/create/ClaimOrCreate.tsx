@@ -1,16 +1,7 @@
-import { routes, swapPath } from "@/constants/routes";
+import { swapPath } from "@/constants/routes";
 import { useClaimFlow } from "@/utils/claim";
 import { useUserInfo } from "@/utils/userState";
 import { Box, Button, Text } from "@chakra-ui/react";
-import React, { useMemo } from "react";
-import { useAsyncCallback } from "react-async-hook";
-import { useHistory } from "react-router-dom";
-import {
-  getTwitterTld,
-  getTwitterRegistryKey,
-  useQuery,
-  useReverseTwitter,
-} from "wumbo-common";
 import { useWallet } from "@solana/wallet-adapter-react";
 import {
   useErrorHandler,
@@ -18,7 +9,19 @@ import {
   useStrataSdks,
 } from "@strata-foundation/react";
 import { SplTokenCollective } from "@strata-foundation/spl-token-collective";
+import React, { useMemo } from "react";
+import { useAsyncCallback } from "react-async-hook";
+import { useHistory } from "react-router-dom";
+import {
+  getTwitterRegistryKey,
+  getTwitterTld,
+  useQuery,
+  useReverseTwitter,
+} from "wumbo-common";
 
+function toPercent(u32: number) {
+  return (u32 / 4294967295) * 100;
+}
 export default React.memo(() => {
   const history = useHistory();
   const { tokenCollectiveSdk, tokenBondingSdk } = useStrataSdks();
@@ -45,10 +48,16 @@ export default React.memo(() => {
       name: await getTwitterRegistryKey(handle, await getTwitterTld()),
       nameParent: await getTwitterTld(),
       tokenBondingParams: {
-        buyBaseRoyaltyPercentage: config.minBuyBaseRoyaltyPercentage,
-        sellBaseRoyaltyPercentage: config.minSellBaseRoyaltyPercentage,
-        buyTargetRoyaltyPercentage: config.minBuyTargetRoyaltyPercentage,
-        sellTargetRoyaltyPercentage: config.minSellTargetRoyaltyPercentage,
+        buyBaseRoyaltyPercentage: toPercent(config.minBuyBaseRoyaltyPercentage),
+        sellBaseRoyaltyPercentage: toPercent(
+          config.minSellBaseRoyaltyPercentage
+        ),
+        buyTargetRoyaltyPercentage: toPercent(
+          config.minBuyTargetRoyaltyPercentage
+        ),
+        sellTargetRoyaltyPercentage: toPercent(
+          config.minSellTargetRoyaltyPercentage
+        ),
       },
     });
     const tokenBondingAcct = (await tokenBondingSdk!.getTokenBonding(
@@ -62,13 +71,20 @@ export default React.memo(() => {
       ) + `?name=${query.get("name")!}`
     );
   };
+  const { provider } = useProvider();
 
   const {
     execute,
     loading: creationLoading,
     error,
   } = useAsyncCallback(createCreator);
-  const { claim, loading, error: claimError } = useClaimFlow(query.get("name"));
+  const {
+    link,
+    claim,
+    claimLoading: loading,
+    linkLoading,
+    error: claimError,
+  } = useClaimFlow(query.get("name"));
   const { handleErrors } = useErrorHandler();
   handleErrors(reverseTwitterError, error, claimError);
   const showCreate = useMemo(
@@ -76,9 +92,17 @@ export default React.memo(() => {
     [userInfo, loading2]
   );
 
+  const or = (
+    <Box d="flex" justifyContent="center">
+      <Text fontSize="lg" color="gray.500">
+        Or
+      </Text>
+    </Box>
+  );
   return (
     <>
-      {showCreate && (
+      {/* TODO: Uncomment when token creation is live */}
+      {/* {showCreate && (
         <Button
           w="full"
           size="md"
@@ -95,11 +119,7 @@ export default React.memo(() => {
       {(!ownerTwitterHandle || ownerTwitterHandle == query.get("name")) && (
         <>
           {showCreate && (
-            <Box d="flex" justifyContent="center">
-              <Text fontSize="lg" color="gray.500">
-                Or
-              </Text>
-            </Box>
+            or
           )}
           <Button
             w="full"
@@ -110,6 +130,24 @@ export default React.memo(() => {
             loadingText={awaitingApproval ? "Awaiting Approval" : "Claiming"}
           >
             This is me, Claim and Create my Token
+          </Button>
+        </>
+      )} */}
+      {!ownerTwitterHandle && (
+        <>
+          {/* TODO: Uncomment when token creation is live */}
+          {/* {showCreate && (
+            or
+          )} */}
+          <Button
+            w="full"
+            size="md"
+            colorScheme="twitter"
+            onClick={link}
+            isLoading={linkLoading}
+            loadingText={awaitingApproval ? "Awaiting Approval" : "Linking"}
+          >
+            This is me, Link my Twitter
           </Button>
         </>
       )}

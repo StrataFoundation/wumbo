@@ -34,7 +34,7 @@ export const TagNft: React.FC = () => {
 
   return (
     <Fragment>
-      <WumboDrawer.Header title={`Tag ${metadata?.data.name}`} />
+      <WumboDrawer.Header title={`Verify ${metadata?.data.name}`} />
       <WumboDrawer.Content>
         <WalletRedirect />
         <CommonTagNft token={token} />

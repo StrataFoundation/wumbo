@@ -55,9 +55,12 @@ export const ViewProfileRoute: React.FC = () => {
       collectivePath={tokenBonding ? profilePath(tokenBonding.baseMint) : null}
       useClaimFlow={() => ({
         claim: () => Promise.resolve(),
-        loading: false,
+        link: () => Promise.resolve(),
+        claimLoading: false,
+        linkLoading: false,
         error: undefined,
       })}
+      createPath={""}
       onTradeClick={() =>
         tokenBonding &&
         history.push(

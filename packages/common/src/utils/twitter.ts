@@ -17,12 +17,18 @@ import {
   TransactionInstruction,
 } from "@solana/web3.js";
 import axios from "axios";
+import { deserializeUnchecked } from "borsh";
 import { useAsync } from "react-async-hook";
 import { WUMBO_IDENTITY_SERVICE_URL } from "../constants/globals";
 import {
   createVerifiedTwitterRegistry,
   getTwitterRegistry,
 } from "./testableNameServiceTwitter";
+import {
+  useAccountFetchCache,
+  getOwnerForName,
+} from "@strata-foundation/react";
+import { useTwitterTld } from "../hooks";
 
 let twitterTld: PublicKey, twitterVerifier: PublicKey;
 async function fetchConfig(): Promise<void> {
@@ -158,7 +164,15 @@ export async function getTwitterReverse(
     await getTwitterTld()
   );
 
-  return ReverseTwitterRegistryState.retrieve(connection, key);
+  const reverseTwitterAccount = await connection.getAccountInfo(key);
+  if (!reverseTwitterAccount) {
+    throw new Error("Invalid reverse Twitter account provided");
+  }
+  return deserializeUnchecked(
+    ReverseTwitterRegistryState.schema,
+    ReverseTwitterRegistryState,
+    reverseTwitterAccount.data.slice(NameRegistryState.HEADER_LEN)
+  );
 }
 
 async function getTwitterName(
@@ -193,5 +207,26 @@ export function useReverseTwitter(
       ? undefined
       : error,
     handle,
+  };
+}
+
+interface TwitterState {
+  loading: boolean;
+  owner: PublicKey | undefined;
+  error: Error | undefined;
+}
+export function useTwitterOwner(handle: string | undefined): TwitterState {
+  const cache = useAccountFetchCache();
+  const tld = useTwitterTld();
+  const {
+    loading,
+    error,
+    result: owner,
+  } = useAsync(getOwnerForName, [cache, handle, tld]);
+
+  return {
+    loading,
+    error,
+    owner,
   };
 }

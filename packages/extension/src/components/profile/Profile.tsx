@@ -18,7 +18,7 @@ import {
 } from "@strata-foundation/react";
 import React, { Fragment } from "react";
 import { useHistory, useParams } from "react-router-dom";
-import { Profile as CommonProfile } from "wumbo-common";
+import { Profile as CommonProfile, useQuery } from "wumbo-common";
 import WalletRedirect from "../wallet/WalletRedirect";
 import { WumboDrawer } from "../WumboDrawer";
 
@@ -33,6 +33,9 @@ export const Profile = () => {
   const history = useHistory();
   const { info: tokenBonding } = useTokenBondingFromMint(mintKey);
   const { metadata } = useTokenMetadata(mintKey);
+  const query = useQuery();
+  const name = query.get("name");
+
   if (!connected) {
     return <WalletRedirect />;
   }
@@ -41,7 +44,7 @@ export const Profile = () => {
     return <WumboDrawer.Loading />;
   }
 
-  if (!mintKey) {
+  if (!mintKey && !name) {
     return (
       <Fragment>
         <WumboDrawer.Header title="Profile" />
@@ -63,6 +66,7 @@ export const Profile = () => {
       <WumboDrawer.Content>
         <CommonProfile
           sendPath={sendSearchPath(walletTokenRef?.owner || undefined)}
+          createPath={routes.create.path + `?name=${name}`}
           collectivePath={
             tokenBonding ? viewProfilePath(tokenBonding.baseMint) : null
           }

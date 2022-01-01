@@ -7,7 +7,10 @@ import {
   useClaimLink,
   useCreateOrClaimCoin,
   useReverseTwitter,
+  executeRemoteTxn,
+  WUMBO_IDENTITY_SERVICE_URL,
 } from "wumbo-common";
+import { useProvider } from "@strata-foundation/react";
 
 let claimWindow: Window | undefined;
 
@@ -17,7 +20,7 @@ export function useClaimFlow(name?: string | null): IClaimFlowOutput {
     handle: `${name}`,
     newTab: true,
   });
-  const { connection } = useConnection();
+  const { provider } = useProvider();
   const { adapter } = useWallet();
   const publicKey = adapter?.publicKey;
   const { handle: ownerTwitterHandle, error: reverseTwitterError } =
@@ -29,9 +32,9 @@ export function useClaimFlow(name?: string | null): IClaimFlowOutput {
     awaitingApproval: createAwaitingApproval,
   } = useCreateOrClaimCoin();
 
-  async function createTwitter() {
-    claimWindow = claim() || undefined;
-    const oauthResult = await new Promise<any>((resolve, reject) => {
+  async function oauthFlow() {
+    return new Promise<any>((resolve, reject) => {
+      claimWindow = claim() || undefined;
       const fn = (msg: any, _: any, sendResponse: any) => {
         if (msg.type == "CLAIM") {
           claimWindow?.close();
@@ -43,6 +46,10 @@ export function useClaimFlow(name?: string | null): IClaimFlowOutput {
       };
       chrome.runtime.onMessage.addListener(fn);
     });
+  }
+
+  async function createTwitter() {
+    const oauthResult = await oauthFlow();
     await create({
       redirectUri,
       ...oauthResult,
@@ -59,11 +66,35 @@ export function useClaimFlow(name?: string | null): IClaimFlowOutput {
     history.push(routes.editProfile.path);
   };
 
+  const link = async () => {
+    if (!ownerTwitterHandle) {
+      const oauthResult = await oauthFlow();
+      await executeRemoteTxn(
+        provider!,
+        WUMBO_IDENTITY_SERVICE_URL + "/twitter/oauth",
+        {
+          pubkey: adapter!.publicKey!.toBase58(),
+          redirectUri,
+          ...oauthResult,
+          twitterHandle: name,
+        }
+      );
+      history.push(routes.profile.path);
+    }
+  };
+
   const { loading, execute, error } = useAsyncCallback(smartClaim);
+  const {
+    loading: linkLoading,
+    execute: linkExec,
+    error: linkError,
+  } = useAsyncCallback(link);
 
   return {
     claim: execute,
-    loading: creating || loading,
-    error: error || createCoinError || reverseTwitterError,
+    link: linkExec,
+    claimLoading: creating || loading,
+    linkLoading: linkLoading,
+    error: error || createCoinError || reverseTwitterError || linkError,
   };
 }

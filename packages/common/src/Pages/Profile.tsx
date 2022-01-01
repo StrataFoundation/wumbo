@@ -6,7 +6,10 @@ import {
   HStack,
   Icon,
   Link as PlainLink,
-  Spacer,
+  Popover,
+  PopoverBody,
+  PopoverContent,
+  PopoverTrigger,
   Tab,
   TabList,
   TabPanel,
@@ -20,6 +23,7 @@ import { AiOutlineSend } from "react-icons/ai";
 import { useWallet } from "@solana/wallet-adapter-react";
 import { PublicKey } from "@solana/web3.js";
 import {
+  amountAsNum,
   supplyAsNum,
   useBondingPricing,
   useClaimedTokenRefKey,
@@ -30,12 +34,14 @@ import {
   usePrimaryClaimedTokenRef,
   useProvider,
   usePublicKey,
+  useTokenAccount,
   useTokenBondingFromMint,
   useTokenMetadata,
   useTokenRefFromBonding,
 } from "@strata-foundation/react";
 import { ITokenWithMetaAndAccount } from "@strata-foundation/spl-token-collective";
 import React from "react";
+import { AiOutlineSend } from "react-icons/ai";
 import { FaChevronRight } from "react-icons/fa";
 import { HiOutlinePencilAlt } from "react-icons/hi";
 import { Link } from "react-router-dom";
@@ -52,13 +58,14 @@ import { TokenLeaderboard } from "../Leaderboard/TokenLeaderboard";
 import { NftListRaw } from "../Nft";
 import { Spinner } from "../Spinner";
 import { StatCard } from "../StatCard";
-import { useQuery, useReverseTwitter } from "../utils";
+import { useQuery, useReverseTwitter, useTwitterOwner } from "../utils";
 
 interface IProfileProps
   extends Pick<ISocialTokenTabsProps, "onAccountClick" | "getNftLink"> {
   mintKey: PublicKey;
   editPath: string;
   sendPath: string;
+  createPath: string;
   collectivePath: string | null;
   onTradeClick?: () => void;
   useClaimFlow: (handle: string | undefined | null) => IClaimFlowOutput;
@@ -66,8 +73,10 @@ interface IProfileProps
 
 export interface IClaimFlowOutput {
   error: Error | undefined;
-  loading: boolean;
+  claimLoading: boolean;
+  linkLoading: boolean;
   claim: () => Promise<void>;
+  link: () => Promise<void>;
 }
 
 const GET_TOKEN_RANK = gql`
@@ -114,13 +123,13 @@ export const Profile = React.memo(
     editPath,
     collectivePath,
     sendPath,
+    createPath,
   }: IProfileProps) => {
     const { handleErrors } = useErrorHandler();
     const { info: tokenRef, loading } = useMintTokenRef(mintKey);
-    const ownerWalletKey = tokenRef?.owner as PublicKey | undefined;
-    const { info: walletTokenRef } = usePrimaryClaimedTokenRef(ownerWalletKey);
     const { info: tokenBonding, loading: tokenBondingLoading } =
       useTokenBondingFromMint(mintKey);
+
     const {
       metadata,
       loading: loadingMetadata,
@@ -163,15 +172,40 @@ export const Profile = React.memo(
       typeof nativeLocked !== "undefined" &&
       toFiat(nativeLocked || 0).toFixed(2);
 
+    const { info: buyTargetRoyalties } = useTokenAccount(
+      tokenBonding?.buyTargetRoyalties
+    );
+    const targetMint = useMint(tokenBonding?.targetMint);
+    const buyTargetRoyaltiesAmount =
+      buyTargetRoyalties &&
+      targetMint &&
+      amountAsNum(buyTargetRoyalties?.amount, targetMint);
+    const claimAmount =
+      buyTargetRoyaltiesAmount &&
+      fiatPrice &&
+      pricing &&
+      toFiat(pricing.current(NATIVE_MINT)) * buyTargetRoyaltiesAmount;
+
     const query = useQuery();
-    let { handle, error: reverseTwitterError2 } =
-      useReverseTwitter(ownerWalletKey);
+    let { handle: reverseLookupHandle, error: reverseTwitterError2 } =
+      useReverseTwitter(tokenRef?.owner || undefined);
+    let handle =
+      tokenRef && !tokenRef.isClaimed
+        ? metadata?.data.name
+        : reverseLookupHandle;
+
     if (!handle) {
       handle = query.get("name") || metadata?.data.name;
     }
+
+    const { owner: ownerWalletKey } = useTwitterOwner(handle);
+    const { info: walletTokenRef } = usePrimaryClaimedTokenRef(ownerWalletKey);
+
     const {
       claim,
-      loading: claiming,
+      claimLoading: claiming,
+      link,
+      linkLoading: linking,
       error: claimError,
     } = useClaimFlow(handle);
 
@@ -309,26 +343,64 @@ export const Profile = React.memo(
                 onClick={onTradeClick}
               />
             )}
-            {tokenBonding && (
-              <PriceChangeTicker tokenBonding={tokenBonding.publicKey} />
-            )}
-            {tokenRef &&
+
+            {/* TODO: Uncomment when token creation is live */}
+            {/* {tokenRef &&
               !tokenRef.isClaimed &&
               !walletTokenRef &&
               (!walletTwitterHandle || walletTwitterHandle == handle) && (
-                <Button
-                  size="xs"
-                  colorScheme="indigo"
-                  variant="outline"
-                  onClick={claim}
-                  isLoading={claiming}
-                  loadingText={
-                    awaitingApproval ? "Awaiting Approval" : "Claiming"
-                  }
+                <Popover
+                  placement="bottom"
+                  trigger="hover"
                 >
-                  Claim
-                </Button>
-              )}
+                  <PopoverTrigger>
+                    <Button
+                      size="xs"
+                      colorScheme="indigo"
+                      variant="outline"
+                      onClick={claim}
+                      isLoading={claiming}
+                      loadingText={
+                        awaitingApproval ? "Awaiting Approval" : "Claiming"
+                      }
+                    >
+                      Claim Token
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent>
+                    <PopoverBody>
+                      You'll receive ${claimAmount && claimAmount.toFixed(2)} in your token if you claim!
+                    </PopoverBody>
+                  </PopoverContent>
+                </Popover>
+
+              )} */}
+            {!ownerWalletKey && (
+              <Button
+                size="xs"
+                colorScheme="twitter"
+                variant="outline"
+                onClick={link}
+                isLoading={linking}
+                loadingText={awaitingApproval ? "Awaiting Approval" : "Linking"}
+              >
+                Link Wallet
+              </Button>
+            )}
+            {!tokenRef && (
+              <Button
+                as={Link}
+                to={createPath}
+                size="xs"
+                colorScheme="indigo"
+                variant="outline"
+              >
+                Mint
+              </Button>
+            )}
+            {tokenBonding && (
+              <PriceChangeTicker tokenBonding={tokenBonding.publicKey} />
+            )}
           </HStack>
           {tokenBonding && (
             <Grid
@@ -365,13 +437,16 @@ export const Profile = React.memo(
           <div id="tabs" />
           {tokenRef ? (
             <SocialTokenTabs
+              wallet={ownerWalletKey}
               onAccountClick={onAccountClick}
               tokenBondingKey={tokenBonding!.publicKey}
               getNftLink={getNftLink}
             />
-          ) : (
+          ) : tokenBonding ? (
             <CollectiveTabs onAccountClick={onAccountClick} mintKey={mintKey} />
-          )}
+          ) : ownerWalletKey ? (
+            <LinkedTabs getNftLink={getNftLink} wallet={ownerWalletKey} />
+          ) : null}
         </VStack>
       </TokenBondingRecentTransactionsProvider>
     );
@@ -379,18 +454,20 @@ export const Profile = React.memo(
 );
 
 interface ISocialTokenTabsProps {
+  wallet: PublicKey | undefined;
   tokenBondingKey: PublicKey;
   onAccountClick?: (mintKey: PublicKey) => void;
   getNftLink: (t: ITokenWithMetaAndAccount) => string;
 }
 
 function SocialTokenTabs({
+  wallet,
   tokenBondingKey,
   onAccountClick,
   getNftLink,
 }: ISocialTokenTabsProps) {
   const { info: tokenRef, loading } = useTokenRefFromBonding(tokenBondingKey);
-  const ownerWalletKey = tokenRef?.owner as PublicKey | undefined;
+  const ownerWalletKey = wallet || (tokenRef?.owner as PublicKey | undefined);
 
   const {
     data: tokens,
@@ -495,6 +572,46 @@ function CollectiveTabs({
             onAccountClick={onAccountClick}
             mintKey={mintKey}
             tokenBondingKey={tokenBondingKey}
+          />
+        </TabPanel>
+      </TabPanels>
+    </Tabs>
+  );
+}
+
+interface ILinkedTabsProps {
+  wallet: PublicKey;
+  getNftLink: (t: ITokenWithMetaAndAccount) => string;
+}
+
+function LinkedTabs({ wallet, getNftLink }: ILinkedTabsProps) {
+  const {
+    data: tokens,
+    loading: loadingCollectibles,
+    error,
+  } = useUserTokensWithMeta(wallet);
+  const { handleErrors } = useErrorHandler();
+
+  handleErrors(error);
+
+  return (
+    <Tabs isFitted w="full">
+      <TabList>
+        <Tab
+          color="gray.300"
+          borderColor="gray.300"
+          _selected={{ color: "indigo.500", borderColor: "indigo.500" }}
+        >
+          Collectibles
+        </Tab>
+      </TabList>
+
+      <TabPanels>
+        <TabPanel paddingX={0}>
+          <NftListRaw
+            loading={loadingCollectibles}
+            tokens={tokens}
+            getLink={getNftLink}
           />
         </TabPanel>
       </TabPanels>
