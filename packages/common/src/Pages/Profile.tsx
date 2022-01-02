@@ -305,19 +305,21 @@ export const Profile = React.memo(
                   </Link>
                 )}
 
-              { ownerWalletKey && <Link
-                title="Send Tokens"
-                style={{ display: "flex", alignItems: "center" }}
-                to={sendPath}
-              >
-                <Icon
-                  as={AiOutlineSend}
-                  w={5}
-                  h={5}
-                  color="indigo.500"
-                  _hover={{ color: "indigo.700", cursor: "pointer" }}
-                />
-              </Link> }
+              {ownerWalletKey && (
+                <Link
+                  title="Send Tokens"
+                  style={{ display: "flex", alignItems: "center" }}
+                  to={sendPath}
+                >
+                  <Icon
+                    as={AiOutlineSend}
+                    w={5}
+                    h={5}
+                    color="indigo.500"
+                    _hover={{ color: "indigo.700", cursor: "pointer" }}
+                  />
+                </Link>
+              )}
             </HStack>
 
             {metadata && (
@@ -348,10 +350,7 @@ export const Profile = React.memo(
               !tokenRef.isClaimed &&
               !walletTokenRef &&
               (!walletTwitterHandle || walletTwitterHandle == handle) && (
-                <Popover
-                  placement="bottom"
-                  trigger="hover"
-                >
+                <Popover placement="bottom" trigger="hover">
                   <PopoverTrigger>
                     <Button
                       size="xs"
@@ -368,13 +367,13 @@ export const Profile = React.memo(
                   </PopoverTrigger>
                   <PopoverContent>
                     <PopoverBody>
-                      You'll receive ${claimAmount && claimAmount.toFixed(2)} in your token if you claim!
+                      You'll receive ${claimAmount && claimAmount.toFixed(2)} in
+                      your token if you claim!
                     </PopoverBody>
                   </PopoverContent>
                 </Popover>
-
               )}
-            {!ownerWalletKey && !baseIsCollective &&  (
+            {!ownerWalletKey && !baseIsCollective && (
               <Button
                 size="xs"
                 colorScheme="twitter"

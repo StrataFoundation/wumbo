@@ -128,9 +128,7 @@ export default React.memo(() => {
       )}
       {(!ownerTwitterHandle || ownerTwitterHandle == query.get("name")) && (
         <>
-          {showCreate && (
-            or
-          )}
+          {showCreate && or}
           <Button
             w="full"
             size="md"
@@ -145,9 +143,7 @@ export default React.memo(() => {
       )}
       {!ownerTwitterHandle && (
         <>
-          {showCreate && (
-            or
-          )}
+          {showCreate && or}
           <Button
             w="full"
             size="md"
