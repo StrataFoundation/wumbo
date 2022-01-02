@@ -40,6 +40,16 @@ export default React.memo(() => {
       SplTokenCollective.OPEN_COLLECTIVE_ID
     ))!;
     const config = collectiveAcct.config.unclaimedTokenBondingSettings as any;
+    let goLiveDate = new Date(0);
+    // Can uncomment when creating with wumbo.
+    // goLiveDate.setUTCSeconds(1642518000); // 9am CST on January 18th
+    goLiveDate.setUTCSeconds(1642604400); // 9am CST on January 19th
+    // After the launch, use the normal logic
+    // TODO: We can rm all of this logic after launch
+    if (new Date() > goLiveDate) {
+      goLiveDate = new Date(new Date().valueOf() - 10000); // 10 secs ago
+    }
+
     const { tokenBonding } = await tokenCollectiveSdk!.createSocialToken({
       metadata: {
         name: handle,
@@ -48,6 +58,7 @@ export default React.memo(() => {
       name: await getTwitterRegistryKey(handle, await getTwitterTld()),
       nameParent: await getTwitterTld(),
       tokenBondingParams: {
+        goLiveDate,
         buyBaseRoyaltyPercentage: toPercent(config.minBuyBaseRoyaltyPercentage),
         sellBaseRoyaltyPercentage: toPercent(
           config.minSellBaseRoyaltyPercentage
@@ -101,8 +112,7 @@ export default React.memo(() => {
   );
   return (
     <>
-      {/* TODO: Uncomment when token creation is live */}
-      {/* {showCreate && (
+      {showCreate && (
         <Button
           w="full"
           size="md"
@@ -132,13 +142,12 @@ export default React.memo(() => {
             This is me, Claim and Create my Token
           </Button>
         </>
-      )} */}
+      )}
       {!ownerTwitterHandle && (
         <>
-          {/* TODO: Uncomment when token creation is live */}
-          {/* {showCreate && (
+          {showCreate && (
             or
-          )} */}
+          )}
           <Button
             w="full"
             size="md"
@@ -147,7 +156,7 @@ export default React.memo(() => {
             isLoading={linkLoading}
             loadingText={awaitingApproval ? "Awaiting Approval" : "Linking"}
           >
-            This is me, Link my Twitter
+            Link my Wallet, but don't claim Token
           </Button>
         </>
       )}

@@ -305,7 +305,7 @@ export const Profile = React.memo(
                   </Link>
                 )}
 
-              <Link
+              { ownerWalletKey && <Link
                 title="Send Tokens"
                 style={{ display: "flex", alignItems: "center" }}
                 to={sendPath}
@@ -317,7 +317,7 @@ export const Profile = React.memo(
                   color="indigo.500"
                   _hover={{ color: "indigo.700", cursor: "pointer" }}
                 />
-              </Link>
+              </Link> }
             </HStack>
 
             {metadata && (
@@ -344,8 +344,7 @@ export const Profile = React.memo(
               />
             )}
 
-            {/* TODO: Uncomment when token creation is live */}
-            {/* {tokenRef &&
+            {tokenRef &&
               !tokenRef.isClaimed &&
               !walletTokenRef &&
               (!walletTwitterHandle || walletTwitterHandle == handle) && (
@@ -374,8 +373,8 @@ export const Profile = React.memo(
                   </PopoverContent>
                 </Popover>
 
-              )} */}
-            {!ownerWalletKey && (
+              )}
+            {!ownerWalletKey && !baseIsCollective &&  (
               <Button
                 size="xs"
                 colorScheme="twitter"
@@ -387,7 +386,7 @@ export const Profile = React.memo(
                 Link Wallet
               </Button>
             )}
-            {!tokenRef && (
+            {!tokenRef && !tokenBonding && (
               <Button
                 as={Link}
                 to={createPath}
