@@ -80,6 +80,7 @@ export const ClaimButton: FC<Props> = ({
 
   return (
     <PriceButton
+      optedOut={tokenRef?.isOptedOut as boolean}
       buttonTarget={buttonTarget}
       {...btnProps}
       r={100}
