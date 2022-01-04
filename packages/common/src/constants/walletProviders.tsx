@@ -1,6 +1,5 @@
 import {
   Wallet,
-  getSolletWallet,
   getSolletExtensionWallet,
   getLedgerWallet,
   getPhantomWallet,
@@ -12,7 +11,6 @@ export const INJECTED_PROVIDERS: Wallet[] = [
   getPhantomWallet(),
   getSolflareWallet(),
   getLedgerWallet(),
-  getSolletWallet(),
   getSolletExtensionWallet(),
 ];
 
@@ -22,8 +20,8 @@ export const WALLET_PROVIDERS: Wallet[] = [
     options: {
       replaceUrlOnRedirect: false,
       clientId:
-        "BHgxWcEBp7kICzfoIUlL9kCmope2NRhrDz7d8ugBucqQqBel1Q7yDvkPfLrgZh140oLxyN0MgpmziL7UG7jZuWk",
-      network: "testnet",
+        "BAjNy8GFgk8BzjoZPowW82MFlkOGuPVykpcANoYJTi6khZPoPnJNxvts_OViNdxXOqcvCZCo2kB-zrnEi0T-Zx4",
+      network: "mainnet",
       uxMode: "popup",
     },
   }),

@@ -1,8 +1,15 @@
 import React, { useEffect, useState } from "react";
 import { useHistory } from "react-router-dom";
 import { useWallet } from "@solana/wallet-adapter-react";
-import { Flex, VStack, Heading, Text, Button } from "@chakra-ui/react";
-import { useErrorHandler } from "@strata-foundation/react";
+import {
+  Flex,
+  VStack,
+  Heading,
+  Text,
+  Button,
+  Alert,
+  AlertIcon,
+} from "@chakra-ui/react";
 import { useClaimLink, useCreateOrClaimCoin } from "wumbo-common";
 
 export interface IClaim3Props {
@@ -12,88 +19,111 @@ export interface IClaim3Props {
   decrementStep: () => void;
 }
 
-export const Claim3: React.FC<IClaim3Props> = ({
-  handle,
-  code,
-  incrementStep,
-  decrementStep,
-}) => {
-  const history = useHistory();
-  const [attemptedToClaim, setAttemptedToClaim] = useState(false);
-  const { connected } = useWallet();
-  const { handleErrors } = useErrorHandler();
-  const { claim, redirectUri } = useClaimLink({
-    handle: `${handle}`,
-  });
+export const Claim3 = React.memo<IClaim3Props>(
+  ({ handle, code, incrementStep, decrementStep }) => {
+    const history = useHistory();
+    const [attemptedClaim, setAttemptedClaim] = useState<boolean>(false);
+    const [internalError, setInternalError] = useState<undefined | Error>();
+    const [isClaiming, setIsClaiming] = useState<boolean>(false);
+    const { connected } = useWallet();
+    const { claim, redirectUri } = useClaimLink({
+      handle: `${handle}`,
+    });
 
-  const {
-    create,
-    error: createCoinError,
-    creating,
-    awaitingApproval,
-  } = useCreateOrClaimCoin();
+    const {
+      create,
+      error: createCoinError,
+      creating,
+      awaitingApproval,
+    } = useCreateOrClaimCoin();
 
-  useEffect(() => {
-    if (!connected) {
-      decrementStep();
-    }
-  }, [connected, decrementStep]);
-
-  useEffect(() => {
-    (async () => {
-      if (connected && code && !attemptedToClaim) {
-        try {
-          setAttemptedToClaim(true);
-          await create({
-            redirectUri,
-            code,
-            twitterHandle: handle,
-          });
-        } catch (e) {
-          console.log(e);
+    useEffect(() => {
+      (async () => {
+        if (connected && code && !attemptedClaim) {
+          try {
+            setAttemptedClaim(true);
+            setIsClaiming(true);
+            await create({
+              redirectUri,
+              code,
+              twitterHandle: handle,
+            });
+            incrementStep();
+          } catch (e) {
+            setInternalError(e as Error);
+          } finally {
+            setIsClaiming(false);
+          }
         }
+      })();
+    }, [
+      connected,
+      code,
+      create,
+      attemptedClaim,
+      setIsClaiming,
+      setAttemptedClaim,
+      setInternalError,
+    ]);
+
+    useEffect(() => {
+      if (createCoinError) {
+        setInternalError(createCoinError);
       }
-    })();
-  }, [connected, code, create, attemptedToClaim, setAttemptedToClaim]);
+    }, [createCoinError, setInternalError]);
 
-  handleErrors(createCoinError);
+    const hasError = createCoinError || internalError;
+    const loggedInAsWrongUser =
+      hasError &&
+      ["Screen", "name", "does", "not", "match"].every((match) =>
+        internalError?.message.includes(match)
+      );
 
-  return (
-    <VStack spacing={8} align="left">
-      <div>
-        <Text fontSize="sm" fontWeight="bold" color="indigo.600">
-          Wum.bo
+    return (
+      <VStack w="full" spacing={8} align="left">
+        {hasError && (
+          <Alert status="error" rounded="lg">
+            <AlertIcon />
+            {loggedInAsWrongUser &&
+              `Make sure you're logged into twitter as ${handle}. ${internalError?.message}`}
+            {!loggedInAsWrongUser && `${internalError?.message}`}
+          </Alert>
+        )}
+        <div>
+          <Text fontSize="sm" fontWeight="bold" color="indigo.600">
+            Wum.bo
+          </Text>
+          <Heading as="h1" size="xl">
+            Verify your Twitter account
+          </Heading>
+        </div>
+        <Text size="md">
+          Almost there! In order to claim your profile on Wumbo, we'll need you
+          to connect your Twitter account. The Wumbo chrome extension sits on
+          top of Twitter so you can see and interact with Collectives or social
+          tokens you come across.
         </Text>
-        <Heading as="h1" size="xl">
-          Verify your Twitter account
-        </Heading>
-      </div>
-      <Text size="md">
-        Almost there! In order to claim your profile on Wumbo, we'll need you to
-        connect your Twitter account. The Wumbo chrome extension sits on top of
-        Twitter so you can see and interact with Collectives or social tokens
-        you come across.
-      </Text>
-      <Flex w="full" justifyContent="center">
-        <VStack spacing={6} py={4} maxW="412px" w="full">
-          <Button
-            isFullWidth
-            colorScheme="twitter"
-            onClick={claim}
-            isLoading={awaitingApproval || creating}
-            loadingText={awaitingApproval ? "Awaiting Approval" : "Claiming"}
-          >
-            Log in with Twitter
-          </Button>
-          <Button
-            colorScheme="indigo"
-            variant="link"
-            onClick={() => history.push("/")}
-          >
-            Cancel
-          </Button>
-        </VStack>
-      </Flex>
-    </VStack>
-  );
-};
+        <Flex w="full" justifyContent="center">
+          <VStack spacing={6} py={4} maxW="412px" w="full">
+            <Button
+              isFullWidth
+              colorScheme="twitter"
+              onClick={claim}
+              isLoading={awaitingApproval || creating || isClaiming}
+              loadingText={awaitingApproval ? "Awaiting Approval" : "Claiming"}
+            >
+              Log in with Twitter
+            </Button>
+            <Button
+              colorScheme="indigo"
+              variant="link"
+              onClick={() => history.push("/")}
+            >
+              Cancel
+            </Button>
+          </VStack>
+        </Flex>
+      </VStack>
+    );
+  }
+);

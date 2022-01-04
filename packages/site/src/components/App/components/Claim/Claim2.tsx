@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React from "react";
 import { useWallet } from "@solana/wallet-adapter-react";
 import { WalletName } from "@solana/wallet-adapter-wallets";
 import {
@@ -14,7 +14,11 @@ import {
 import { useModal } from "../../../../contexts";
 import claim1illu from "../../../../assets/images/claim1illu.png";
 import TorusBlack from "../../../../assets/images/torusblack.png";
-import { useErrorHandler } from "@strata-foundation/react";
+import {
+  useClaimedTokenRefKey,
+  useTokenRef,
+  useTokenMetadata,
+} from "@strata-foundation/react";
 
 export interface IClaim2Props {
   handle: string;
@@ -23,18 +27,19 @@ export interface IClaim2Props {
 }
 
 export const Claim2: React.FC<IClaim2Props> = ({ handle, incrementStep }) => {
-  const { connected, select, connect } = useWallet();
-  const { handleErrors } = useErrorHandler();
-  const { showModal, hideModal } = useModal();
+  const { connected, select, adapter, wallet } = useWallet();
+  const { showModal } = useModal();
+  const walletMintKey = useClaimedTokenRefKey(adapter?.publicKey, null);
 
-  useEffect(() => {
-    if (connected) {
-      hideModal();
-      incrementStep();
-    }
-  }, [connected, hideModal, incrementStep]);
+  const { info: walletRef, loading: walletRefLoading = true } =
+    useTokenRef(walletMintKey);
 
-  if (connected) return null;
+  const { metadata, loading: metadataLoading = true } = useTokenMetadata(
+    walletRef?.mint
+  );
+
+  const hasWalletClaimed =
+    !!wallet && !walletRefLoading && !!walletRef?.isClaimed;
 
   return (
     <VStack spacing={8} align="left">
@@ -47,44 +52,117 @@ export const Claim2: React.FC<IClaim2Props> = ({ handle, incrementStep }) => {
         </Heading>
       </div>
       <Image src={claim1illu} />
-      <Heading as="h2" size="lg" fontWeight="500">
-        How do you set up a wallet?
-      </Heading>
-      <VStack spacing={6} color="gray.600">
-        <Text size="md">
-          Setting up a wallet is easy! You can use any digital wallet that
-          supports Solana tokens or platforms. There are several to choose from.
-          If you already have one, you're one step ahead.
-        </Text>
-        <Text size="md">
-          If you don't have a wallet yet, we'll walk you through a quick process
-          to connect your social media account and create a wallet at the same
-          time. It's as easy as 1, 2, 3!
-        </Text>
-      </VStack>
+      {!hasWalletClaimed && (
+        <>
+          <Heading as="h2" size="lg" fontWeight="500">
+            How do you set up a wallet?
+          </Heading>
+          <VStack spacing={6} color="gray.600">
+            <Text size="md">
+              Setting up a wallet is easy! You can use any digital wallet that
+              supports Solana tokens or platforms. There are several to choose
+              from. If you already have one, you're one step ahead.
+            </Text>
+            <Text size="md">
+              If you don't have a wallet yet, we'll walk you through a quick
+              process to connect your social media account and create a wallet
+              at the same time. It's as easy as 1, 2, 3!
+            </Text>
+          </VStack>
+        </>
+      )}
+      {hasWalletClaimed && (
+        <>
+          <Heading as="h2" size="lg" fontWeight="500">
+            Wallet has already claimed!
+          </Heading>
+          <VStack spacing={6} color="gray.600">
+            <Text size="md">
+              It appears the {wallet!.name} wallet you are using has already
+              claimed a social token with the twitter handle of{" "}
+              <Text as="span" fontWeight="bold">
+                {metadataLoading ? "Loading..." : metadata?.data.name}
+              </Text>
+              {". "}
+              In order to claim multiple social tokens you will need multiple
+              wallets.
+            </Text>
+            <Text size="md">
+              Please generate a new address for the {wallet!.name} wallet in
+              order to claim the new social token for{" "}
+              <Text as="span" fontWeight="bold">
+                {handle}
+              </Text>
+              {". "}
+              If you need help you can reach out on{" "}
+              <Link href="discord.gg/S8wJBR2BQV" color="indigo.500">
+                discord
+              </Link>
+              {", "}
+              <Link href="https://twitter.com/TeamWumbo" color="indigo.500">
+                twitter
+              </Link>
+              , or refrence the{" "}
+              <Link href={wallet!.url} color="indigo.500">
+                {wallet!.name} website
+              </Link>
+              .
+            </Text>
+          </VStack>
+        </>
+      )}
       <Flex w="full" justifyContent="center">
         <VStack spacing={6} py={4} maxW="412px" w="full">
-          <Button
-            isFullWidth
-            colorScheme="indigo"
-            variant="outline"
-            bgColor="indigo.500"
-            color="white"
-            _hover={{ bgColor: "indigo.600" }}
-            onClick={() => showModal("WalletSelect")}
-          >
-            Use my own wallet
-          </Button>
-          <Button
-            isFullWidth
-            colorScheme="gray"
-            borderColor="black"
-            variant="outline"
-            onClick={() => select(WalletName.Torus)}
-            leftIcon={<Image src={TorusBlack} w={8} h={8} />}
-          >
-            Log in with Social
-          </Button>
+          {!connected && (
+            <>
+              <Button
+                isFullWidth
+                colorScheme="indigo"
+                variant="outline"
+                bgColor="indigo.500"
+                color="white"
+                _hover={{ bgColor: "indigo.600" }}
+                onClick={() => showModal("WalletSelect")}
+              >
+                Use my own wallet
+              </Button>
+              <Button
+                isFullWidth
+                colorScheme="gray"
+                borderColor="black"
+                variant="outline"
+                onClick={() => select(WalletName.Torus)}
+                leftIcon={<Image src={TorusBlack} w={8} h={8} />}
+              >
+                Log in with Social
+              </Button>
+            </>
+          )}
+          {connected && (
+            <>
+              <Button
+                isFullWidth
+                colorScheme="indigo"
+                variant="outline"
+                bgColor="indigo.500"
+                color="white"
+                _hover={{ bgColor: "indigo.600" }}
+                onClick={incrementStep}
+                disabled={hasWalletClaimed}
+              >
+                Next
+              </Button>
+              <Button
+                isFullWidth
+                colorScheme="gray"
+                borderColor="black"
+                variant="outline"
+                onClick={() => adapter?.disconnect()}
+              >
+                Disconnect Wallet
+              </Button>
+            </>
+          )}
         </VStack>
       </Flex>
       <Box

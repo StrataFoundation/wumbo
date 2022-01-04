@@ -7,7 +7,7 @@ import {
   ModalContent,
   ModalOverlay,
 } from "@chakra-ui/react";
-import { WalletSelect } from "wumbo-common";
+import { usePrevious, WalletSelect } from "wumbo-common";
 import { useWallet } from "@solana/wallet-adapter-react";
 import { WalletName } from "@solana/wallet-adapter-wallets";
 import { useModal } from "../../../../contexts";
@@ -16,12 +16,19 @@ import { useErrorHandler } from "@strata-foundation/react";
 export const WalletSelectModal: React.FC = React.memo(() => {
   const [selectedWallet, setSelectedWallet] = useState<WalletName | null>(null);
   const { modalType, hideModal } = useModal();
-  const { connecting, connect, select } = useWallet();
+  const { connecting, connect, connected, select } = useWallet();
+  const previousConnecting = usePrevious(connecting);
   const { handleErrors } = useErrorHandler();
 
   useEffect(() => {
-    setSelectedWallet(null);
-  }, [connecting]);
+    if (connecting) {
+      setSelectedWallet(null);
+    }
+
+    if (previousConnecting && !connecting && connected) {
+      hideModal();
+    }
+  }, [connecting, previousConnecting, connected, hideModal]);
 
   const handleOnSelect = (name: WalletName) => {
     select(name);

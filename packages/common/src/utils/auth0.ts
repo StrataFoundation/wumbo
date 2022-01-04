@@ -29,7 +29,6 @@ export function useClaimLink({
   handle: string;
   newTab?: boolean;
 }): { redirectUri: string; claim: () => Window | null } {
-  const setAuth0State = useLocalStorage("auth0-state", "")[1];
   const redirectUri = `${SITE_URL}/app/claim?step=3&handle=${handle}`;
   const claim = () => {
     const state = makeId(6);

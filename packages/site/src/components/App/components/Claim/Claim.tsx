@@ -17,12 +17,12 @@ export const ClaimRoute = React.memo(() => {
 
   const incrementStep = useCallback(
     () => history.push(claimPath({ step: `${+step + 1}`, handle, code })),
-    [step, handle, code, history, claimPath]
+    [step, handle, code, history]
   );
 
   const decrementStep = useCallback(
     () => history.push(claimPath({ step: `${+step - 1}`, handle, code })),
-    [step, handle, code, history, claimPath]
+    [step, handle, code, history]
   );
 
   useEffect(() => {
@@ -31,7 +31,7 @@ export const ClaimRoute = React.memo(() => {
 
   if (!step || !handle) {
     return (
-      <Alert status="error">
+      <Alert status="error" rounded="lg">
         <AlertIcon />
         {!step ? "Claim Step Undeterminable." : "No Handle Provided."}
       </Alert>
@@ -42,6 +42,7 @@ export const ClaimRoute = React.memo(() => {
     <Flex
       direction="column"
       align="center"
+      w="full"
       maxW={{ md: "760px" }}
       m="0 auto"
       p={10}

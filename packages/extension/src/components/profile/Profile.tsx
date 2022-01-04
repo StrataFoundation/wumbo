@@ -34,6 +34,7 @@ export const Profile = () => {
   const history = useHistory();
   const { info: tokenBonding } = useTokenBondingFromMint(mintKey);
   const { metadata } = useTokenMetadata(mintKey);
+
   if (!connected) {
     return <WalletRedirect />;
   }
