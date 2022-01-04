@@ -88,7 +88,7 @@ export function PriceButton({
   return (
     <Center
       h={h}
-      background={(optedOut || !gradient) ? "green.500" : gradient}
+      background={optedOut || !gradient ? "green.500" : gradient}
       padding="2px"
       borderRadius={r ? `${r}px` : "6px"}
     >
@@ -110,8 +110,9 @@ export function PriceButton({
       >
         {!optedOut && coinPriceUsd ? (
           "$" + coinPriceUsd.toFixed(2)
-        ) : optedOut ? 
-          "View" :  (
+        ) : optedOut ? (
+          "View"
+        ) : (
           <Box w="30px">
             <Spinner size="xs" />
           </Box>

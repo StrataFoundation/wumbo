@@ -340,8 +340,8 @@ export const Profile = React.memo(
             )}
             {tokenBonding && !tokenRef?.isOptedOut && (
               <PriceButton
-              optedOut={tokenRef?.isOptedOut as boolean}
-              tokenBonding={tokenBonding.publicKey}
+                optedOut={tokenRef?.isOptedOut as boolean}
+                tokenBonding={tokenBonding.publicKey}
                 mint={mintKey}
                 onClick={onTradeClick}
               />
@@ -384,16 +384,18 @@ export const Profile = React.memo(
                     variant="outline"
                     onClick={link}
                     isLoading={linking}
-                    loadingText={awaitingApproval ? "Awaiting Approval" : "Linking"}
+                    loadingText={
+                      awaitingApproval ? "Awaiting Approval" : "Linking"
+                    }
                   >
                     Link Wallet
                   </Button>
                 </PopoverTrigger>
                 <PopoverContent>
                   <PopoverBody>
-                    Link your wallet to Wum.bo without claiming this token. 
-                    Your collectibles will appear on your profile.
-                    If you are the creator on any NFTs, they will link back to your profile.
+                    Link your wallet to Wum.bo without claiming this token. Your
+                    collectibles will appear on your profile. If you are the
+                    creator on any NFTs, they will link back to your profile.
                   </PopoverBody>
                 </PopoverContent>
               </Popover>
