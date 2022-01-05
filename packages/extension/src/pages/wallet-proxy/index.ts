@@ -1,4 +1,4 @@
-import { WalletAdapter } from "@solana/wallet-adapter-base";
+import { BaseSignerWalletAdapter } from "@solana/wallet-adapter-base";
 import { Transaction } from "@solana/web3.js";
 import { serializeError } from "serialize-error";
 import { INJECTED_PROVIDERS } from "wumbo-common";
@@ -10,10 +10,10 @@ import {
   SignTransactionsMessage,
 } from "../../utils/wallets";
 
-const getProvider = (name: string): any | undefined =>
+const getAdapter = (name: string): any | undefined =>
   INJECTED_PROVIDERS.find((p) => p.name === name);
 
-let adapter: WalletAdapter | undefined;
+let adapter: BaseSignerWalletAdapter | undefined;
 
 const resetWallet = () =>
   window.postMessage({ type: MessageType.WALLET_RESET }, "*");
@@ -34,8 +34,7 @@ const resetWallet = () =>
           const {
             data: { name },
           } = e as MessageEvent<ConnectMessage>;
-          const provider = getProvider(name!);
-          adapter = provider?.adapter();
+          adapter = getAdapter(name!);
           adapter?.on("disconnect", resetWallet);
 
           try {
@@ -54,12 +53,11 @@ const resetWallet = () =>
           const {
             data: { name },
           } = e as MessageEvent<ConnectMessage>;
-
-          const provider = getProvider(name!);
-          adapter = provider?.adapter();
+          adapter = getAdapter(name!);
+          debugger;
 
           try {
-            const ready = adapter?.ready;
+            const ready = adapter?.readyState === "Installed";
             sendReply({ ready });
           } catch (error) {
             sendReply({ error });

@@ -135,8 +135,8 @@ export const Profile = React.memo(
     const baseIsCollective = !!baseMintTokenBonding.info;
 
     const { awaitingApproval } = useProvider();
-    const { adapter } = useWallet();
-    const publicKey = adapter?.publicKey;
+    const { wallet } = useWallet();
+    const publicKey = wallet?.adapter?.publicKey;
     const myTokenRefKey = useClaimedTokenRefKey(publicKey, null);
     const { handle: walletTwitterHandle, error: reverseTwitterError } =
       useReverseTwitter(publicKey || undefined);

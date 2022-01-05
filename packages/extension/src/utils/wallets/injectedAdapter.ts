@@ -1,4 +1,5 @@
 import {
+  WalletName,
   EventEmitter,
   SignerWalletAdapter,
   WalletAdapterEvents,
@@ -6,8 +7,7 @@ import {
   WalletDisconnectionError,
   WalletError,
   WalletNotConnectedError,
-  WalletNotFoundError,
-  WalletNotInstalledError,
+  WalletNotReadyError,
   WalletSignMessageError,
   WalletWindowClosedError,
   SendTransactionOptions,
@@ -15,7 +15,6 @@ import {
 import { Connection, PublicKey, Transaction } from "@solana/web3.js";
 import { MessageType, Message } from "./types";
 import { deserializeError } from "serialize-error";
-import { WalletName } from "@solana/wallet-adapter-wallets";
 import { sleep } from "wumbo-common";
 
 export interface IInjectedWalletAdapterConfig {
@@ -27,6 +26,7 @@ export class InjectedWalletAdapter
   implements SignerWalletAdapter
 {
   private _name: WalletName | null;
+  private _url: string | null;
   private _publicKey: PublicKey | null;
   private _connecting: boolean;
   private _connected: boolean;
@@ -127,8 +127,7 @@ export class InjectedWalletAdapter
           // errors are returned serialized
           // reconstruct them and reject them
           const errorConstructor: { [key: string]: any } = {
-            WalletNotFoundError: WalletNotFoundError,
-            WalletNotInstalledError: WalletNotInstalledError,
+            WalletNotReadyError: WalletNotReadyError,
             WalletWindowClosedError: WalletWindowClosedError,
             WalletConnectionError: WalletConnectionError,
             WalletSignMessageError: WalletSignMessageError,

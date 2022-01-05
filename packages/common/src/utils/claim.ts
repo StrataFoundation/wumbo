@@ -18,10 +18,11 @@ interface CreateState {
 }
 
 export function useCreateOrClaimCoin(): CreateState {
-  const { adapter } = useWallet();
+  const { wallet } = useWallet();
   const [creating, setCreating] = useState<boolean>(false);
   const { awaitingApproval, provider } = useProvider();
   const { tokenCollectiveSdk } = useStrataSdks();
+  const adapter = wallet?.adapter;
 
   async function exec({ twitterHandle, code, redirectUri }: CreateArgs) {
     let result;

@@ -27,17 +27,13 @@ import {
 export const ContextProviders: FC = ({ children }) => {
   const alteredWallets = useMemo(
     () =>
-      WALLET_PROVIDERS.map((wallet) => {
-        const injectedWalletNames = INJECTED_PROVIDERS.map(
-          (wallet) => wallet.name
-        );
-
-        if (injectedWalletNames.includes(wallet.name)) {
-          wallet.adapter = () =>
-            new InjectedWalletAdapter({ name: wallet.name });
+      WALLET_PROVIDERS.map((adapter) => {
+        const injectedWalletNames = INJECTED_PROVIDERS.map((a) => a.name);
+        if (injectedWalletNames.includes(adapter.name)) {
+          return new InjectedWalletAdapter({ name: adapter.name });
         }
 
-        return wallet;
+        return adapter;
       }),
     []
   );

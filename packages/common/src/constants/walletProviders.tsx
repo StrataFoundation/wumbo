@@ -1,28 +1,24 @@
+import { Adapter } from "@solana/wallet-adapter-base";
 import {
-  Wallet,
-  getSolletExtensionWallet,
-  getLedgerWallet,
-  getPhantomWallet,
-  getSolflareWallet,
-  getTorusWallet,
+  LedgerWalletAdapter,
+  PhantomWalletAdapter,
+  SlopeWalletAdapter,
+  SolflareWalletAdapter,
+  SolletExtensionWalletAdapter,
+  SolletWalletAdapter,
+  TorusWalletAdapter,
 } from "@solana/wallet-adapter-wallets";
 
-export const INJECTED_PROVIDERS: Wallet[] = [
-  getPhantomWallet(),
-  getSolflareWallet(),
-  getLedgerWallet(),
-  getSolletExtensionWallet(),
+export const INJECTED_PROVIDERS: Adapter[] = [
+  new PhantomWalletAdapter(),
+  new SolflareWalletAdapter(),
+  new SlopeWalletAdapter(),
+  new LedgerWalletAdapter(),
+  new SolletWalletAdapter(),
+  new SolletExtensionWalletAdapter(),
 ];
 
-export const WALLET_PROVIDERS: Wallet[] = [
+export const WALLET_PROVIDERS: Adapter[] = [
   ...INJECTED_PROVIDERS,
-  getTorusWallet({
-    options: {
-      replaceUrlOnRedirect: false,
-      clientId:
-        "BAjNy8GFgk8BzjoZPowW82MFlkOGuPVykpcANoYJTi6khZPoPnJNxvts_OViNdxXOqcvCZCo2kB-zrnEi0T-Zx4",
-      network: "testnet",
-      uxMode: "popup",
-    },
-  }),
+  new TorusWalletAdapter(),
 ];

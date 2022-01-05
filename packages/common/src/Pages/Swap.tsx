@@ -39,7 +39,7 @@ export const Swap = ({
   manageWalletPath: string;
 } & Pick<ISwapDriverArgs, "onTradingMintsChange">) => {
   const history = useHistory();
-  const { adapter } = useWallet();
+  const { wallet } = useWallet();
   const { handleErrors } = useErrorHandler();
   const { info: targetTokenRef, loading: loadingTarget } =
     useMintTokenRef(targetMint);
@@ -72,7 +72,7 @@ export const Swap = ({
             signers: [] as Signer[],
             instructions: [
               SystemProgram.transfer({
-                fromPubkey: adapter!.publicKey!,
+                fromPubkey: wallet!.adapter!.publicKey!,
                 toPubkey: WUMBO_TRANSACTION_FEE_DESTINATION,
                 lamports: solAmount * Math.pow(10, 9),
               }),

@@ -1,4 +1,4 @@
-import { WalletName } from "@solana/wallet-adapter-wallets";
+import { WalletName } from "@solana/wallet-adapter-base";
 
 export enum MessageType {
   WALLET_READY = "WALLET_READY",

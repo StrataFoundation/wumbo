@@ -1,6 +1,7 @@
 import React from "react";
 import { useWallet } from "@solana/wallet-adapter-react";
-import { Wallet, WalletName } from "@solana/wallet-adapter-wallets";
+import { Adapter, WalletName } from "@solana/wallet-adapter-base";
+import { TorusWalletName } from "@solana/wallet-adapter-wallets";
 import { Flex, Box, Button, Text, VStack } from "@chakra-ui/react";
 import { WALLET_PROVIDERS } from "../constants/walletProviders";
 
@@ -13,7 +14,8 @@ export const WalletSelect: React.FC<IWalletSelect> = ({
   onSelect,
   selectedWallet,
 }) => {
-  const { adapter, select } = useWallet();
+  const { wallet, select } = useWallet();
+  const adapter = wallet?.adapter;
 
   const handleOnSelect = (name: WalletName) => {
     onSelect ? onSelect(name) : select(name);
@@ -40,13 +42,13 @@ export const WalletSelect: React.FC<IWalletSelect> = ({
             <Button
               colorScheme="indigo"
               variant="link"
-              onClick={() => handleOnSelect(WalletName.Torus)}
+              onClick={() => handleOnSelect(TorusWalletName)}
               color="indigo.600"
             >
               Connect with Social.
             </Button>
           </Text>
-          {WALLET_PROVIDERS.map((provider: Wallet, idx: number) => (
+          {WALLET_PROVIDERS.map((provider: Adapter, idx: number) => (
             <Button
               key={idx}
               w="full"

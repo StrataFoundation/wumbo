@@ -152,8 +152,8 @@ export const Wallet = React.memo(
   }) => {
     const { amount: solOwned } = useSolOwnedAmount();
     const solPrice = usePriceInUsd(SOL_TOKEN);
-    const { adapter } = useWallet();
-    const publicKey = adapter?.publicKey;
+    const { wallet } = useWallet();
+    const publicKey = wallet?.adapter?.publicKey;
     const { data: tokens, loading } = useUserTokensWithMeta(
       publicKey || undefined
     );

@@ -186,9 +186,9 @@ export const TaggableImages = ({
   const [error, setError] = useState<Error>();
   const [selected, setSelected] = useState<Record<string, boolean>>({});
   const [allSelected, setAllSelected] = useState<boolean>(false);
-  const { adapter, signTransaction } = useWallet();
+  const { wallet, signTransaction } = useWallet();
   const { awaitingApproval } = useProvider();
-  const publicKey = adapter?.publicKey;
+  const publicKey = wallet?.adapter?.publicKey;
   const { handleErrors } = useErrorHandler();
 
   handleErrors(bufferError, error);

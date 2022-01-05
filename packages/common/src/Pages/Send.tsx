@@ -58,8 +58,8 @@ export const Send = ({ finishRedirectUrl }: { finishRedirectUrl: string }) => {
   const history = useHistory();
   const params = useParams<{ mint: string | undefined }>();
   const mint = usePublicKey(params.mint);
-  const { adapter } = useWallet();
-  const publicKey = adapter?.publicKey;
+  const { wallet } = useWallet();
+  const publicKey = wallet?.adapter?.publicKey;
   const { awaitingApproval, provider } = useProvider();
   const ownedAmount = useOwnedAmount(mint);
   const validationSchema = yup.object({
@@ -341,9 +341,7 @@ export const Send = ({ finishRedirectUrl }: { finishRedirectUrl: string }) => {
                 resize="none"
                 boxShadow="none"
                 ring="none"
-                size="lg"
                 placeholder="Enter Address"
-                variant="unstyled"
                 _focus={{ boxShadow: "none" }}
               />
             </VStack>
