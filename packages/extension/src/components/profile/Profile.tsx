@@ -15,6 +15,7 @@ import {
   useTokenBondingFromMint,
   useTokenMetadata,
   useTokenRef,
+  useTokenRefFromBonding,
 } from "@strata-foundation/react";
 import React, { Fragment } from "react";
 import { useHistory, useParams } from "react-router-dom";
@@ -27,11 +28,15 @@ export const Profile = () => {
   const { connected, adapter } = useWallet();
   const publicKey = adapter?.publicKey;
   const walletMintKey = useClaimedTokenRefKey(publicKey, null);
-  const { info: walletTokenRef, loading } = useTokenRef(walletMintKey);
+  const { info: walletTokenRef, loading: walletTokenRefLoading } =
+    useTokenRef(walletMintKey);
   const passedMintKey = usePublicKey(params.mint);
   const mintKey = passedMintKey || walletTokenRef?.mint;
   const history = useHistory();
   const { info: tokenBonding } = useTokenBondingFromMint(mintKey);
+  const { info: tokenRef, loading: tokenRefLoading } = useTokenRefFromBonding(
+    tokenBonding?.publicKey
+  );
   const { metadata } = useTokenMetadata(mintKey);
   const query = useQuery();
   const name = query.get("name");
@@ -40,7 +45,7 @@ export const Profile = () => {
     return <WalletRedirect />;
   }
 
-  if (loading) {
+  if (walletTokenRefLoading || tokenRefLoading) {
     return <WumboDrawer.Loading />;
   }
 
@@ -65,7 +70,9 @@ export const Profile = () => {
       <WumboDrawer.Header title={metadata?.data.name || "View Profile"} />
       <WumboDrawer.Content>
         <CommonProfile
-          sendPath={sendSearchPath(walletTokenRef?.owner || undefined)}
+          sendPath={sendSearchPath(
+            tokenRef?.owner || walletTokenRef?.owner || undefined
+          )}
           createPath={routes.create.path + `?name=${name}`}
           collectivePath={
             tokenBonding ? viewProfilePath(tokenBonding.baseMint) : null

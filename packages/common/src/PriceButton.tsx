@@ -82,7 +82,7 @@ export function PriceButton({
   const coinPriceUsd = usePriceInUsd(mint);
 
   const backgroundColor = useMemo(
-    () => getBackgroundColor(buttonTarget) || "#ffffffff",
+    () => getBackgroundColor(buttonTarget) || "#ffffff",
     [buttonTarget]
   );
   return (
@@ -97,7 +97,13 @@ export function PriceButton({
         h={`calc(${h} - 4px)`}
         as={link ? Link : undefined}
         _hover={{
-          background: isDark(backgroundColor) ? "gray.600" : "gray.300",
+          background: isDark(backgroundColor)
+            ? !gradient
+              ? "green.900"
+              : "gray.600"
+            : !gradient
+            ? "green.300"
+            : "gray.300",
         }}
         to={link}
         size="xs"

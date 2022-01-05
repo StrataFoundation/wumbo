@@ -3,7 +3,7 @@ import { routes, viewProfilePath } from "@/constants/routes";
 import { useDrawer } from "@/contexts/drawerContext";
 import { Button, ButtonProps, SpinnerProps } from "@chakra-ui/react";
 import React, { FC } from "react";
-import { Link, useHistory } from "react-router-dom";
+import { Link } from "react-router-dom";
 import {
   PriceButton,
   Spinner,
@@ -33,7 +33,6 @@ export const MainButton: FC<Props> = ({
     null,
     tld
   );
-  const history = useHistory();
   const { owner, loading: loadingOwner } = useTwitterOwner(creatorName);
 
   if (!(loading || loadingOwner) && !tokenRef) {
@@ -51,6 +50,7 @@ export const MainButton: FC<Props> = ({
         _hover={{ bg: "indigo.900" }}
         _active={{ bg: "indigo.900" }}
         _focus={{ boxShadow: "none" }}
+        borderWidth="2px"
         onClick={() => {
           toggleDrawer({
             isOpen: true,
@@ -70,9 +70,9 @@ export const MainButton: FC<Props> = ({
 
   return (
     <PriceButton
-      optedOut={tokenRef?.isOptedOut as boolean}
+      optedOut={!!tokenRef.isOptedOut as boolean}
       buttonTarget={buttonTarget}
-      {...btnProps}
+      {...(btnProps as any)}
       {...(btnProps.borderRadius == "full"
         ? {
             r: 100,

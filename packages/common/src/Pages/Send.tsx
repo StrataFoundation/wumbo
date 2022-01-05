@@ -90,7 +90,7 @@ export const Send = ({ finishRedirectUrl }: { finishRedirectUrl: string }) => {
   } = useForm<FormValues>({
     resolver: yupResolver(validationSchema),
     defaultValues: {
-      amount: 0,
+      amount: undefined,
       recipient: recipientRaw || "",
     },
   });
@@ -235,6 +235,7 @@ export const Send = ({ finishRedirectUrl }: { finishRedirectUrl: string }) => {
               {...register("amount")}
               max={ownedAmount}
               step={0.0000000001}
+              placeholder="0"
             />
             <InputRightElement
               h="100%"

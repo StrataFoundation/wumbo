@@ -106,6 +106,7 @@ export const TaggableImage = React.memo(
                   <Box
                     backgroundColor="#00CE90"
                     background="repeating-linear-gradient(45deg, #4239B1, #4239B1 2px, #00CE90 2px, #00CE90 20px )"
+                    borderRadius="999px"
                     opacity={0.5}
                     width={image.height + "px"}
                     height={image.height + "px"}
@@ -121,6 +122,7 @@ export const TaggableImage = React.memo(
                 <ThemeProvider>
                   <Box
                     backgroundColor="#4239B1"
+                    borderRadius="999px"
                     opacity={0.5}
                     width={image.height + "px"}
                     height={image.height + "px"}
