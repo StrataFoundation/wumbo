@@ -8,12 +8,13 @@ import {
 import { ITokenRef } from "@strata-foundation/spl-token-collective";
 import { Link } from "react-router-dom";
 import { PublicKey } from "@solana/web3.js";
-import { Avatar, truncatePubkey } from "../";
+import { Avatar, truncatePubkey, useReverseTwitter } from "../";
 
 export type GetCreatorLink = (
   c: PublicKey,
   t: MetaplexMetadata | undefined,
-  b: ITokenRef | undefined
+  b: ITokenRef | undefined,
+  h: string | undefined
 ) => string;
 
 export const Creator = React.memo(
@@ -28,19 +29,21 @@ export const Creator = React.memo(
     const { metadata, tokenRef, error, image } =
       useSocialTokenMetadata(creator);
 
-    handleErrors(error);
+    const { handle, error: reverseTwitterError2 } = useReverseTwitter(creator);
+    handleErrors(error, reverseTwitterError2);
 
     const children = (
       <>
         {metadata && (
           <Avatar showDetails size="xs" src={image} name={metadata.data.name} />
         )}
-        {!metadata && truncatePubkey(creator)}
+        {!metadata && !handle && truncatePubkey(creator)}
+        {handle && `@${handle}`}
       </>
     );
 
     // @ts-ignore
-    const link = getCreatorLink(creator, metadata, tokenRef);
+    const link = getCreatorLink(creator, metadata, tokenRef, handle);
 
     if (link.includes("http")) {
       return (

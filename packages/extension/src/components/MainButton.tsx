@@ -4,7 +4,12 @@ import { useDrawer } from "@/contexts/drawerContext";
 import { Button, ButtonProps, SpinnerProps } from "@chakra-ui/react";
 import React, { FC } from "react";
 import { Link } from "react-router-dom";
-import { PriceButton, Spinner, useTwitterTld } from "wumbo-common";
+import {
+  PriceButton,
+  Spinner,
+  useTwitterOwner,
+  useTwitterTld,
+} from "wumbo-common";
 
 type Props = {
   creatorName: string;
@@ -28,12 +33,16 @@ export const MainButton: FC<Props> = ({
     null,
     tld
   );
+  const { owner, loading: loadingOwner } = useTwitterOwner(creatorName);
 
-  if (!loading && !tokenRef) {
+  if (!(loading || loadingOwner) && !tokenRef) {
     return (
       <Button
         as={Link}
-        to={routes.create.path + `?name=${creatorName}&src=${creatorImg}`}
+        to={
+          (owner ? routes.profile.path : routes.create.path) +
+          `?name=${creatorName}&src=${creatorImg}`
+        }
         size="xs"
         fontFamily="body"
         colorScheme="indigo"
@@ -41,15 +50,16 @@ export const MainButton: FC<Props> = ({
         _hover={{ bg: "indigo.900" }}
         _active={{ bg: "indigo.900" }}
         _focus={{ boxShadow: "none" }}
-        onClick={() =>
+        borderWidth="2px"
+        onClick={() => {
           toggleDrawer({
             isOpen: true,
             creator: { name: creatorName, img: creatorImg },
-          })
-        }
+          });
+        }}
         {...btnProps}
       >
-        Mint
+        {owner ? "View" : "Mint"}
       </Button>
     );
   }
@@ -60,7 +70,15 @@ export const MainButton: FC<Props> = ({
 
   return (
     <PriceButton
+      optedOut={!!tokenRef.isOptedOut as boolean}
       buttonTarget={buttonTarget}
+      {...(btnProps as any)}
+      {...(btnProps.borderRadius == "full"
+        ? {
+            r: 100,
+            h: "36px",
+          }
+        : {})}
       link={`${viewProfilePath(tokenRef.mint)}?name=${creatorName}`}
       onClick={() =>
         toggleDrawer({

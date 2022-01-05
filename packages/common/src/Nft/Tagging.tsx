@@ -33,7 +33,7 @@ interface ITagArgs {
   feePayer: string;
 }
 
-const getBufferFromUrl = async (
+export const getBufferFromUrl = async (
   url: string | undefined
 ): Promise<Blob | undefined> => {
   if (url) {
@@ -106,6 +106,7 @@ export const TaggableImage = React.memo(
                   <Box
                     backgroundColor="#00CE90"
                     background="repeating-linear-gradient(45deg, #4239B1, #4239B1 2px, #00CE90 2px, #00CE90 20px )"
+                    borderRadius="999px"
                     opacity={0.5}
                     width={image.height + "px"}
                     height={image.height + "px"}
@@ -121,6 +122,7 @@ export const TaggableImage = React.memo(
                 <ThemeProvider>
                   <Box
                     backgroundColor="#4239B1"
+                    borderRadius="999px"
                     opacity={0.5}
                     width={image.height + "px"}
                     height={image.height + "px"}
@@ -166,6 +168,13 @@ export function getUntaggedImages(): HTMLImageElement[] {
   ]) as HTMLImageElement[];
 }
 
+export function useBufferFromUrl(url: string): {
+  result: Blob | undefined;
+  error?: Error;
+} {
+  return useAsync(getBufferFromUrl, [url]);
+}
+
 type TagMatch = { percent: number; els: HTMLImageElement[] };
 export const TaggableImages = ({
   metadata,
@@ -178,9 +187,7 @@ export const TaggableImages = ({
 }) => {
   const { connection } = useConnection();
   const images = useMemo(() => getUntaggedImages(), [refreshCounter]);
-  const { result: img1, error: bufferError } = useAsync(getBufferFromUrl, [
-    src,
-  ]);
+  const { result: img1, error: bufferError } = useBufferFromUrl(src);
   const [matches, setMatches] = useState<Record<string, TagMatch>>({});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<Error>();
@@ -368,7 +375,7 @@ export const TaggableImages = ({
         </VStack>
       )}
       {!loading && Object.entries(matches).length === 0 && (
-        <div>No Matches found to tag</div>
+        <div>No Matches found to link</div>
       )}
       <Button
         width="full"

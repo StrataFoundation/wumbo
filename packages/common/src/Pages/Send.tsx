@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { useHistory, useParams } from "react-router-dom";
 import { useAsync } from "react-async-hook";
 import { useForm } from "react-hook-form";
@@ -50,10 +50,14 @@ import { Spinner } from "../Spinner";
 import { Avatar } from "../Avatar";
 import { useWallet } from "@solana/wallet-adapter-react";
 import { SplTokenMetadata } from "@strata-foundation/spl-utils";
+import { useQuery } from "../utils";
 
 type FormValues = { amount: number; recipient: string };
 
 export const Send = ({ finishRedirectUrl }: { finishRedirectUrl: string }) => {
+  const query = useQuery();
+  const recipientRaw = query.get("recipient");
+
   const { handleErrors } = useErrorHandler();
   const history = useHistory();
   const params = useParams<{ mint: string | undefined }>();
@@ -86,8 +90,8 @@ export const Send = ({ finishRedirectUrl }: { finishRedirectUrl: string }) => {
   } = useForm<FormValues>({
     resolver: yupResolver(validationSchema),
     defaultValues: {
-      amount: 0,
-      recipient: "",
+      amount: undefined,
+      recipient: recipientRaw || "",
     },
   });
 
@@ -98,6 +102,7 @@ export const Send = ({ finishRedirectUrl }: { finishRedirectUrl: string }) => {
   const recipientStr = watch("recipient");
   const amount = watch("amount");
   const recipient = usePublicKey(recipientStr);
+  console.log(recipientRaw, recipientStr, recipient);
   const {
     associatedAccount: ata,
     loading: ataLoading,
@@ -128,6 +133,12 @@ export const Send = ({ finishRedirectUrl }: { finishRedirectUrl: string }) => {
   const recipientLoading = refLoading || metadataLoading || imageLoading;
 
   const recipientRegister = register("recipient");
+  const recipientRef = React.useRef<HTMLParagraphElement>(null);
+  useEffect(() => {
+    if (recipientRef.current && recipientRaw) {
+      recipientRef.current.innerHTML = recipientRaw;
+    }
+  }, [recipientRef, recipientRaw]);
   handleErrors(imageError, error, feeError);
 
   const handleUseMax = () => {
@@ -224,6 +235,7 @@ export const Send = ({ finishRedirectUrl }: { finishRedirectUrl: string }) => {
               {...register("amount")}
               max={ownedAmount}
               step={0.0000000001}
+              placeholder="0"
             />
             <InputRightElement
               h="100%"
@@ -322,6 +334,7 @@ export const Send = ({ finishRedirectUrl }: { finishRedirectUrl: string }) => {
               )}
               <Text
                 {...recipientRegister}
+                ref={recipientRef}
                 onInput={(e) => {
                   // @ts-ignore
                   e.target.value = e.target.innerText;

@@ -1,49 +1,55 @@
-import React, { Fragment } from "react";
-import { useHistory, useParams } from "react-router-dom";
-import { PublicKey } from "@solana/web3.js";
-import { Profile as CommonProfile } from "wumbo-common";
-import {
-  useTokenRef,
-  useClaimedTokenRefKey,
-  usePublicKey,
-  useTokenMetadata,
-  useTokenBondingFromMint,
-} from "@strata-foundation/react";
-import { WumboDrawer } from "../WumboDrawer";
 import {
   nftPath,
   routes,
-  topTokensPath,
+  sendSearchPath,
   swapPath,
   viewProfilePath,
-  wumNetWorthPath,
 } from "@/constants/routes";
-import WalletRedirect from "../wallet/WalletRedirect";
-import { useWallet } from "@solana/wallet-adapter-react";
 import { useClaimFlow } from "@/utils/claim";
 import { Box } from "@chakra-ui/react";
+import { useWallet } from "@solana/wallet-adapter-react";
+import { PublicKey } from "@solana/web3.js";
+import {
+  useClaimedTokenRefKey,
+  usePublicKey,
+  useTokenBondingFromMint,
+  useTokenMetadata,
+  useTokenRef,
+  useTokenRefFromBonding,
+} from "@strata-foundation/react";
+import React, { Fragment } from "react";
+import { useHistory, useParams } from "react-router-dom";
+import { Profile as CommonProfile, useQuery } from "wumbo-common";
+import WalletRedirect from "../wallet/WalletRedirect";
+import { WumboDrawer } from "../WumboDrawer";
 
 export const Profile = () => {
   const params = useParams<{ mint: string | undefined }>();
   const { connected, adapter } = useWallet();
   const publicKey = adapter?.publicKey;
   const walletMintKey = useClaimedTokenRefKey(publicKey, null);
-  const { info: walletTokenRef, loading } = useTokenRef(walletMintKey);
+  const { info: walletTokenRef, loading: walletTokenRefLoading } =
+    useTokenRef(walletMintKey);
   const passedMintKey = usePublicKey(params.mint);
   const mintKey = passedMintKey || walletTokenRef?.mint;
   const history = useHistory();
   const { info: tokenBonding } = useTokenBondingFromMint(mintKey);
+  const { info: tokenRef, loading: tokenRefLoading } = useTokenRefFromBonding(
+    tokenBonding?.publicKey
+  );
   const { metadata } = useTokenMetadata(mintKey);
+  const query = useQuery();
+  const name = query.get("name");
 
   if (!connected) {
     return <WalletRedirect />;
   }
 
-  if (loading) {
+  if (walletTokenRefLoading || tokenRefLoading) {
     return <WumboDrawer.Loading />;
   }
 
-  if (!mintKey) {
+  if (!mintKey && !name) {
     return (
       <Fragment>
         <WumboDrawer.Header title="Profile" />
@@ -64,6 +70,10 @@ export const Profile = () => {
       <WumboDrawer.Header title={metadata?.data.name || "View Profile"} />
       <WumboDrawer.Content>
         <CommonProfile
+          sendPath={sendSearchPath(
+            tokenRef?.owner || walletTokenRef?.owner || undefined
+          )}
+          createPath={routes.create.path + `?name=${name}`}
           collectivePath={
             tokenBonding ? viewProfilePath(tokenBonding.baseMint) : null
           }

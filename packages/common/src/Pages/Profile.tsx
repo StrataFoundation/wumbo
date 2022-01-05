@@ -6,7 +6,10 @@ import {
   HStack,
   Icon,
   Link as PlainLink,
-  Spacer,
+  Popover,
+  PopoverBody,
+  PopoverContent,
+  PopoverTrigger,
   Tab,
   TabList,
   TabPanel,
@@ -19,6 +22,7 @@ import { NATIVE_MINT } from "@solana/spl-token";
 import { useWallet } from "@solana/wallet-adapter-react";
 import { PublicKey } from "@solana/web3.js";
 import {
+  amountAsNum,
   supplyAsNum,
   useBondingPricing,
   useClaimedTokenRefKey,
@@ -29,18 +33,20 @@ import {
   usePrimaryClaimedTokenRef,
   useProvider,
   usePublicKey,
+  useTokenAccount,
   useTokenBondingFromMint,
   useTokenMetadata,
   useTokenRefFromBonding,
 } from "@strata-foundation/react";
 import { ITokenWithMetaAndAccount } from "@strata-foundation/spl-token-collective";
+import { TROPHY_CREATOR } from "../constants";
 import React from "react";
+import { AiOutlineSend } from "react-icons/ai";
 import { FaChevronRight } from "react-icons/fa";
 import { HiOutlinePencilAlt } from "react-icons/hi";
 import { Link } from "react-router-dom";
 import { HashLink } from "react-router-hash-link";
 import { Avatar, MetadataAvatar, PriceButton, PriceChangeTicker } from "..";
-import { TROPHY_CREATOR } from "../constants/globals";
 import {
   TokenBondingRecentTransactionsProvider,
   useTokenBondingRecentTransactions,
@@ -51,12 +57,21 @@ import { TokenLeaderboard } from "../Leaderboard/TokenLeaderboard";
 import { NftListRaw } from "../Nft";
 import { Spinner } from "../Spinner";
 import { StatCard } from "../StatCard";
-import { useQuery, useReverseTwitter } from "../utils";
+import { useQuery, useReverseTwitter, useTwitterOwner } from "../utils";
+
+interface ISocialTokenTabsProps {
+  wallet: PublicKey | undefined;
+  tokenBondingKey: PublicKey;
+  onAccountClick?: (mintKey: PublicKey) => void;
+  getNftLink: (t: ITokenWithMetaAndAccount) => string;
+}
 
 interface IProfileProps
   extends Pick<ISocialTokenTabsProps, "onAccountClick" | "getNftLink"> {
   mintKey: PublicKey;
   editPath: string;
+  sendPath: string;
+  createPath: string;
   collectivePath: string | null;
   onTradeClick?: () => void;
   useClaimFlow: (handle: string | undefined | null) => IClaimFlowOutput;
@@ -64,8 +79,10 @@ interface IProfileProps
 
 export interface IClaimFlowOutput {
   error: Error | undefined;
-  loading: boolean;
+  claimLoading: boolean;
+  linkLoading: boolean;
   claim: () => Promise<void>;
+  link: () => Promise<void>;
 }
 
 const GET_TOKEN_RANK = gql`
@@ -111,13 +128,14 @@ export const Profile = React.memo(
     getNftLink,
     editPath,
     collectivePath,
+    sendPath,
+    createPath,
   }: IProfileProps) => {
     const { handleErrors } = useErrorHandler();
     const { info: tokenRef, loading } = useMintTokenRef(mintKey);
-    const ownerWalletKey = tokenRef?.owner as PublicKey | undefined;
-    const { info: walletTokenRef } = usePrimaryClaimedTokenRef(ownerWalletKey);
     const { info: tokenBonding, loading: tokenBondingLoading } =
       useTokenBondingFromMint(mintKey);
+
     const {
       metadata,
       loading: loadingMetadata,
@@ -160,15 +178,40 @@ export const Profile = React.memo(
       typeof nativeLocked !== "undefined" &&
       toFiat(nativeLocked || 0).toFixed(2);
 
+    const { info: buyTargetRoyalties } = useTokenAccount(
+      tokenBonding?.buyTargetRoyalties
+    );
+    const targetMint = useMint(tokenBonding?.targetMint);
+    const buyTargetRoyaltiesAmount =
+      buyTargetRoyalties &&
+      targetMint &&
+      amountAsNum(buyTargetRoyalties?.amount, targetMint);
+    const claimAmount =
+      buyTargetRoyaltiesAmount &&
+      fiatPrice &&
+      pricing &&
+      toFiat(pricing.current(NATIVE_MINT)) * buyTargetRoyaltiesAmount;
+
     const query = useQuery();
-    let { handle, error: reverseTwitterError2 } =
-      useReverseTwitter(ownerWalletKey);
+    let { handle: reverseLookupHandle, error: reverseTwitterError2 } =
+      useReverseTwitter(tokenRef?.owner || undefined);
+    let handle =
+      tokenRef && !tokenRef.isClaimed
+        ? metadata?.data.name
+        : reverseLookupHandle;
+
     if (!handle) {
       handle = query.get("name") || metadata?.data.name;
     }
+
+    const { owner: ownerWalletKey } = useTwitterOwner(handle);
+    const { info: walletTokenRef } = usePrimaryClaimedTokenRef(ownerWalletKey);
+
     const {
       claim,
-      loading: claiming,
+      claimLoading: claiming,
+      link,
+      linkLoading: linking,
       error: claimError,
     } = useClaimFlow(handle);
 
@@ -197,121 +240,190 @@ export const Profile = React.memo(
       <TokenBondingRecentTransactionsProvider
         tokenBonding={tokenBonding?.publicKey}
       >
-        <VStack w="full" spacing={4} padding={4}>
-          <HStack spacing={2} w="full" alignItems="start">
-            <VStack spacing={"6px"} alignItems="start">
-              <MetadataAvatar
-                mb={"8px"}
-                size="lg"
-                mint={mintKey}
-                name="UNCLAIMED"
-              />
-              <HStack spacing={2} alignItems="center">
-                <Text fontSize="18px" lineHeight="none">
-                  {metadata?.data.name || handleLink}
-                </Text>
-                {myTokenRefKey &&
-                  walletTokenRef?.publicKey.equals(myTokenRefKey) && (
-                    <Link
-                      style={{ display: "flex", alignItems: "center" }}
-                      to={editPath}
-                    >
-                      <Icon
-                        as={HiOutlinePencilAlt}
-                        w={5}
-                        h={5}
-                        color="indigo.500"
-                        _hover={{ color: "indigo.700", cursor: "pointer" }}
-                      />
-                    </Link>
-                  )}
-              </HStack>
-              {metadata && (
-                <Text fontSize="14px">
-                  {metadata.data.symbol} |&nbsp;{handleLink}
-                </Text>
-              )}
-              {!metadata && (
-                <Text fontSize="14px">UNCLAIMED |&nbsp;{handleLink}</Text>
-              )}
-            </VStack>
-            <Spacer />
-            <VStack spacing={2} alignItems="stretch">
-              {baseIsCollective && collectivePath && collectiveMetadata && (
-                <Link to={collectivePath}>
-                  <HStack
-                    _hover={{ cursor: "pointer", bgColor: "gray.100" }}
-                    w="full"
-                    spacing={2}
-                    padding={2}
-                    rounded="lg"
-                    borderWidth="2px"
-                    borderColor="gray.100"
+        <VStack w="full" spacing={4} padding={4} alignItems="start">
+          <HStack
+            spacing={2}
+            w="full"
+            alignItems="start"
+            justify="space-between"
+          >
+            <MetadataAvatar
+              mb={"8px"}
+              size="lg"
+              mint={mintKey}
+              name="UNCLAIMED"
+              marginBottom="-var(--chakra-sizes-4)"
+            />
+            {baseIsCollective && collectivePath && collectiveMetadata && (
+              <Link to={collectivePath}>
+                <HStack
+                  _hover={{ cursor: "pointer", bgColor: "gray.100" }}
+                  w="full"
+                  spacing={2}
+                  padding={2}
+                  rounded="lg"
+                  borderWidth="2px"
+                  borderColor="gray.100"
+                >
+                  <Avatar src={collectiveImage} w="24px" h="24px" />
+                  <Flex
+                    justifyContent="space-between"
+                    flexDir="column"
+                    flexGrow={1}
+                    lineHeight="normal"
                   >
-                    <Avatar src={collectiveImage} w="24px" h="24px" />
-                    <Flex
-                      justifyContent="space-between"
-                      flexDir="column"
-                      flexGrow={1}
-                      lineHeight="normal"
-                    >
-                      <Text
-                        lineHeight="14.4px"
-                        fontWeight={800}
-                        fontSize="12px"
-                      >
-                        {collectiveMetadata?.data.symbol}
-                      </Text>
-                      <Text fontSize="10px" color="gray.500">
-                        {collectiveMetadata?.data.name}
-                      </Text>
-                    </Flex>
-                    <Icon
-                      justifySelf="end"
-                      as={FaChevronRight}
-                      color="gray.400"
-                      height="16px"
-                    />
-                  </HStack>
-                </Link>
-              )}
-            </VStack>
+                    <Text lineHeight="14.4px" fontWeight={800} fontSize="12px">
+                      {collectiveMetadata?.data.symbol}
+                    </Text>
+                    <Text fontSize="10px" color="gray.500">
+                      {collectiveMetadata?.data.name}
+                    </Text>
+                  </Flex>
+                  <Icon
+                    justifySelf="end"
+                    as={FaChevronRight}
+                    color="gray.400"
+                    height="16px"
+                  />
+                </HStack>
+              </Link>
+            )}
           </HStack>
+          <VStack alignItems="start" spacing="6px">
+            <HStack spacing={2} alignItems="center">
+              <Text fontSize="18px" lineHeight="none">
+                {metadata?.data.name || handleLink}
+              </Text>
+              {myTokenRefKey &&
+                walletTokenRef?.publicKey.equals(myTokenRefKey) && (
+                  <Link
+                    title="Edit Profile"
+                    style={{ display: "flex", alignItems: "center" }}
+                    to={editPath}
+                  >
+                    <Icon
+                      as={HiOutlinePencilAlt}
+                      w={5}
+                      h={5}
+                      color="indigo.500"
+                      _hover={{ color: "indigo.700", cursor: "pointer" }}
+                    />
+                  </Link>
+                )}
+
+              {ownerWalletKey &&
+                publicKey &&
+                !ownerWalletKey.equals(publicKey) && (
+                  <Link
+                    title="Send Tokens"
+                    style={{ display: "flex", alignItems: "center" }}
+                    to={sendPath}
+                  >
+                    <Icon
+                      as={AiOutlineSend}
+                      w={5}
+                      h={5}
+                      color="indigo.500"
+                      _hover={{ color: "indigo.700", cursor: "pointer" }}
+                    />
+                  </Link>
+                )}
+            </HStack>
+
+            {metadata && (
+              <Text fontSize="14px">
+                {metadata.data.symbol} |&nbsp;{handleLink}
+              </Text>
+            )}
+            {!metadata && (
+              <Text fontSize="14px">UNCLAIMED |&nbsp;{handleLink}</Text>
+            )}
+          </VStack>
+
           <HStack spacing={2} w="full">
             {tokenBonding && (
               <Button size="xs" colorScheme="indigo" onClick={onTradeClick}>
                 Trade
               </Button>
             )}
-            {tokenBonding && (
+            {tokenBonding && !tokenRef?.isOptedOut && (
               <PriceButton
+                optedOut={tokenRef?.isOptedOut as boolean}
                 tokenBonding={tokenBonding.publicKey}
                 mint={mintKey}
                 onClick={onTradeClick}
               />
             )}
+
+            {tokenRef &&
+              !tokenRef.isClaimed &&
+              !tokenRef.isOptedOut &&
+              !walletTokenRef &&
+              (!walletTwitterHandle || walletTwitterHandle == handle) && (
+                <Popover placement="bottom" trigger="hover">
+                  <PopoverTrigger>
+                    <Button
+                      size="xs"
+                      colorScheme="indigo"
+                      variant="outline"
+                      onClick={claim}
+                      isLoading={claiming}
+                      loadingText={
+                        awaitingApproval ? "Awaiting Approval" : "Claiming"
+                      }
+                    >
+                      Claim Token
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent>
+                    <PopoverBody>
+                      You'll receive ${claimAmount && claimAmount.toFixed(2)} in
+                      your token if you claim!
+                    </PopoverBody>
+                  </PopoverContent>
+                </Popover>
+              )}
+            {!ownerWalletKey && baseIsCollective && (
+              <Popover placement="bottom" trigger="hover">
+                <PopoverTrigger>
+                  <Button
+                    size="xs"
+                    colorScheme="twitter"
+                    variant="outline"
+                    onClick={link}
+                    isLoading={linking}
+                    loadingText={
+                      awaitingApproval ? "Awaiting Approval" : "Linking"
+                    }
+                  >
+                    Link Wallet
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent>
+                  <PopoverBody>
+                    Link your wallet to Wum.bo without claiming this token. Your
+                    collectibles will appear on your profile. If you are the
+                    creator on any NFTs, they will link back to your profile.
+                  </PopoverBody>
+                </PopoverContent>
+              </Popover>
+            )}
+            {!tokenRef && !tokenBonding && (
+              <Button
+                as={Link}
+                to={createPath}
+                size="xs"
+                colorScheme="indigo"
+                variant="outline"
+              >
+                Mint
+              </Button>
+            )}
             {tokenBonding && (
               <PriceChangeTicker tokenBonding={tokenBonding.publicKey} />
             )}
-            {tokenRef &&
-              !tokenRef.isClaimed &&
-              !walletTokenRef &&
-              (!walletTwitterHandle || walletTwitterHandle == handle) && (
-                <Button
-                  size="xs"
-                  colorScheme="indigo"
-                  variant="outline"
-                  onClick={claim}
-                  isLoading={claiming}
-                  loadingText={
-                    awaitingApproval ? "Awaiting Approval" : "Claiming"
-                  }
-                >
-                  Claim
-                </Button>
-              )}
           </HStack>
-          {tokenBonding && (
+          {tokenBonding && !tokenRef?.isOptedOut && (
             <Grid
               templateColumns="repeat(3, 1fr)"
               gap={4}
@@ -319,8 +431,11 @@ export const Profile = React.memo(
               alignItems="stretch"
             >
               <StatCard label="Supply" value={supply.toFixed(2)} />
-              <HashLink
-                // @ts-ignore
+              <Flex
+                flexGrow={1}
+                width="100%"
+                height="100%"
+                as={collectivePath ? HashLink : undefined}
                 to={
                   collectivePath
                     ? {
@@ -330,7 +445,6 @@ export const Profile = React.memo(
                       }
                     : {}
                 }
-                style={{ flexGrow: 1, width: "100%", height: "100%" }}
               >
                 <StatCard
                   tier={tier}
@@ -339,39 +453,37 @@ export const Profile = React.memo(
                   label="Total Locked"
                   value={fiatLocked ? "$" + fiatLocked : "Loading..."}
                 />
-              </HashLink>
-              <VolumeCard baseMint={mintKey} />
+              </Flex>
+              <VolumeCard baseMint={tokenBonding.baseMint} />
             </Grid>
           )}
           <div id="tabs" />
           {tokenRef ? (
             <SocialTokenTabs
+              wallet={ownerWalletKey}
               onAccountClick={onAccountClick}
               tokenBondingKey={tokenBonding!.publicKey}
               getNftLink={getNftLink}
             />
-          ) : (
+          ) : tokenBonding ? (
             <CollectiveTabs onAccountClick={onAccountClick} mintKey={mintKey} />
-          )}
+          ) : ownerWalletKey ? (
+            <LinkedTabs getNftLink={getNftLink} wallet={ownerWalletKey} />
+          ) : null}
         </VStack>
       </TokenBondingRecentTransactionsProvider>
     );
   }
 );
 
-interface ISocialTokenTabsProps {
-  tokenBondingKey: PublicKey;
-  onAccountClick?: (mintKey: PublicKey) => void;
-  getNftLink: (t: ITokenWithMetaAndAccount) => string;
-}
-
 function SocialTokenTabs({
+  wallet,
   tokenBondingKey,
   onAccountClick,
   getNftLink,
 }: ISocialTokenTabsProps) {
   const { info: tokenRef, loading } = useTokenRefFromBonding(tokenBondingKey);
-  const ownerWalletKey = tokenRef?.owner as PublicKey | undefined;
+  const ownerWalletKey = wallet || (tokenRef?.owner as PublicKey | undefined);
 
   const {
     data: tokens,
@@ -476,6 +588,46 @@ function CollectiveTabs({
             onAccountClick={onAccountClick}
             mintKey={mintKey}
             tokenBondingKey={tokenBondingKey}
+          />
+        </TabPanel>
+      </TabPanels>
+    </Tabs>
+  );
+}
+
+interface ILinkedTabsProps {
+  wallet: PublicKey;
+  getNftLink: (t: ITokenWithMetaAndAccount) => string;
+}
+
+function LinkedTabs({ wallet, getNftLink }: ILinkedTabsProps) {
+  const {
+    data: tokens,
+    loading: loadingCollectibles,
+    error,
+  } = useUserTokensWithMeta(wallet);
+  const { handleErrors } = useErrorHandler();
+
+  handleErrors(error);
+
+  return (
+    <Tabs isFitted w="full">
+      <TabList>
+        <Tab
+          color="gray.300"
+          borderColor="gray.300"
+          _selected={{ color: "indigo.500", borderColor: "indigo.500" }}
+        >
+          Collectibles
+        </Tab>
+      </TabList>
+
+      <TabPanels>
+        <TabPanel paddingX={0}>
+          <NftListRaw
+            loading={loadingCollectibles}
+            tokens={tokens}
+            getLink={getNftLink}
           />
         </TabPanel>
       </TabPanels>

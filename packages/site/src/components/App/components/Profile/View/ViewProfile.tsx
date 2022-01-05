@@ -1,21 +1,22 @@
-import React from "react";
-import { PublicKey } from "@solana/web3.js";
-import { useParams, useHistory } from "react-router-dom";
-import { useWallet } from "@solana/wallet-adapter-react";
 import { Box } from "@chakra-ui/react";
-import { Profile, Spinner } from "wumbo-common";
-import { ITokenWithMetaAndAccount } from "@strata-foundation/spl-token-collective";
+import { useWallet } from "@solana/wallet-adapter-react";
+import { PublicKey } from "@solana/web3.js";
 import {
   useClaimedTokenRefKey,
   usePublicKey,
   useTokenBondingFromMint,
   useTokenRef,
 } from "@strata-foundation/react";
+import { ITokenWithMetaAndAccount } from "@strata-foundation/spl-token-collective";
+import React from "react";
+import { useHistory, useParams } from "react-router-dom";
+import { Profile, Spinner } from "wumbo-common";
 import {
   AppRoutes,
-  profilePath,
   nftPath,
+  profilePath,
   swapPath,
+  sendSearchPath,
 } from "../../../../../constants/routes";
 import WalletRedirect from "../../Wallet/WalletRedirect";
 import { AppContainer } from "../../common/AppContainer";

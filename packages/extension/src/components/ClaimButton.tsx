@@ -17,7 +17,7 @@ type Props = {
   creatorImg: string;
   btnProps?: ButtonProps;
   spinnerProps?: SpinnerProps;
-  buttonTarget?: HTMLInputElement;
+  buttonTarget?: HTMLElement;
 };
 
 export const ClaimButton: FC<Props> = ({
@@ -80,10 +80,11 @@ export const ClaimButton: FC<Props> = ({
 
   return (
     <PriceButton
+      optedOut={tokenRef?.isOptedOut as boolean}
       buttonTarget={buttonTarget}
-      {...btnProps}
+      {...(btnProps as any)}
       r={100}
-      h={36}
+      h={"36px"}
       link={`${viewProfilePath(tokenRef.mint)}?name=${creatorName}`}
       onClick={() =>
         toggleDrawer({

@@ -1,5 +1,4 @@
 import { WebAuth, AuthOptions } from "auth0-js";
-import { useLocalStorage } from "@strata-foundation/react";
 import { SITE_URL } from "../constants";
 
 export const auth0Options: AuthOptions = {

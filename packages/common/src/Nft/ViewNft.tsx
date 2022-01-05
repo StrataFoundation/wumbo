@@ -161,7 +161,7 @@ export const ViewNftRaw = React.memo(
               {token.image && token.metadataKey && tagNftPath && (
                 <Link to={tagNftPath}>
                   <Button size="md" colorScheme="indigo">
-                    Tag
+                    Verify
                   </Button>
                 </Link>
               )}

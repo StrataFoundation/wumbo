@@ -1,23 +1,27 @@
-import { routes, swapPath } from "@/constants/routes";
+import { swapPath } from "@/constants/routes";
 import { useClaimFlow } from "@/utils/claim";
 import { useUserInfo } from "@/utils/userState";
 import { Box, Button, Text } from "@chakra-ui/react";
-import React, { useMemo } from "react";
-import { useAsyncCallback } from "react-async-hook";
-import { useHistory } from "react-router-dom";
-import {
-  getTwitterTld,
-  getTwitterRegistryKey,
-  useQuery,
-  useReverseTwitter,
-} from "wumbo-common";
 import { useWallet } from "@solana/wallet-adapter-react";
 import {
   useErrorHandler,
   useProvider,
   useStrataSdks,
 } from "@strata-foundation/react";
+import { SplTokenCollective } from "@strata-foundation/spl-token-collective";
+import React, { useMemo } from "react";
+import { useAsyncCallback } from "react-async-hook";
+import { useHistory } from "react-router-dom";
+import {
+  getTwitterRegistryKey,
+  getTwitterTld,
+  useQuery,
+  useReverseTwitter,
+} from "wumbo-common";
 
+function toPercent(u32: number) {
+  return (u32 / 4294967295) * 100;
+}
 export default React.memo(() => {
   const history = useHistory();
   const { tokenCollectiveSdk, tokenBondingSdk } = useStrataSdks();
@@ -32,6 +36,20 @@ export default React.memo(() => {
   const createCreator = async () => {
     const handle = query.get("name")!;
 
+    const collectiveAcct = (await tokenCollectiveSdk?.getCollective(
+      SplTokenCollective.OPEN_COLLECTIVE_ID
+    ))!;
+    const config = collectiveAcct.config.unclaimedTokenBondingSettings as any;
+    let goLiveDate = new Date(0);
+    // Can uncomment when creating with wumbo.
+    // goLiveDate.setUTCSeconds(1642518000); // 9am CST on January 18th
+    goLiveDate.setUTCSeconds(1642604400); // 9am CST on January 19th
+    // After the launch, use the normal logic
+    // TODO: We can rm all of this logic after launch
+    if (new Date() > goLiveDate) {
+      goLiveDate = new Date(new Date().valueOf() - 10000); // 10 secs ago
+    }
+
     const { tokenBonding } = await tokenCollectiveSdk!.createSocialToken({
       metadata: {
         name: handle,
@@ -40,10 +58,17 @@ export default React.memo(() => {
       name: await getTwitterRegistryKey(handle, await getTwitterTld()),
       nameParent: await getTwitterTld(),
       tokenBondingParams: {
-        buyBaseRoyaltyPercentage: 0,
-        sellBaseRoyaltyPercentage: 0,
-        buyTargetRoyaltyPercentage: 5,
-        sellTargetRoyaltyPercentage: 0,
+        goLiveDate,
+        buyBaseRoyaltyPercentage: toPercent(config.minBuyBaseRoyaltyPercentage),
+        sellBaseRoyaltyPercentage: toPercent(
+          config.minSellBaseRoyaltyPercentage
+        ),
+        buyTargetRoyaltyPercentage: toPercent(
+          config.minBuyTargetRoyaltyPercentage
+        ),
+        sellTargetRoyaltyPercentage: toPercent(
+          config.minSellTargetRoyaltyPercentage
+        ),
       },
     });
     const tokenBondingAcct = (await tokenBondingSdk!.getTokenBonding(
@@ -57,13 +82,20 @@ export default React.memo(() => {
       ) + `?name=${query.get("name")!}`
     );
   };
+  const { provider } = useProvider();
 
   const {
     execute,
     loading: creationLoading,
     error,
   } = useAsyncCallback(createCreator);
-  const { claim, loading, error: claimError } = useClaimFlow(query.get("name"));
+  const {
+    link,
+    claim,
+    claimLoading: loading,
+    linkLoading,
+    error: claimError,
+  } = useClaimFlow(query.get("name"));
   const { handleErrors } = useErrorHandler();
   handleErrors(reverseTwitterError, error, claimError);
   const showCreate = useMemo(
@@ -71,6 +103,13 @@ export default React.memo(() => {
     [userInfo, loading2]
   );
 
+  const or = (
+    <Box d="flex" justifyContent="center">
+      <Text fontSize="lg" color="gray.500">
+        Or
+      </Text>
+    </Box>
+  );
   return (
     <>
       {showCreate && (
@@ -89,13 +128,7 @@ export default React.memo(() => {
       )}
       {(!ownerTwitterHandle || ownerTwitterHandle == query.get("name")) && (
         <>
-          {showCreate && (
-            <Box d="flex" justifyContent="center">
-              <Text fontSize="lg" color="gray.500">
-                Or
-              </Text>
-            </Box>
-          )}
+          {showCreate && or}
           <Button
             w="full"
             size="md"
@@ -105,6 +138,21 @@ export default React.memo(() => {
             loadingText={awaitingApproval ? "Awaiting Approval" : "Claiming"}
           >
             This is me, Claim and Create my Token
+          </Button>
+        </>
+      )}
+      {!ownerTwitterHandle && (
+        <>
+          {showCreate && or}
+          <Button
+            w="full"
+            size="md"
+            colorScheme="twitter"
+            onClick={link}
+            isLoading={linkLoading}
+            loadingText={awaitingApproval ? "Awaiting Approval" : "Linking"}
+          >
+            Link my Wallet, but don't claim Token
           </Button>
         </>
       )}

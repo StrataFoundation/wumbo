@@ -113,7 +113,7 @@ export const EditProfile = React.memo(
     };
 
     const humanRedablePercent = (p: number | undefined = 0) =>
-      (p / 4294967295) * 100;
+      Number(((p / 4294967295) * 100).toFixed(2));
 
     const [imgUrl, setImgUrl] = useState<string>();
 

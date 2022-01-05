@@ -129,6 +129,7 @@ export const SendSearch = React.memo(
           align="stretch"
           divider={<StackDivider borderColor="gray.200" />}
           w="full"
+          justify="stretch"
         >
           {tokenInfos}
         </VStack>

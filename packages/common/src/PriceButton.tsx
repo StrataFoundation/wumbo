@@ -1,10 +1,12 @@
 import { Button, ButtonProps } from "@chakra-ui/button";
 import { Center } from "@chakra-ui/layout";
+import { Box } from "@chakra-ui/react"
 import { PublicKey } from "@solana/web3.js";
 import React, { useMemo } from "react";
 import { usePriceInUsd } from "@strata-foundation/react";
 import { Link } from "react-router-dom";
 import { getTierGradient, useTokenTier } from "./hooks";
+import { Spinner } from "./Spinner";
 
 function isTransparent(color: string) {
   switch ((color || "").replace(/\s+/g, "").toLowerCase()) {
@@ -58,43 +60,51 @@ function isDark(color: any): boolean {
 }
 
 export function PriceButton({
-  h = 22,
+  h = "var(--chakra-sizes-6)",
   r,
   link,
   mint,
   tokenBonding,
   buttonTarget,
+  optedOut,
   ...btnProps
 }: {
-  h?: number;
+  h?: string;
   w?: number;
   r?: number;
   buttonTarget?: HTMLElement;
   mint: PublicKey | undefined | null;
   tokenBonding: PublicKey | undefined | null;
   link?: string;
+  optedOut?: boolean;
 } & ButtonProps) {
   const tier = useTokenTier(tokenBonding);
   const gradient = getTierGradient(tier);
   const coinPriceUsd = usePriceInUsd(mint);
 
   const backgroundColor = useMemo(
-    () => getBackgroundColor(buttonTarget) || "#ffffffff",
+    () => getBackgroundColor(buttonTarget) || "#ffffff",
     [buttonTarget]
   );
   return (
     <Center
-      h={`${h}px`}
-      background={gradient || "green.500"}
+      h={h}
+      background={optedOut || !gradient ? "green.500" : gradient}
       padding="2px"
-      borderRadius={r ? `${r}px` : "7.5px"}
+      borderRadius={r ? `${r}px` : "6px"}
     >
       <Button
         backgroundColor={backgroundColor}
-        h={`${h - 4}px`}
+        h={`calc(${h} - 4px)`}
         as={link ? Link : undefined}
         _hover={{
-          background: isDark(backgroundColor) ? "gray.600" : "gray.300",
+          background: isDark(backgroundColor)
+            ? !gradient
+              ? "green.900"
+              : "gray.600"
+            : !gradient
+            ? "green.300"
+            : "gray.300",
         }}
         to={link}
         size="xs"
@@ -103,8 +113,17 @@ export function PriceButton({
         color={isDark(backgroundColor) ? "white" : "black"}
         fontFamily="body"
         {...btnProps}
+        borderRadius={r ? `${r - 1}px` : "4.4px"}
       >
-        ${coinPriceUsd?.toFixed(2) || "0.00"}
+        {!optedOut && coinPriceUsd ? (
+          "$" + coinPriceUsd.toFixed(2)
+        ) : optedOut ? (
+          "View"
+        ) : (
+          <Box w="30px">
+            <Spinner size="xs" />
+          </Box>
+        )}
       </Button>
     </Center>
   );

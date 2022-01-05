@@ -3,7 +3,7 @@ import { useProvider, useStrataSdks } from "@strata-foundation/react";
 import { useState } from "react";
 import { useAsyncCallback } from "react-async-hook";
 import { WUMBO_IDENTITY_SERVICE_URL } from "../constants/globals";
-import { exectuteRemoteTxn } from "./executeRemoteTxn";
+import { executeRemoteTxn } from "./executeRemoteTxn";
 
 export type CreateArgs = {
   code?: string;
@@ -28,7 +28,7 @@ export function useCreateOrClaimCoin(): CreateState {
     let result;
     try {
       setCreating(true);
-      result = await exectuteRemoteTxn(
+      result = await executeRemoteTxn(
         provider!,
         WUMBO_IDENTITY_SERVICE_URL + "/twitter/claim-or-create",
         {
