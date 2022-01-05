@@ -229,6 +229,7 @@ export const Send = ({ finishRedirectUrl }: { finishRedirectUrl: string }) => {
           </HStack>
           <InputGroup>
             <Input
+              autoFocus
               size="lg"
               type="number"
               {...register("amount")}
