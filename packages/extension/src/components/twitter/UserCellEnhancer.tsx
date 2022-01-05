@@ -29,6 +29,7 @@ export const UserCellEnhancer = () => {
           <MainButton
             creatorName={cell.name}
             creatorImg={cell.avatar || ""}
+            buttonTarget={cell.buttonTarget.parentNode as HTMLElement}
             btnProps={{
               size: "md",
               height: "32px",

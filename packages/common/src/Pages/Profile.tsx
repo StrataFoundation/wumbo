@@ -19,7 +19,6 @@ import {
   VStack,
 } from "@chakra-ui/react";
 import { NATIVE_MINT } from "@solana/spl-token";
-import { AiOutlineSend } from "react-icons/ai";
 import { useWallet } from "@solana/wallet-adapter-react";
 import { PublicKey } from "@solana/web3.js";
 import {
@@ -40,6 +39,7 @@ import {
   useTokenRefFromBonding,
 } from "@strata-foundation/react";
 import { ITokenWithMetaAndAccount } from "@strata-foundation/spl-token-collective";
+import { TROPHY_CREATOR } from "../constants";
 import React from "react";
 import { AiOutlineSend } from "react-icons/ai";
 import { FaChevronRight } from "react-icons/fa";
@@ -47,7 +47,6 @@ import { HiOutlinePencilAlt } from "react-icons/hi";
 import { Link } from "react-router-dom";
 import { HashLink } from "react-router-hash-link";
 import { Avatar, MetadataAvatar, PriceButton, PriceChangeTicker } from "..";
-import { TROPHY_CREATOR } from "../constants/globals";
 import {
   TokenBondingRecentTransactionsProvider,
   useTokenBondingRecentTransactions,
@@ -59,6 +58,13 @@ import { NftListRaw } from "../Nft";
 import { Spinner } from "../Spinner";
 import { StatCard } from "../StatCard";
 import { useQuery, useReverseTwitter, useTwitterOwner } from "../utils";
+
+interface ISocialTokenTabsProps {
+  wallet: PublicKey | undefined;
+  tokenBondingKey: PublicKey;
+  onAccountClick?: (mintKey: PublicKey) => void;
+  getNftLink: (t: ITokenWithMetaAndAccount) => string;
+}
 
 interface IProfileProps
   extends Pick<ISocialTokenTabsProps, "onAccountClick" | "getNftLink"> {
@@ -305,21 +311,23 @@ export const Profile = React.memo(
                   </Link>
                 )}
 
-              {ownerWalletKey && (
-                <Link
-                  title="Send Tokens"
-                  style={{ display: "flex", alignItems: "center" }}
-                  to={sendPath}
-                >
-                  <Icon
-                    as={AiOutlineSend}
-                    w={5}
-                    h={5}
-                    color="indigo.500"
-                    _hover={{ color: "indigo.700", cursor: "pointer" }}
-                  />
-                </Link>
-              )}
+              {ownerWalletKey &&
+                publicKey &&
+                !ownerWalletKey.equals(publicKey) && (
+                  <Link
+                    title="Send Tokens"
+                    style={{ display: "flex", alignItems: "center" }}
+                    to={sendPath}
+                  >
+                    <Icon
+                      as={AiOutlineSend}
+                      w={5}
+                      h={5}
+                      color="indigo.500"
+                      _hover={{ color: "indigo.700", cursor: "pointer" }}
+                    />
+                  </Link>
+                )}
             </HStack>
 
             {metadata && (
@@ -423,8 +431,11 @@ export const Profile = React.memo(
               alignItems="stretch"
             >
               <StatCard label="Supply" value={supply.toFixed(2)} />
-              <HashLink
-                // @ts-ignore
+              <Flex
+                flexGrow={1}
+                width="100%"
+                height="100%"
+                as={collectivePath ? HashLink : undefined}
                 to={
                   collectivePath
                     ? {
@@ -434,7 +445,6 @@ export const Profile = React.memo(
                       }
                     : {}
                 }
-                style={{ flexGrow: 1, width: "100%", height: "100%" }}
               >
                 <StatCard
                   tier={tier}
@@ -443,7 +453,7 @@ export const Profile = React.memo(
                   label="Total Locked"
                   value={fiatLocked ? "$" + fiatLocked : "Loading..."}
                 />
-              </HashLink>
+              </Flex>
               <VolumeCard baseMint={tokenBonding.baseMint} />
             </Grid>
           )}
@@ -465,13 +475,6 @@ export const Profile = React.memo(
     );
   }
 );
-
-interface ISocialTokenTabsProps {
-  wallet: PublicKey | undefined;
-  tokenBondingKey: PublicKey;
-  onAccountClick?: (mintKey: PublicKey) => void;
-  getNftLink: (t: ITokenWithMetaAndAccount) => string;
-}
 
 function SocialTokenTabs({
   wallet,

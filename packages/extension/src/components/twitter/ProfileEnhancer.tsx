@@ -77,20 +77,24 @@ export const ProfileEnhancer = () => {
       }
     }
   }, [previousProfile, profile, triggerRemount]);
+
   const { result: img1, error: bufferError } = useBufferFromUrl(
     profile?.avatar
   );
+
   const {
     data: tokens,
     error,
     loading: loadingTokens,
   } = useUserTokensWithMeta(adapter?.publicKey || undefined);
+
   const { handleErrors } = useErrorHandler();
   const {
     result: pfpMatch,
     error: pfpMatcherError,
     loading,
   } = useAsync(getTaggableNft, [img1, tokens]);
+
   handleErrors(error, bufferError, pfpMatcherError);
   const { toggleDrawer } = useDrawer();
 
@@ -146,8 +150,12 @@ export const ProfileEnhancer = () => {
                       fontFamily="body"
                       colorScheme="indigo"
                       variant="outline"
+                      _hover={{ bg: "indigo.900" }}
+                      _active={{ bg: "indigo.900" }}
+                      _focus={{ boxShadow: "none" }}
                       borderRadius="full"
                       size="md"
+                      borderWidth="2px"
                       onClick={() => {
                         history.push(tagNftPath(pfpMatch.account!.mint));
                         toggleDrawer({
