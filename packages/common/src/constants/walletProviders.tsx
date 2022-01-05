@@ -21,7 +21,7 @@ export const WALLET_PROVIDERS: Wallet[] = [
       replaceUrlOnRedirect: false,
       clientId:
         "BAjNy8GFgk8BzjoZPowW82MFlkOGuPVykpcANoYJTi6khZPoPnJNxvts_OViNdxXOqcvCZCo2kB-zrnEi0T-Zx4",
-      network: "mainnet",
+      network: "testnet",
       uxMode: "popup",
     },
   }),

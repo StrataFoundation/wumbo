@@ -186,3 +186,5 @@ export const Claim2: React.FC<IClaim2Props> = ({ handle, incrementStep }) => {
     </VStack>
   );
 };
+
+// (Claim2 as any).whyDidYouRender = true;
