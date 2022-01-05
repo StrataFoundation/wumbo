@@ -305,19 +305,21 @@ export const Profile = React.memo(
                   </Link>
                 )}
 
-              <Link
-                title="Send Tokens"
-                style={{ display: "flex", alignItems: "center" }}
-                to={sendPath}
-              >
-                <Icon
-                  as={AiOutlineSend}
-                  w={5}
-                  h={5}
-                  color="indigo.500"
-                  _hover={{ color: "indigo.700", cursor: "pointer" }}
-                />
-              </Link>
+              {ownerWalletKey && (
+                <Link
+                  title="Send Tokens"
+                  style={{ display: "flex", alignItems: "center" }}
+                  to={sendPath}
+                >
+                  <Icon
+                    as={AiOutlineSend}
+                    w={5}
+                    h={5}
+                    color="indigo.500"
+                    _hover={{ color: "indigo.700", cursor: "pointer" }}
+                  />
+                </Link>
+              )}
             </HStack>
 
             {metadata && (
@@ -336,23 +338,21 @@ export const Profile = React.memo(
                 Trade
               </Button>
             )}
-            {tokenBonding && (
+            {tokenBonding && !tokenRef?.isOptedOut && (
               <PriceButton
+                optedOut={tokenRef?.isOptedOut as boolean}
                 tokenBonding={tokenBonding.publicKey}
                 mint={mintKey}
                 onClick={onTradeClick}
               />
             )}
 
-            {/* TODO: Uncomment when token creation is live */}
-            {/* {tokenRef &&
+            {tokenRef &&
               !tokenRef.isClaimed &&
+              !tokenRef.isOptedOut &&
               !walletTokenRef &&
               (!walletTwitterHandle || walletTwitterHandle == handle) && (
-                <Popover
-                  placement="bottom"
-                  trigger="hover"
-                >
+                <Popover placement="bottom" trigger="hover">
                   <PopoverTrigger>
                     <Button
                       size="xs"
@@ -369,25 +369,38 @@ export const Profile = React.memo(
                   </PopoverTrigger>
                   <PopoverContent>
                     <PopoverBody>
-                      You'll receive ${claimAmount && claimAmount.toFixed(2)} in your token if you claim!
+                      You'll receive ${claimAmount && claimAmount.toFixed(2)} in
+                      your token if you claim!
                     </PopoverBody>
                   </PopoverContent>
                 </Popover>
-
-              )} */}
-            {!ownerWalletKey && (
-              <Button
-                size="xs"
-                colorScheme="twitter"
-                variant="outline"
-                onClick={link}
-                isLoading={linking}
-                loadingText={awaitingApproval ? "Awaiting Approval" : "Linking"}
-              >
-                Link Wallet
-              </Button>
+              )}
+            {!ownerWalletKey && baseIsCollective && (
+              <Popover placement="bottom" trigger="hover">
+                <PopoverTrigger>
+                  <Button
+                    size="xs"
+                    colorScheme="twitter"
+                    variant="outline"
+                    onClick={link}
+                    isLoading={linking}
+                    loadingText={
+                      awaitingApproval ? "Awaiting Approval" : "Linking"
+                    }
+                  >
+                    Link Wallet
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent>
+                  <PopoverBody>
+                    Link your wallet to Wum.bo without claiming this token. Your
+                    collectibles will appear on your profile. If you are the
+                    creator on any NFTs, they will link back to your profile.
+                  </PopoverBody>
+                </PopoverContent>
+              </Popover>
             )}
-            {!tokenRef && (
+            {!tokenRef && !tokenBonding && (
               <Button
                 as={Link}
                 to={createPath}
@@ -402,7 +415,7 @@ export const Profile = React.memo(
               <PriceChangeTicker tokenBonding={tokenBonding.publicKey} />
             )}
           </HStack>
-          {tokenBonding && (
+          {tokenBonding && !tokenRef?.isOptedOut && (
             <Grid
               templateColumns="repeat(3, 1fr)"
               gap={4}

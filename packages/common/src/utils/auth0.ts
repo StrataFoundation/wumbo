@@ -1,12 +1,13 @@
-import { WebAuth } from "auth0-js";
-import { useLocalStorage } from "@strata-foundation/react";
+import { WebAuth, AuthOptions } from "auth0-js";
 import { SITE_URL } from "../constants";
 
-export const auth0Options = {
+export const auth0Options: AuthOptions = {
   domain: process.env.REACT_APP_AUTH0_DOMAIN || "wumbo.us.auth0.com",
+  maxAge: 50,
   clientID:
     process.env.REACT_APP_AUTH0_CLIENT_ID || "GPsjYroOyNKWCScIk2woGZi4kBTGDDTW",
 };
+
 export const auth0 = new WebAuth(auth0Options);
 
 function makeId(length: number): string {
@@ -19,6 +20,7 @@ function makeId(length: number): string {
   }
   return result;
 }
+
 export function useClaimLink({
   handle,
   newTab = false,
@@ -26,21 +28,30 @@ export function useClaimLink({
   handle: string;
   newTab?: boolean;
 }): { redirectUri: string; claim: () => Window | null } {
-  const setAuth0State = useLocalStorage("auth0-state", "")[1];
-  const redirectUri = `${SITE_URL}/claim?name=${handle}`;
+  const redirectUri = `${SITE_URL}/app/claim?step=3&handle=${handle}`;
   const claim = () => {
     const state = makeId(6);
 
     const auth0Url = auth0.client.buildAuthorizeUrl({
-      ...auth0Options,
       scope: "openid profile",
       redirectUri,
       responseType: "code",
       state,
     });
-    setAuth0State(state);
 
-    return window.open(auth0Url, newTab ? "_blank" : undefined);
+    if (newTab) {
+      window.open(auth0Url);
+    } else {
+      auth0.authorize({
+        scope: "openid profile",
+        redirectUri,
+        responseType: "code",
+        state,
+        prompt: "login",
+      });
+    }
+
+    return window;
   };
 
   return {

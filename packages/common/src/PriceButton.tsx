@@ -65,6 +65,7 @@ export function PriceButton({
   mint,
   tokenBonding,
   buttonTarget,
+  optedOut,
   ...btnProps
 }: {
   h?: string;
@@ -74,6 +75,7 @@ export function PriceButton({
   mint: PublicKey | undefined | null;
   tokenBonding: PublicKey | undefined | null;
   link?: string;
+  optedOut?: boolean;
 } & ButtonProps) {
   const tier = useTokenTier(tokenBonding);
   const gradient = getTierGradient(tier);
@@ -86,7 +88,7 @@ export function PriceButton({
   return (
     <Center
       h={h}
-      background={gradient || "green.500"}
+      background={optedOut || !gradient ? "green.500" : gradient}
       padding="2px"
       borderRadius={r ? `${r}px` : "6px"}
     >
@@ -106,8 +108,10 @@ export function PriceButton({
         {...btnProps}
         borderRadius={r ? `${r - 1}px` : "4.4px"}
       >
-        {coinPriceUsd ? (
+        {!optedOut && coinPriceUsd ? (
           "$" + coinPriceUsd.toFixed(2)
+        ) : optedOut ? (
+          "View"
         ) : (
           <Box w="30px">
             <Spinner size="xs" />

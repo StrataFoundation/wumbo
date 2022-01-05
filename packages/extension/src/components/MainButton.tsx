@@ -70,6 +70,7 @@ export const MainButton: FC<Props> = ({
 
   return (
     <PriceButton
+      optedOut={tokenRef?.isOptedOut as boolean}
       buttonTarget={buttonTarget}
       {...btnProps}
       {...(btnProps.borderRadius == "full"
