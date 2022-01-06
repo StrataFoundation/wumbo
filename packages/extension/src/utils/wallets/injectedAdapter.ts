@@ -80,7 +80,7 @@ export class InjectedWalletAdapter
   get url(): string {
     return this._url || "";
   }
-  
+
   get name(): WalletName {
     return this._name;
   }

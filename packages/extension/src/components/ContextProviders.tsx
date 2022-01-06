@@ -30,7 +30,11 @@ export const ContextProviders: FC = ({ children }) => {
       WALLET_PROVIDERS.map((adapter) => {
         const injectedWalletNames = INJECTED_PROVIDERS.map((a) => a.name);
         if (injectedWalletNames.includes(adapter.name)) {
-          return new InjectedWalletAdapter({ name: adapter.name, url: adapter.url, icon: adapter.icon });
+          return new InjectedWalletAdapter({
+            name: adapter.name,
+            url: adapter.url,
+            icon: adapter.icon,
+          });
         }
 
         return adapter;
