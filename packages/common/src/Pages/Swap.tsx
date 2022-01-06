@@ -18,12 +18,12 @@ import {
   useSwapDriver,
 } from "@strata-foundation/react";
 import { ISwapArgs, toNumber } from "@strata-foundation/spl-token-bonding";
+import { useConfig } from "../hooks";
 import React from "react";
 import toast from "react-hot-toast";
 import { useHistory } from "react-router-dom";
 import {
-  WUMBO_TRANSACTION_FEE,
-  WUMBO_TRANSACTION_FEE_DESTINATION,
+  WUMBO_TRANSACTION_FEE
 } from "../constants/globals";
 
 export const Swap = ({
@@ -48,7 +48,8 @@ export const Swap = ({
   const { pricing } = useBondingPricing(tokenBonding);
   const baseMintInfo = useMint(baseMint);
   const targetMintInfo = useMint(targetMint);
-
+  const wumboConfig = useConfig();
+  
   const hasFees = targetTokenRef || baseTokenRef;
   const { loading, error, execute } = useSwap({
     async extraInstructions({ tokenBonding, isBuy, amount }) {
@@ -73,7 +74,7 @@ export const Swap = ({
             instructions: [
               SystemProgram.transfer({
                 fromPubkey: wallet!.adapter!.publicKey!,
-                toPubkey: WUMBO_TRANSACTION_FEE_DESTINATION,
+                toPubkey: wumboConfig.feeWallet,
                 lamports: solAmount * Math.pow(10, 9),
               }),
             ],

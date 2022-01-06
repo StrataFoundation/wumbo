@@ -376,8 +376,10 @@ export const Profile = React.memo(
                   </PopoverTrigger>
                   <PopoverContent>
                     <PopoverBody>
-                      Claim this token and make it your own. You'll receive ${claimAmount && claimAmount.toFixed(2)} in
-                      your token! You'll also be able to customize your name, symbol, image, and royalties.
+                      Claim this token and make it your own. You'll receive $
+                      {claimAmount && claimAmount.toFixed(2)} in your token!
+                      You'll also be able to customize your name, symbol, image,
+                      and royalties.
                     </PopoverBody>
                   </PopoverContent>
                 </Popover>

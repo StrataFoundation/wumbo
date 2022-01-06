@@ -24,7 +24,7 @@ function makeId(length: number): string {
 export function useClaimLink({
   handle,
   newTab = false,
-  extension = false
+  extension = false,
 }: {
   handle: string;
   newTab?: boolean;

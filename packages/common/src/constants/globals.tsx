@@ -5,9 +5,6 @@ import { SplTokenCollective } from "@strata-foundation/spl-token-collective";
 export const WUMBO_TRANSACTION_FEE: number = Number(
   process.env.REACT_APP_WUMBO_TRANSACTION_FEE!
 );
-export const WUMBO_TRANSACTION_FEE_DESTINATION: PublicKey = new PublicKey(
-  process.env.REACT_APP_WUMBO_TRANSACTION_FEE_DESTINATION!
-);
 export const DEFAULT_COMMITMENT = "processed";
 export const TAGGING_THRESHOLD = Number(
   process.env.REACT_APP_TAGGING_THRESHOLD!

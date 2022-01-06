@@ -19,7 +19,7 @@ export function useClaimFlow(name?: string | null): IClaimFlowOutput {
   const { claim, redirectUri } = useClaimLink({
     handle: `${name}`,
     newTab: true,
-    extension: true
+    extension: true,
   });
   const { provider } = useProvider();
   const { publicKey, wallet } = useWallet();
