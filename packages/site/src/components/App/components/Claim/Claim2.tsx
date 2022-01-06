@@ -19,9 +19,7 @@ import {
   useTokenRef,
   useTokenMetadata,
 } from "@strata-foundation/react";
-import {
-  TorusWalletAdapter,
-} from "@solana/wallet-adapter-wallets";
+import { TorusWalletAdapter } from "@solana/wallet-adapter-wallets";
 
 export interface IClaim2Props {
   handle: string;
