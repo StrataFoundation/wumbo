@@ -23,8 +23,7 @@ import { AppContainer } from "../../common/AppContainer";
 
 export const ViewProfileRoute: React.FC = () => {
   const params = useParams<{ mint: string | undefined }>();
-  const { connected, adapter } = useWallet();
-  const publicKey = adapter?.publicKey;
+  const { connected, publicKey } = useWallet();
   const walletMintKey = useClaimedTokenRefKey(publicKey, null);
   const { info: walletTokenRef, loading } = useTokenRef(walletMintKey);
   const passedMintKey = usePublicKey(params.mint);
@@ -55,12 +54,16 @@ export const ViewProfileRoute: React.FC = () => {
   return (
     <AppContainer>
       <Profile
+        sendPath=""
+        createPath=""
         collectivePath={
           tokenBonding ? profilePath(tokenBonding.baseMint) : null
         }
         useClaimFlow={() => ({
           claim: () => Promise.resolve(),
-          loading: false,
+          link: () => Promise.resolve(),
+          linkLoading: false,
+          claimLoading: false,
           error: undefined,
         })}
         onTradeClick={() =>

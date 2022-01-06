@@ -13,8 +13,7 @@ import WalletRedirect from "./WalletRedirect";
 
 export default React.memo(() => {
   const solLink = useFtxPayLink();
-  const { adapter } = useWallet();
-  const publicKey = adapter?.publicKey;
+  const { publicKey } = useWallet();
   return (
     <AppContainer>
       <WalletRedirect />

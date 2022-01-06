@@ -14,12 +14,12 @@ export const Claim4: React.FC = () => (
       </Heading>
     </div>
     <VStack spacing={6} color="gray.600">
-      <Text size="md">
+      <Text fontSize="md">
         Wum.bo is a platform built on top of Solana that introduces a new
         economy, allowing fans to be talent scouts and creators to fund their
         endeavors.
       </Text>
-      <Text size="md">
+      <Text fontSize="md">
         Wum.bo uses Social Tokens to allow fans to back their favorite artists
         and share in the up side, helping them fund new albums, games, and other
         ventures. We are enhancing existing social networks by giving users a

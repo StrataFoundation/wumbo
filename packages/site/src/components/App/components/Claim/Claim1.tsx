@@ -172,12 +172,12 @@ export const Claim1 = React.memo<IClaim1Props>(
           What is a social token?
         </Heading>
         <VStack spacing={6} color="gray.600">
-          <Text size="md">
+          <Text fontSize="md">
             A Social Token allows content creators, thought leaders,
             entertainers, artists, and other individuals to create their own
             tokens that increase in value as their communities grow.
           </Text>
-          <Text size="md">
+          <Text fontSize="md">
             This is a great way to support creators you believe in and love to
             follow! Think of it as joining someone's fan club, but you (and
             they) get real value of it.

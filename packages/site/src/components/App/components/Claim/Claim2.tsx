@@ -1,6 +1,6 @@
 import React from "react";
 import { useWallet } from "@solana/wallet-adapter-react";
-import { WalletName } from "@solana/wallet-adapter-wallets";
+import { WalletName } from "@solana/wallet-adapter-base";
 import {
   Box,
   Flex,
@@ -19,6 +19,9 @@ import {
   useTokenRef,
   useTokenMetadata,
 } from "@strata-foundation/react";
+import {
+  TorusWalletAdapter,
+} from "@solana/wallet-adapter-wallets";
 
 export interface IClaim2Props {
   handle: string;
@@ -27,7 +30,8 @@ export interface IClaim2Props {
 }
 
 export const Claim2: React.FC<IClaim2Props> = ({ handle, incrementStep }) => {
-  const { connected, select, adapter, wallet } = useWallet();
+  const { connected, select, wallet } = useWallet();
+  const adapter = wallet?.adapter;
   const { showModal } = useModal();
   const walletMintKey = useClaimedTokenRefKey(adapter?.publicKey, null);
 
@@ -58,12 +62,12 @@ export const Claim2: React.FC<IClaim2Props> = ({ handle, incrementStep }) => {
             How do you set up a wallet?
           </Heading>
           <VStack spacing={6} color="gray.600">
-            <Text size="md">
+            <Text fontSize="md">
               Setting up a wallet is easy! You can use any digital wallet that
               supports Solana tokens or platforms. There are several to choose
               from. If you already have one, you're one step ahead.
             </Text>
-            <Text size="md">
+            <Text fontSize="md">
               If you don't have a wallet yet, we'll walk you through a quick
               process to connect your social media account and create a wallet
               at the same time. It's as easy as 1, 2, 3!
@@ -77,8 +81,8 @@ export const Claim2: React.FC<IClaim2Props> = ({ handle, incrementStep }) => {
             Wallet has already claimed!
           </Heading>
           <VStack spacing={6} color="gray.600">
-            <Text size="md">
-              It appears the {wallet!.name} wallet you are using has already
+            <Text fontSize="md">
+              It appears the {adapter!.name} wallet you are using has already
               claimed a social token with the twitter handle of{" "}
               <Text as="span" fontWeight="bold">
                 {metadataLoading ? "Loading..." : metadata?.data.name}
@@ -87,8 +91,8 @@ export const Claim2: React.FC<IClaim2Props> = ({ handle, incrementStep }) => {
               In order to claim multiple social tokens you will need multiple
               wallets.
             </Text>
-            <Text size="md">
-              Please generate a new address for the {wallet!.name} wallet in
+            <Text fontSize="md">
+              Please generate a new address for the {adapter!.name} wallet in
               order to claim the new social token for{" "}
               <Text as="span" fontWeight="bold">
                 {handle}
@@ -103,8 +107,8 @@ export const Claim2: React.FC<IClaim2Props> = ({ handle, incrementStep }) => {
                 twitter
               </Link>
               , or refrence the{" "}
-              <Link href={wallet!.url} color="indigo.500">
-                {wallet!.name} website
+              <Link href={adapter!.url} color="indigo.500">
+                {adapter!.name} website
               </Link>
               .
             </Text>
@@ -131,7 +135,7 @@ export const Claim2: React.FC<IClaim2Props> = ({ handle, incrementStep }) => {
                 colorScheme="gray"
                 borderColor="black"
                 variant="outline"
-                onClick={() => select(WalletName.Torus)}
+                onClick={() => select(new TorusWalletAdapter().name)}
                 leftIcon={<Image src={TorusBlack} w={8} h={8} />}
               >
                 Log in with Social

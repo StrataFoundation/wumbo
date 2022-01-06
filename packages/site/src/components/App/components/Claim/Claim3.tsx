@@ -97,7 +97,7 @@ export const Claim3 = React.memo<IClaim3Props>(
             Verify your Twitter account
           </Heading>
         </div>
-        <Text size="md">
+        <Text fontSize="md">
           Almost there! In order to claim your profile on Wumbo, we'll need you
           to connect your Twitter account. The Wumbo chrome extension sits on
           top of Twitter so you can see and interact with Collectives or social
