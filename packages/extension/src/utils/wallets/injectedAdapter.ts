@@ -16,7 +16,6 @@ import {
 import { Connection, PublicKey, Transaction } from "@solana/web3.js";
 import { MessageType, Message } from "./types";
 import { deserializeError } from "serialize-error";
-import { sleep } from "wumbo-common";
 
 export interface IInjectedWalletAdapterConfig {
   name: WalletName;
@@ -70,13 +69,6 @@ export class InjectedWalletAdapter
     return this._publicKey;
   }
 
-  get ready(): boolean {
-    // dont use this
-    // need to vallidate extending
-    // use readyAsync
-    return true;
-  }
-
   get url(): string {
     return this._url || "";
   }
@@ -85,31 +77,22 @@ export class InjectedWalletAdapter
     return this._name;
   }
 
-  readyAsync(): Promise<boolean> {
+  readyStateAsync(): Promise<WalletReadyState> {
     return (async () => {
       try {
-        const { ready } = await this.sendMessage(
+        const { readyState } = await this.sendMessage(
           {
-            type: MessageType.WALLET_READY,
+            type: MessageType.WALLET_READY_STATE,
             name: this._name,
           },
           500
         );
 
-        return ready;
+        return readyState;
       } catch (error: any) {
-        return false;
+        return WalletReadyState.NotDetected;
       }
     })();
-  }
-
-  async waitForReady(): Promise<void> {
-    let ready = await this.readyAsync();
-    while (!ready) {
-      ready = await this.readyAsync();
-      await sleep(500);
-      console.log("Injected wallet not ready, trying again...");
-    }
   }
 
   get connecting(): boolean {
@@ -180,8 +163,19 @@ export class InjectedWalletAdapter
 
     try {
       if (this.connected || this.connecting) return;
+      const readyState = await this.readyStateAsync();
+      debugger;
+
+      if (
+        !(
+          readyState === WalletReadyState.Loadable ||
+          readyState === WalletReadyState.Installed
+        )
+      ) {
+        throw new WalletNotReadyError();
+      }
+
       this._connecting = true;
-      await this.waitForReady();
 
       try {
         const { publicKey: responsePK } = await this.sendMessage({

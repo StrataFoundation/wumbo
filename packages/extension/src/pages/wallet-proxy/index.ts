@@ -1,4 +1,7 @@
-import { BaseSignerWalletAdapter } from "@solana/wallet-adapter-base";
+import {
+  BaseSignerWalletAdapter,
+  WalletReadyState,
+} from "@solana/wallet-adapter-base";
 import { Transaction } from "@solana/web3.js";
 import { serializeError } from "serialize-error";
 import { INJECTED_PROVIDERS } from "wumbo-common";
@@ -49,15 +52,20 @@ const resetWallet = () =>
           break;
         }
 
-        case MessageType.WALLET_READY: {
+        case MessageType.WALLET_READY_STATE: {
           const {
             data: { name },
           } = e as MessageEvent<ConnectMessage>;
           adapter = getAdapter(name!);
 
           try {
-            const ready = adapter?.readyState === "Installed";
-            sendReply({ ready });
+            const readyState = adapter?.readyState;
+
+            if (adapter?.readyState === WalletReadyState.NotDetected) {
+              window.open(adapter?.url);
+            }
+
+            sendReply({ readyState });
           } catch (error) {
             sendReply({ error });
           }
