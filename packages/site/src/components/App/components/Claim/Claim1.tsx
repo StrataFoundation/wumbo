@@ -24,7 +24,7 @@ import {
 } from "@chakra-ui/react";
 import { RiAlertLine, RiGift2Line } from "react-icons/ri";
 import { useTwitterTld } from "wumbo-common";
-import claim1illu from "../../../../assets/images/Claim1Illu.png";
+import claim1illu from "../../../../assets/images/claim1illu.png";
 import claim1banner from "../../../../assets/images/claim1banner.png";
 
 export interface IClaim1Props {
