@@ -164,7 +164,6 @@ export class InjectedWalletAdapter
     try {
       if (this.connected || this.connecting) return;
       const readyState = await this.readyStateAsync();
-      debugger;
 
       if (
         !(
