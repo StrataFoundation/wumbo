@@ -14,11 +14,11 @@ export const INJECTED_PROVIDERS: Adapter[] = [
   new SolflareWalletAdapter(),
   new SlopeWalletAdapter(),
   new LedgerWalletAdapter(),
-  new SolletWalletAdapter(),
   new SolletExtensionWalletAdapter(),
 ];
 
 export const WALLET_PROVIDERS: Adapter[] = [
   ...INJECTED_PROVIDERS,
+  new SolletWalletAdapter(),
   new TorusWalletAdapter(),
 ];
