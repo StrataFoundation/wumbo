@@ -22,9 +22,7 @@ import { useConfig } from "../hooks";
 import React from "react";
 import toast from "react-hot-toast";
 import { useHistory } from "react-router-dom";
-import {
-  WUMBO_TRANSACTION_FEE
-} from "../constants/globals";
+import { WUMBO_TRANSACTION_FEE } from "../constants/globals";
 
 export const Swap = ({
   onTradingMintsChange,
@@ -49,7 +47,7 @@ export const Swap = ({
   const baseMintInfo = useMint(baseMint);
   const targetMintInfo = useMint(targetMint);
   const wumboConfig = useConfig();
-  
+
   const hasFees = targetTokenRef || baseTokenRef;
   const { loading, error, execute } = useSwap({
     async extraInstructions({ tokenBonding, isBuy, amount }) {
