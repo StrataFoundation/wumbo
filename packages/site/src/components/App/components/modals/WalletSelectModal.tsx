@@ -9,7 +9,7 @@ import {
 } from "@chakra-ui/react";
 import { usePrevious, WalletSelect } from "wumbo-common";
 import { useWallet } from "@solana/wallet-adapter-react";
-import { WalletName } from "@solana/wallet-adapter-wallets";
+import { WalletName } from "@solana/wallet-adapter-base";
 import { useModal } from "../../../../contexts";
 import { useErrorHandler } from "@strata-foundation/react";
 

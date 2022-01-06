@@ -54,7 +54,6 @@ const resetWallet = () =>
             data: { name },
           } = e as MessageEvent<ConnectMessage>;
           adapter = getAdapter(name!);
-          debugger;
 
           try {
             const ready = adapter?.readyState === "Installed";
@@ -73,7 +72,6 @@ const resetWallet = () =>
 
           try {
             const signed = await adapter?.signTransaction(unsigned);
-
             sendReply({
               signedTransaction: signed!.serialize({
                 verifySignatures: true,

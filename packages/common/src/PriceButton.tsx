@@ -1,6 +1,6 @@
 import { Button, ButtonProps } from "@chakra-ui/button";
 import { Center } from "@chakra-ui/layout";
-import { Box } from "@chakra-ui/react"
+import { Box } from "@chakra-ui/react";
 import { PublicKey } from "@solana/web3.js";
 import React, { useMemo } from "react";
 import { usePriceInUsd } from "@strata-foundation/react";

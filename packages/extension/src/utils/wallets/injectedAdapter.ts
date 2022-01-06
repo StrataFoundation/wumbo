@@ -11,6 +11,7 @@ import {
   WalletSignMessageError,
   WalletWindowClosedError,
   SendTransactionOptions,
+  WalletReadyState,
 } from "@solana/wallet-adapter-base";
 import { Connection, PublicKey, Transaction } from "@solana/web3.js";
 import { MessageType, Message } from "./types";
@@ -18,15 +19,18 @@ import { deserializeError } from "serialize-error";
 import { sleep } from "wumbo-common";
 
 export interface IInjectedWalletAdapterConfig {
-  name: WalletName | null;
+  name: WalletName;
+  url: string | null;
+  icon: string | null;
 }
 
 export class InjectedWalletAdapter
   extends EventEmitter<WalletAdapterEvents>
   implements SignerWalletAdapter
 {
-  private _name: WalletName | null;
+  private _name: WalletName;
   private _url: string | null;
+  private _icon: string | null;
   private _publicKey: PublicKey | null;
   private _connecting: boolean;
   private _connected: boolean;
@@ -35,6 +39,8 @@ export class InjectedWalletAdapter
   constructor(config: IInjectedWalletAdapterConfig) {
     super();
     this._name = config.name;
+    this._url = config.url;
+    this._icon = config.icon;
     this._publicKey = null;
     this._connecting = false;
     this._connected = false;
@@ -50,6 +56,7 @@ export class InjectedWalletAdapter
       }
     });
   }
+  readyState: WalletReadyState = WalletReadyState.Installed;
 
   sendTransaction(
     transaction: Transaction,
@@ -68,6 +75,14 @@ export class InjectedWalletAdapter
     // need to vallidate extending
     // use readyAsync
     return true;
+  }
+
+  get url(): string {
+    return this._url || "";
+  }
+  
+  get name(): WalletName {
+    return this._name;
   }
 
   readyAsync(): Promise<boolean> {
@@ -107,6 +122,10 @@ export class InjectedWalletAdapter
 
   get autoApprove(): boolean {
     return false;
+  }
+
+  get icon(): string {
+    return this._icon || "";
   }
 
   async sendMessage(m: Message, timeoutMs: number = -1): Promise<any> {
@@ -173,7 +192,7 @@ export class InjectedWalletAdapter
         publicKey = new PublicKey(responsePK);
         this._publicKey = publicKey;
         this._connected = true;
-        this.emit("connect");
+        this.emit("connect", publicKey);
       } catch (error: any) {
         if (error instanceof WalletError) throw error;
         throw new WalletConnectionError(error?.message, error);
@@ -188,6 +207,7 @@ export class InjectedWalletAdapter
       try {
         await this.sendMessage({ type: MessageType.WALLET_DISCONNECT });
         this.emit("disconnect");
+        this._connected = false;
       } catch (error: any) {
         throw new WalletDisconnectionError();
       }
