@@ -14,8 +14,8 @@ import WalletRedirect from "./WalletRedirect";
 
 export const Wallet = () => {
   const solLink = useFtxPayLink();
-  const { adapter } = useWallet();
-  const publicKey = adapter?.publicKey;
+  const { publicKey } = useWallet();
+
   return (
     <Fragment>
       <WumboDrawer.Header title="Wallet" />

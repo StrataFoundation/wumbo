@@ -25,8 +25,7 @@ import { WumboDrawer } from "../WumboDrawer";
 
 export const Profile = () => {
   const params = useParams<{ mint: string | undefined }>();
-  const { connected, adapter } = useWallet();
-  const publicKey = adapter?.publicKey;
+  const { connected, publicKey } = useWallet();
   const walletMintKey = useClaimedTokenRefKey(publicKey, null);
   const { info: walletTokenRef, loading: walletTokenRefLoading } =
     useTokenRef(walletMintKey);

@@ -153,8 +153,7 @@ export const Profile = React.memo(
     const baseIsCollective = !!baseMintTokenBonding.info;
 
     const { awaitingApproval } = useProvider();
-    const { wallet } = useWallet();
-    const publicKey = wallet?.adapter?.publicKey;
+    const { publicKey } = useWallet();
     const myTokenRefKey = useClaimedTokenRefKey(publicKey, null);
     const { handle: walletTwitterHandle, error: reverseTwitterError } =
       useReverseTwitter(publicKey || undefined);
@@ -377,13 +376,13 @@ export const Profile = React.memo(
                   </PopoverTrigger>
                   <PopoverContent>
                     <PopoverBody>
-                      You'll receive ${claimAmount && claimAmount.toFixed(2)} in
-                      your token if you claim!
+                      Claim this token and make it your own. You'll receive ${claimAmount && claimAmount.toFixed(2)} in
+                      your token! You'll also be able to customize your name, symbol, image, and royalties.
                     </PopoverBody>
                   </PopoverContent>
                 </Popover>
               )}
-            {!ownerWalletKey && baseIsCollective && (
+            {!ownerWalletKey && baseIsCollective && !walletTwitterHandle && (
               <Popover placement="bottom" trigger="hover">
                 <PopoverTrigger>
                   <Button

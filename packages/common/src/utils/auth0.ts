@@ -24,9 +24,11 @@ function makeId(length: number): string {
 export function useClaimLink({
   handle,
   newTab = false,
+  extension = false
 }: {
   handle: string;
   newTab?: boolean;
+  extension?: boolean;
 }): { redirectUri: string; claim: () => Window | null } {
   const redirectUri = `${SITE_URL}/app/claim?step=3&handle=${handle}`;
   const claim = () => {
@@ -40,7 +42,7 @@ export function useClaimLink({
     });
 
     if (newTab) {
-      window.open(auth0Url);
+      return window.open(auth0Url);
     } else {
       auth0.authorize({
         scope: "openid profile",

@@ -51,8 +51,7 @@ export const SendSearch = React.memo(
   }: {
     getSendLink: (tokenWithMeta: ITokenWithMetaAndAccount) => string;
   }) => {
-    const { wallet } = useWallet();
-    const publicKey = wallet?.adapter?.publicKey;
+    const { publicKey } = useWallet();
     const { data: tokens, loading } = useUserTokensWithMeta(
       publicKey || undefined
     );

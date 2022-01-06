@@ -35,6 +35,7 @@ export const MainButton: FC<Props> = ({
   );
   const { owner, loading: loadingOwner } = useTwitterOwner(creatorName);
 
+  console.log("Foo", loading, loadingOwner, tokenRef)
   if (!(loading || loadingOwner) && !tokenRef) {
     return (
       <Button

@@ -20,27 +20,14 @@ import {
   getOwnerForName,
 } from "@strata-foundation/react";
 import { useTwitterTld } from "../hooks";
+import { fetchConfig } from "../contexts";
 
 let twitterTld: PublicKey, twitterVerifier: PublicKey;
-async function fetchConfig(): Promise<void> {
-  try {
-    const config = await (
-      await axios.get(WUMBO_IDENTITY_SERVICE_URL + "/config")
-    ).data;
-    twitterTld = new PublicKey(config.tlds.twitter);
-    twitterVerifier = new PublicKey(config.verifiers.twitter);
-  } catch (e: any) {
-    console.error(e);
-    twitterTld = new PublicKey("Fhqd3ostRQQE65hzoA7xFMgT9kge2qPnsTNAKuL2yrnx");
-    twitterVerifier = new PublicKey(
-      "DTok7pfUzNeNPqU3Q6foySCezPQE82eRyhX1HdhVNLVC"
-    );
-  }
-}
 
 export async function getTwitterTld(): Promise<PublicKey> {
   if (!twitterTld) {
-    await fetchConfig();
+    const config = await fetchConfig();
+    twitterTld = new PublicKey(config.tlds.twitter);
   }
 
   return twitterTld;
@@ -48,7 +35,8 @@ export async function getTwitterTld(): Promise<PublicKey> {
 
 export async function getTwitterVerifier(): Promise<PublicKey> {
   if (!twitterVerifier) {
-    await fetchConfig();
+    const config = await fetchConfig();
+    twitterVerifier = new PublicKey(config.verifiers.twitter);
   }
 
   return twitterVerifier;
@@ -149,6 +137,7 @@ export async function getTwitterReverse(
   owner: PublicKey
 ): Promise<ReverseTwitterRegistryState> {
   const hashedName = await getHashedName(owner.toString());
+
   const key = await getNameAccountKey(
     hashedName,
     await getTwitterVerifier(),

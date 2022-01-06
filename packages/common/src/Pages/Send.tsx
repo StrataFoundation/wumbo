@@ -62,8 +62,7 @@ export const Send = ({ finishRedirectUrl }: { finishRedirectUrl: string }) => {
   const history = useHistory();
   const params = useParams<{ mint: string | undefined }>();
   const mint = usePublicKey(params.mint);
-  const { wallet } = useWallet();
-  const publicKey = wallet?.adapter?.publicKey;
+  const { publicKey } = useWallet();
   const { awaitingApproval, provider } = useProvider();
   const ownedAmount = useOwnedAmount(mint);
   const validationSchema = yup.object({

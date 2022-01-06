@@ -19,10 +19,11 @@ export function useClaimFlow(name?: string | null): IClaimFlowOutput {
   const { claim, redirectUri } = useClaimLink({
     handle: `${name}`,
     newTab: true,
+    extension: true
   });
   const { provider } = useProvider();
-  const { adapter } = useWallet();
-  const publicKey = adapter?.publicKey;
+  const { publicKey, wallet } = useWallet();
+  const adapter = wallet?.adapter;
   const { handle: ownerTwitterHandle, error: reverseTwitterError } =
     useReverseTwitter(publicKey || undefined);
   const {

@@ -75,11 +75,10 @@ export const TokenLeaderboard = React.memo(
     tokenBonding: PublicKey | undefined;
     onAccountClick?: (mintKey: PublicKey) => void;
   }) => {
-    const { wallet } = useWallet();
-    const publicKey = wallet?.adapter?.publicKey;
+    const { wallet, publicKey } = useWallet();
     const { info: tokenBondingAcc } = useTokenBonding(tokenBonding);
     const { result: ata } = useAssociatedTokenAddress(
-      wallet?.adapter?.publicKey,
+      publicKey,
       tokenBondingAcc?.targetMint
     );
     const client = useApolloClient();

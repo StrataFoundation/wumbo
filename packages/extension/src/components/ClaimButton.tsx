@@ -35,8 +35,7 @@ export const ClaimButton: FC<Props> = ({
     tld
   );
 
-  const { adapter, connected } = useWallet();
-  const publicKey = adapter?.publicKey;
+  const { publicKey, connected } = useWallet();
   const { handle: ownerTwitterHandle, error: reverseTwitterError } =
     useReverseTwitter(publicKey || undefined);
   const { handleErrors } = useErrorHandler();

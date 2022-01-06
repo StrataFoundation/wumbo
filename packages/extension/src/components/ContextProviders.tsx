@@ -6,6 +6,7 @@ import {
   ThemeProvider,
   INJECTED_PROVIDERS,
   SOLANA_API_URL,
+  ConfigProvider,
 } from "wumbo-common";
 import {
   AccountProvider,
@@ -79,28 +80,30 @@ export const ContextProviders: FC = ({ children }) => {
   );
 
   return (
-    <ConnectionProvider endpoint={SOLANA_API_URL}>
-      <ErrorHandlerProvider onError={onError}>
-        <ApolloProvider client={wumboApi}>
-          <AccountProvider commitment="confirmed">
-            <WalletProvider
-              wallets={alteredWallets}
-              onError={console.error}
-              autoConnect
-            >
-              <StrataSdksProvider>
-                <SolPriceProvider>
-                  <HistoryContextProvider>
-                    <DrawerProvider>
-                      <ThemeProvider>{children}</ThemeProvider>
-                    </DrawerProvider>
-                  </HistoryContextProvider>
-                </SolPriceProvider>
-              </StrataSdksProvider>
-            </WalletProvider>
-          </AccountProvider>
-        </ApolloProvider>
-      </ErrorHandlerProvider>
-    </ConnectionProvider>
+    <ConfigProvider>
+      <ConnectionProvider endpoint={SOLANA_API_URL}>
+        <ErrorHandlerProvider onError={onError}>
+          <ApolloProvider client={wumboApi}>
+            <AccountProvider commitment="confirmed">
+              <WalletProvider
+                wallets={alteredWallets}
+                onError={console.error}
+                autoConnect
+              >
+                <StrataSdksProvider>
+                  <SolPriceProvider>
+                    <HistoryContextProvider>
+                      <DrawerProvider>
+                        <ThemeProvider>{children}</ThemeProvider>
+                      </DrawerProvider>
+                    </HistoryContextProvider>
+                  </SolPriceProvider>
+                </StrataSdksProvider>
+              </WalletProvider>
+            </AccountProvider>
+          </ApolloProvider>
+        </ErrorHandlerProvider>
+      </ConnectionProvider>
+    </ConfigProvider>
   );
 };

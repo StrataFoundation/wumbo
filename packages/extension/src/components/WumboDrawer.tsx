@@ -192,8 +192,7 @@ WumboDrawer.Content = (props: { children: ReactNode }) => (
 
 WumboDrawer.Nav = () => {
   const { creator } = useDrawer();
-  const { adapter } = useWallet();
-  const wallet = adapter?.publicKey;
+  const { publicKey: wallet } = useWallet();
   const { handle: reverseHandle } = useReverseTwitter(wallet || undefined);
   const handle = creator?.name || reverseHandle || "";
   const creatorInfoState = useUserInfo(handle);
@@ -239,7 +238,7 @@ WumboDrawer.Nav = () => {
               OPEN_BONDING.toBase58(),
             ":tokenRefKey": creatorInfo?.tokenRef?.publicKey.toBase58() || "",
             ":action": "buy",
-            ":baseMint": NATIVE_MINT,
+            ":baseMint": NATIVE_MINT.toBase58(),
             ":targetMint":
               SplTokenCollective.OPEN_COLLECTIVE_MINT_ID.toBase58(),
           });

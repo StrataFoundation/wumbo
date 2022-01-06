@@ -63,7 +63,7 @@ export const ProfileEnhancer = () => {
   const profile = useProfile();
   const previousProfile = usePrevious(profile);
   const history = useHistory();
-  const { adapter } = useWallet();
+  const { publicKey } = useWallet();
 
   const triggerRemount = useCallback(() => {
     setTriggerCount(triggerCount + 1);
@@ -86,7 +86,7 @@ export const ProfileEnhancer = () => {
     data: tokens,
     error,
     loading: loadingTokens,
-  } = useUserTokensWithMeta(adapter?.publicKey || undefined);
+  } = useUserTokensWithMeta(publicKey || undefined);
 
   const { handleErrors } = useErrorHandler();
   const {
