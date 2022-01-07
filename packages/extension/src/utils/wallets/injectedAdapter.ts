@@ -87,7 +87,6 @@ export class InjectedWalletAdapter
           },
           500
         );
-
         return readyState;
       } catch (error: any) {
         return WalletReadyState.NotDetected;
@@ -118,7 +117,7 @@ export class InjectedWalletAdapter
       let timeout: any;
       if (timeoutMs > 0) {
         timeout = setTimeout(() => {
-          reject(new WalletConnectionError("Not ready"));
+          reject(new WalletNotReadyError("Not ready"));
         }, timeoutMs);
       }
 

@@ -88,7 +88,6 @@ export const ContextProviders: FC = ({ children }) => {
               <WalletProvider
                 wallets={alteredWallets}
                 onError={console.error}
-                autoConnect
               >
                 <StrataSdksProvider>
                   <SolPriceProvider>

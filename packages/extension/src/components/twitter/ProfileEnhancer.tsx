@@ -21,6 +21,7 @@ import { useAsync } from "react-async-hook";
 import { useHistory } from "react-router-dom";
 import { useDrawer } from "../../contexts/drawerContext";
 import { tagNftPath } from "@/constants/routes";
+import { WalletAutoConnect } from "../wallet/WalletAutoConnect";
 
 async function imagesMatch(
   img1: Blob | undefined,
@@ -143,6 +144,7 @@ export const ProfileEnhancer = () => {
                   marginBottom="11px"
                   spacing={1}
                 >
+                  <WalletAutoConnect />
                   {buttonEl}
                   {(loading || loadingTokens) && <Spinner />}
                   {pfpMatch && (

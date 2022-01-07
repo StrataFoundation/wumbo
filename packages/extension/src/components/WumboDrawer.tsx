@@ -21,6 +21,7 @@ import { useWallet } from "@solana/wallet-adapter-react";
 import { SplTokenCollective } from "@strata-foundation/spl-token-collective";
 import Logo from "../../public/assets/img/logo.svg";
 import { NATIVE_MINT } from "@solana/spl-token";
+import { WalletAutoConnect } from "./wallet/WalletAutoConnect";
 
 export const OutsideOfDrawerRef =
   React.createContext<React.MutableRefObject<HTMLInputElement> | null>(null);
@@ -57,6 +58,9 @@ export const WumboDrawer = (props: { children: ReactNode }) => {
         </Box>
       )}
       <Box ref={outsideOfDrawerRef} zIndex={200} />
+      { isOpen &&
+        <WalletAutoConnect />
+      }
 
       <OutsideOfDrawerRef.Provider value={outsideOfDrawerRef}>
         <Slide
