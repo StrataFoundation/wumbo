@@ -18,11 +18,10 @@ interface CreateState {
 }
 
 export function useCreateOrClaimCoin(): CreateState {
-  const { wallet } = useWallet();
+  const { publicKey } = useWallet();
   const [creating, setCreating] = useState<boolean>(false);
   const { awaitingApproval, provider } = useProvider();
   const { tokenCollectiveSdk } = useStrataSdks();
-  const adapter = wallet?.adapter;
 
   async function exec({ twitterHandle, code, redirectUri }: CreateArgs) {
     let result;
@@ -32,7 +31,7 @@ export function useCreateOrClaimCoin(): CreateState {
         provider!,
         WUMBO_IDENTITY_SERVICE_URL + "/twitter/claim-or-create",
         {
-          pubkey: adapter!.publicKey!.toBase58(),
+          pubkey: publicKey!.toBase58(),
           code,
           redirectUri,
           twitterHandle,
