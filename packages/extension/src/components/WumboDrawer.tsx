@@ -20,8 +20,8 @@ import { useHistoryList } from "@/utils/history";
 import { useWallet } from "@solana/wallet-adapter-react";
 import { SplTokenCollective } from "@strata-foundation/spl-token-collective";
 import Logo from "../../public/assets/img/logo.svg";
-import { NATIVE_MINT } from "@solana/spl-token";
 import { WalletAutoConnect } from "./wallet/WalletAutoConnect";
+import { useTwWrappedSolMint } from "@strata-foundation/react";
 
 export const OutsideOfDrawerRef =
   React.createContext<React.MutableRefObject<HTMLInputElement> | null>(null);
@@ -107,7 +107,7 @@ WumboDrawer.Header = (props: HeaderProps) => {
   const { connected } = useWallet();
   const historyList = useHistoryList();
   const history = useHistory();
-
+  
   return (
     <Flex
       padding={4}
@@ -199,6 +199,7 @@ WumboDrawer.Nav = () => {
   const handle = creator?.name || reverseHandle || "";
   const creatorInfoState = useUserInfo(handle);
   const { userInfo: creatorInfo, loading } = creatorInfoState;
+  const twSol = useTwWrappedSolMint();
 
   return (
     <Box w="full" position="relative">
@@ -240,7 +241,7 @@ WumboDrawer.Nav = () => {
               OPEN_BONDING.toBase58(),
             ":tokenRefKey": creatorInfo?.tokenRef?.publicKey.toBase58() || "",
             ":action": "buy",
-            ":baseMint": NATIVE_MINT.toBase58(),
+            ":baseMint": twSol?.toBase58() || "",
             ":targetMint":
               SplTokenCollective.OPEN_COLLECTIVE_MINT_ID.toBase58(),
           });
