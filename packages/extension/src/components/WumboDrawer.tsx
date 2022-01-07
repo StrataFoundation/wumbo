@@ -58,9 +58,7 @@ export const WumboDrawer = (props: { children: ReactNode }) => {
         </Box>
       )}
       <Box ref={outsideOfDrawerRef} zIndex={200} />
-      { isOpen &&
-        <WalletAutoConnect />
-      }
+      {isOpen && <WalletAutoConnect />}
 
       <OutsideOfDrawerRef.Provider value={outsideOfDrawerRef}>
         <Slide

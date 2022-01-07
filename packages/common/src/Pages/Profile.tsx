@@ -466,11 +466,9 @@ export const Profile = React.memo(
               tokenBondingKey={tokenBonding!.publicKey}
               getNftLink={getNftLink}
             />
-          ) : tokenBonding ? (
-            <CollectiveTabs onAccountClick={onAccountClick} mintKey={mintKey} />
           ) : ownerWalletKey ? (
             <LinkedTabs getNftLink={getNftLink} wallet={ownerWalletKey} />
-          ) : null}
+          ) : <CollectiveTabs onAccountClick={onAccountClick} mintKey={mintKey} />}
         </VStack>
       </TokenBondingRecentTransactionsProvider>
     );

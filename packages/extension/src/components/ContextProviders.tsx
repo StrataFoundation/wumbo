@@ -85,10 +85,7 @@ export const ContextProviders: FC = ({ children }) => {
         <ErrorHandlerProvider onError={onError}>
           <ApolloProvider client={wumboApi}>
             <AccountProvider commitment="confirmed">
-              <WalletProvider
-                wallets={alteredWallets}
-                onError={console.error}
-              >
+              <WalletProvider wallets={alteredWallets} onError={console.error}>
                 <StrataSdksProvider>
                   <SolPriceProvider>
                     <HistoryContextProvider>
