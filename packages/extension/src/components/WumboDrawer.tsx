@@ -107,7 +107,7 @@ WumboDrawer.Header = (props: HeaderProps) => {
   const { connected } = useWallet();
   const historyList = useHistoryList();
   const history = useHistory();
-  
+
   return (
     <Flex
       padding={4}
