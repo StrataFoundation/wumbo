@@ -52,14 +52,14 @@ export const Create = () => {
                 link your wallet to Wum.bo for free.
               </Text>
               <Text>
-              If this is someone else's twitter account, you can create and
-              begin trading a token that they will have the option to claim
-              later. 
+                If this is someone else's twitter account, you can create and
+                begin trading a token that they will have the option to claim
+                later.
               </Text>
               <Text>
-              Should the person opt out, no new tokens may be purchased
-              and exisiting tokens may still be sold. It costs 0.03 SOL (~$
-              {solPrice ? (solPrice * 0.03).toFixed(2) : ""}) to do this.
+                Should the person opt out, no new tokens may be purchased and
+                exisiting tokens may still be sold. It costs 0.03 SOL (~$
+                {solPrice ? (solPrice * 0.03).toFixed(2) : ""}) to do this.
               </Text>
             </VStack>
           )}
