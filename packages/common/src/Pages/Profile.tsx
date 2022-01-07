@@ -409,7 +409,7 @@ export const Profile = React.memo(
                 </PopoverContent>
               </Popover>
             )}
-            {!tokenRef && !tokenBonding && (
+            {!tokenRef && !tokenBonding && !mintKey && (
               <Button
                 as={Link}
                 to={createPath}
@@ -468,7 +468,9 @@ export const Profile = React.memo(
             />
           ) : ownerWalletKey ? (
             <LinkedTabs getNftLink={getNftLink} wallet={ownerWalletKey} />
-          ) : <CollectiveTabs onAccountClick={onAccountClick} mintKey={mintKey} />}
+          ) : (
+            <CollectiveTabs onAccountClick={onAccountClick} mintKey={mintKey} />
+          )}
         </VStack>
       </TokenBondingRecentTransactionsProvider>
     );

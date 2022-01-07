@@ -77,7 +77,7 @@ export class InjectedWalletAdapter
     return this._name;
   }
 
-  readyStateAsync(): Promise<WalletReadyState> {
+  readyStateAsync(): Promise<WalletReadyState | "ProxyNotReady"> {
     return (async () => {
       try {
         const { readyState } = await this.sendMessage(
@@ -89,7 +89,7 @@ export class InjectedWalletAdapter
         );
         return readyState;
       } catch (error: any) {
-        return WalletReadyState.NotDetected;
+        return "ProxyNotReady";
       }
     })();
   }

@@ -6,20 +6,26 @@ import { sleep } from "wumbo-common";
 
 const MAX_TRIES = 10;
 
+let globalReady = false;
 async function waitForReady(adapter: any): Promise<boolean> {
+  if (globalReady) {
+    return true;
+  }
+
   let tries = 0;
-  while (adapter && adapter.readyStateAsync && tries < MAX_TRIES) {
+  while (adapter && adapter.readyStateAsync && tries < MAX_TRIES && !globalReady) {
     const ready = await adapter.readyStateAsync();
-    if (ready == WalletReadyState.NotDetected) {
+    if (ready == "ProxyNotReady") {
       console.log("Wallet not ready, trying again...");
       await sleep(500);
     } else {
       console.log("Wallet ready!");
+      globalReady = true;
       return true;
     }
   }
 
-  return false;
+  return globalReady;
 }
 
 export const WalletAutoConnect = () => {
