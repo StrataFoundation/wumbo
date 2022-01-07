@@ -46,17 +46,22 @@ export const Create = () => {
             </Box>
           </Box>
           {!userInfo && !loading && (
-            <Text w="full" fontSize="small">
+            <VStack spacing={2} w="full">
               <Text fontWeight="bold">
                 If this is your twitter account, you can create your token or
                 link your wallet to Wum.bo for free.
               </Text>
+              <Text>
               If this is someone else's twitter account, you can create and
               begin trading a token that they will have the option to claim
-              later. Should the person opt out, no new tokens may be purchased
+              later. 
+              </Text>
+              <Text>
+              Should the person opt out, no new tokens may be purchased
               and exisiting tokens may still be sold. It costs 0.03 SOL (~$
               {solPrice ? (solPrice * 0.03).toFixed(2) : ""}) to do this.
-            </Text>
+              </Text>
+            </VStack>
           )}
           {connected && publicKey ? (
             <ClaimOrCreate />

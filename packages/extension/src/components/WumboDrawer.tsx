@@ -174,6 +174,7 @@ WumboDrawer.Header = (props: HeaderProps) => {
         </Flex>
 
         <Box
+          pl="8px"
           color="gray.500"
           _hover={{ color: "gray.600", cursor: "pointer" }}
           onClick={() => toggleDrawer()}

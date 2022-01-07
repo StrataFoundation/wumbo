@@ -38,7 +38,7 @@ const SearchError = ({
         {title}
       </Text>
       <Text fontSize="14px">{subTitle}</Text>
-      <Text mt={4} fontSize="14px" color="gray.500">
+      <Text textAlign="center" mt={4} fontSize="14px" color="gray.500">
         {description}
       </Text>
     </VStack>
@@ -145,7 +145,7 @@ export const SendSearch = React.memo(
             <SearchError
               title="No Tokens"
               subTitle="It looks like your wallet is empty."
-              description="Send tokens or by tokens from this wallet first, then you'll be able to send them to other wallets."
+              description="Send tokens or buy tokens from this wallet first, then you'll be able to send them to other wallets."
             />
           ))}
       </VStack>
