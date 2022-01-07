@@ -12,6 +12,10 @@ async function waitForReady(adapter: any): Promise<boolean> {
     return true;
   }
 
+  if (adapter && !adapter.readyStateAsync) {
+    globalReady = true;
+  }
+
   let tries = 0;
   while (
     adapter &&
@@ -49,6 +53,8 @@ export const WalletAutoConnect = () => {
       )
     )
       return;
+
+
     connect();
   }, [ready, connecting, connected, wallet, connect]);
 

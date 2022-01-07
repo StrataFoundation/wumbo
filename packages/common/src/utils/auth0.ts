@@ -3,7 +3,7 @@ import { SITE_URL } from "../constants";
 
 export const auth0Options: AuthOptions = {
   domain: process.env.REACT_APP_AUTH0_DOMAIN || "wumbo.us.auth0.com",
-  maxAge: 50,
+  maxAge: 1,
   clientID:
     process.env.REACT_APP_AUTH0_CLIENT_ID || "GPsjYroOyNKWCScIk2woGZi4kBTGDDTW",
 };

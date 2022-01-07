@@ -4,6 +4,7 @@ import { Adapter, WalletName } from "@solana/wallet-adapter-base";
 import { TorusWalletName } from "@solana/wallet-adapter-wallets";
 import { Flex, Box, Button, Text, VStack } from "@chakra-ui/react";
 import { WALLET_PROVIDERS } from "../constants/walletProviders";
+import { connect } from "http2";
 
 export interface IWalletSelect {
   onSelect?: (name: WalletName) => void;
@@ -14,11 +15,16 @@ export const WalletSelect: React.FC<IWalletSelect> = ({
   onSelect,
   selectedWallet,
 }) => {
-  const { wallet, select } = useWallet();
+  const { wallet, select, connect } = useWallet();
   const adapter = wallet?.adapter;
 
   const handleOnSelect = (name: WalletName) => {
-    onSelect ? onSelect(name) : select(name);
+    if (onSelect) {
+      onSelect(name)
+    } else {
+      select(name);
+      connect();
+    }
   };
 
   return (
