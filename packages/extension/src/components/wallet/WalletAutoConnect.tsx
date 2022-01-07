@@ -13,7 +13,12 @@ async function waitForReady(adapter: any): Promise<boolean> {
   }
 
   let tries = 0;
-  while (adapter && adapter.readyStateAsync && tries < MAX_TRIES && !globalReady) {
+  while (
+    adapter &&
+    adapter.readyStateAsync &&
+    tries < MAX_TRIES &&
+    !globalReady
+  ) {
     const ready = await adapter.readyStateAsync();
     if (ready == "ProxyNotReady") {
       console.log("Wallet not ready, trying again...");
