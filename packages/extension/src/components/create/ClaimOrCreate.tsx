@@ -46,7 +46,7 @@ export default React.memo(() => {
       SplTokenCollective.OPEN_COLLECTIVE_ID
     ))!;
     const config = collectiveAcct.config.unclaimedTokenBondingSettings as any;
-    
+
     // After the launch, use the normal logic
     // TODO: We can rm all of this logic after launch
     if (new Date() > goLiveDate) {
