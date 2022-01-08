@@ -3,10 +3,7 @@ import { sendPath } from "@/constants/routes";
 import { Box } from "@chakra-ui/react";
 import { PublicKey } from "@solana/web3.js";
 import React, { Fragment } from "react";
-import {
-  SendSearch as CommonSendSearch,
-  useQuery,
-} from "wumbo-common";
+import { SendSearch as CommonSendSearch, useQuery } from "wumbo-common";
 import { WumboDrawer } from "../WumboDrawer";
 
 export const SendSearch = () => {

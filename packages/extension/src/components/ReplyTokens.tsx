@@ -16,7 +16,7 @@ import {
   ASSOCIATED_TOKEN_PROGRAM_ID,
   Token,
   TOKEN_PROGRAM_ID,
-  AccountInfo as TokenAccountInfo
+  AccountInfo as TokenAccountInfo,
 } from "@solana/spl-token";
 import { AccountInfo, Connection, PublicKey } from "@solana/web3.js";
 import {
@@ -28,7 +28,10 @@ import {
   useTwitterTld,
   getTwitterRegistryKey,
 } from "wumbo-common";
-import { ITokenRef, SplTokenCollective } from "@strata-foundation/spl-token-collective";
+import {
+  ITokenRef,
+  SplTokenCollective,
+} from "@strata-foundation/spl-token-collective";
 import {
   useStrataSdks,
   useTokenRefForName,
@@ -40,7 +43,7 @@ import {
   useTokenMetadata,
   useTokenBonding,
   ParsedAccountBase,
-  TokenAccountParser
+  TokenAccountParser,
 } from "@strata-foundation/react";
 import { AccountFetchCache } from "@strata-foundation/spl-utils";
 import { useAsync } from "react-async-hook";
@@ -205,8 +208,8 @@ const tokenAccountParser = (
   return {
     pubkey,
     info,
-    account: acct
-  }
+    account: acct,
+  };
 };
 
 async function ownsTokensOf(
@@ -222,8 +225,7 @@ async function ownsTokensOf(
     owner
   );
 
-  const { info: acct } =
-    (await cache.search(ata, tokenAccountParser)) || {};
+  const { info: acct } = (await cache.search(ata, tokenAccountParser)) || {};
   return (acct?.amount.toNumber() || 0) > 0;
 }
 
@@ -253,17 +255,17 @@ const getMentionsWithTokens = async (
           tld
         );
         if (tokenCollectiveSdk) {
-          const decoder = (pubkey: PublicKey, account: AccountInfo<Buffer>) => ({ info: tokenCollectiveSdk.tokenRefDecoder(pubkey, account), pubkey, account });
-          const claimedRef = claimed && await cache.search(
-            claimed,
-            decoder,
-            true
-          );
-          const unclaimedRef = await cache.search(
-            unclaimed,
-            decoder,
-            true
-          );
+          const decoder = (
+            pubkey: PublicKey,
+            account: AccountInfo<Buffer>
+          ) => ({
+            info: tokenCollectiveSdk.tokenRefDecoder(pubkey, account),
+            pubkey,
+            account,
+          });
+          const claimedRef =
+            claimed && (await cache.search(claimed, decoder, true));
+          const unclaimedRef = await cache.search(unclaimed, decoder, true);
           let tokenRef = claimedRef || unclaimedRef;
           if (
             tokenRef?.info &&
