@@ -68,7 +68,7 @@ interface ISocialTokenTabsProps {
 
 interface IProfileProps
   extends Pick<ISocialTokenTabsProps, "onAccountClick" | "getNftLink"> {
-  mintKey: PublicKey;
+  mintKey?: PublicKey;
   editPath: string;
   sendPath: string;
   createPath: string;
@@ -468,9 +468,9 @@ export const Profile = React.memo(
             />
           ) : ownerWalletKey ? (
             <LinkedTabs getNftLink={getNftLink} wallet={ownerWalletKey} />
-          ) : (
+          ) : mintKey ? (
             <CollectiveTabs onAccountClick={onAccountClick} mintKey={mintKey} />
-          )}
+          ) : null}
         </VStack>
       </TokenBondingRecentTransactionsProvider>
     );

@@ -26,7 +26,7 @@ import { useTwWrappedSolMint } from "@strata-foundation/react";
 export const OutsideOfDrawerRef =
   React.createContext<React.MutableRefObject<HTMLInputElement> | null>(null);
 
-export const useOutsideOfDrawerRef = (): React.RefObject<unknown> => {
+export const useOutsideOfDrawerRef = (): React.RefObject<any> => {
   return useContext(OutsideOfDrawerRef)!;
 };
 

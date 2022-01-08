@@ -13,6 +13,7 @@ import { useProfile } from "../../utils/twitterSpotter";
 import { MainButton } from "../MainButton";
 import { ClaimButton } from "../ClaimButton";
 import { Spinner, useBufferFromUrl, getBufferFromUrl } from "wumbo-common";
+// @ts-ignore
 import compareImages from "resemblejs/compareImages";
 import { useWallet } from "@solana/wallet-adapter-react";
 import { ITokenWithMetaAndAccount } from "@strata-foundation/spl-token-collective";
@@ -80,7 +81,7 @@ export const ProfileEnhancer = () => {
   }, [previousProfile, profile, triggerRemount]);
 
   const { result: img1, error: bufferError } = useBufferFromUrl(
-    profile?.avatar
+    profile?.avatar || ""
   );
 
   const {

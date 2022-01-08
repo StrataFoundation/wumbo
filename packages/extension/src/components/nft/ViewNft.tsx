@@ -45,7 +45,6 @@ export const ViewNft: React.FC = () => {
           modalRef={modalRef}
           tagNftPath={token ? tagNftPath(token) : undefined}
           token={token}
-          j
           owner={info?.owner}
           getCreatorLink={(c, t, tokenRef, handle) => {
             return tokenRef

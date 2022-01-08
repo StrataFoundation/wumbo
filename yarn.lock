@@ -4945,6 +4945,11 @@
     "@types/node" "*"
     safe-buffer "*"
 
+"@types/resemblejs@^3.2.1":
+  version "3.2.1"
+  resolved "https://registry.yarnpkg.com/@types/resemblejs/-/resemblejs-3.2.1.tgz#f4d6dc1549184f6a8ac71f831547f055421ba926"
+  integrity sha512-PEAcjrHtLYqxhjkRrHVCyyQBk1A58aVlDkpmFpcSIejE+PNz9ovEJKSH8iyNOOBoDPNA1JBvaaBUYtFgEbFjiw==
+
 "@types/resolve@0.0.8":
   version "0.0.8"
   resolved "https://registry.yarnpkg.com/@types/resolve/-/resolve-0.0.8.tgz#f26074d238e02659e323ce1a13d041eee280e194"

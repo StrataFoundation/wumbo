@@ -1,9 +1,9 @@
+import { ITokenWithMetaAndAccount } from "@strata-foundation/spl-token-collective";
 import { sendPath } from "@/constants/routes";
 import { Box } from "@chakra-ui/react";
 import { PublicKey } from "@solana/web3.js";
 import React, { Fragment } from "react";
 import {
-  ITokenWithMetaAndAccount,
   SendSearch as CommonSendSearch,
   useQuery,
 } from "wumbo-common";

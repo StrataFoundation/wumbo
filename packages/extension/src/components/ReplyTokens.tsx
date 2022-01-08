@@ -16,6 +16,7 @@ import {
   ASSOCIATED_TOKEN_PROGRAM_ID,
   Token,
   TOKEN_PROGRAM_ID,
+  AccountInfo as TokenAccountInfo
 } from "@solana/spl-token";
 import { AccountInfo, Connection, PublicKey } from "@solana/web3.js";
 import {
@@ -27,7 +28,7 @@ import {
   useTwitterTld,
   getTwitterRegistryKey,
 } from "wumbo-common";
-import { SplTokenCollective } from "@strata-foundation/spl-token-collective";
+import { ITokenRef, SplTokenCollective } from "@strata-foundation/spl-token-collective";
 import {
   useStrataSdks,
   useTokenRefForName,
@@ -38,6 +39,8 @@ import {
   useErrorHandler,
   useTokenMetadata,
   useTokenBonding,
+  ParsedAccountBase,
+  TokenAccountParser
 } from "@strata-foundation/react";
 import { AccountFetchCache } from "@strata-foundation/spl-utils";
 import { useAsync } from "react-async-hook";
@@ -194,6 +197,18 @@ const getTwitterHandle = async (
   return (await getTwitterRegistry(connection, twitterHandle)) || null;
 };
 
+const tokenAccountParser = (
+  pubkey: PublicKey,
+  acct: AccountInfo<Buffer>
+): ParsedAccountBase => {
+  const info = TokenAccountParser(pubkey, acct)?.info;
+  return {
+    pubkey,
+    info,
+    account: acct
+  }
+};
+
 async function ownsTokensOf(
   owner: PublicKey,
   tokenCollectiveSdk: SplTokenCollective,
@@ -206,8 +221,9 @@ async function ownsTokensOf(
     mint,
     owner
   );
+
   const { info: acct } =
-    (await cache.search(ata, tokenCollectiveSdk.tokenRefDecoder)) || {};
+    (await cache.search(ata, tokenAccountParser)) || {};
   return (acct?.amount.toNumber() || 0) > 0;
 }
 
@@ -225,42 +241,40 @@ const getMentionsWithTokens = async (
   return (
     await Promise.all(
       mentions.map(async (mention) => {
-        const handle = await getTwitterHandle(cache.connection, mention);
-        if (handle) {
-          const claimed = await getClaimedTokenRefKeyForName(
-            cache.connection,
-            mention,
-            null,
-            tld
+        const claimed = await getClaimedTokenRefKeyForName(
+          cache,
+          mention,
+          null,
+          tld
+        );
+        const unclaimed = await getUnclaimedTokenRefKeyForName(
+          mention,
+          null,
+          tld
+        );
+        if (tokenCollectiveSdk) {
+          const decoder = (pubkey: PublicKey, account: AccountInfo<Buffer>) => ({ info: tokenCollectiveSdk.tokenRefDecoder(pubkey, account), pubkey, account });
+          const claimedRef = claimed && await cache.search(
+            claimed,
+            decoder,
+            true
           );
-          const unclaimed = await getUnclaimedTokenRefKeyForName(
-            mention,
-            null,
-            tld
+          const unclaimedRef = await cache.search(
+            unclaimed,
+            decoder,
+            true
           );
-          if (tokenCollectiveSdk) {
-            const claimedRef = await cache.search(
-              claimed,
-              tokenCollectiveSdk.tokenRefDecoder,
-              true
-            );
-            const unclaimedRef = await cache.search(
-              unclaimed,
-              tokenCollectiveSdk.tokenRefDecoder,
-              true
-            );
-            let tokenRef = claimedRef || unclaimedRef;
-            if (
-              tokenRef?.info &&
-              (await ownsTokensOf(
-                owner,
-                tokenCollectiveSdk,
-                cache,
-                tokenRef.info.mint as PublicKey
-              ))
-            ) {
-              return mention;
-            }
+          let tokenRef = claimedRef || unclaimedRef;
+          if (
+            tokenRef?.info &&
+            (await ownsTokensOf(
+              owner,
+              tokenCollectiveSdk,
+              cache,
+              tokenRef.info.mint as PublicKey
+            ))
+          ) {
+            return mention;
           }
         }
       })
