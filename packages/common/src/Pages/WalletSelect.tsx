@@ -20,7 +20,7 @@ export const WalletSelect: React.FC<IWalletSelect> = ({
 
   const handleOnSelect = (name: WalletName) => {
     if (onSelect) {
-      onSelect(name)
+      onSelect(name);
     } else {
       select(name);
       connect();

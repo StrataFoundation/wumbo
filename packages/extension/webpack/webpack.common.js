@@ -71,6 +71,7 @@ module.exports = {
       ),
       "@chakra-ui/react": path.resolve("../../node_modules/@chakra-ui/react"),
       "@solana/wallet-adapter-react": path.resolve("../../node_modules/@solana/wallet-adapter-react"),
+      "@toruslabs/solana-embed": path.resolve("../../node_modules/@toruslabs/solana-embed"),
       ...process.env.LINKED_DEV ? {
         "@strata-foundation/react": path.resolve("./node_modules/@strata-foundation/react"),
         "@strata-foundation/spl-token-bonding": path.resolve("./node_modules/@strata-foundation/spl-token-bonding"),

@@ -54,7 +54,6 @@ export const WalletAutoConnect = () => {
     )
       return;
 
-
     connect();
   }, [ready, connecting, connected, wallet, connect]);
 
