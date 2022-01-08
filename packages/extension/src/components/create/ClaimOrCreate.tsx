@@ -33,6 +33,11 @@ export default React.memo(() => {
   const { handle: ownerTwitterHandle, error: reverseTwitterError } =
     useReverseTwitter(publicKey || undefined);
   const { userInfo, loading: loading2 } = useUserInfo(query.get("name")!);
+  let goLiveDate = new Date(0);
+  // Can uncomment when creating with wumbo.
+  // goLiveDate.setUTCSeconds(1642518000); // 9am CST on January 18th
+  goLiveDate.setUTCSeconds(wumboConfig.goLiveUnixTime); // 9am CST on January 19th
+  const isLive = new Date() > goLiveDate;
 
   const createCreator = async () => {
     const handle = query.get("name")!;
@@ -41,10 +46,7 @@ export default React.memo(() => {
       SplTokenCollective.OPEN_COLLECTIVE_ID
     ))!;
     const config = collectiveAcct.config.unclaimedTokenBondingSettings as any;
-    let goLiveDate = new Date(0);
-    // Can uncomment when creating with wumbo.
-    // goLiveDate.setUTCSeconds(1642518000); // 9am CST on January 18th
-    goLiveDate.setUTCSeconds(wumboConfig.goLiveUnixTime); // 9am CST on January 19th
+    
     // After the launch, use the normal logic
     // TODO: We can rm all of this logic after launch
     if (new Date() > goLiveDate) {
@@ -83,7 +85,6 @@ export default React.memo(() => {
       ) + `?name=${query.get("name")!}`
     );
   };
-  const { provider } = useProvider();
 
   const {
     execute,
@@ -100,8 +101,8 @@ export default React.memo(() => {
   const { handleErrors } = useErrorHandler();
   handleErrors(reverseTwitterError, error, claimError);
   const showCreate = useMemo(
-    () => !userInfo && !loading2,
-    [userInfo, loading2]
+    () => !userInfo && !loading2 && isLive,
+    [userInfo, loading2, isLive]
   );
 
   const or = (
