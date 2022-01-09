@@ -87,7 +87,7 @@ export const ViewNftRaw = React.memo(
                 letterSpacing="wide"
                 fontSize="sm"
               >
-                {displayName(token.data?.properties.category)} &bull;{" "}
+                {displayName(token.data?.properties?.category)} &bull;{" "}
                 {token.edition
                   ? `Editon no. ${token.edition.edition.toNumber()} of ${token.masterEdition?.supply.toNumber()}`
                   : token.masterEdition

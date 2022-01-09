@@ -158,7 +158,7 @@ export const Nft: React.FC<{
     getLast(animationURL.split("?"))
   ).get("ext");
 
-  const category = data?.properties.category;
+  const category = data?.properties?.category;
   const imageUri = image || getImageFromMeta(data.image);
   const imageComponent = (
     <Image src={imageUri} alt={data?.name} {...imageProps} />
@@ -176,7 +176,7 @@ export const Nft: React.FC<{
         style={style}
         uri={imageUri}
         animationUrl={animationURL}
-        files={data?.properties.files}
+        files={data?.properties?.files}
       />
     );
   }
@@ -185,7 +185,7 @@ export const Nft: React.FC<{
     return (
       <VideoArtContent
         image={imageComponent}
-        files={data?.properties.files}
+        files={data?.properties?.files}
         uri={imageUri}
         animationURL={animationURL}
         active={true}

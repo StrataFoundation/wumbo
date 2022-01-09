@@ -23,7 +23,6 @@ export const WalletSelect: React.FC<IWalletSelect> = ({
       onSelect(name);
     } else {
       select(name);
-      connect();
     }
   };
 
