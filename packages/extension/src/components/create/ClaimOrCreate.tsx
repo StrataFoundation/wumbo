@@ -101,8 +101,8 @@ export default React.memo(() => {
   const { handleErrors } = useErrorHandler();
   handleErrors(reverseTwitterError, error, claimError);
   const showCreate = useMemo(
-    () => !userInfo && !loading2 && isLive,
-    [userInfo, loading2, isLive]
+    () => !userInfo && !loading2,
+    [userInfo, loading2]
   );
 
   const or = (
@@ -116,6 +116,12 @@ export default React.memo(() => {
     <>
       {showCreate && (
         <Button
+          disabled={!isLive}
+          title={
+            !isLive
+              ? `Minting tokens for others enabled on ${goLiveDate.toLocaleString()}`
+              : undefined
+          }
           w="full"
           size="md"
           colorScheme="indigo"

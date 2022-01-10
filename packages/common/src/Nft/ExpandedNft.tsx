@@ -35,7 +35,7 @@ export const ExpandedNft = ({
       <ModalBody display="flex" justifyContent="center" alignItems="center">
         {tokenData.data && (
           // @ts-ignore
-          <Nft data={tokenData.data} />
+          <Nft image={tokenData.image} data={tokenData.data} />
         )}
       </ModalBody>
     </ModalContent>
