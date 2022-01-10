@@ -1,6 +1,5 @@
 import React from "react";
 import { useWallet } from "@solana/wallet-adapter-react";
-import { WalletName } from "@solana/wallet-adapter-base";
 import {
   Box,
   Flex,
@@ -12,7 +11,7 @@ import {
   Image,
 } from "@chakra-ui/react";
 import { useModal } from "../../../../contexts";
-import claim1illu from "../../../../assets/images/claim1illu.png";
+import claim1illu from "../../../../assets/images/Claim1Illu.png";
 import TorusBlack from "../../../../assets/images/torusblack.png";
 import {
   useClaimedTokenRefKey,
