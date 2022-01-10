@@ -3766,7 +3766,7 @@
   dependencies:
     eventemitter3 "^4.0.7"
 
-"@solana/wallet-adapter-base@^0.9.0", "@solana/wallet-adapter-base@^0.9.1":
+"@solana/wallet-adapter-base@^0.9.1":
   version "0.9.1"
   resolved "https://registry.yarnpkg.com/@solana/wallet-adapter-base/-/wallet-adapter-base-0.9.1.tgz#41aecdffc260630ef9d64e9ce0e14b5dd2b96185"
   integrity sha512-RhIpz+UiLhqoF3hk5oz0uDDGICV8P6NShI9u3YCFLzp0rFt6ZhvfQL58hXEvOs0Vo7jvu06pm7Bh4arpU4tgIA==
@@ -3916,7 +3916,7 @@
   resolved "https://registry.yarnpkg.com/@solana/wallet-adapter-react/-/wallet-adapter-react-0.13.1.tgz#7014f85b4d60a1c2b0e8c72c12baa0b1b5172854"
   integrity sha512-Sk45AuOF8EgmR28zcib5NquvOwTpBlyDA8Iku1MVdXUQ9giA/tBwfJw21HIf1r+TVepg+V0xAP5FhP+MX0p6QQ==
 
-"@solana/wallet-adapter-react@^0.15.0":
+"@solana/wallet-adapter-react@^0.15.1":
   version "0.15.1"
   resolved "https://registry.yarnpkg.com/@solana/wallet-adapter-react/-/wallet-adapter-react-0.15.1.tgz#f5e2d506e5b46e629f4f1911f52b3bf76ff4e9a5"
   integrity sha512-7b5pqne7D2cuK+6mM2JVuk+G/kl/oIuLkD/g8lzmXbFocAZDyGI35SeqFMU7tH1+WXj31sgb28d6MbVpILeimA==
