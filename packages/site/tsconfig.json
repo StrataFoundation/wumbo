@@ -4,10 +4,14 @@
     "allowSyntheticDefaultImports": true,
     "baseUrl": "src",
     "forceConsistentCasingInFileNames": true,
-    "isolatedModules": false,
-    "jsx": "react",
-    "lib": ["DOM", "DOM.Iterable", "ESNext"],
-    "module": "commonjs",
+    "isolatedModules": true,
+    "jsx": "react-jsx",
+    "lib": [
+      "DOM",
+      "DOM.Iterable",
+      "ESNext"
+    ],
+    "module": "esnext",
     "moduleResolution": "Node",
     "resolveJsonModule": true,
     "skipLibCheck": true,
@@ -18,8 +22,18 @@
     "sourceMap": true,
     "strict": true,
     "target": "es6",
-    "typeRoots": ["node_modules/@types"]
+    "typeRoots": [
+      "node_modules/@types"
+    ],
+    "allowJs": true,
+    "noFallthroughCasesInSwitch": true,
+    "noEmit": true
   },
-  "include": ["src"],
-  "exclude": ["dist", "node_modules"]
+  "include": [
+    "src"
+  ],
+  "exclude": [
+    "dist",
+    "node_modules"
+  ]
 }
