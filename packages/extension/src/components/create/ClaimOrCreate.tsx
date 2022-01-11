@@ -116,7 +116,7 @@ export default React.memo(() => {
     <>
       {showCreate && (
         <Button
-          disabled={!isLive}
+          disabled={!isLive || creationLoading}
           title={
             !isLive
               ? `Minting tokens for others enabled on ${goLiveDate.toLocaleString()}`
