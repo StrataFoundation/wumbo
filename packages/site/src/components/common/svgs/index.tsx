@@ -1,0 +1,1 @@
+export { MatchaLogo } from "./Matcha";

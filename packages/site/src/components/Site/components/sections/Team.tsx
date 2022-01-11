@@ -10,8 +10,13 @@ import {
   HStack,
   Icon,
 } from "@chakra-ui/react";
-import { RiTwitterFill, RiDiscordFill } from "react-icons/ri";
+import {
+  RiTwitterFill,
+  RiDiscordFill,
+  RiExternalLinkLine,
+} from "react-icons/ri";
 import { LandingLayout } from "../layouts/LandingLayout";
+import { MatchaLogo } from "../../../common/svgs";
 
 interface ITeamMemberProps {
   image: string;
@@ -28,14 +33,16 @@ const TeamMember: React.FC<ITeamMemberProps> = ({
   twitter,
   discord,
 }) => (
-  <VStack>
+  <VStack spacing={2}>
     <Box w={{ base: "140px", md: "180px" }} h={{ base: "140px", md: "180px" }}>
       <Image w="100%" h="100%" objectFit="cover" rounded="lg" src={image} />
     </Box>
-    <Text fontSize="lg" fontWeight="bold">
-      {name}
-    </Text>
-    <Text fontSize="">{title}</Text>
+    <VStack spacing={0}>
+      <Text fontSize="lg" fontWeight="bold">
+        {name}
+      </Text>
+      <Text fontSize="md">{title}</Text>
+    </VStack>
     <HStack>
       {twitter && (
         <Link to={{ pathname: twitter }} target="_blank">
@@ -112,6 +119,25 @@ export const Team: React.FC = () => (
               name="Frank De Czito"
               title="Global Marketing"
             />
+          </HStack>
+          <HStack>
+            <Box p={4} bgColor="#6FCF97" color="white" rounded="2xl" mr={2}>
+              <Icon as={MatchaLogo} w={14} h={14} />
+            </Box>
+            <Box>
+              <HStack spacing={2}>
+                <Text fontSize="lg" fontWeight="bold">
+                  Matcha Design Labs
+                </Text>
+                <Link
+                  to={{ pathname: "https://www.matchadesignlabs.com/" }}
+                  target="_blank"
+                >
+                  <Icon as={RiExternalLinkLine} color="indigo.500" />
+                </Link>
+              </HStack>
+              <Text fontSize="md">UX/Product Design Partner</Text>
+            </Box>
           </HStack>
         </VStack>
       </Flex>

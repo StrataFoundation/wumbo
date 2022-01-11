@@ -1,5 +1,5 @@
-import React, { useEffect } from "react";
-import { Switch, Route, useLocation } from "react-router-dom";
+import React from "react";
+import { Switch, Route } from "react-router-dom";
 import { Flex } from "@chakra-ui/react";
 import { Header } from "./components/common/Header";
 import { Workspace } from "./components/common/Workspace";
@@ -19,23 +19,12 @@ import { ContextProviders } from "./ContextProviders";
 
 import { WalletSelectModal } from "./components/modals/WalletSelectModal";
 
-const ScrollToTop = () => {
-  const { pathname, search } = useLocation();
-
-  useEffect(() => {
-    window.scrollTo(0, 0);
-  }, [pathname, search]);
-
-  return null;
-};
-
 export const App: React.FC = () => (
   <ContextProviders>
     <Flex w="full" h="100vh" flexDirection="column">
       <Header />
 
       <Workspace>
-        <ScrollToTop />
         <Switch>
           <Route path={AppRoutes.claim.path} component={ClaimRoute} />
           <Route path={AppRoutes.wallet.path} component={Wallet} />

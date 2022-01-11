@@ -177,7 +177,7 @@ export const Claim2: React.FC<IClaim2Props> = ({ handle, incrementStep }) => {
       >
         <Text fontWeight="bold">Worried about potential legal problems?</Text>
         <Link
-          href="https://teamwumbo.medium.com/wum-bo-hello-world-hello-twitter-fa3a7b8b6957"
+          href="https://strataprotocol.com/blog/us-social-token-law"
           color="indigo.500"
           isExternal
         >
