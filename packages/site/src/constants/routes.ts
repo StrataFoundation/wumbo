@@ -1,5 +1,5 @@
 import { PublicKey } from "@solana/web3.js";
-import { replaceAll } from "wumbo-common";
+import { replaceAll, toQueryString } from "wumbo-common";
 
 type Route = {
   path: string;
@@ -12,6 +12,7 @@ interface ISiteRoutes {
 interface IAppRoutes {
   root: Route;
   claim: Route;
+  optOut: Route;
   viewProfile: Route;
   viewNft: Route;
   profile: Route;
@@ -25,6 +26,24 @@ interface IAppRoutes {
   swap: Route;
   prototype: Route;
 }
+
+export const AppRoutes: IAppRoutes = {
+  root: { path: "/app" },
+  claim: { path: "/app/claim" },
+  optOut: { path: "/app/optOut" },
+  manageWallet: { path: "/app/manage-wallet" },
+  wallet: { path: "/app/wallet" },
+  viewProfile: { path: "/app/profile/view/:mint" },
+  viewNft: { path: "/app/nft/view/:mint" },
+  profile: { path: "/app/profile" },
+  editProfile: { path: "/app/profile/edit" },
+  topTokens: { path: "/app/top-tokens/:tokenBondingKey" },
+  wumNetWorth: { path: "/app/wum-net-worth/:wallet" },
+  sendSearch: { path: "/app/send" },
+  send: { path: "/app/send/:mint" },
+  swap: { path: "/app/swap/:tokenBondingKey/:baseMint/:targetMint" },
+  prototype: { path: "/app/prototype" },
+};
 
 export function sendPath(mint: PublicKey, recipient?: PublicKey): string {
   return (
@@ -73,35 +92,14 @@ export const SiteRoutes: ISiteRoutes = {
   root: { path: "/" },
 };
 
-export const claimPath = ({
-  step,
-  handle = undefined,
-  code = undefined,
-}: {
-  step?: string;
-  handle?: string;
+export const claimPath = (args: {
+  step: string;
+  handle: string;
   code?: string;
-}): string => {
-  if (!code) {
-    return `${AppRoutes.claim.path}?step=${step}&handle=${handle}`;
-  }
+}): string => `${AppRoutes.claim.path}?${toQueryString(args)}`;
 
-  return `${AppRoutes.claim.path}?step=${step}&handle=${handle}&code=${code}`;
-};
-
-export const AppRoutes: IAppRoutes = {
-  root: { path: "/app" },
-  claim: { path: "/app/claim" },
-  manageWallet: { path: "/app/manage-wallet" },
-  wallet: { path: "/app/wallet" },
-  viewProfile: { path: "/app/profile/view/:mint" },
-  viewNft: { path: "/app/nft/view/:mint" },
-  profile: { path: "/app/profile" },
-  editProfile: { path: "/app/profile/edit" },
-  topTokens: { path: "/app/top-tokens/:tokenBondingKey" },
-  wumNetWorth: { path: "/app/wum-net-worth/:wallet" },
-  sendSearch: { path: "/app/send" },
-  send: { path: "/app/send/:mint" },
-  swap: { path: "/app/swap/:tokenBondingKey/:baseMint/:targetMint" },
-  prototype: { path: "/app/prototype" },
-};
+export const optOutPath = (args: {
+  handle: string;
+  fiatLocked: number;
+  claimableAmount: number;
+}): string => `${AppRoutes.optOut.path}?${toQueryString(args)}`;

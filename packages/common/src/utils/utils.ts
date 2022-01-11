@@ -42,3 +42,8 @@ export const replaceAll = (str: string, mapObj: Record<string, string>) => {
 
   return str.replace(re, (matched: string) => mapObj[matched]);
 };
+
+export const toQueryString = (args: { [key: string]: any }): string =>
+  Object.keys(args)
+    .map((key) => key + "=" + args[key])
+    .join("&");
