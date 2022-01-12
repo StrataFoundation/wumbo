@@ -42,7 +42,12 @@ export const useNfts = (): INft[] | null => {
         const newNfts = (
           await Promise.all(
             images.flatMap(async (img) => {
-              const mintKey = await getNftMintCached(cache, img.src, config.verifiers.nftVerifier, config.tlds.nftVerifier);
+              const mintKey = await getNftMintCached(
+                cache,
+                img.src,
+                config.verifiers.nftVerifier,
+                config.tlds.nftVerifier
+              );
               if (mintKey) {
                 img.className = `${img.className} nft-tagged`;
                 if (!img.id) {

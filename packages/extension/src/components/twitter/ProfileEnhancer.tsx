@@ -49,7 +49,8 @@ async function getTaggableNft(
     tokens
       .filter((token) => token.mint?.decimals == 0)
       .map(async (token) => {
-        const isMatch = token.image && (await imagesMatch(img1, token.image, threshold));
+        const isMatch =
+          token.image && (await imagesMatch(img1, token.image, threshold));
         if (isMatch) {
           return token;
         } else {

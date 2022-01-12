@@ -22,7 +22,7 @@ import {
   useErrorHandler,
   useProvider,
   useCollective,
-  humanReadablePercentage
+  humanReadablePercentage,
 } from "@strata-foundation/react";
 import { ISetMetadataArgs, useSetMetadata } from "../hooks";
 import { TokenPill } from "../TokenPill";
@@ -66,11 +66,12 @@ export const EditProfile = React.memo(
     } = useForm<ISetMetadataArgs>({
       resolver: yupResolver(validationSchema),
     });
-    const { info: collective } = useCollective(tokenRef?.collective)
-    const tokenBondingSettings = collective?.config.claimedTokenBondingSettings as ITokenBondingSettings | undefined;
+    const { info: collective } = useCollective(tokenRef?.collective);
+    const tokenBondingSettings = collective?.config
+      .claimedTokenBondingSettings as ITokenBondingSettings | undefined;
 
     function percentOr(percentu32: number | undefined, def: number) {
-      return percentu32 ? Number(humanReadablePercentage(percentu32)) : def
+      return percentu32 ? Number(humanReadablePercentage(percentu32)) : def;
     }
 
     const { info: tokenBonding, loading: loadingTokenBonding } =
@@ -256,8 +257,14 @@ export const EditProfile = React.memo(
                 <Input
                   isRequired
                   type="number"
-                  min={percentOr(tokenBondingSettings?.minBuyTargetRoyaltyPercentage, 0)}
-                  max={percentOr(tokenBondingSettings?.maxBuyTargetRoyaltyPercentage, 100)}
+                  min={percentOr(
+                    tokenBondingSettings?.minBuyTargetRoyaltyPercentage,
+                    0
+                  )}
+                  max={percentOr(
+                    tokenBondingSettings?.maxBuyTargetRoyaltyPercentage,
+                    100
+                  )}
                   placeholder="5"
                   defaultValue={5}
                   step={0.00001}
@@ -274,8 +281,14 @@ export const EditProfile = React.memo(
                 <Input
                   isRequired
                   type="number"
-                  min={percentOr(tokenBondingSettings?.minSellTargetRoyaltyPercentage, 0)}
-                  max={percentOr(tokenBondingSettings?.maxSellTargetRoyaltyPercentage, 100)}
+                  min={percentOr(
+                    tokenBondingSettings?.minSellTargetRoyaltyPercentage,
+                    0
+                  )}
+                  max={percentOr(
+                    tokenBondingSettings?.maxSellTargetRoyaltyPercentage,
+                    100
+                  )}
                   placeholder="5"
                   defaultValue={5}
                   step={0.00001}
@@ -289,8 +302,14 @@ export const EditProfile = React.memo(
                 <Input
                   isRequired
                   type="number"
-                  min={percentOr(tokenBondingSettings?.minBuyBaseRoyaltyPercentage, 0)}
-                  max={percentOr(tokenBondingSettings?.maxBuyBaseRoyaltyPercentage, 100)}
+                  min={percentOr(
+                    tokenBondingSettings?.minBuyBaseRoyaltyPercentage,
+                    0
+                  )}
+                  max={percentOr(
+                    tokenBondingSettings?.maxBuyBaseRoyaltyPercentage,
+                    100
+                  )}
                   placeholder="5"
                   defaultValue={5}
                   step={0.00001}
@@ -305,8 +324,14 @@ export const EditProfile = React.memo(
                 <Input
                   isRequired
                   type="number"
-                  min={percentOr(tokenBondingSettings?.minSellBaseRoyaltyPercentage, 0)}
-                  max={percentOr(tokenBondingSettings?.maxSellBaseRoyaltyPercentage, 100)}
+                  min={percentOr(
+                    tokenBondingSettings?.minSellBaseRoyaltyPercentage,
+                    0
+                  )}
+                  max={percentOr(
+                    tokenBondingSettings?.maxSellBaseRoyaltyPercentage,
+                    100
+                  )}
                   placeholder="5"
                   defaultValue={5}
                   step={0.00001}
@@ -351,4 +376,3 @@ export const EditProfile = React.memo(
     );
   }
 );
-

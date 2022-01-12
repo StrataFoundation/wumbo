@@ -10,12 +10,12 @@ import {
 } from "@strata-foundation/spl-utils";
 import { deserializeUnchecked } from "borsh";
 
-export async function getNftNameRecordKey(imgUrl: string, verifier: PublicKey, tld: PublicKey): Promise<PublicKey> {
-  return getNameAccountKey(
-    await getHashedName(imgUrl),
-    verifier,
-    tld
-  );
+export async function getNftNameRecordKey(
+  imgUrl: string,
+  verifier: PublicKey,
+  tld: PublicKey
+): Promise<PublicKey> {
+  return getNameAccountKey(await getHashedName(imgUrl), verifier, tld);
 }
 
 export async function getNftMetadataKey(

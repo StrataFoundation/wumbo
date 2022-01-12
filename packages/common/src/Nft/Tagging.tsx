@@ -272,7 +272,7 @@ export const TaggableImages = ({
       setSelected({});
     }
   }, [allSelected, matches, setSelected]);
-                
+
   const config = useConfig();
 
   useEffect(() => {
@@ -289,7 +289,11 @@ export const TaggableImages = ({
           const newMatches = (
             await Promise.all(
               Object.entries(imagesBySrc).map(async ([img2Src, images]) => {
-                const key = await getNftNameRecordKey(img2Src, config.verifiers.nftVerifier, config.tlds.nftVerifier);
+                const key = await getNftNameRecordKey(
+                  img2Src,
+                  config.verifiers.nftVerifier,
+                  config.tlds.nftVerifier
+                );
                 const alreadyExists = await cache.search(key, undefined, true);
 
                 if (!alreadyExists) {
