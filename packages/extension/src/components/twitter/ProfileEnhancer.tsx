@@ -5,9 +5,9 @@ import {
   ThemeProvider,
   AppendChildPortal,
   usePrevious,
-  TAGGING_THRESHOLD,
   useUserTokensWithMeta,
   truthy,
+  useConfig,
 } from "wumbo-common";
 import { useProfile } from "../../utils/twitterSpotter";
 import { MainButton } from "../MainButton";
@@ -26,18 +26,20 @@ import { WalletAutoConnect } from "../wallet/WalletAutoConnect";
 
 async function imagesMatch(
   img1: Blob | undefined,
-  img2Src: string
+  img2Src: string,
+  threshold: number
 ): Promise<boolean> {
   const img2 = await getBufferFromUrl(img2Src);
   const mismatchPercent = +(
     await compareImages(img1, img2, { scaleToSameSize: true })
   ).misMatchPercentage;
-  return mismatchPercent <= TAGGING_THRESHOLD;
+  return mismatchPercent <= threshold;
 }
 
 async function getTaggableNft(
   img1: Blob | undefined,
-  tokens: ITokenWithMetaAndAccount[] | undefined
+  tokens: ITokenWithMetaAndAccount[] | undefined,
+  threshold: number
 ): Promise<ITokenWithMetaAndAccount | undefined> {
   if (!img1 || !tokens) {
     return;
@@ -47,7 +49,7 @@ async function getTaggableNft(
     tokens
       .filter((token) => token.mint?.decimals == 0)
       .map(async (token) => {
-        const isMatch = token.image && (await imagesMatch(img1, token.image));
+        const isMatch = token.image && (await imagesMatch(img1, token.image, threshold));
         if (isMatch) {
           return token;
         } else {
@@ -91,11 +93,12 @@ export const ProfileEnhancer = () => {
   } = useUserTokensWithMeta(publicKey || undefined);
 
   const { handleErrors } = useErrorHandler();
+  const config = useConfig();
   const {
     result: pfpMatch,
     error: pfpMatcherError,
     loading,
-  } = useAsync(getTaggableNft, [img1, tokens]);
+  } = useAsync(getTaggableNft, [img1, tokens, config.nftMismatchThreshold]);
 
   handleErrors(error, bufferError, pfpMatcherError);
   const { toggleDrawer } = useDrawer();

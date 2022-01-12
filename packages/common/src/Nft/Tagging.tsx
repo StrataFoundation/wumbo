@@ -18,12 +18,12 @@ import {
 } from "@strata-foundation/react";
 import {
   NFT_VERIFIER_URL,
-  TAGGING_THRESHOLD,
   getNftNameRecordKey,
   truthy,
   ThemeProvider,
   Spinner,
   FloatPortal,
+  useConfig,
 } from "../";
 import { useConnection, useWallet } from "@solana/wallet-adapter-react";
 
@@ -272,6 +272,8 @@ export const TaggableImages = ({
       setSelected({});
     }
   }, [allSelected, matches, setSelected]);
+                
+  const config = useConfig();
 
   useEffect(() => {
     (async () => {
@@ -287,7 +289,7 @@ export const TaggableImages = ({
           const newMatches = (
             await Promise.all(
               Object.entries(imagesBySrc).map(async ([img2Src, images]) => {
-                const key = await getNftNameRecordKey(img2Src);
+                const key = await getNftNameRecordKey(img2Src, config.verifiers.nftVerifier, config.tlds.nftVerifier);
                 const alreadyExists = await cache.search(key, undefined, true);
 
                 if (!alreadyExists) {
@@ -295,7 +297,7 @@ export const TaggableImages = ({
                   const mismatchPercent = +(
                     await compareImages(img1, img2, { scaleToSameSize: true })
                   ).misMatchPercentage;
-                  if (mismatchPercent <= TAGGING_THRESHOLD) {
+                  if (mismatchPercent <= config.nftMismatchThreshold) {
                     return [
                       img2Src,
                       {

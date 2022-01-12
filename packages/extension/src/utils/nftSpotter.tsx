@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react";
-import { getNftMint, getUntaggedImages, truthy } from "wumbo-common";
+import { getNftMint, getUntaggedImages, truthy, useConfig } from "wumbo-common";
 import { useAccountFetchCache } from "@strata-foundation/react";
 import { AccountFetchCache } from "@strata-foundation/spl-utils";
+import { PublicKey } from "@solana/web3.js";
 
 interface INft {
   img: HTMLImageElement;
@@ -12,19 +13,22 @@ interface INft {
 let metadataKeyCache = new Map<string, string>();
 async function getNftMintCached(
   cache: AccountFetchCache,
-  src: string
+  src: string,
+  verifier: PublicKey,
+  tld: PublicKey
 ): Promise<string | undefined> {
   if (metadataKeyCache.has(src)) {
     return metadataKeyCache.get(src);
   }
 
-  return (await getNftMint(cache, src))?.toBase58();
+  return (await getNftMint(cache, src, verifier, tld))?.toBase58();
 }
 
 let incrementingId = 0;
 export const useNfts = (): INft[] | null => {
   const [nfts, setNfts] = useState<INft[]>([]);
   const cache = useAccountFetchCache();
+  const config = useConfig();
 
   useEffect(() => {
     let timeout: NodeJS.Timeout | null = null;
@@ -38,7 +42,7 @@ export const useNfts = (): INft[] | null => {
         const newNfts = (
           await Promise.all(
             images.flatMap(async (img) => {
-              const mintKey = await getNftMintCached(cache, img.src);
+              const mintKey = await getNftMintCached(cache, img.src, config.verifiers.nftVerifier, config.tlds.nftVerifier);
               if (mintKey) {
                 img.className = `${img.className} nft-tagged`;
                 if (!img.id) {

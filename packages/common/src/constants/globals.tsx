@@ -6,21 +6,12 @@ export const WUMBO_TRANSACTION_FEE: number = Number(
   process.env.REACT_APP_WUMBO_TRANSACTION_FEE!
 );
 export const DEFAULT_COMMITMENT = "processed";
-export const TAGGING_THRESHOLD = Number(
-  process.env.REACT_APP_TAGGING_THRESHOLD!
-);
 export const SITE_URL = process.env.REACT_APP_SITE_URL;
 export const ARWEAVE_UPLOAD_URL = process.env.REACT_APP_ARWEAVE_UPLOAD_URL!;
 export const STRATA_API_URL = process.env.REACT_APP_STRATA_API_URL!;
 export const WUMBO_IDENTITY_SERVICE_URL =
   process.env.REACT_APP_WUMBO_IDENTITY_SERVICE_URL!;
 export const NFT_VERIFIER_URL = process.env.REACT_APP_NFT_VERIFIER_URL;
-
-export const NFT_VERIFIER_TLD = new PublicKey(
-  process.env.REACT_APP_NFT_VERIFIER_TLD!
-);
-
-export const NFT_VERIFIER = new PublicKey(process.env.REACT_APP_NFT_VERIFIER!);
 
 export const TROPHY_CREATOR = new PublicKey(
   process.env.REACT_APP_TROPHY_CREATOR!

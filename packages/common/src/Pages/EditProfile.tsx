@@ -21,11 +21,14 @@ import {
   usePrimaryClaimedTokenRef,
   useErrorHandler,
   useProvider,
+  useCollective,
+  humanReadablePercentage
 } from "@strata-foundation/react";
 import { ISetMetadataArgs, useSetMetadata } from "../hooks";
 import { TokenPill } from "../TokenPill";
 import { Avatar } from "../Avatar";
 import { Spinner } from "../Spinner";
+import { ITokenBondingSettings } from "@strata-foundation/spl-token-collective";
 
 interface IEditProfileProps {
   ownerWalletKey: PublicKey;
@@ -63,6 +66,12 @@ export const EditProfile = React.memo(
     } = useForm<ISetMetadataArgs>({
       resolver: yupResolver(validationSchema),
     });
+    const { info: collective } = useCollective(tokenRef?.collective)
+    const tokenBondingSettings = collective?.config.claimedTokenBondingSettings as ITokenBondingSettings | undefined;
+
+    function percentOr(percentu32: number | undefined, def: number) {
+      return percentu32 ? Number(humanReadablePercentage(percentu32)) : def
+    }
 
     const { info: tokenBonding, loading: loadingTokenBonding } =
       useTokenBonding(tokenRef?.tokenBonding);
@@ -247,8 +256,8 @@ export const EditProfile = React.memo(
                 <Input
                   isRequired
                   type="number"
-                  min={0}
-                  max={100}
+                  min={percentOr(tokenBondingSettings?.minBuyTargetRoyaltyPercentage, 0)}
+                  max={percentOr(tokenBondingSettings?.maxBuyTargetRoyaltyPercentage, 100)}
                   placeholder="5"
                   defaultValue={5}
                   step={0.00001}
@@ -265,8 +274,8 @@ export const EditProfile = React.memo(
                 <Input
                   isRequired
                   type="number"
-                  min={0}
-                  max={100}
+                  min={percentOr(tokenBondingSettings?.minSellTargetRoyaltyPercentage, 0)}
+                  max={percentOr(tokenBondingSettings?.maxSellTargetRoyaltyPercentage, 100)}
                   placeholder="5"
                   defaultValue={5}
                   step={0.00001}
@@ -280,8 +289,8 @@ export const EditProfile = React.memo(
                 <Input
                   isRequired
                   type="number"
-                  min={0}
-                  max={100}
+                  min={percentOr(tokenBondingSettings?.minBuyBaseRoyaltyPercentage, 0)}
+                  max={percentOr(tokenBondingSettings?.maxBuyBaseRoyaltyPercentage, 100)}
                   placeholder="5"
                   defaultValue={5}
                   step={0.00001}
@@ -296,8 +305,8 @@ export const EditProfile = React.memo(
                 <Input
                   isRequired
                   type="number"
-                  min={0}
-                  max={100}
+                  min={percentOr(tokenBondingSettings?.minSellBaseRoyaltyPercentage, 0)}
+                  max={percentOr(tokenBondingSettings?.maxSellBaseRoyaltyPercentage, 100)}
                   placeholder="5"
                   defaultValue={5}
                   step={0.00001}
@@ -342,3 +351,4 @@ export const EditProfile = React.memo(
     );
   }
 );
+

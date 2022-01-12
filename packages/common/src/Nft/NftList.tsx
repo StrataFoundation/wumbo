@@ -39,6 +39,8 @@ export const NftListRaw = React.memo(
       );
     }
 
+    
+
     return (
       <SimpleGrid w="full" minChildWidth="93px" spacing={4}>
         {tokens
