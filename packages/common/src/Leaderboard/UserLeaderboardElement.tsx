@@ -11,7 +11,7 @@ export const UserLeaderboardElement = React.memo(
     displayKey,
     onClick,
     mint,
-    backupName
+    backupName,
   }: {
     onClick?: () => void;
     displayKey: PublicKey | undefined;
@@ -22,7 +22,9 @@ export const UserLeaderboardElement = React.memo(
     const { metadata, image, loading, error } = useTokenMetadata(mint);
 
     const name =
-      metadata?.data.name || backupName || (displayKey && truncatePubkey(displayKey));
+      metadata?.data.name ||
+      backupName ||
+      (displayKey && truncatePubkey(displayKey));
     const symbol = metadata?.data.symbol;
 
     const { handleErrors } = useErrorHandler();

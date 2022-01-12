@@ -5,7 +5,7 @@ import {
   useClaimedTokenRefKey,
   usePublicKey,
   useTokenBondingFromMint,
-  useTokenRef
+  useTokenRef,
 } from "@strata-foundation/react";
 import { ITokenWithMetaAndAccount } from "@strata-foundation/spl-token-collective";
 import React from "react";
@@ -15,7 +15,7 @@ import {
   AppRoutes,
   nftPath,
   profilePath,
-  swapPath
+  swapPath,
 } from "../../../../../constants/routes";
 import { AppContainer } from "../../common/AppContainer";
 import WalletRedirect from "../../Wallet/WalletRedirect";
@@ -79,10 +79,9 @@ export const ViewProfileRoute: React.FC = () => {
         mintKey={mintKey}
         onAccountClick={(mintKey?: PublicKey, handle?: string) => {
           if (handle) {
-            history.push(AppRoutes.profile.path +
-                `?name=${handle}`)
+            history.push(AppRoutes.profile.path + `?name=${handle}`);
           } else if (mintKey) {
-            history.push(profilePath(mintKey))
+            history.push(profilePath(mintKey));
           }
         }}
         getNftLink={(token: ITokenWithMetaAndAccount) => {

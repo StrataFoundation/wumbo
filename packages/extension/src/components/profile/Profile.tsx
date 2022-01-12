@@ -3,7 +3,7 @@ import {
   routes,
   sendSearchPath,
   swapPath,
-  viewProfilePath
+  viewProfilePath,
 } from "@/constants/routes";
 import { useClaimFlow } from "@/utils/claim";
 import { Box } from "@chakra-ui/react";
@@ -12,14 +12,17 @@ import { PublicKey } from "@solana/web3.js";
 import {
   useMetaplexTokenMetadata,
   usePublicKey,
-  useTokenBonding, useTokenBondingFromMint, useTokenRefForName
+  useTokenBonding,
+  useTokenBondingFromMint,
+  useTokenRefForName,
 } from "@strata-foundation/react";
 import React, { Fragment } from "react";
 import { useHistory, useParams } from "react-router-dom";
 import {
   Profile as CommonProfile,
   useQuery,
-  useReverseTwitter, useTwitterTld
+  useReverseTwitter,
+  useTwitterTld,
 } from "wumbo-common";
 import WalletRedirect from "../wallet/WalletRedirect";
 import { WumboDrawer } from "../WumboDrawer";
@@ -34,8 +37,9 @@ export const Profile = () => {
   const { metadata } = useMetaplexTokenMetadata(tokenRef?.mint);
   const passedMintKey = usePublicKey(params.mint);
   const history = useHistory();
-  const { info: tokenBonding } = useTokenBondingFromMint(passedMintKey || tokenRef?.mint);
-
+  const { info: tokenBonding } = useTokenBondingFromMint(
+    passedMintKey || tokenRef?.mint
+  );
 
   if (!connected) {
     return <WalletRedirect />;
@@ -63,12 +67,12 @@ export const Profile = () => {
 
   return (
     <Fragment>
-      <WumboDrawer.Header title={metadata?.data.name || name || "View Profile"} />
+      <WumboDrawer.Header
+        title={metadata?.data.name || name || "View Profile"}
+      />
       <WumboDrawer.Content>
         <CommonProfile
-          sendPath={sendSearchPath(
-            tokenRef?.owner || undefined
-          )}
+          sendPath={sendSearchPath(tokenRef?.owner || undefined)}
           createPath={routes.create.path + `?name=${name}`}
           collectivePath={
             tokenBonding ? viewProfilePath(tokenBonding.baseMint) : null
@@ -78,10 +82,9 @@ export const Profile = () => {
           mintKey={passedMintKey || tokenRef?.mint}
           onAccountClick={(mintKey, handle) => {
             if (handle) {
-              history.push(routes.profile.path +
-                  `?name=${handle}`)
+              history.push(routes.profile.path + `?name=${handle}`);
             } else if (mintKey) {
-              history.push(viewProfilePath(mintKey))
+              history.push(viewProfilePath(mintKey));
             }
           }}
           onTradeClick={() =>

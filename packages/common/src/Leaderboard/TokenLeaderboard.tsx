@@ -48,7 +48,7 @@ const Element = React.memo(
     const mint = useMint(tokenAccount?.mint);
     const { info: tokenRef, loading: loadingTokenRef } =
       usePrimaryClaimedTokenRef(tokenAccount?.owner);
-    const { handle } = useReverseTwitter(tokenAccount?.owner)
+    const { handle } = useReverseTwitter(tokenAccount?.owner);
 
     if (loading || loadingTokenRef) {
       return <Spinner />;

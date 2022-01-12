@@ -143,21 +143,25 @@ export const Profile = React.memo(
       error: tokenMetadataError,
     } = useTokenMetadata(mintKey);
     const { handle: walletTwitterHandle, error: reverseTwitterError } =
-    useReverseTwitter(publicKey || undefined);
-    
+      useReverseTwitter(publicKey || undefined);
+
     const query = useQuery();
     let { handle: reverseLookupHandle, error: reverseTwitterError2 } =
       useReverseTwitter(mintTokenRef?.owner || undefined);
-    const handle = query.get("name") || reverseLookupHandle || metadata?.data.name || walletTwitterHandle;
+    const handle =
+      query.get("name") ||
+      reverseLookupHandle ||
+      metadata?.data.name ||
+      walletTwitterHandle;
 
     const { owner: ownerWalletKey } = useTwitterOwner(handle);
     const { info: walletTokenRef } = usePrimaryClaimedTokenRef(ownerWalletKey);
 
-    const tokenRef = mintTokenRef || walletTokenRef
+    const tokenRef = mintTokenRef || walletTokenRef;
 
     const { info: tokenBonding, loading: tokenBondingLoading } =
       useTokenBondingFromMint(mintKey || tokenRef?.mint);
-      
+
     const {
       image: collectiveImage,
       metadata: collectiveMetadata,
@@ -171,7 +175,7 @@ export const Profile = React.memo(
 
     const { awaitingApproval } = useProvider();
     const myTokenRefKey = useClaimedTokenRefKey(publicKey, null);
-    
+
     const { data: { tokenRank } = {} } = apolloUseQuery<{
       tokenRank: number | undefined;
     }>(GET_TOKEN_RANK, {
@@ -205,7 +209,6 @@ export const Profile = React.memo(
       fiatPrice &&
       pricing &&
       toFiat(pricing.current(NATIVE_MINT)) * buyTargetRoyaltiesAmount;
-
 
     const {
       claim,
