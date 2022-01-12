@@ -16,10 +16,9 @@ import {
   nftPath,
   profilePath,
   swapPath,
-  sendSearchPath,
 } from "../../../../../constants/routes";
-import WalletRedirect from "../../Wallet/WalletRedirect";
 import { AppContainer } from "../../common/AppContainer";
+import WalletRedirect from "../../Wallet/WalletRedirect";
 
 export const ViewProfileRoute: React.FC = () => {
   const params = useParams<{ mint: string | undefined }>();
@@ -78,8 +77,12 @@ export const ViewProfileRoute: React.FC = () => {
         }
         editPath={AppRoutes.editProfile.path}
         mintKey={mintKey}
-        onAccountClick={(mintKey: PublicKey) => {
-          history.push(profilePath(mintKey));
+        onAccountClick={(mintKey?: PublicKey, handle?: string) => {
+          if (handle) {
+            history.push(AppRoutes.profile.path + `?name=${handle}`);
+          } else if (mintKey) {
+            history.push(profilePath(mintKey));
+          }
         }}
         getNftLink={(token: ITokenWithMetaAndAccount) => {
           const mint = token?.metadata?.mint;

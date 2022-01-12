@@ -11,6 +11,7 @@ import {
 } from "@strata-foundation/react";
 import { amountAsNum } from "@strata-foundation/spl-token-bonding";
 import React, { useMemo } from "react";
+import { useReverseTwitter } from "../utils";
 import { UserLeaderboardElement } from "./UserLeaderboardElement";
 import { WumboUserLeaderboard } from "./WumboUserLeaderboard";
 
@@ -41,12 +42,13 @@ const Element = React.memo(
     onClick,
   }: {
     account: PublicKey;
-    onClick?: (mintKey: PublicKey) => void;
+    onClick?: (mintKey?: PublicKey, handle?: string) => void;
   }) => {
     const { info: tokenAccount, loading } = useTokenAccount(account);
     const mint = useMint(tokenAccount?.mint);
     const { info: tokenRef, loading: loadingTokenRef } =
       usePrimaryClaimedTokenRef(tokenAccount?.owner);
+    const { handle } = useReverseTwitter(tokenAccount?.owner);
 
     if (loading || loadingTokenRef) {
       return <Spinner />;
@@ -55,12 +57,13 @@ const Element = React.memo(
     return (
       <UserLeaderboardElement
         displayKey={tokenAccount?.owner}
+        backupName={handle && `@${handle}`}
         amount={
           tokenAccount &&
           mint &&
           amountAsNum(tokenAccount.amount, mint).toFixed(2)
         }
-        onClick={() => tokenRef && onClick && onClick(tokenRef.mint)}
+        onClick={() => onClick && onClick(tokenRef?.mint, handle)}
         mint={tokenRef?.mint}
       />
     );
@@ -73,7 +76,7 @@ export const TokenLeaderboard = React.memo(
     onAccountClick,
   }: {
     tokenBonding: PublicKey | undefined;
-    onAccountClick?: (mintKey: PublicKey) => void;
+    onAccountClick?: (mintKey?: PublicKey, handle?: string) => void;
   }) => {
     const { wallet, publicKey } = useWallet();
     const { info: tokenBondingAcc } = useTokenBonding(tokenBonding);

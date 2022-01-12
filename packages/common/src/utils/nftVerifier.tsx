@@ -9,22 +9,23 @@ import {
   decodeMetadata,
 } from "@strata-foundation/spl-utils";
 import { deserializeUnchecked } from "borsh";
-import { NFT_VERIFIER, NFT_VERIFIER_TLD } from "../constants/globals";
 
-export async function getNftNameRecordKey(imgUrl: string): Promise<PublicKey> {
-  return getNameAccountKey(
-    await getHashedName(imgUrl),
-    NFT_VERIFIER,
-    NFT_VERIFIER_TLD
-  );
+export async function getNftNameRecordKey(
+  imgUrl: string,
+  verifier: PublicKey,
+  tld: PublicKey
+): Promise<PublicKey> {
+  return getNameAccountKey(await getHashedName(imgUrl), verifier, tld);
 }
 
 export async function getNftMetadataKey(
   cache: AccountFetchCache,
-  imgUrl: string
+  imgUrl: string,
+  verifier: PublicKey,
+  tld: PublicKey
 ): Promise<PublicKey | undefined> {
   const [header, dispose] = await cache.searchAndWatch(
-    await getNftNameRecordKey(imgUrl),
+    await getNftNameRecordKey(imgUrl, verifier, tld),
     (pubkey, account) => {
       const header: NameRegistryState = deserializeUnchecked(
         NameRegistryState.schema,
@@ -56,9 +57,11 @@ export async function getNftMetadataKey(
 
 export async function getNftMint(
   cache: AccountFetchCache,
-  imgUrl: string
+  imgUrl: string,
+  verifier: PublicKey,
+  tld: PublicKey
 ): Promise<PublicKey | undefined> {
-  const metadataKey = await getNftMetadataKey(cache, imgUrl);
+  const metadataKey = await getNftMetadataKey(cache, imgUrl, verifier, tld);
   const metadata =
     metadataKey &&
     (await cache.search(

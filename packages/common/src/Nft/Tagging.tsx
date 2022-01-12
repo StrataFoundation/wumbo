@@ -18,12 +18,12 @@ import {
 } from "@strata-foundation/react";
 import {
   NFT_VERIFIER_URL,
-  TAGGING_THRESHOLD,
   getNftNameRecordKey,
   truthy,
   ThemeProvider,
   Spinner,
   FloatPortal,
+  useConfig,
 } from "../";
 import { useConnection, useWallet } from "@solana/wallet-adapter-react";
 
@@ -77,7 +77,6 @@ export const TaggableImage = React.memo(
     images: HTMLImageElement[];
   }) => {
     const [hovering, setHovering] = useState(false);
-    let sanitizedPercent = (100 - percent).toFixed();
 
     const handleSelect = () => {
       onSelect();
@@ -142,17 +141,6 @@ export const TaggableImage = React.memo(
           <Text fontWeight="medium" isTruncated>
             {src}
           </Text>
-          <HStack w="full">
-            <Text fontSize="sm" color="gray.700">
-              Verification Match: {sanitizedPercent}%
-            </Text>
-            <Box
-              h={2}
-              w={2}
-              rounded="full"
-              bgColor={+sanitizedPercent >= 95 ? "green.500" : "yellow.500"}
-            />
-          </HStack>
         </VStack>
       </HStack>
     );
@@ -273,6 +261,8 @@ export const TaggableImages = ({
     }
   }, [allSelected, matches, setSelected]);
 
+  const config = useConfig();
+
   useEffect(() => {
     (async () => {
       if (img1) {
@@ -287,7 +277,11 @@ export const TaggableImages = ({
           const newMatches = (
             await Promise.all(
               Object.entries(imagesBySrc).map(async ([img2Src, images]) => {
-                const key = await getNftNameRecordKey(img2Src);
+                const key = await getNftNameRecordKey(
+                  img2Src,
+                  config.verifiers.nftVerifier,
+                  config.tlds.nftVerifier
+                );
                 const alreadyExists = await cache.search(key, undefined, true);
 
                 if (!alreadyExists) {
@@ -295,7 +289,7 @@ export const TaggableImages = ({
                   const mismatchPercent = +(
                     await compareImages(img1, img2, { scaleToSameSize: true })
                   ).misMatchPercentage;
-                  if (mismatchPercent <= TAGGING_THRESHOLD) {
+                  if (mismatchPercent <= config.nftMismatchThreshold) {
                     return [
                       img2Src,
                       {
@@ -384,7 +378,7 @@ export const TaggableImages = ({
         isLoading={executing}
         loadingText={awaitingApproval ? "Awaiting Approval" : "Tagging"}
       >
-        {loading ? "Searching..." : "Tag"}
+        {loading ? "Searching..." : "Verify"}
       </Button>
     </VStack>
   );

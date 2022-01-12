@@ -1,28 +1,61 @@
-import React from "react";
+import { Box, Center, SimpleGrid } from "@chakra-ui/react";
 import { PublicKey } from "@solana/web3.js";
-import { SimpleGrid, Box, Center } from "@chakra-ui/react";
-import { useErrorHandler } from "@strata-foundation/react";
+import {
+  TokenAccount,
+  useErrorHandler,
+  useMetaplexTokenMetadata,
+  useWalletTokenAccounts,
+} from "@strata-foundation/react";
 import { ITokenWithMeta } from "@strata-foundation/spl-utils";
-import { ITokenWithMetaAndAccount } from "@strata-foundation/spl-token-collective";
-import { NftCard } from "./NftCard";
+import React from "react";
 import { Spinner } from "../Spinner";
-import { useUserTokensWithMeta } from "../hooks";
+import { NftCard } from "./NftCard";
+
+export const MaybeNft = React.memo(
+  ({
+    tokenAccount,
+    filter,
+    getLink,
+  }: {
+    tokenAccount: TokenAccount;
+    filter?: (t: ITokenWithMeta) => boolean;
+    getLink: (t: ITokenWithMeta) => string;
+  }) => {
+    const metadata = useMetaplexTokenMetadata(tokenAccount.info.mint);
+
+    if (
+      (filter && !filter(metadata)) ||
+      metadata.mint?.decimals != 0 ||
+      !metadata.metadata
+    ) {
+      return null;
+    }
+
+    return (
+      <Box height="156px" w="full">
+        <NftCard getLink={getLink} token={metadata} />
+      </Box>
+    );
+  }
+);
 
 export const NftListRaw = React.memo(
   ({
-    tokens,
+    tokenAccounts,
     getLink,
-    loading = !!tokens,
+    loading = !!tokenAccounts,
+    filter,
   }: {
-    tokens?: ITokenWithMetaAndAccount[];
+    tokenAccounts?: TokenAccount[];
     getLink: (t: ITokenWithMeta) => string;
     loading?: boolean;
+    filter?: (t: ITokenWithMeta) => boolean;
   }) => {
     if (loading) {
       return <Spinner />;
     }
 
-    if (!tokens?.length) {
+    if (!tokenAccounts?.length) {
       return (
         <Box w="full" h="full">
           <Center
@@ -41,17 +74,14 @@ export const NftListRaw = React.memo(
 
     return (
       <SimpleGrid w="full" minChildWidth="93px" spacing={4}>
-        {tokens
-          .filter(
-            (t) =>
-              t.masterEdition ||
-              (t.account?.amount.toNumber() == 1 && t.mint?.decimals === 0)
-          )
-          .map((token) => (
-            <Box key={token.publicKey?.toBase58()} height="156px" w="full">
-              <NftCard getLink={getLink} token={token} />
-            </Box>
-          ))}
+        {tokenAccounts.map((tokenAccount) => (
+          <MaybeNft
+            getLink={getLink}
+            key={tokenAccount.pubkey.toBase58()}
+            filter={filter}
+            tokenAccount={tokenAccount}
+          />
+        ))}
       </SimpleGrid>
     );
   }
@@ -66,9 +96,19 @@ export const NftList = React.memo(
     getLink: (t: ITokenWithMeta) => string;
   }) => {
     const { handleErrors } = useErrorHandler();
-    const { data: tokens, loading, error } = useUserTokensWithMeta(owner);
+    const {
+      result: tokenAccounts,
+      loading,
+      error,
+    } = useWalletTokenAccounts(owner);
 
     handleErrors(error);
-    return <NftListRaw getLink={getLink} loading={loading} tokens={tokens} />;
+    return (
+      <NftListRaw
+        getLink={getLink}
+        loading={loading}
+        tokenAccounts={tokenAccounts}
+      />
+    );
   }
 );

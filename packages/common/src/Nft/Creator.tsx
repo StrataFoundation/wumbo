@@ -38,7 +38,7 @@ export const Creator = React.memo(
           <Avatar showDetails size="xs" src={image} name={metadata.data.name} />
         )}
         {!metadata && !handle && truncatePubkey(creator)}
-        {handle && `@${handle}`}
+        {!metadata && handle && `@${handle}`}
       </>
     );
 

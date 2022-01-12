@@ -1,6 +1,6 @@
 import React from "react";
 import { Link } from "react-router-dom";
-import { Flex, Box, Tag, Text } from "@chakra-ui/react";
+import { Flex, Box, Tag, Text, Center } from "@chakra-ui/react";
 import { ITokenWithMeta } from "@strata-foundation/spl-utils";
 import { Nft } from "./Nft";
 
@@ -29,12 +29,20 @@ export const NftCard = React.memo(
         alignItems="center"
         justifyContent="center"
       >
-        <Box w={20} height={20}>
+        <Center w={20} height={20}>
           {token.data && (
             // @ts-ignore
-            <Nft image={token.image} meshEnabled={false} data={token.data} />
+            <Nft
+              imageProps={{
+                maxHeight: "var(--chakra-sizes-20)",
+                maxWidth: "var(--chakra-sizes-20)",
+              }}
+              image={token.image}
+              meshEnabled={false}
+              data={token.data}
+            />
           )}
-        </Box>
+        </Center>
       </Flex>
       <Flex w="full" flexDirection="column" padding={2} alignItems="start">
         <Text
