@@ -31,6 +31,9 @@ export async function fetchConfig(): Promise<IWumboConfig> {
     config = await (
       await axios.get(WUMBO_IDENTITY_SERVICE_URL + "/config")
     ).data;
+    config.verifiers.twitter = new PublicKey(config.verifiers.twitter);
+    config.tlds.twitter = new PublicKey(config.tlds.twitter);
+    config.feeWallet = new PublicKey(config.feeWallet);
   } catch (e: any) {
     config = DEFAULT_CONFIG;
     console.error(e);
@@ -40,8 +43,8 @@ export async function fetchConfig(): Promise<IWumboConfig> {
     const nftConfig = await (
       await axios.get(NFT_VERIFIER_URL + "/config")
     ).data;
-    config.verifiers.nftVerifier = nftConfig.verifier;
-    config.tlds.nftVerifier = nftConfig.tld;
+    config.verifiers.nftVerifier = new PublicKey(nftConfig.verifier);
+    config.tlds.nftVerifier = new PublicKey(nftConfig.tld);
     config.nftMismatchThreshold = nftConfig.mismatchThreshold;
   } catch (e: any) {
     config.verifiers.nftVerifier = DEFAULT_CONFIG.verifiers.nftVerifier;

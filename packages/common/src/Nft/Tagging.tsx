@@ -77,7 +77,6 @@ export const TaggableImage = React.memo(
     images: HTMLImageElement[];
   }) => {
     const [hovering, setHovering] = useState(false);
-    let sanitizedPercent = (100 - percent).toFixed();
 
     const handleSelect = () => {
       onSelect();
@@ -142,17 +141,6 @@ export const TaggableImage = React.memo(
           <Text fontWeight="medium" isTruncated>
             {src}
           </Text>
-          <HStack w="full">
-            <Text fontSize="sm" color="gray.700">
-              Verification Match: {sanitizedPercent}%
-            </Text>
-            <Box
-              h={2}
-              w={2}
-              rounded="full"
-              bgColor={+sanitizedPercent >= 95 ? "green.500" : "yellow.500"}
-            />
-          </HStack>
         </VStack>
       </HStack>
     );
