@@ -38,18 +38,21 @@ export const Claim1 = React.memo<IClaim1Props>(
   ({ handle, incrementStep, decrementStep }) => {
     const history = useHistory();
     const tld = useTwitterTld();
-    const { info: tokenRef, loading: tokenRefLoading = true } =
-      useTokenRefForName(handle, null, tld);
+    const { info: tokenRef, loading: tokenRefLoading } = useTokenRefForName(
+      handle,
+      null,
+      tld
+    );
 
-    const { info: tokenBonding, loading: tokenBondingLoading = true } =
+    const { info: tokenBonding, loading: tokenBondingLoading } =
       useTokenBondingFromMint(tokenRef?.mint);
 
-    const { info: buyRoyaltiesAcct, loading: royaltiesAcctLoading = true } =
+    const { info: buyRoyaltiesAcct, loading: royaltiesAcctLoading } =
       useTokenAccount(tokenBonding?.buyTargetRoyalties);
 
     const mint = useMint(tokenRef?.mint);
 
-    const { pricing, loading: pricingLoading = true } = useBondingPricing(
+    const { pricing, loading: pricingLoading } = useBondingPricing(
       tokenBonding?.publicKey
     );
 
@@ -68,20 +71,25 @@ export const Claim1 = React.memo<IClaim1Props>(
       typeof nativeLocked !== "undefined" &&
       toFiat(amountAsNum(buyRoyaltiesAcct.amount, mint), fiatPrice).toFixed(2);
 
-    const isLoading = useMemo(
-      () =>
+    const isLoading = useMemo(() => {
+      return (
         tokenRefLoading ||
         tokenBondingLoading ||
         royaltiesAcctLoading ||
-        pricingLoading,
-      [
-        tokenRef,
-        tokenRefLoading,
-        tokenBondingLoading,
-        royaltiesAcctLoading,
-        pricingLoading,
-      ]
-    );
+        pricingLoading ||
+        !!(tokenRef && (!tokenBonding || !buyRoyaltiesAcct || !pricing))
+      );
+    }, [
+      tokenRef,
+      tokenRefLoading,
+      tokenBondingLoading,
+      royaltiesAcctLoading,
+      pricingLoading,
+      tokenRef,
+      tokenBonding,
+      buyRoyaltiesAcct,
+      pricing,
+    ]);
 
     const tokenExists = !isLoading && tokenRef && tokenBonding;
     const isClaimable = tokenExists && !tokenRef?.isClaimed;
@@ -141,7 +149,7 @@ export const Claim1 = React.memo<IClaim1Props>(
                       href="https://twitter.com/TeamWumbo"
                       textDecor="underline"
                     >
-                      xo twitter
+                      twitter
                     </Link>{" "}
                     if you believe there should be.
                   </Text>
@@ -231,25 +239,30 @@ export const Claim1 = React.memo<IClaim1Props>(
               Read "Legality of Wumbo"
             </Button>
           </VStack>
-          <VStack spacing={0}>
-            <Text fontWeight="bold">Dont want to claim your social token?</Text>
-            <Button
-              variant="link"
-              colorScheme="indigo"
-              isDisabled={isLoading}
-              onClick={() =>
-                history.push(
-                  optOutPath({
-                    handle,
-                    fiatLocked: Number(fiatLocked) || 0,
-                    claimableAmount: Number(claimableAmount) || 0,
-                  })
-                )
-              }
-            >
-              Learn about "Opting Out"
-            </Button>
-          </VStack>
+          {isLoading ||
+            (isClaimable && (
+              <VStack spacing={0}>
+                <Text fontWeight="bold">
+                  Dont want to claim your social token?
+                </Text>
+                <Button
+                  variant="link"
+                  colorScheme="indigo"
+                  isDisabled={isLoading}
+                  onClick={() =>
+                    history.push(
+                      optOutPath({
+                        handle,
+                        fiatLocked: Number(fiatLocked) || 0,
+                        claimableAmount: Number(claimableAmount) || 0,
+                      })
+                    )
+                  }
+                >
+                  Learn about "Opting Out"
+                </Button>
+              </VStack>
+            ))}
         </VStack>
       </VStack>
     );
