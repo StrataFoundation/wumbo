@@ -3,7 +3,7 @@ import {
   routes,
   sendSearchPath,
   swapPath,
-  viewProfilePath
+  viewProfilePath,
 } from "@/constants/routes";
 import { useClaimFlow } from "@/utils/claim";
 import { Box } from "@chakra-ui/react";
@@ -15,11 +15,15 @@ import {
   useTokenBondingFromMint,
   useTokenMetadata,
   useTokenRef,
-  useTokenRefFromBonding
+  useTokenRefFromBonding,
 } from "@strata-foundation/react";
 import React, { Fragment } from "react";
 import { useHistory, useParams } from "react-router-dom";
-import { Profile as CommonProfile, useQuery, useTwitterOwner } from "wumbo-common";
+import {
+  Profile as CommonProfile,
+  useQuery,
+  useTwitterOwner,
+} from "wumbo-common";
 import WalletRedirect from "../wallet/WalletRedirect";
 import { WumboDrawer } from "../WumboDrawer";
 
