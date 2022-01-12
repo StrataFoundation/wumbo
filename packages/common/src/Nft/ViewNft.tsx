@@ -169,7 +169,7 @@ export const ViewNftRaw = React.memo(
             <Flex fontSize="sm">{token.description}</Flex>
             {
               // @ts-ignore
-              (token.data?.attributes || []).map(
+              sanitizeStarAtlas(token.data?.attributes).map(
                 ({ trait_type, display_type, value }: Attribute) => (
                   <HStack spacing={2} key={trait_type}>
                     <Text fontSize="sm" color="gray.500" w={24}>
@@ -194,6 +194,25 @@ export const ViewNftRaw = React.memo(
     );
   }
 );
+
+/**
+ * Normal nfts have an attributes array. But star atlas didn't follow that.
+ *
+ * @param attributes
+ */
+function sanitizeStarAtlas(attributes?: any): any[] {
+  if (!attributes) {
+    return [];
+  }
+  if (Array.isArray(attributes)) {
+    return attributes;
+  }
+
+  return Object.entries(attributes).map(([key, value]) => ({
+    trait_type: key,
+    value: value,
+  }));
+}
 
 export const ViewNft = React.memo(
   ({

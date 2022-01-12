@@ -78,7 +78,7 @@ export const Profile = () => {
           }
           editPath={routes.editProfile.path}
           useClaimFlow={useClaimFlow}
-          mintKey={mintKey}
+          mintKey={passedMintKey}
           onAccountClick={(mintKey) => history.push(viewProfilePath(mintKey))}
           onTradeClick={() =>
             tokenBonding &&

@@ -37,6 +37,7 @@ import {
   useTokenBondingFromMint,
   useTokenMetadata,
   useTokenRefFromBonding,
+  useWalletTokenAccounts,
 } from "@strata-foundation/react";
 import { ITokenWithMetaAndAccount } from "@strata-foundation/spl-token-collective";
 import { TROPHY_CREATOR } from "../constants";
@@ -58,6 +59,7 @@ import { NftListRaw } from "../Nft";
 import { Spinner } from "../Spinner";
 import { StatCard } from "../StatCard";
 import { useQuery, useReverseTwitter, useTwitterOwner } from "../utils";
+import { ITokenWithMeta } from "@strata-foundation/spl-utils";
 
 interface ISocialTokenTabsProps {
   wallet: PublicKey | undefined;
@@ -487,10 +489,10 @@ function SocialTokenTabs({
   const ownerWalletKey = wallet || (tokenRef?.owner as PublicKey | undefined);
 
   const {
-    data: tokens,
+    result: tokenAccounts,
     loading: loadingCollectibles,
     error,
-  } = useUserTokensWithMeta(ownerWalletKey);
+  } = useWalletTokenAccounts(wallet);
   const { handleErrors } = useErrorHandler();
 
   handleErrors(error);
@@ -544,14 +546,16 @@ function SocialTokenTabs({
         <TabPanel paddingX={0}>
           <NftListRaw
             loading={loadingCollectibles}
-            tokens={tokens?.filter((t) => !isTrophy(t))}
+            tokenAccounts={tokenAccounts}
+            filter={(t: ITokenWithMeta) => !isTrophy(t)}
             getLink={getNftLink}
           />
         </TabPanel>
         <TabPanel paddingX={0}>
           <NftListRaw
             loading={loadingCollectibles}
-            tokens={tokens?.filter((t) => isTrophy(t))}
+            tokenAccounts={tokenAccounts}
+            filter={(t: ITokenWithMeta) => !isTrophy(t)}
             getLink={getNftLink}
           />
         </TabPanel>
@@ -603,10 +607,10 @@ interface ILinkedTabsProps {
 
 function LinkedTabs({ wallet, getNftLink }: ILinkedTabsProps) {
   const {
-    data: tokens,
+    result: tokenAccounts,
     loading: loadingCollectibles,
     error,
-  } = useUserTokensWithMeta(wallet);
+  } = useWalletTokenAccounts(wallet);
   const { handleErrors } = useErrorHandler();
 
   handleErrors(error);
@@ -627,7 +631,7 @@ function LinkedTabs({ wallet, getNftLink }: ILinkedTabsProps) {
         <TabPanel paddingX={0}>
           <NftListRaw
             loading={loadingCollectibles}
-            tokens={tokens}
+            tokenAccounts={tokenAccounts}
             getLink={getNftLink}
           />
         </TabPanel>
