@@ -6,6 +6,7 @@ export const WumboIcon = createIcon({
   viewBox: "0 0 324 324",
   path: [
     <linearGradient
+      key="1"
       id="a"
       x1="-120.432"
       x2="87.5714"
@@ -17,8 +18,9 @@ export const WumboIcon = createIcon({
       <stop offset=".4183" stopColor="#4F51FF" />
       <stop offset="1" stopColor="#A53EF4" />
     </linearGradient>,
-    <circle cx="162" cy="162" r="162" fill="url(#a)" />,
+    <circle key="2" cx="162" cy="162" r="162" fill="url(#a)" />,
     <path
+      key="3"
       stroke="currentColor"
       strokeLinecap="round"
       strokeLinejoin="round"
@@ -26,6 +28,7 @@ export const WumboIcon = createIcon({
       d="M91.088 138.345 127.341 200l37.613-61.655L200.261 200"
     />,
     <circle
+      key="4"
       cx="229.051"
       cy="138.338"
       r="15.338"

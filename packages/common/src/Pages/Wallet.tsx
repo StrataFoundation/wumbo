@@ -190,8 +190,7 @@ export const Wallet = React.memo(
   }) => {
     const { amount: solOwned } = useSolOwnedAmount();
     const solPrice = usePriceInUsd(SOL_TOKEN);
-    const { adapter } = useWallet();
-    const publicKey = adapter?.publicKey;
+    const { publicKey } = useWallet();
     const { data: tokens, loading } = useUserTokensWithMeta(
       publicKey || undefined
     );
@@ -231,8 +230,8 @@ export const Wallet = React.memo(
                 <Icon as={SolLogoIcon} w={"48px"} h={"48px"} />
                 <HStack align="center" spacing={1}>
                   <Icon as={RiCoinLine} w="16px" h="16px" />
-                  <Text>{solOwned?.toFixed(2)} SOL</Text>
-                  <Text color="gray.500">
+                  <Text fontWeight={600}>{solOwned?.toFixed(2)} SOL</Text>
+                  <Text fontWeight={600} color="gray.500">
                     (~${((solPrice || 0) * solOwned).toFixed(2)})
                   </Text>
                 </HStack>

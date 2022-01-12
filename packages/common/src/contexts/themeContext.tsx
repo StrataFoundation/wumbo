@@ -1,9 +1,9 @@
+import React, { FC } from "react";
 import {
-  ChakraProvider,
   extendTheme,
+  ChakraProvider,
   theme as chakraTheme,
 } from "@chakra-ui/react";
-import React, { FC } from "react";
 
 export const theme = extendTheme({
   shadows: {

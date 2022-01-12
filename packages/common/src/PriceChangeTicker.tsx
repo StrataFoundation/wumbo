@@ -2,7 +2,6 @@ import { Box, HStack, Icon, Text } from "@chakra-ui/react";
 import { PublicKey } from "@solana/web3.js";
 import {
   Spinner,
-  useBondingPricing,
   useCurve,
   useErrorHandler,
   useMint,

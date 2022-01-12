@@ -3,7 +3,7 @@ import { SITE_URL } from "../constants";
 
 export const auth0Options: AuthOptions = {
   domain: process.env.REACT_APP_AUTH0_DOMAIN || "wumbo.us.auth0.com",
-  maxAge: 50,
+  maxAge: 1,
   clientID:
     process.env.REACT_APP_AUTH0_CLIENT_ID || "GPsjYroOyNKWCScIk2woGZi4kBTGDDTW",
 };
@@ -27,6 +27,7 @@ export function useClaimLink({
 }: {
   handle: string;
   newTab?: boolean;
+  extension?: boolean;
 }): { redirectUri: string; claim: () => Window | null } {
   const redirectUri = `${SITE_URL}/app/claim?step=3&handle=${handle}`;
   const claim = () => {
@@ -40,7 +41,7 @@ export function useClaimLink({
     });
 
     if (newTab) {
-      window.open(auth0Url);
+      return window.open(auth0Url);
     } else {
       auth0.authorize({
         scope: "openid profile",

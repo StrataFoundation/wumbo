@@ -18,13 +18,11 @@ import {
   useSwapDriver,
 } from "@strata-foundation/react";
 import { ISwapArgs, toNumber } from "@strata-foundation/spl-token-bonding";
+import { useConfig } from "../hooks";
 import React from "react";
 import toast from "react-hot-toast";
 import { useHistory } from "react-router-dom";
-import {
-  WUMBO_TRANSACTION_FEE,
-  WUMBO_TRANSACTION_FEE_DESTINATION,
-} from "../constants/globals";
+import { WUMBO_TRANSACTION_FEE } from "../constants/globals";
 
 export const Swap = ({
   onTradingMintsChange,
@@ -39,7 +37,7 @@ export const Swap = ({
   manageWalletPath: string;
 } & Pick<ISwapDriverArgs, "onTradingMintsChange">) => {
   const history = useHistory();
-  const { adapter } = useWallet();
+  const { wallet } = useWallet();
   const { handleErrors } = useErrorHandler();
   const { info: targetTokenRef, loading: loadingTarget } =
     useMintTokenRef(targetMint);
@@ -48,6 +46,7 @@ export const Swap = ({
   const { pricing } = useBondingPricing(tokenBonding);
   const baseMintInfo = useMint(baseMint);
   const targetMintInfo = useMint(targetMint);
+  const wumboConfig = useConfig();
 
   const hasFees = targetTokenRef || baseTokenRef;
   const { loading, error, execute } = useSwap({
@@ -72,8 +71,8 @@ export const Swap = ({
             signers: [] as Signer[],
             instructions: [
               SystemProgram.transfer({
-                fromPubkey: adapter!.publicKey!,
-                toPubkey: WUMBO_TRANSACTION_FEE_DESTINATION,
+                fromPubkey: wallet!.adapter!.publicKey!,
+                toPubkey: wumboConfig.feeWallet,
                 lamports: solAmount * Math.pow(10, 9),
               }),
             ],

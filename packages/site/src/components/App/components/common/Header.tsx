@@ -2,7 +2,7 @@ import React from "react";
 import { Center, HStack, Icon, Text } from "@chakra-ui/react";
 import { WumboIcon } from "wumbo-common";
 
-export const Header = () => (
+export const Header: React.FC = () => (
   <Center
     w="full"
     paddingX={14}
@@ -10,8 +10,7 @@ export const Header = () => (
     justifyContent="space-between"
     alignItems="center"
     color="white"
-    bg="linear-gradient(147deg, rgba(0, 0, 0, 0.28) 15%, rgba(0, 0, 0, 0.32) 129%),
-      linear-gradient(56deg, #2323ff -25%, #4f51ff 20%, #a53ef4 84%)"
+    bg="linear-gradient(272.23deg, #5D34A9 -0.32%, #413BB1 93.88%), #FFFFFF;"
   >
     <HStack spacing={4}>
       <Icon as={WumboIcon} w={10} h={10} />

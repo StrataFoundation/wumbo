@@ -9,7 +9,7 @@ import {
   useMediaQuery,
 } from "@chakra-ui/react";
 import { LandingLayout } from "../layouts/LandingLayout";
-import { DownloadButton } from "../common/DownloadButton";
+import { DownloadButton } from "../../../common/DownloadButton";
 
 export const Hero: React.FC = () => {
   const [isLargerThan1280] = useMediaQuery("(min-width: 1280px)");

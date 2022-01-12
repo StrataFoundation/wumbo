@@ -48,7 +48,9 @@ export const StatCard = ({
       <Text fontSize="xs" color="gray.500">
         {label}
       </Text>
-      <Text fontSize="md">{value}</Text>
+      <Text fontWeight={500} fontSize="md">
+        {value}
+      </Text>
     </Flex>
   );
 

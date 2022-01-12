@@ -1,33 +1,35 @@
 import {
+  WalletName,
   EventEmitter,
-  WalletAdapter,
   SignerWalletAdapter,
   WalletAdapterEvents,
   WalletConnectionError,
   WalletDisconnectionError,
   WalletError,
   WalletNotConnectedError,
-  WalletNotFoundError,
-  WalletNotInstalledError,
+  WalletNotReadyError,
   WalletSignMessageError,
   WalletWindowClosedError,
   SendTransactionOptions,
+  WalletReadyState,
 } from "@solana/wallet-adapter-base";
 import { Connection, PublicKey, Transaction } from "@solana/web3.js";
 import { MessageType, Message } from "./types";
 import { deserializeError } from "serialize-error";
-import { WalletName } from "@solana/wallet-adapter-wallets";
-import { sleep } from "../utils";
 
 export interface IInjectedWalletAdapterConfig {
-  name: WalletName | null;
+  name: WalletName;
+  url: string | null;
+  icon: string | null;
 }
 
 export class InjectedWalletAdapter
   extends EventEmitter<WalletAdapterEvents>
   implements SignerWalletAdapter
 {
-  private _name: WalletName | null;
+  private _name: WalletName;
+  private _url: string | null;
+  private _icon: string | null;
   private _publicKey: PublicKey | null;
   private _connecting: boolean;
   private _connected: boolean;
@@ -36,6 +38,8 @@ export class InjectedWalletAdapter
   constructor(config: IInjectedWalletAdapterConfig) {
     super();
     this._name = config.name;
+    this._url = config.url;
+    this._icon = config.icon;
     this._publicKey = null;
     this._connecting = false;
     this._connected = false;
@@ -51,6 +55,7 @@ export class InjectedWalletAdapter
       }
     });
   }
+  readyState: WalletReadyState = WalletReadyState.Installed;
 
   sendTransaction(
     transaction: Transaction,
@@ -64,38 +69,29 @@ export class InjectedWalletAdapter
     return this._publicKey;
   }
 
-  get ready(): boolean {
-    // dont use this
-    // need to vallidate extending
-    // use readyAsync
-    return true;
+  get url(): string {
+    return this._url || "";
   }
 
-  readyAsync(): Promise<boolean> {
+  get name(): WalletName {
+    return this._name;
+  }
+
+  readyStateAsync(): Promise<WalletReadyState | "ProxyNotReady"> {
     return (async () => {
       try {
-        const { ready } = await this.sendMessage(
+        const { readyState } = await this.sendMessage(
           {
-            type: MessageType.WALLET_READY,
+            type: MessageType.WALLET_READY_STATE,
             name: this._name,
           },
           500
         );
-
-        return ready;
+        return readyState;
       } catch (error: any) {
-        return false;
+        return "ProxyNotReady";
       }
     })();
-  }
-
-  async waitForReady(): Promise<void> {
-    let ready = await this.readyAsync();
-    while (!ready) {
-      ready = await this.readyAsync();
-      await sleep(500);
-      console.log("Injected wallet not ready, trying again...");
-    }
   }
 
   get connecting(): boolean {
@@ -110,6 +106,10 @@ export class InjectedWalletAdapter
     return false;
   }
 
+  get icon(): string {
+    return this._icon || "";
+  }
+
   async sendMessage(m: Message, timeoutMs: number = -1): Promise<any> {
     return new Promise((resolve, reject) => {
       const messageChannel = new MessageChannel();
@@ -117,7 +117,7 @@ export class InjectedWalletAdapter
       let timeout: any;
       if (timeoutMs > 0) {
         timeout = setTimeout(() => {
-          reject(new WalletConnectionError("Not ready"));
+          reject(new WalletNotReadyError("Not ready"));
         }, timeoutMs);
       }
 
@@ -128,8 +128,7 @@ export class InjectedWalletAdapter
           // errors are returned serialized
           // reconstruct them and reject them
           const errorConstructor: { [key: string]: any } = {
-            WalletNotFoundError: WalletNotFoundError,
-            WalletNotInstalledError: WalletNotInstalledError,
+            WalletNotReadyError: WalletNotReadyError,
             WalletWindowClosedError: WalletWindowClosedError,
             WalletConnectionError: WalletConnectionError,
             WalletSignMessageError: WalletSignMessageError,
@@ -163,8 +162,18 @@ export class InjectedWalletAdapter
 
     try {
       if (this.connected || this.connecting) return;
+      const readyState = await this.readyStateAsync();
+
+      if (
+        !(
+          readyState === WalletReadyState.Loadable ||
+          readyState === WalletReadyState.Installed
+        )
+      ) {
+        throw new WalletNotReadyError();
+      }
+
       this._connecting = true;
-      await this.waitForReady();
 
       try {
         const { publicKey: responsePK } = await this.sendMessage({
@@ -175,7 +184,7 @@ export class InjectedWalletAdapter
         publicKey = new PublicKey(responsePK);
         this._publicKey = publicKey;
         this._connected = true;
-        this.emit("connect");
+        this.emit("connect", publicKey);
       } catch (error: any) {
         if (error instanceof WalletError) throw error;
         throw new WalletConnectionError(error?.message, error);
@@ -190,6 +199,7 @@ export class InjectedWalletAdapter
       try {
         await this.sendMessage({ type: MessageType.WALLET_DISCONNECT });
         this.emit("disconnect");
+        this._connected = false;
       } catch (error: any) {
         throw new WalletDisconnectionError();
       }

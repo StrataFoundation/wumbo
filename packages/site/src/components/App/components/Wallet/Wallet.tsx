@@ -8,14 +8,14 @@ import {
   swapPath,
   wumNetWorthPath,
 } from "../../../../constants/routes";
+import { AppContainer } from "../common/AppContainer";
 import WalletRedirect from "./WalletRedirect";
 
 export default React.memo(() => {
   const solLink = useFtxPayLink();
-  const { adapter } = useWallet();
-  const publicKey = adapter?.publicKey;
+  const { publicKey } = useWallet();
   return (
-    <>
+    <AppContainer>
       <WalletRedirect />
       <Wallet
         wumLeaderboardLink={publicKey ? wumNetWorthPath(publicKey) : ""}
@@ -33,6 +33,6 @@ export default React.memo(() => {
         solLink={solLink}
         sendLink={AppRoutes.sendSearch.path}
       />
-    </>
+    </AppContainer>
   );
 });

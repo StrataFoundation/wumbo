@@ -6,6 +6,7 @@ import {
   ThemeProvider,
   INJECTED_PROVIDERS,
   SOLANA_API_URL,
+  ConfigProvider,
 } from "wumbo-common";
 import {
   AccountProvider,
@@ -27,17 +28,17 @@ import {
 export const ContextProviders: FC = ({ children }) => {
   const alteredWallets = useMemo(
     () =>
-      WALLET_PROVIDERS.map((wallet) => {
-        const injectedWalletNames = INJECTED_PROVIDERS.map(
-          (wallet) => wallet.name
-        );
-
-        if (injectedWalletNames.includes(wallet.name)) {
-          wallet.adapter = () =>
-            new InjectedWalletAdapter({ name: wallet.name });
+      WALLET_PROVIDERS.map((adapter) => {
+        const injectedWalletNames = INJECTED_PROVIDERS.map((a) => a.name);
+        if (injectedWalletNames.includes(adapter.name)) {
+          return new InjectedWalletAdapter({
+            name: adapter.name,
+            url: adapter.url,
+            icon: adapter.icon,
+          });
         }
 
-        return wallet;
+        return adapter;
       }),
     []
   );
@@ -79,28 +80,26 @@ export const ContextProviders: FC = ({ children }) => {
   );
 
   return (
-    <ConnectionProvider endpoint={SOLANA_API_URL}>
-      <ErrorHandlerProvider onError={onError}>
-        <ApolloProvider client={wumboApi}>
-          <AccountProvider commitment="confirmed">
-            <WalletProvider
-              wallets={alteredWallets}
-              onError={console.error}
-              autoConnect
-            >
-              <StrataSdksProvider>
-                <SolPriceProvider>
-                  <HistoryContextProvider>
-                    <DrawerProvider>
-                      <ThemeProvider>{children}</ThemeProvider>
-                    </DrawerProvider>
-                  </HistoryContextProvider>
-                </SolPriceProvider>
-              </StrataSdksProvider>
-            </WalletProvider>
-          </AccountProvider>
-        </ApolloProvider>
-      </ErrorHandlerProvider>
-    </ConnectionProvider>
+    <ConfigProvider>
+      <ConnectionProvider endpoint={SOLANA_API_URL}>
+        <ErrorHandlerProvider onError={onError}>
+          <ApolloProvider client={wumboApi}>
+            <AccountProvider commitment="confirmed">
+              <WalletProvider wallets={alteredWallets} onError={console.error}>
+                <StrataSdksProvider>
+                  <SolPriceProvider>
+                    <HistoryContextProvider>
+                      <DrawerProvider>
+                        <ThemeProvider>{children}</ThemeProvider>
+                      </DrawerProvider>
+                    </HistoryContextProvider>
+                  </SolPriceProvider>
+                </StrataSdksProvider>
+              </WalletProvider>
+            </AccountProvider>
+          </ApolloProvider>
+        </ErrorHandlerProvider>
+      </ConnectionProvider>
+    </ConfigProvider>
   );
 };

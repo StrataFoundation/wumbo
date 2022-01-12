@@ -7,12 +7,15 @@ export default React.memo(() => {
   const location = useLocation();
   const { connected } = useWallet();
 
-  const redirectUri =
-    AppRoutes.manageWallet.path +
-    `?redirect=${location.pathname}${location.search}`;
-
   if (!connected) {
-    return <Redirect to={redirectUri} />;
+    return (
+      <Redirect
+        to={{
+          pathname: AppRoutes.manageWallet.path,
+          search: `?redirect=${location.pathname}${location.search}`,
+        }}
+      />
+    );
   }
 
   return null;

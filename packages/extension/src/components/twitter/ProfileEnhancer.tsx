@@ -13,6 +13,7 @@ import { useProfile } from "../../utils/twitterSpotter";
 import { MainButton } from "../MainButton";
 import { ClaimButton } from "../ClaimButton";
 import { Spinner, useBufferFromUrl, getBufferFromUrl } from "wumbo-common";
+// @ts-ignore
 import compareImages from "resemblejs/compareImages";
 import { useWallet } from "@solana/wallet-adapter-react";
 import { ITokenWithMetaAndAccount } from "@strata-foundation/spl-token-collective";
@@ -21,6 +22,7 @@ import { useAsync } from "react-async-hook";
 import { useHistory } from "react-router-dom";
 import { useDrawer } from "../../contexts/drawerContext";
 import { tagNftPath } from "@/constants/routes";
+import { WalletAutoConnect } from "../wallet/WalletAutoConnect";
 
 async function imagesMatch(
   img1: Blob | undefined,
@@ -63,7 +65,7 @@ export const ProfileEnhancer = () => {
   const profile = useProfile();
   const previousProfile = usePrevious(profile);
   const history = useHistory();
-  const { adapter } = useWallet();
+  const { publicKey } = useWallet();
 
   const triggerRemount = useCallback(() => {
     setTriggerCount(triggerCount + 1);
@@ -79,14 +81,14 @@ export const ProfileEnhancer = () => {
   }, [previousProfile, profile, triggerRemount]);
 
   const { result: img1, error: bufferError } = useBufferFromUrl(
-    profile?.avatar
+    profile?.avatar || ""
   );
 
   const {
     data: tokens,
     error,
     loading: loadingTokens,
-  } = useUserTokensWithMeta(adapter?.publicKey || undefined);
+  } = useUserTokensWithMeta(publicKey || undefined);
 
   const { handleErrors } = useErrorHandler();
   const {
@@ -143,6 +145,7 @@ export const ProfileEnhancer = () => {
                   marginBottom="11px"
                   spacing={1}
                 >
+                  <WalletAutoConnect />
                   {buttonEl}
                   {(loading || loadingTokens) && <Spinner />}
                   {pfpMatch && (

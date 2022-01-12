@@ -7,8 +7,7 @@ import WalletRedirect from "../wallet/WalletRedirect";
 import { routes } from "@/constants/routes";
 
 export const EditProfileRoute = React.memo(() => {
-  const { connected, adapter } = useWallet();
-  const publicKey = adapter?.publicKey;
+  const { connected, publicKey } = useWallet();
   const history = useHistory();
 
   if (!connected || !publicKey) {

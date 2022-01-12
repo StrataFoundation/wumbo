@@ -1,10 +1,11 @@
-import { getTierGradient, useTokenTier } from "./hooks";
 import { Button, ButtonProps } from "@chakra-ui/button";
-import { Box, Center } from "@chakra-ui/layout";
+import { Center } from "@chakra-ui/layout";
+import { Box } from "@chakra-ui/react";
 import { PublicKey } from "@solana/web3.js";
 import React, { useMemo } from "react";
 import { usePriceInUsd } from "@strata-foundation/react";
 import { Link } from "react-router-dom";
+import { getTierGradient, useTokenTier } from "./hooks";
 import { Spinner } from "./Spinner";
 
 function isTransparent(color: string) {

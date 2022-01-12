@@ -1,4 +1,7 @@
-import { WalletAdapter } from "@solana/wallet-adapter-base";
+import {
+  BaseSignerWalletAdapter,
+  WalletReadyState,
+} from "@solana/wallet-adapter-base";
 import { Transaction } from "@solana/web3.js";
 import { serializeError } from "serialize-error";
 import { INJECTED_PROVIDERS } from "wumbo-common";
@@ -10,10 +13,10 @@ import {
   SignTransactionsMessage,
 } from "../../utils/wallets";
 
-const getProvider = (name: string): any | undefined =>
+const getAdapter = (name: string): any | undefined =>
   INJECTED_PROVIDERS.find((p) => p.name === name);
 
-let adapter: WalletAdapter | undefined;
+let adapter: BaseSignerWalletAdapter | undefined;
 
 const resetWallet = () =>
   window.postMessage({ type: MessageType.WALLET_RESET }, "*");
@@ -34,8 +37,7 @@ const resetWallet = () =>
           const {
             data: { name },
           } = e as MessageEvent<ConnectMessage>;
-          const provider = getProvider(name!);
-          adapter = provider?.adapter();
+          adapter = getAdapter(name!);
           adapter?.on("disconnect", resetWallet);
 
           try {
@@ -50,17 +52,20 @@ const resetWallet = () =>
           break;
         }
 
-        case MessageType.WALLET_READY: {
+        case MessageType.WALLET_READY_STATE: {
           const {
             data: { name },
           } = e as MessageEvent<ConnectMessage>;
-
-          const provider = getProvider(name!);
-          adapter = provider?.adapter();
+          adapter = getAdapter(name!);
 
           try {
-            const ready = adapter?.ready;
-            sendReply({ ready });
+            const readyState = adapter?.readyState;
+
+            if (adapter?.readyState === WalletReadyState.NotDetected) {
+              window.open(adapter?.url);
+            }
+
+            sendReply({ readyState });
           } catch (error) {
             sendReply({ error });
           }
@@ -75,7 +80,6 @@ const resetWallet = () =>
 
           try {
             const signed = await adapter?.signTransaction(unsigned);
-
             sendReply({
               signedTransaction: signed!.serialize({
                 verifySignatures: true,

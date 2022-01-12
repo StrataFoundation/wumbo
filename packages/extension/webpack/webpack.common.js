@@ -71,6 +71,7 @@ module.exports = {
       ),
       "@chakra-ui/react": path.resolve("../../node_modules/@chakra-ui/react"),
       "@solana/wallet-adapter-react": path.resolve("../../node_modules/@solana/wallet-adapter-react"),
+      "@toruslabs/solana-embed": path.resolve("../../node_modules/@toruslabs/solana-embed"),
       ...process.env.LINKED_DEV ? {
         "@strata-foundation/react": path.resolve("./node_modules/@strata-foundation/react"),
         "@strata-foundation/spl-token-bonding": path.resolve("./node_modules/@strata-foundation/spl-token-bonding"),
@@ -82,7 +83,6 @@ module.exports = {
   plugins: [
     new webpack.EnvironmentPlugin([
       "REACT_APP_WUMBO_TRANSACTION_FEE",
-      "REACT_APP_WUMBO_TRANSACTION_FEE_DESTINATION",
       "REACT_APP_SITE_URL",
       "REACT_APP_NFT_VERIFIER_TLD",
       "REACT_APP_NFT_VERIFIER",

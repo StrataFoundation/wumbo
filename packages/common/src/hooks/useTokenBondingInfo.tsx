@@ -58,7 +58,7 @@ export const useTokenBondingInfo = (
             icon: (
               <MetadataAvatar
                 size={avatarSize}
-                mint={tokenBondingInfo.targetMint}
+                mint={tokenBondingInfo?.targetMint}
                 name={metadata.data.name || "UNCLAIMED"}
               />
             ),

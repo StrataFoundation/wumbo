@@ -6,8 +6,7 @@ import { AppRoutes } from "../../../../../constants/routes";
 import WalletRedirect from "../../Wallet/WalletRedirect";
 
 export const EditProfileRoute: React.FC = () => {
-  const { connected, adapter } = useWallet();
-  const publicKey = adapter?.publicKey;
+  const { connected, publicKey } = useWallet();
   const history = useHistory();
 
   if (!connected || !publicKey) {
@@ -18,7 +17,7 @@ export const EditProfileRoute: React.FC = () => {
     <>
       <WalletRedirect />
       <EditProfile
-        ownerWalletKey={adapter?.publicKey!}
+        ownerWalletKey={publicKey!}
         onComplete={() => history.push(AppRoutes.profile.path)}
       />
     </>

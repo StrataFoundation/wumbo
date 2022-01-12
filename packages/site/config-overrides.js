@@ -21,6 +21,7 @@ const supportMjs = () => (webpackConfig) => {
       ...webpackConfig.resolve,
       alias: {
         react: path.resolve("../../node_modules/react"),
+        "@toruslabs/solana-embed": path.resolve("../../node_modules/@toruslabs/solana-embed"),
         // For local dev with linked packages:
         ...process.env.LINKED_DEV ? {
           "@chakra-ui/react": path.resolve("../../node_modules/@chakra-ui/react"),

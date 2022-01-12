@@ -73,6 +73,22 @@ export const SiteRoutes: ISiteRoutes = {
   root: { path: "/" },
 };
 
+export const claimPath = ({
+  step,
+  handle = undefined,
+  code = undefined,
+}: {
+  step?: string;
+  handle?: string;
+  code?: string;
+}): string => {
+  if (!code) {
+    return `${AppRoutes.claim.path}?step=${step}&handle=${handle}`;
+  }
+
+  return `${AppRoutes.claim.path}?step=${step}&handle=${handle}&code=${code}`;
+};
+
 export const AppRoutes: IAppRoutes = {
   root: { path: "/app" },
   claim: { path: "/app/claim" },

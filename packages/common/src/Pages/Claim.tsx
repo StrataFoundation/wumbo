@@ -41,8 +41,8 @@ export const Claim = React.memo(
     } = useRentExemptAmount(
       TWITTER_REGISTRY_SIZE + 512 + 3 * 312 // bonding, token refx3
     );
-    const { adapter } = useWallet();
-    const tokenRef = useClaimedTokenRefKey(adapter?.publicKey, null);
+    const { wallet } = useWallet();
+    const tokenRef = useClaimedTokenRefKey(wallet?.adapter?.publicKey, null);
 
     handleErrors(rentExemptError, createCoinError);
 
@@ -98,7 +98,10 @@ export const Claim = React.memo(
               code,
               redirectUri,
             }).then(() =>
-              onComplete({ tokenRef: tokenRef!, owner: adapter!.publicKey! })
+              onComplete({
+                tokenRef: tokenRef!,
+                owner: wallet?.adapter!.publicKey!,
+              })
             );
           }}
         >

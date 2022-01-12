@@ -4,6 +4,7 @@ import { ITokenWithMetaAndAccount } from "@strata-foundation/spl-token-collectiv
 import React from "react";
 import { SendSearch, useQuery } from "wumbo-common";
 import { sendPath } from "../../../../constants/routes";
+import { AppContainer } from "../common/AppContainer";
 import WalletRedirect from "./WalletRedirect";
 
 export default React.memo(() => {
@@ -11,7 +12,7 @@ export default React.memo(() => {
   const recipient = query.get("recipient");
 
   return (
-    <>
+    <AppContainer>
       <WalletRedirect />
       <Box p={4} w="full">
         <SendSearch
@@ -23,6 +24,6 @@ export default React.memo(() => {
           }
         />
       </Box>
-    </>
+    </AppContainer>
   );
 });

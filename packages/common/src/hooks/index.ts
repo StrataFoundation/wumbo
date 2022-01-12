@@ -5,3 +5,4 @@ export * from "./useSetMetadata";
 export * from "./useUserTokensWithMeta";
 export * from "./useTwitterTld";
 export * from "./useTokenTier";
+export * from "./useConfig";

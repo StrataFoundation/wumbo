@@ -1,8 +1,8 @@
 {
   "manifest_version": 3,
   "name": "Wum.bo",
-  "description": "Wum.bo Creator Coins",
-  "version": "1.1.0",
+  "description": "Wum.bo, Empowered Socials",
+  "version": "1.1.1",
   "action": {
     "default_title": "Wum.bo",
     "default_icon": {
@@ -31,7 +31,7 @@
       "all_frames": true
     },
     {
-      "matches": ["https://wum.bo/claim*"],
+      "matches": ["https://wum.bo/app/claim*"],
       "js": ["oauth.js"],
       "run_at": "document_start",
       "all_frames": true
@@ -48,8 +48,8 @@
     }
   ],
   "permissions": ["tabs"],
-  "hostPermissions": [
-    "https://wum.bo/claim*", 
+  "host_permissions": [
+    "https://wum.bo/app/claim*", 
     "https://twitter.com/*"
   ]
 }

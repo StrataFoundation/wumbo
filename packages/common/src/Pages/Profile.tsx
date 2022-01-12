@@ -68,7 +68,7 @@ interface ISocialTokenTabsProps {
 
 interface IProfileProps
   extends Pick<ISocialTokenTabsProps, "onAccountClick" | "getNftLink"> {
-  mintKey: PublicKey;
+  mintKey?: PublicKey;
   editPath: string;
   sendPath: string;
   createPath: string;
@@ -153,8 +153,7 @@ export const Profile = React.memo(
     const baseIsCollective = !!baseMintTokenBonding.info;
 
     const { awaitingApproval } = useProvider();
-    const { adapter } = useWallet();
-    const publicKey = adapter?.publicKey;
+    const { publicKey } = useWallet();
     const myTokenRefKey = useClaimedTokenRefKey(publicKey, null);
     const { handle: walletTwitterHandle, error: reverseTwitterError } =
       useReverseTwitter(publicKey || undefined);
@@ -377,13 +376,15 @@ export const Profile = React.memo(
                   </PopoverTrigger>
                   <PopoverContent>
                     <PopoverBody>
-                      You'll receive ${claimAmount && claimAmount.toFixed(2)} in
-                      your token if you claim!
+                      Claim this token and make it your own. You'll receive $
+                      {claimAmount && claimAmount.toFixed(2)} in your token!
+                      You'll also be able to customize your name, symbol, image,
+                      and royalties.
                     </PopoverBody>
                   </PopoverContent>
                 </Popover>
               )}
-            {!ownerWalletKey && baseIsCollective && (
+            {!ownerWalletKey && baseIsCollective && !walletTwitterHandle && (
               <Popover placement="bottom" trigger="hover">
                 <PopoverTrigger>
                   <Button
@@ -408,7 +409,7 @@ export const Profile = React.memo(
                 </PopoverContent>
               </Popover>
             )}
-            {!tokenRef && !tokenBonding && (
+            {!tokenRef && !tokenBonding && !mintKey && (
               <Button
                 as={Link}
                 to={createPath}
@@ -465,10 +466,10 @@ export const Profile = React.memo(
               tokenBondingKey={tokenBonding!.publicKey}
               getNftLink={getNftLink}
             />
-          ) : tokenBonding ? (
-            <CollectiveTabs onAccountClick={onAccountClick} mintKey={mintKey} />
           ) : ownerWalletKey ? (
             <LinkedTabs getNftLink={getNftLink} wallet={ownerWalletKey} />
+          ) : mintKey ? (
+            <CollectiveTabs onAccountClick={onAccountClick} mintKey={mintKey} />
           ) : null}
         </VStack>
       </TokenBondingRecentTransactionsProvider>
