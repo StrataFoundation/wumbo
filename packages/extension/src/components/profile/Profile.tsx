@@ -3,7 +3,7 @@ import {
   routes,
   sendSearchPath,
   swapPath,
-  viewProfilePath,
+  viewProfilePath
 } from "@/constants/routes";
 import { useClaimFlow } from "@/utils/claim";
 import { Box } from "@chakra-ui/react";
@@ -15,18 +15,22 @@ import {
   useTokenBondingFromMint,
   useTokenMetadata,
   useTokenRef,
-  useTokenRefFromBonding,
+  useTokenRefFromBonding
 } from "@strata-foundation/react";
 import React, { Fragment } from "react";
 import { useHistory, useParams } from "react-router-dom";
-import { Profile as CommonProfile, useQuery } from "wumbo-common";
+import { Profile as CommonProfile, useQuery, useTwitterOwner } from "wumbo-common";
 import WalletRedirect from "../wallet/WalletRedirect";
 import { WumboDrawer } from "../WumboDrawer";
 
 export const Profile = () => {
   const params = useParams<{ mint: string | undefined }>();
   const { connected, publicKey } = useWallet();
-  const walletMintKey = useClaimedTokenRefKey(publicKey, null);
+  const query = useQuery();
+  const name = query.get("name");
+  const { owner: twitterOwner } = useTwitterOwner(name || undefined);
+
+  const walletMintKey = useClaimedTokenRefKey(twitterOwner || publicKey, null);
   const { info: walletTokenRef, loading: walletTokenRefLoading } =
     useTokenRef(walletMintKey);
   const passedMintKey = usePublicKey(params.mint);
@@ -37,8 +41,6 @@ export const Profile = () => {
     tokenBonding?.publicKey
   );
   const { metadata } = useTokenMetadata(mintKey);
-  const query = useQuery();
-  const name = query.get("name");
 
   if (!connected) {
     return <WalletRedirect />;
@@ -78,7 +80,7 @@ export const Profile = () => {
           }
           editPath={routes.editProfile.path}
           useClaimFlow={useClaimFlow}
-          mintKey={passedMintKey}
+          mintKey={mintKey}
           onAccountClick={(mintKey) => history.push(viewProfilePath(mintKey))}
           onTradeClick={() =>
             tokenBonding &&
