@@ -1,7 +1,6 @@
 // config-overrides.js
 const { override } = require("customize-cra");
-const path = require("path/posix");
-const webpack = require("webpack");
+const path = require("path");
 
 const emptyFs = () => (webpackConfig) => ({
   ...webpackConfig,
