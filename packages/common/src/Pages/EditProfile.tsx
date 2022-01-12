@@ -62,7 +62,7 @@ export const EditProfile = React.memo(
       setError,
       clearErrors,
       reset,
-      formState: { errors },
+      formState: { errors, isSubmitting },
     } = useForm<ISetMetadataArgs>({
       resolver: yupResolver(validationSchema),
     });
@@ -357,7 +357,7 @@ export const EditProfile = React.memo(
             w="full"
             colorScheme="indigo"
             size="lg"
-            isLoading={loading}
+            isLoading={loading || isSubmitting}
             type="submit"
             loadingText={
               awaitingApproval

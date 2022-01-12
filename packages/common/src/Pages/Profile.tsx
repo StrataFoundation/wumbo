@@ -64,7 +64,7 @@ import { ITokenWithMeta } from "@strata-foundation/spl-utils";
 interface ISocialTokenTabsProps {
   wallet: PublicKey | undefined;
   tokenBondingKey: PublicKey;
-  onAccountClick?: (mintKey: PublicKey) => void;
+  onAccountClick?: (mintKey?: PublicKey, handle?: string) => void;
   getNftLink: (t: ITokenWithMetaAndAccount) => string;
 }
 
@@ -134,15 +134,30 @@ export const Profile = React.memo(
     createPath,
   }: IProfileProps) => {
     const { handleErrors } = useErrorHandler();
-    const { info: tokenRef, loading } = useMintTokenRef(mintKey);
-    const { info: tokenBonding, loading: tokenBondingLoading } =
-      useTokenBondingFromMint(mintKey);
+    const { info: mintTokenRef, loading } = useMintTokenRef(mintKey);
 
+    const { publicKey } = useWallet();
     const {
       metadata,
       loading: loadingMetadata,
       error: tokenMetadataError,
     } = useTokenMetadata(mintKey);
+    const { handle: walletTwitterHandle, error: reverseTwitterError } =
+    useReverseTwitter(publicKey || undefined);
+    
+    const query = useQuery();
+    let { handle: reverseLookupHandle, error: reverseTwitterError2 } =
+      useReverseTwitter(mintTokenRef?.owner || undefined);
+    const handle = query.get("name") || reverseLookupHandle || metadata?.data.name || walletTwitterHandle;
+
+    const { owner: ownerWalletKey } = useTwitterOwner(handle);
+    const { info: walletTokenRef } = usePrimaryClaimedTokenRef(ownerWalletKey);
+
+    const tokenRef = mintTokenRef || walletTokenRef
+
+    const { info: tokenBonding, loading: tokenBondingLoading } =
+      useTokenBondingFromMint(mintKey || tokenRef?.mint);
+      
     const {
       image: collectiveImage,
       metadata: collectiveMetadata,
@@ -155,10 +170,8 @@ export const Profile = React.memo(
     const baseIsCollective = !!baseMintTokenBonding.info;
 
     const { awaitingApproval } = useProvider();
-    const { publicKey } = useWallet();
     const myTokenRefKey = useClaimedTokenRefKey(publicKey, null);
-    const { handle: walletTwitterHandle, error: reverseTwitterError } =
-      useReverseTwitter(publicKey || undefined);
+    
     const { data: { tokenRank } = {} } = apolloUseQuery<{
       tokenRank: number | undefined;
     }>(GET_TOKEN_RANK, {
@@ -193,20 +206,6 @@ export const Profile = React.memo(
       pricing &&
       toFiat(pricing.current(NATIVE_MINT)) * buyTargetRoyaltiesAmount;
 
-    const query = useQuery();
-    let { handle: reverseLookupHandle, error: reverseTwitterError2 } =
-      useReverseTwitter(tokenRef?.owner || undefined);
-    let handle =
-      tokenRef && !tokenRef.isClaimed
-        ? metadata?.data.name
-        : reverseLookupHandle;
-
-    if (!handle) {
-      handle = query.get("name") || metadata?.data.name;
-    }
-
-    const { owner: ownerWalletKey } = useTwitterOwner(handle);
-    const { info: walletTokenRef } = usePrimaryClaimedTokenRef(ownerWalletKey);
 
     const {
       claim,
@@ -461,11 +460,11 @@ export const Profile = React.memo(
             </Grid>
           )}
           <div id="tabs" />
-          {tokenRef ? (
+          {tokenRef && tokenBonding ? (
             <SocialTokenTabs
               wallet={ownerWalletKey}
               onAccountClick={onAccountClick}
-              tokenBondingKey={tokenBonding!.publicKey}
+              tokenBondingKey={tokenBonding.publicKey}
               getNftLink={getNftLink}
             />
           ) : ownerWalletKey ? (

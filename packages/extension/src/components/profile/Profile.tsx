@@ -3,58 +3,49 @@ import {
   routes,
   sendSearchPath,
   swapPath,
-  viewProfilePath,
+  viewProfilePath
 } from "@/constants/routes";
 import { useClaimFlow } from "@/utils/claim";
 import { Box } from "@chakra-ui/react";
 import { useWallet } from "@solana/wallet-adapter-react";
 import { PublicKey } from "@solana/web3.js";
 import {
-  useClaimedTokenRefKey,
+  useMetaplexTokenMetadata,
   usePublicKey,
-  useTokenBondingFromMint,
-  useTokenMetadata,
-  useTokenRef,
-  useTokenRefFromBonding,
+  useTokenBonding, useTokenBondingFromMint, useTokenRefForName
 } from "@strata-foundation/react";
 import React, { Fragment } from "react";
 import { useHistory, useParams } from "react-router-dom";
 import {
   Profile as CommonProfile,
   useQuery,
-  useTwitterOwner,
+  useReverseTwitter, useTwitterTld
 } from "wumbo-common";
 import WalletRedirect from "../wallet/WalletRedirect";
 import { WumboDrawer } from "../WumboDrawer";
 
 export const Profile = () => {
   const params = useParams<{ mint: string | undefined }>();
-  const { connected, publicKey } = useWallet();
+  const { connected } = useWallet();
   const query = useQuery();
   const name = query.get("name");
-  const { owner: twitterOwner } = useTwitterOwner(name || undefined);
-
-  const walletMintKey = useClaimedTokenRefKey(twitterOwner || publicKey, null);
-  const { info: walletTokenRef, loading: walletTokenRefLoading } =
-    useTokenRef(walletMintKey);
+  const tld = useTwitterTld();
+  const { info: tokenRef, loading } = useTokenRefForName(name, null, tld);
+  const { metadata } = useMetaplexTokenMetadata(tokenRef?.mint);
   const passedMintKey = usePublicKey(params.mint);
-  const mintKey = passedMintKey || walletTokenRef?.mint;
   const history = useHistory();
-  const { info: tokenBonding } = useTokenBondingFromMint(mintKey);
-  const { info: tokenRef, loading: tokenRefLoading } = useTokenRefFromBonding(
-    tokenBonding?.publicKey
-  );
-  const { metadata } = useTokenMetadata(mintKey);
+  const { info: tokenBonding } = useTokenBondingFromMint(passedMintKey || tokenRef?.mint);
+
 
   if (!connected) {
     return <WalletRedirect />;
   }
 
-  if (walletTokenRefLoading || tokenRefLoading) {
+  if (loading) {
     return <WumboDrawer.Loading />;
   }
 
-  if (!mintKey && !name) {
+  if (!passedMintKey && !name) {
     return (
       <Fragment>
         <WumboDrawer.Header title="Profile" />
@@ -72,11 +63,11 @@ export const Profile = () => {
 
   return (
     <Fragment>
-      <WumboDrawer.Header title={metadata?.data.name || "View Profile"} />
+      <WumboDrawer.Header title={metadata?.data.name || name || "View Profile"} />
       <WumboDrawer.Content>
         <CommonProfile
           sendPath={sendSearchPath(
-            tokenRef?.owner || walletTokenRef?.owner || undefined
+            tokenRef?.owner || undefined
           )}
           createPath={routes.create.path + `?name=${name}`}
           collectivePath={
@@ -84,8 +75,15 @@ export const Profile = () => {
           }
           editPath={routes.editProfile.path}
           useClaimFlow={useClaimFlow}
-          mintKey={mintKey}
-          onAccountClick={(mintKey) => history.push(viewProfilePath(mintKey))}
+          mintKey={passedMintKey || tokenRef?.mint}
+          onAccountClick={(mintKey, handle) => {
+            if (handle) {
+              history.push(routes.profile.path +
+                  `?name=${handle}`)
+            } else if (mintKey) {
+              history.push(viewProfilePath(mintKey))
+            }
+          }}
           onTradeClick={() =>
             tokenBonding &&
             history.push(

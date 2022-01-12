@@ -10,7 +10,7 @@ import {
 import React, { Fragment, useMemo } from "react";
 import { useOutsideOfDrawerRef, WumboDrawer } from "../WumboDrawer";
 import { useParams } from "react-router-dom";
-import { viewProfilePath, tagNftPath } from "@/constants/routes";
+import { viewProfilePath, tagNftPath, routes } from "@/constants/routes";
 import { PublicKey } from "@solana/web3.js";
 
 export const ViewNft: React.FC = () => {
@@ -50,7 +50,7 @@ export const ViewNft: React.FC = () => {
             return tokenRef
               ? viewProfilePath(tokenRef.mint)
               : handle
-              ? `https://twitter.com/${handle}`
+              ? routes.profile.path + `?name=${handle}`
               : `https://explorer.solana.com/address/${c.toBase58()}`;
           }}
         />
