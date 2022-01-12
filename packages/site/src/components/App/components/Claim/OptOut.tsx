@@ -43,7 +43,8 @@ export const OptOutRoute: React.FC = () => {
             </Heading>
           </div>
           <Text fontSize="md">
-            Although we would love for you to stay and grow the{" "}
+            We would love for you to stay and grow together with the other
+            creators who have joined the{" "}
             <Link
               href="https://www.strataprotocol.com/blog/open-collective"
               isExternal
@@ -51,26 +52,24 @@ export const OptOutRoute: React.FC = () => {
             >
               OPEN collective
             </Link>{" "}
-            alongside your social token, we understand if you want to opt out of
-            the experience. You'll be leaving behind your fans who have already
-            allocated{" "}
+            by claiming their social tokens. You’ll be leaving behind your fans
+            who have already allocated{" "}
             <Text as="span" color="green.600" fontWeight={900}>
               ${fiatLocked}
             </Text>{" "}
-            to you and a claimable amount of{" "}
+            to you with{" "}
             <Text as="span" color="green.600" fontWeight={900}>
               ${claimableAmount}
             </Text>{" "}
-            in your own social token.
+            claimable in your own social token.
           </Text>
         </VStack>
         <VStack align="left">
           <Text fontSize="lg" fontWeight="500">
-            Had a change of heart?
+            Consider Staying With Us
           </Text>
           <Text fontSize="md">
-            Listen we wont fault you if you came here wanting to opt out. But if
-            you want to grow the{" "}
+            We understand if you came here to opt out, but consider growing the{" "}
             <Link
               href="https://www.strataprotocol.com/blog/open-collective"
               isExternal
@@ -78,8 +77,10 @@ export const OptOutRoute: React.FC = () => {
             >
               OPEN collective
             </Link>{" "}
-            alongside your peers. Then please claim your profile and participate
-            in the community either on{" "}
+            with your peers. You can even leave your social token unclaimed for
+            your fans to build their own community around the token. Click the
+            button below if you had a change of heart and want to claim your
+            token, and please take a look at the community on{" "}
             <Link href="discord.gg/S8wJBR2BQV" color="indigo.500">
               discord
             </Link>{" "}
@@ -87,6 +88,7 @@ export const OptOutRoute: React.FC = () => {
             <Link href="https://twitter.com/TeamWumbo" color="indigo.500">
               twitter
             </Link>
+            .
           </Text>
         </VStack>
         <Flex w="full" justifyContent="center">
@@ -99,14 +101,14 @@ export const OptOutRoute: React.FC = () => {
                 history.push(claimPath({ step: "1", handle: handle! }))
               }
             >
-              Claim Profile
+              Claim Token
             </Button>
           </VStack>
         </Flex>
         <VStack align="left" spacing={4}>
           <Text fontSize="lg" fontWeight="500">
-            If you still wish to go through with opting out please follow the
-            directions below.
+            If you still wish to opt out then please follow the directions
+            below.
           </Text>
           <List spacing={4}>
             <ListItem display="flex" alignItems="center">

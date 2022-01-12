@@ -243,7 +243,7 @@ export const Claim1 = React.memo<IClaim1Props>(
             (isClaimable && (
               <VStack spacing={0}>
                 <Text fontWeight="bold">
-                  Dont want to claim your social token?
+                  Do you want this social token removed?
                 </Text>
                 <Button
                   variant="link"
