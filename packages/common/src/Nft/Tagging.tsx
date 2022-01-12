@@ -378,7 +378,7 @@ export const TaggableImages = ({
         isLoading={executing}
         loadingText={awaitingApproval ? "Awaiting Approval" : "Tagging"}
       >
-        {loading ? "Searching..." : "Tag"}
+        {loading ? "Searching..." : "Verify"}
       </Button>
     </VStack>
   );
