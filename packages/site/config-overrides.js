@@ -30,7 +30,15 @@ const supportMjs = () => (webpackConfig) => {
           "@strata-foundation/spl-utils": path.resolve(
             "./node_modules/@strata-foundation/spl-utils"
           ),
-        } : {}
+        } : {
+          "@chakra-ui/react": path.resolve("../../node_modules/@chakra-ui/react"),
+          "@solana/wallet-adapter-react": path.resolve("../../node_modules/@solana/wallet-adapter-react"),
+          "@strata-foundation/react": path.resolve("../../node_modules/@strata-foundation/react"),
+          "@strata-foundation/spl-token-bonding": path.resolve("../../node_modules/@strata-foundation/spl-token-bonding"),
+          "@strata-foundation/spl-utils": path.resolve(
+            "../../node_modules/@strata-foundation/spl-utils"
+          ),
+        }
       }
     }
     return webpackConfig;
