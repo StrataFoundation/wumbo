@@ -15,15 +15,17 @@ export const ClaimRoute = React.memo(() => {
   const handle = query.get("handle") || undefined;
   const code = query.get("code") || undefined;
 
-  const incrementStep = useCallback(
-    () => history.push(claimPath({ step: `${+step + 1}`, handle, code })),
-    [step, handle, code, history]
-  );
+  const incrementStep = useCallback(() => {
+    if (handle) {
+      history.push(claimPath({ step: `${+step + 1}`, handle, code }));
+    }
+  }, [step, handle, code, history]);
 
-  const decrementStep = useCallback(
-    () => history.push(claimPath({ step: `${+step - 1}`, handle, code })),
-    [step, handle, code, history]
-  );
+  const decrementStep = useCallback(() => {
+    if (handle) {
+      history.push(claimPath({ step: `${+step - 1}`, handle, code }));
+    }
+  }, [step, handle, code, history]);
 
   useEffect(() => {
     window.scrollTo(0, 0);

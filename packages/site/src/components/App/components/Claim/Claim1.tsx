@@ -26,6 +26,7 @@ import { RiAlertLine, RiGift2Line } from "react-icons/ri";
 import { useTwitterTld } from "wumbo-common";
 import claim1illu from "../../../../assets/images/Claim1Illu.png";
 import claim1banner from "../../../../assets/images/claim1banner.png";
+import { optOutPath } from "../../../../constants/routes";
 
 export interface IClaim1Props {
   handle: string;
@@ -37,18 +38,21 @@ export const Claim1 = React.memo<IClaim1Props>(
   ({ handle, incrementStep, decrementStep }) => {
     const history = useHistory();
     const tld = useTwitterTld();
-    const { info: tokenRef, loading: tokenRefLoading = true } =
-      useTokenRefForName(handle, null, tld);
+    const { info: tokenRef, loading: tokenRefLoading } = useTokenRefForName(
+      handle,
+      null,
+      tld
+    );
 
-    const { info: tokenBonding, loading: tokenBondingLoading = true } =
+    const { info: tokenBonding, loading: tokenBondingLoading } =
       useTokenBondingFromMint(tokenRef?.mint);
 
-    const { info: buyRoyaltiesAcct, loading: royaltiesAcctLoading = true } =
+    const { info: buyRoyaltiesAcct, loading: royaltiesAcctLoading } =
       useTokenAccount(tokenBonding?.buyTargetRoyalties);
 
     const mint = useMint(tokenRef?.mint);
 
-    const { pricing, loading: pricingLoading = true } = useBondingPricing(
+    const { pricing, loading: pricingLoading } = useBondingPricing(
       tokenBonding?.publicKey
     );
 
@@ -67,20 +71,25 @@ export const Claim1 = React.memo<IClaim1Props>(
       typeof nativeLocked !== "undefined" &&
       toFiat(amountAsNum(buyRoyaltiesAcct.amount, mint), fiatPrice).toFixed(2);
 
-    const isLoading = useMemo(
-      () =>
+    const isLoading = useMemo(() => {
+      return (
         tokenRefLoading ||
         tokenBondingLoading ||
         royaltiesAcctLoading ||
-        pricingLoading,
-      [
-        tokenRef,
-        tokenRefLoading,
-        tokenBondingLoading,
-        royaltiesAcctLoading,
-        pricingLoading,
-      ]
-    );
+        pricingLoading ||
+        !!(tokenRef && (!tokenBonding || !buyRoyaltiesAcct || !pricing))
+      );
+    }, [
+      tokenRef,
+      tokenRefLoading,
+      tokenBondingLoading,
+      royaltiesAcctLoading,
+      pricingLoading,
+      tokenRef,
+      tokenBonding,
+      buyRoyaltiesAcct,
+      pricing,
+    ]);
 
     const tokenExists = !isLoading && tokenRef && tokenBonding;
     const isClaimable = tokenExists && !tokenRef?.isClaimed;
@@ -190,7 +199,7 @@ export const Claim1 = React.memo<IClaim1Props>(
               colorScheme="indigo"
               variant="outline"
               onClick={incrementStep}
-              disabled={isLoading || !isClaimable}
+              isDisabled={isLoading || !isClaimable}
             >
               Next
             </Button>
@@ -198,13 +207,13 @@ export const Claim1 = React.memo<IClaim1Props>(
               colorScheme="indigo"
               variant="link"
               onClick={() => history.push("/")}
-              disabled={isLoading || !isClaimable}
+              isDisabled={isLoading || !isClaimable}
             >
               Cancel
             </Button>
           </VStack>
         </Flex>
-        <Box
+        <VStack
           w="full"
           border="1px solid"
           borderColor="gray.300"
@@ -212,16 +221,49 @@ export const Claim1 = React.memo<IClaim1Props>(
           justifyContent="center"
           align="center"
           rounded="md"
+          spacing={5}
         >
-          <Text fontWeight="bold">Worried about potential legal problems?</Text>
-          <Link
-            href="https://strataprotocol.com/blog/us-social-token-law"
-            color="indigo.500"
-            isExternal
-          >
-            Read "Legality of Wumbo"
-          </Link>
-        </Box>
+          <VStack spacing={0}>
+            <Text fontWeight="bold">
+              Worried about potential legal problems?
+            </Text>
+            <Button
+              variant="link"
+              colorScheme="indigo"
+              onClick={() =>
+                window.open(
+                  "https://strataprotocol.com/blog/us-social-token-law"
+                )
+              }
+            >
+              Read "Legality of Wumbo"
+            </Button>
+          </VStack>
+          {isLoading ||
+            (isClaimable && (
+              <VStack spacing={0}>
+                <Text fontWeight="bold">
+                  Do you want this social token removed?
+                </Text>
+                <Button
+                  variant="link"
+                  colorScheme="indigo"
+                  isDisabled={isLoading}
+                  onClick={() =>
+                    history.push(
+                      optOutPath({
+                        handle,
+                        fiatLocked: Number(fiatLocked) || 0,
+                        claimableAmount: Number(claimableAmount) || 0,
+                      })
+                    )
+                  }
+                >
+                  Learn about "Opting Out"
+                </Button>
+              </VStack>
+            ))}
+        </VStack>
       </VStack>
     );
   }
