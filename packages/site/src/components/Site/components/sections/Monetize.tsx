@@ -46,8 +46,7 @@ export const Monetize: React.FC = () => (
           lineHeight={1.5}
           textAlign={["center", "center", "left", "left"]}
         >
-          Be your own record label. Fund your favorite artist and share in their
-          success
+          Fund your favorite artist and be a part of their success.
         </Heading>
         <Heading
           as="h2"

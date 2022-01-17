@@ -43,7 +43,8 @@ export const Hero: React.FC = () => {
               color="white"
               textAlign={["center", "center", "left", "left"]}
             >
-              Back you favorite creators, artists, and influencers{" "}
+              The power to support your favorite artists and influencers is now
+              in your hands{" "}
               <Text as="span" fontWeight="light">
                 with Wumbo.
               </Text>
@@ -58,8 +59,8 @@ export const Hero: React.FC = () => {
               textAlign={["center", "center", "left", "left"]}
             >
               Wumbo is a Browser Extension that sits on top of Twitter and lets
-              you mint tokens for new influencers you discover. Join them on
-              their journey to the top!
+              you mint tokens for your favorite creators. Build a thriving
+              community and join them on their journey to the top!
             </Heading>
             <DownloadButton />
           </Stack>

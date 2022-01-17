@@ -12,7 +12,6 @@ import { PublicKey } from "@solana/web3.js";
 import {
   useMetaplexTokenMetadata,
   usePublicKey,
-  useTokenBonding,
   useTokenBondingFromMint,
   useTokenRefForName,
 } from "@strata-foundation/react";
@@ -21,7 +20,7 @@ import { useHistory, useParams } from "react-router-dom";
 import {
   Profile as CommonProfile,
   useQuery,
-  useReverseTwitter,
+  useTwitterOwner,
   useTwitterTld,
 } from "wumbo-common";
 import WalletRedirect from "../wallet/WalletRedirect";
@@ -40,6 +39,7 @@ export const Profile = () => {
   const { info: tokenBonding } = useTokenBondingFromMint(
     passedMintKey || tokenRef?.mint
   );
+  const { owner: twitterWallet } = useTwitterOwner(name || undefined);
 
   if (!connected) {
     return <WalletRedirect />;
@@ -72,7 +72,9 @@ export const Profile = () => {
       />
       <WumboDrawer.Content>
         <CommonProfile
-          sendPath={sendSearchPath(tokenRef?.owner || undefined)}
+          sendPath={sendSearchPath(
+            tokenRef?.owner || twitterWallet || undefined
+          )}
           createPath={routes.create.path + `?name=${name}`}
           collectivePath={
             tokenBonding ? viewProfilePath(tokenBonding.baseMint) : null

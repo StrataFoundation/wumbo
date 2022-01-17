@@ -14,6 +14,8 @@ export const DownloadButton: React.FC<IDownloadButtonProps> = ({
     lineHeight="1"
     size="md"
     onClick={(e) => {
+      e.preventDefault();
+      e.stopPropagation();
       window.open(
         "https://chrome.google.com/webstore/detail/wumbo/opmfbcncfajkanpggglkgabbfhebgikk"
       );

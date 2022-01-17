@@ -32,7 +32,7 @@ export const AppRoutes: IAppRoutes = {
   claim: { path: "/app/claim" },
   optOut: { path: "/app/optOut" },
   manageWallet: { path: "/app/manage-wallet" },
-  wallet: { path: "/app/wallet" },
+  wallet: { path: "/app/my-tokens" },
   viewProfile: { path: "/app/profile/view/:mint" },
   viewNft: { path: "/app/nft/view/:mint" },
   profile: { path: "/app/profile" },

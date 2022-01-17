@@ -1,7 +1,21 @@
 import React, { useRef, Fragment, ReactNode, useContext } from "react";
-import { Route, NavLink, Link, useHistory } from "react-router-dom";
+import {
+  Route,
+  NavLink,
+  Link,
+  useHistory,
+  useLocation,
+} from "react-router-dom";
 import startCase from "lodash/startCase";
-import { Flex, Box, Slide, Text, Button, Icon } from "@chakra-ui/react";
+import {
+  Flex,
+  Box,
+  Slide,
+  Text,
+  Button,
+  Icon,
+  Link as ChakraLink,
+} from "@chakra-ui/react";
 import { HiOutlineX } from "react-icons/hi";
 import { IoMdArrowRoundBack } from "react-icons/io";
 import { BiRadioCircleMarked } from "react-icons/bi";
@@ -15,6 +29,7 @@ import {
   Spinner,
   OPEN_BONDING,
   useReverseTwitter,
+  SITE_URL,
 } from "wumbo-common";
 import { useHistoryList } from "@/utils/history";
 import { useWallet } from "@solana/wallet-adapter-react";
@@ -22,7 +37,7 @@ import { SplTokenCollective } from "@strata-foundation/spl-token-collective";
 import Logo from "../../public/assets/img/logo.svg";
 import { WalletAutoConnect } from "./wallet/WalletAutoConnect";
 import { useTwWrappedSolMint } from "@strata-foundation/react";
-
+import { RiExternalLinkLine } from "react-icons/ri";
 export const OutsideOfDrawerRef =
   React.createContext<React.MutableRefObject<HTMLInputElement> | null>(null);
 
@@ -107,6 +122,8 @@ WumboDrawer.Header = (props: HeaderProps) => {
   const { connected } = useWallet();
   const historyList = useHistoryList();
   const history = useHistory();
+  const location = useLocation();
+  const currentUri = `${location.pathname}${location.search}`;
 
   return (
     <Flex
@@ -147,7 +164,15 @@ WumboDrawer.Header = (props: HeaderProps) => {
           )}
           {!hasTitle && (props as HeaderWithChildren).children}
         </Flex>
-        <Flex pl={2} alignItems="center">
+        <ChakraLink
+          color="gray.500"
+          _hover={{ color: "gray.600", cursor: "pointer" }}
+          isExternal
+          href={`${SITE_URL}/app${currentUri}`}
+        >
+          <Icon as={RiExternalLinkLine} w={5} h={5} />
+        </ChakraLink>
+        <Flex pl={2} alignItems="center" marginLeft="12px">
           <Box pr={2}>
             <Link to={routes.manageWallet.path}>
               <Box position="relative">
