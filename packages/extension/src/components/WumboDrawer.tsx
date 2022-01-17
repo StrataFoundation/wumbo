@@ -1,7 +1,21 @@
 import React, { useRef, Fragment, ReactNode, useContext } from "react";
-import { Route, NavLink, Link, useHistory, useLocation } from "react-router-dom";
+import {
+  Route,
+  NavLink,
+  Link,
+  useHistory,
+  useLocation,
+} from "react-router-dom";
 import startCase from "lodash/startCase";
-import { Flex, Box, Slide, Text, Button, Icon, Link as ChakraLink } from "@chakra-ui/react";
+import {
+  Flex,
+  Box,
+  Slide,
+  Text,
+  Button,
+  Icon,
+  Link as ChakraLink,
+} from "@chakra-ui/react";
 import { HiOutlineX } from "react-icons/hi";
 import { IoMdArrowRoundBack } from "react-icons/io";
 import { BiRadioCircleMarked } from "react-icons/bi";
@@ -23,9 +37,7 @@ import { SplTokenCollective } from "@strata-foundation/spl-token-collective";
 import Logo from "../../public/assets/img/logo.svg";
 import { WalletAutoConnect } from "./wallet/WalletAutoConnect";
 import { useTwWrappedSolMint } from "@strata-foundation/react";
-import {
-  RiExternalLinkLine,
-} from "react-icons/ri";
+import { RiExternalLinkLine } from "react-icons/ri";
 export const OutsideOfDrawerRef =
   React.createContext<React.MutableRefObject<HTMLInputElement> | null>(null);
 

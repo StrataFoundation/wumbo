@@ -39,10 +39,7 @@ export const Header: React.FC = () => (
       <Icon as={WumboIcon} w={10} h={10} />
       <Text fontSize="xl">Wum.bo</Text>
     </HStack>
-    <Box
-      display={{ md: "block" }}
-      flexBasis={{ base: "100%", md: "auto" }}
-    >
+    <Box display={{ md: "block" }} flexBasis={{ base: "100%", md: "auto" }}>
       <Flex
         align="center"
         justify={["center", "space-between", "flex-end", "flex-end"]}

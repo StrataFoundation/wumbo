@@ -3,7 +3,7 @@ import {
   routes,
   sendSearchPath,
   swapPath,
-  viewProfilePath
+  viewProfilePath,
 } from "@/constants/routes";
 import { useClaimFlow } from "@/utils/claim";
 import { Box } from "@chakra-ui/react";
@@ -11,14 +11,17 @@ import { useWallet } from "@solana/wallet-adapter-react";
 import { PublicKey } from "@solana/web3.js";
 import {
   useMetaplexTokenMetadata,
-  usePublicKey, useTokenBondingFromMint,
-  useTokenRefForName
+  usePublicKey,
+  useTokenBondingFromMint,
+  useTokenRefForName,
 } from "@strata-foundation/react";
 import React, { Fragment } from "react";
 import { useHistory, useParams } from "react-router-dom";
 import {
   Profile as CommonProfile,
-  useQuery, useTwitterOwner, useTwitterTld
+  useQuery,
+  useTwitterOwner,
+  useTwitterTld,
 } from "wumbo-common";
 import WalletRedirect from "../wallet/WalletRedirect";
 import { WumboDrawer } from "../WumboDrawer";
@@ -69,7 +72,9 @@ export const Profile = () => {
       />
       <WumboDrawer.Content>
         <CommonProfile
-          sendPath={sendSearchPath(tokenRef?.owner || twitterWallet || undefined)}
+          sendPath={sendSearchPath(
+            tokenRef?.owner || twitterWallet || undefined
+          )}
           createPath={routes.create.path + `?name=${name}`}
           collectivePath={
             tokenBonding ? viewProfilePath(tokenBonding.baseMint) : null

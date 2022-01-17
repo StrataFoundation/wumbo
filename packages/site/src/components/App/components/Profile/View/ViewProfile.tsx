@@ -4,15 +4,24 @@ import { PublicKey } from "@solana/web3.js";
 import {
   useMetaplexTokenMetadata,
   usePublicKey,
-  useTokenBondingFromMint, useTokenRefForName
+  useTokenBondingFromMint,
+  useTokenRefForName,
 } from "@strata-foundation/react";
 import React from "react";
 import { useHistory, useParams } from "react-router-dom";
-import { Profile, Spinner, useQuery, useTwitterOwner, useTwitterTld } from "wumbo-common";
+import {
+  Profile,
+  Spinner,
+  useQuery,
+  useTwitterOwner,
+  useTwitterTld,
+} from "wumbo-common";
 import {
   AppRoutes,
   nftPath,
-  profilePath, sendSearchPath, swapPath
+  profilePath,
+  sendSearchPath,
+  swapPath,
 } from "../../../../../constants/routes";
 import { AppContainer } from "../../common/AppContainer";
 import WalletRedirect from "../../Wallet/WalletRedirect";
@@ -31,7 +40,7 @@ export const ViewProfileRoute: React.FC = () => {
     passedMintKey || tokenRef?.mint
   );
   const { owner: twitterWallet } = useTwitterOwner(name || undefined);
-  
+
   if (!connected) {
     return <WalletRedirect />;
   }
@@ -65,11 +74,11 @@ export const ViewProfileRoute: React.FC = () => {
           claimLoading: false,
           linkLoading: false,
           claim: async () => {
-            history.push(AppRoutes.claim + `?handle=${handle}`)
+            history.push(AppRoutes.claim + `?handle=${handle}`);
           },
           link: async () => {
             throw new Error("Not yet supported on site");
-          }
+          },
         })}
         mintKey={passedMintKey || tokenRef?.mint}
         onAccountClick={(mintKey, handle) => {

@@ -66,6 +66,10 @@ export const Support: React.FC = () => (
             image={process.env.PUBLIC_URL + "chrome.png"}
             supported
           />
+          <SupportItem
+            image={process.env.PUBLIC_URL + "brave.png"}
+            supported
+          />
           <SupportItem image={process.env.PUBLIC_URL + "firefox.png"} />
         </HStack>
         <Heading
