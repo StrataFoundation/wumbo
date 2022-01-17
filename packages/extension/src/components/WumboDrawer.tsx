@@ -167,7 +167,7 @@ WumboDrawer.Header = (props: HeaderProps) => {
         <ChakraLink
           color="gray.500"
           _hover={{ color: "gray.600", cursor: "pointer" }}
-          target="_blank"
+          isExternal
           href={`${SITE_URL}/app${currentUri}`}
         >
           <Icon as={RiExternalLinkLine} w={5} h={5} />
