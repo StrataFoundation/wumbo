@@ -3305,14 +3305,6 @@ Lockfile:
       "@solana/spl-token" "^0.1.8"
       "@solana/web3.js" "^1.31.0"
   
-  "@metaplex/arweave-cost@^2.0.0":
-    version "2.0.0"
-    resolved "https://registry.yarnpkg.com/@metaplex/arweave-cost/-/arweave-cost-2.0.0.tgz#74d4dbb5b39e89f81fbc1a50220d1837fe0efdfd"
-    integrity sha512-i2FTLtg7Zz9sVJxKHlr3Ek1ibcG4l/we3r5ZQYlCtNFforBj+w6OnyGwdqSaFIkxSyYXqAlo9BY7cc/WEuTccA==
-    dependencies:
-      axios "^0.24.0"
-      debug "^4.3.2"
-  
   "@metaplex/js@^4.3.0":
     version "4.10.1"
     resolved "https://registry.yarnpkg.com/@metaplex/js/-/js-4.10.1.tgz#bb78382bdd33cce0b58679ab2e3e83accfa9ef31"
