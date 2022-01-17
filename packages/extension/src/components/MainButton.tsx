@@ -79,7 +79,7 @@ export const MainButton: FC<Props> = ({
             h: "36px",
           }
         : {})}
-      link={`${routes.viewProfile.path}?name=${creatorName}`}
+      link={`${routes.profile.path}?name=${creatorName}`}
       onClick={() =>
         toggleDrawer({
           isOpen: true,
