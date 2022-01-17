@@ -73,7 +73,7 @@ interface IProfileProps
   mintKey?: PublicKey;
   editPath: string;
   sendPath: string;
-  createPath: string;
+  createPath?: string;
   collectivePath: string | null;
   onTradeClick?: () => void;
   useClaimFlow: (handle: string | undefined | null) => IClaimFlowOutput;
@@ -413,7 +413,7 @@ export const Profile = React.memo(
                 </PopoverContent>
               </Popover>
             )}
-            {!tokenRef && !tokenBonding && !mintKey && (
+            {!tokenRef && !tokenBonding && !mintKey && createPath && (
               <Button
                 as={Link}
                 to={createPath}

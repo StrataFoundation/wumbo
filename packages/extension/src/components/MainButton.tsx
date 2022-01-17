@@ -79,7 +79,7 @@ export const MainButton: FC<Props> = ({
             h: "36px",
           }
         : {})}
-      link={`${viewProfilePath(tokenRef.mint)}?name=${creatorName}`}
+      link={`${routes.viewProfile.path}?name=${creatorName}`}
       onClick={() =>
         toggleDrawer({
           isOpen: true,

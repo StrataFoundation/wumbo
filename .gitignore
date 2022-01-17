@@ -5,3 +5,6 @@ node_modules
 package-lock.json
 oyster-common
 ./packages/oyster-common
+packages/extension/dist.zip
+.DS_Store
+localnet.pid
