@@ -6,6 +6,7 @@ import { Workspace } from "./components/common/Workspace";
 import { Toaster } from "react-hot-toast";
 import { AppRoutes } from "../../constants/routes";
 import { ClaimRoute } from "./components/Claim/Claim";
+import { OptOutRoute } from "./components/Claim/OptOut";
 import { EditProfileRoute } from "./components/Profile/Edit/EditProfile";
 import ManageWallet from "./components/Wallet/ManageWallet";
 import Wallet from "./components/Wallet/Wallet";
@@ -26,6 +27,7 @@ export const App: React.FC = () => (
 
       <Workspace>
         <Switch>
+          <Route path={AppRoutes.optOut.path} component={OptOutRoute} />
           <Route path={AppRoutes.claim.path} component={ClaimRoute} />
           <Route path={AppRoutes.wallet.path} component={Wallet} />
           <Route path={AppRoutes.manageWallet.path} component={ManageWallet} />
