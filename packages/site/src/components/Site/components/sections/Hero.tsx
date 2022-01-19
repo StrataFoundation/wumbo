@@ -70,7 +70,7 @@ export const Hero: React.FC = () => {
               color="white"
               textAlign={["center", "center", "left", "left"]}
             >
-              Prelaunch tokens go on sale January 19th. <br/>
+              Prelaunch tokens go on sale January 19th. <br />
               All tokens go on sale January 20th.
             </Heading>
             <DownloadButton />

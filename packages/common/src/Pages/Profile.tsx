@@ -164,7 +164,10 @@ export const Profile = React.memo(
       useTokenBondingFromMint(mintKey || tokenRef?.mint);
 
     const royalty = useTokenAccount(tokenBonding?.buyTargetRoyalties);
-    console.log(tokenBonding?.buyTargetRoyalties.toBase58(), royalty.info?.owner.toBase58());
+    console.log(
+      tokenBonding?.buyTargetRoyalties.toBase58(),
+      royalty.info?.owner.toBase58()
+    );
     const {
       image: collectiveImage,
       metadata: collectiveMetadata,
