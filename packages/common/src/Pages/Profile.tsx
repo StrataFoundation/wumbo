@@ -163,6 +163,8 @@ export const Profile = React.memo(
     const { info: tokenBonding, loading: tokenBondingLoading } =
       useTokenBondingFromMint(mintKey || tokenRef?.mint);
 
+    const royalty = useTokenAccount(tokenBonding?.buyTargetRoyalties);
+    console.log(tokenBonding?.buyTargetRoyalties.toBase58(), royalty.info?.owner.toBase58());
     const {
       image: collectiveImage,
       metadata: collectiveMetadata,
@@ -501,6 +503,7 @@ function SocialTokenTabs({
   const isTrophy = (t: ITokenWithMetaAndAccount): boolean => {
     return Boolean(
       t.metadata?.data?.creators?.some(
+        // @ts-ignore
         (c) =>
           c.address == TROPHY_CREATOR.toBase58() &&
           (t.data?.attributes || []).some(

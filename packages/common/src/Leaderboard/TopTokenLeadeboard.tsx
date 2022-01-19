@@ -35,7 +35,7 @@ const Element = React.memo(
   }) => {
     const { pricing } = useBondingPricing(tokenBondingKey);
     const { info: tokenBonding } = useTokenBonding(tokenBondingKey);
-    const fiatPrice = usePriceInUsd(tokenBonding?.baseMint);
+    const fiatPrice = usePriceInUsd(NATIVE_MINT);
     const toFiat = (a: number) => (fiatPrice || 0) * a;
 
     const current = pricing?.locked(NATIVE_MINT);
