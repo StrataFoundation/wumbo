@@ -6,6 +6,7 @@ import {
   HStack,
   Icon,
   Link as PlainLink,
+  ListIcon,
   Popover,
   PopoverBody,
   PopoverContent,
@@ -497,12 +498,9 @@ function SocialTokenTabs({
   } = useWalletTokenAccounts(wallet);
   const { handleErrors } = useErrorHandler();
 
-  handleErrors(error);
-
-  function isTrophy(t: ITokenWithMetaAndAccount): boolean {
+  const isTrophy = (t: ITokenWithMetaAndAccount): boolean => {
     return Boolean(
-      t.data?.properties?.creators?.some(
-        // @ts-ignore
+      t.metadata?.data?.creators?.some(
         (c) =>
           c.address == TROPHY_CREATOR.toBase58() &&
           (t.data?.attributes || []).some(
@@ -510,7 +508,7 @@ function SocialTokenTabs({
           )
       )
     );
-  }
+  };
 
   return (
     <Tabs isFitted w="full">
@@ -557,7 +555,7 @@ function SocialTokenTabs({
           <NftListRaw
             loading={loadingCollectibles}
             tokenAccounts={tokenAccounts}
-            filter={(t: ITokenWithMeta) => !isTrophy(t)}
+            filter={(t: ITokenWithMeta) => isTrophy(t)}
             getLink={getNftLink}
           />
         </TabPanel>
