@@ -6,7 +6,6 @@ import {
   HStack,
   Icon,
   Link as PlainLink,
-  ListIcon,
   Popover,
   PopoverBody,
   PopoverContent,
@@ -53,7 +52,7 @@ import {
   TokenBondingRecentTransactionsProvider,
   useTokenBondingRecentTransactions,
 } from "../contexts";
-import { useTokenTier, useUserTokensWithMeta } from "../hooks";
+import { useTokenTier } from "../hooks";
 import { TopTokenLeaderboard } from "../Leaderboard";
 import { TokenLeaderboard } from "../Leaderboard/TokenLeaderboard";
 import { NftListRaw } from "../Nft";
@@ -134,21 +133,23 @@ export const Profile = React.memo(
     sendPath,
     createPath,
   }: IProfileProps) => {
+    const { publicKey } = useWallet();
+    const query = useQuery();
     const { handleErrors } = useErrorHandler();
     const { info: mintTokenRef, loading } = useMintTokenRef(mintKey);
 
-    const { publicKey } = useWallet();
     const {
       metadata,
       loading: loadingMetadata,
       error: tokenMetadataError,
     } = useTokenMetadata(mintKey);
+
     const { handle: walletTwitterHandle, error: reverseTwitterError } =
       useReverseTwitter(publicKey || undefined);
 
-    const query = useQuery();
     let { handle: reverseLookupHandle, error: reverseTwitterError2 } =
       useReverseTwitter(mintTokenRef?.owner || undefined);
+
     const handle =
       query.get("name") ||
       reverseLookupHandle ||
@@ -156,6 +157,7 @@ export const Profile = React.memo(
       walletTwitterHandle;
 
     const { owner: ownerWalletKey } = useTwitterOwner(handle);
+
     const { info: walletTokenRef } = usePrimaryClaimedTokenRef(ownerWalletKey);
 
     const tokenRef = mintTokenRef || walletTokenRef;
@@ -169,12 +171,15 @@ export const Profile = React.memo(
       loading: loadingCollectiveMetadata,
       error: collectiveMetadataError,
     } = useTokenMetadata(tokenBonding?.baseMint);
+
     const baseMintTokenBonding = useTokenBondingFromMint(
       tokenBonding?.baseMint
     );
+
     const baseIsCollective = !!baseMintTokenBonding.info;
 
     const { awaitingApproval } = useProvider();
+
     const myTokenRefKey = useClaimedTokenRefKey(publicKey, null);
 
     const { data: { tokenRank } = {} } = apolloUseQuery<{

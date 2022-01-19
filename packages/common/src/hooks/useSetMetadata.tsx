@@ -1,7 +1,7 @@
-import { useConnection } from "@solana/wallet-adapter-react";
+import { WalletNotConnectedError } from "@solana/wallet-adapter-base";
+import { useWallet } from "@solana/wallet-adapter-react";
 import { PublicKey, Signer, TransactionInstruction } from "@solana/web3.js";
 import {
-  useProvider,
   useStrataSdks,
   useTokenBonding,
   useTokenMetadata,
@@ -47,32 +47,29 @@ const getFileFromUrl = async (
 export const useSetMetadata = (
   tokenRefKey: PublicKey | undefined
 ): [
-  (
-    args: ISetMetadataArgs
-  ) => Promise<{ metadataAccount: PublicKey | undefined } | void>,
+  (args: ISetMetadataArgs) => Promise<void>,
   {
     loading: boolean;
     loadingState: MetadataFiniteState;
     error: Error | undefined;
   }
 ] => {
-  const { connection } = useConnection();
-  const { provider } = useProvider();
+  const { connected, publicKey } = useWallet();
   const { tokenCollectiveSdk, tokenMetadataSdk } = useStrataSdks();
   const [loading, setLoading] = useState<boolean>(false);
   const [loadingState, setLoadingState] = useState<MetadataFiniteState>("idle");
 
   const { info: tokenRef } = useTokenRef(tokenRefKey);
   const { info: tokenBonding } = useTokenBonding(tokenRef?.tokenBonding);
+
   const {
-    publicKey: metadataAccountKey,
     image,
     metadata,
     error: tokenMetadataError,
   } = useTokenMetadata(tokenBonding?.targetMint);
 
   const exec = async (args: ISetMetadataArgs) => {
-    if (provider && tokenRefKey) {
+    if (connected && publicKey && tokenRefKey) {
       setLoading(true);
       setLoadingState("gathering-files");
       let files: File[] = [];
@@ -159,10 +156,6 @@ export const useSetMetadata = (
           [...updateTokenBondingInstructions, ...updateMetadataInstructions],
           [...updateTokenBondingSigners, ...updateMetadataSigners]
         );
-
-        return {
-          metadataAccount: metadataAccountKey,
-        };
       } finally {
         setLoading(false);
         setLoadingState("idle");
