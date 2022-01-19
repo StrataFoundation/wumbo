@@ -32,7 +32,7 @@ import { ITokenBondingSettings } from "@strata-foundation/spl-token-collective";
 
 interface IEditProfileProps {
   ownerWalletKey: PublicKey;
-  onComplete(completeArgs: { metadataAccount: PublicKey }): void;
+  onComplete(): void;
 }
 
 const validationSchema = yup
@@ -115,11 +115,8 @@ export const EditProfile = React.memo(
     };
 
     const handleOnSubmit = async (values: ISetMetadataArgs) => {
-      const result = await setMetadata(values);
-
-      if (result && result.metadataAccount) {
-        onComplete(result as any);
-      }
+      await setMetadata(values);
+      onComplete();
     };
 
     const humanRedablePercent = (p: number | undefined = 0) =>
