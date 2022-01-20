@@ -5,10 +5,12 @@ import {
   useErrorHandler,
   usePrimaryClaimedTokenRef,
   useStrataSdks,
+  Notification
 } from "@strata-foundation/react";
 import { SplTokenCollective } from "@strata-foundation/spl-token-collective";
 import React from "react";
 import { useAsyncCallback } from "react-async-hook";
+import toast from "react-hot-toast";
 import { useHistory } from "react-router-dom";
 import { Spinner } from "wumbo-common";
 import WalletRedirect from "../Wallet/WalletRedirect";
@@ -20,6 +22,15 @@ async function optOut(
   await tokenCollectiveSdk.optOut({
     tokenRef,
   });
+  toast.custom((t) => (
+    <Notification
+      show={t.visible}
+      type="success"
+      heading="Opted Out"
+      message={"Succesfully opted out"}
+      onDismiss={() => toast.dismiss(t.id)}
+    />
+  ));
 }
 
 export const ClaimedOptOutRoute: React.FC = () => {
