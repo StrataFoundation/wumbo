@@ -5,7 +5,7 @@ import {
   useErrorHandler,
   usePrimaryClaimedTokenRef,
   useStrataSdks,
-  Notification
+  Notification,
 } from "@strata-foundation/react";
 import { SplTokenCollective } from "@strata-foundation/spl-token-collective";
 import React from "react";
