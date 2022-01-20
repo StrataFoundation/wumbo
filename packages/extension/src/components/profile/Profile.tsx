@@ -11,6 +11,7 @@ import { useWallet } from "@solana/wallet-adapter-react";
 import { PublicKey } from "@solana/web3.js";
 import {
   useMetaplexTokenMetadata,
+  usePrimaryClaimedTokenRef,
   usePublicKey,
   useTokenBondingFromMint,
   useTokenRefForName,
@@ -20,6 +21,7 @@ import { useHistory, useParams } from "react-router-dom";
 import {
   Profile as CommonProfile,
   useQuery,
+  useReverseTwitter,
   useTwitterOwner,
   useTwitterTld,
 } from "wumbo-common";
@@ -28,14 +30,22 @@ import { WumboDrawer } from "../WumboDrawer";
 
 export const Profile = () => {
   const params = useParams<{ mint: string | undefined }>();
-  const { connected } = useWallet();
+  const { connected, publicKey } = useWallet();
   const query = useQuery();
   const name = query.get("name");
   const tld = useTwitterTld();
-  const { info: tokenRef, loading } = useTokenRefForName(name, null, tld);
-  const { metadata } = useMetaplexTokenMetadata(tokenRef?.mint);
   const passedMintKey = usePublicKey(params.mint);
   const history = useHistory();
+
+  const { handle: twitterHandle } = useReverseTwitter(publicKey || undefined);
+
+  const { info: tokenRef, loading } = useTokenRefForName(
+    name || twitterHandle,
+    null,
+    tld
+  );
+
+  const { metadata } = useMetaplexTokenMetadata(tokenRef?.mint);
   const { info: tokenBonding } = useTokenBondingFromMint(
     passedMintKey || tokenRef?.mint
   );
@@ -49,7 +59,7 @@ export const Profile = () => {
     return <WumboDrawer.Loading />;
   }
 
-  if (!passedMintKey && !name) {
+  if (!passedMintKey && !name && !twitterHandle) {
     return (
       <Fragment>
         <WumboDrawer.Header title="Profile" />
