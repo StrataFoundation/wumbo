@@ -13,6 +13,7 @@ interface IAppRoutes {
   root: Route;
   claim: Route;
   optOut: Route;
+  claimedOptOut: Route;
   viewProfile: Route;
   viewNft: Route;
   profile: Route;
@@ -30,7 +31,8 @@ interface IAppRoutes {
 export const AppRoutes: IAppRoutes = {
   root: { path: "/app" },
   claim: { path: "/app/claim" },
-  optOut: { path: "/app/optOut" },
+  optOut: { path: "/app/opt-out" },
+  claimedOptOut: { path: "/app/claimed-opt-out" },
   manageWallet: { path: "/app/manage-wallet" },
   wallet: { path: "/app/my-tokens" },
   viewProfile: { path: "/app/profile/view/:mint" },
