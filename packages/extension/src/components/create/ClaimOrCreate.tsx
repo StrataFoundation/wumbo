@@ -53,7 +53,7 @@ export default React.memo(() => {
       goLiveDate = new Date(new Date().valueOf() - 10000); // 10 secs ago
     }
 
-    const { tokenBonding } = await tokenCollectiveSdk!.createSocialToken({
+    const { tokenBonding, mint } = await tokenCollectiveSdk!.createSocialToken({
       metadata: {
         name: handle,
         symbol: "UNCLAIMED",
@@ -74,14 +74,11 @@ export default React.memo(() => {
         ),
       },
     });
-    const tokenBondingAcct = (await tokenBondingSdk!.getTokenBonding(
-      tokenBonding!
-    ))!;
     history.push(
       swapPath(
         tokenBonding!,
-        tokenBondingAcct.baseMint,
-        tokenBondingAcct.targetMint
+        SplTokenCollective.OPEN_COLLECTIVE_MINT_ID,
+        mint
       ) + `?name=${query.get("name")!}`
     );
   };
