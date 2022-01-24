@@ -27,9 +27,11 @@ interface IAppRoutes {
   swap: Route;
   prototype: Route;
   burnBeta: Route;
+  relink: Route;
 }
 
 export const AppRoutes: IAppRoutes = {
+  relink: { path: "/app/relink" },
   root: { path: "/app" },
   claim: { path: "/app/claim" },
   optOut: { path: "/app/opt-out" },

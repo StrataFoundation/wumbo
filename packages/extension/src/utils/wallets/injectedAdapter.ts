@@ -215,7 +215,7 @@ export class InjectedWalletAdapter
           type: MessageType.SIGN_TRANSACTION,
           transaction: transaction.serialize({
             requireAllSignatures: false,
-            verifySignatures: true,
+            verifySignatures: false,
           }),
         });
 
@@ -242,7 +242,7 @@ export class InjectedWalletAdapter
           transactions: transactions.map((t) =>
             t.serialize({
               requireAllSignatures: false,
-              verifySignatures: true,
+              verifySignatures: false,
             })
           ),
         });

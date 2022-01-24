@@ -27,7 +27,7 @@ async function optOut(
       show={t.visible}
       type="success"
       heading="Opted Out"
-      message={"Succesfully opted out"}
+      message={"Successfully opted out"}
       onDismiss={() => toast.dismiss(t.id)}
     />
   ));

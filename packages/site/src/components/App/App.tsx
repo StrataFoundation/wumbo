@@ -17,8 +17,9 @@ import { ViewProfileRoute } from "./components/Profile/View/ViewProfile";
 import { ViewNftRoute } from "./components/Nft/View/ViewNft";
 import { SwapRoute } from "./components/Swap/Swap";
 import { BurnBetaRoute } from "./components/BurnBeta/BurnBetaRoute";
-import { PrototypeRoute } from "./components//Prototype";
+import { PrototypeRoute } from "./components/Prototype";
 import { ContextProviders } from "./ContextProviders";
+import { RelinkRoute } from "./components/Relink/Relink";
 
 import { WalletSelectModal } from "./components/modals/WalletSelectModal";
 
@@ -29,6 +30,10 @@ export const App: React.FC = () => (
 
       <Workspace>
         <Switch>
+          <Route
+            path={AppRoutes.relink.path}
+            component={RelinkRoute}
+          />
           <Route
             path={AppRoutes.claimedOptOut.path}
             component={ClaimedOptOutRoute}

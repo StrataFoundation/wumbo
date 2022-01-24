@@ -74,6 +74,7 @@ interface IProfileProps
   editPath: string;
   sendPath: string;
   createPath?: string;
+  relinkPath?: string;
   collectivePath: string | null;
   onTradeClick?: () => void;
   useClaimFlow: (handle: string | undefined | null) => IClaimFlowOutput;
@@ -132,6 +133,7 @@ export const Profile = React.memo(
     collectivePath,
     sendPath,
     createPath,
+    relinkPath
   }: IProfileProps) => {
     const { publicKey } = useWallet();
     const query = useQuery();
@@ -420,6 +422,26 @@ export const Profile = React.memo(
                     Link your wallet to Wum.bo without claiming this token. Your
                     collectibles will appear on your profile. If you are the
                     creator on any NFTs, they will link back to your profile.
+                  </PopoverBody>
+                </PopoverContent>
+              </Popover>
+            )}
+            {relinkPath && ownerWalletKey && baseIsCollective && walletTwitterHandle && (
+              <Popover placement="bottom" trigger="hover">
+                <PopoverTrigger>
+                  <Button
+                    as={Link}
+                    to={relinkPath}
+                    size="xs"
+                    colorScheme="twitter"
+                    variant="outline"
+                  >
+                    Link a Different Wallet
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent>
+                  <PopoverBody>
+                    Update the primary wallet connected to this social token. This will relink your twitter handle to the new wallet, as well as your token. The new wallet will be used to display collectibles.
                   </PopoverBody>
                 </PopoverContent>
               </Popover>

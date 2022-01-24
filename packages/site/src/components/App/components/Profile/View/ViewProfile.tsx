@@ -64,6 +64,7 @@ export const ViewProfileRoute: React.FC = () => {
   return (
     <AppContainer>
       <Profile
+        relinkPath={AppRoutes.relink.path}
         sendPath={sendSearchPath(tokenRef?.owner || twitterWallet || undefined)}
         collectivePath={
           tokenBonding ? profilePath(tokenBonding.baseMint) : null
