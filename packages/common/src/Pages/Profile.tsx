@@ -133,7 +133,7 @@ export const Profile = React.memo(
     collectivePath,
     sendPath,
     createPath,
-    relinkPath
+    relinkPath,
   }: IProfileProps) => {
     const { publicKey } = useWallet();
     const query = useQuery();
@@ -426,26 +426,32 @@ export const Profile = React.memo(
                 </PopoverContent>
               </Popover>
             )}
-            {relinkPath && ownerWalletKey && baseIsCollective && walletTwitterHandle && (
-              <Popover placement="bottom" trigger="hover">
-                <PopoverTrigger>
-                  <Button
-                    as={Link}
-                    to={relinkPath}
-                    size="xs"
-                    colorScheme="twitter"
-                    variant="outline"
-                  >
-                    Link a Different Wallet
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent>
-                  <PopoverBody>
-                    Update the primary wallet connected to this social token. This will relink your twitter handle to the new wallet, as well as your token. The new wallet will be used to display collectibles.
-                  </PopoverBody>
-                </PopoverContent>
-              </Popover>
-            )}
+            {relinkPath &&
+              ownerWalletKey &&
+              baseIsCollective &&
+              walletTwitterHandle && (
+                <Popover placement="bottom" trigger="hover">
+                  <PopoverTrigger>
+                    <Button
+                      as={Link}
+                      to={relinkPath}
+                      size="xs"
+                      colorScheme="twitter"
+                      variant="outline"
+                    >
+                      Relink Wallet
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent>
+                    <PopoverBody>
+                      Update the primary wallet connected to this social token.
+                      This will relink your twitter handle to the new wallet, as
+                      well as your token. The new wallet will be used to display
+                      collectibles.
+                    </PopoverBody>
+                  </PopoverContent>
+                </Popover>
+              )}
             {!tokenRef && !tokenBonding && !mintKey && createPath && (
               <Button
                 as={Link}

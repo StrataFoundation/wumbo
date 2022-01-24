@@ -30,10 +30,7 @@ export const App: React.FC = () => (
 
       <Workspace>
         <Switch>
-          <Route
-            path={AppRoutes.relink.path}
-            component={RelinkRoute}
-          />
+          <Route path={AppRoutes.relink.path} component={RelinkRoute} />
           <Route
             path={AppRoutes.claimedOptOut.path}
             component={ClaimedOptOutRoute}

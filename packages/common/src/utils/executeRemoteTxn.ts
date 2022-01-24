@@ -29,16 +29,17 @@ export async function executeRemoteTxn(
   errors: Map<number, string> = new Map()
 ): Promise<string[]> {
   const txnsToExec = await getAndSignRemoteTxns(provider, url, body);
-  
+
   return executeTxnsInOrder(provider, txnsToExec, errors);
 }
 
-export async function signOnlyNeeded(provider: Provider, rawTxns: Buffer[]): Promise<Buffer[]> {
+export async function signOnlyNeeded(
+  provider: Provider,
+  rawTxns: Buffer[]
+): Promise<Buffer[]> {
   const txns = rawTxns.map((t) => Transaction.from(t));
   const needToSign = txns.filter((tx) =>
-    tx.signatures.some((sig) =>
-      sig.publicKey.equals(provider.wallet.publicKey)
-    )
+    tx.signatures.some((sig) => sig.publicKey.equals(provider.wallet.publicKey))
   );
   const signedTxns = await provider.wallet.signAllTransactions(needToSign);
   const txnsToExec = txns.map((txn, idx) => {
@@ -46,7 +47,7 @@ export async function signOnlyNeeded(provider: Provider, rawTxns: Buffer[]): Pro
     if (index >= 0) {
       return signedTxns[index].serialize({
         requireAllSignatures: false,
-        verifySignatures: false
+        verifySignatures: false,
       });
     }
 
@@ -63,7 +64,7 @@ export async function executeTxnsInOrder(
 ): Promise<string[]> {
   try {
     return [
-      ...await promiseAllInOrder(
+      ...(await promiseAllInOrder(
         txns.map((txn) => async () => {
           const txid = await provider.connection.sendRawTransaction(txn, {
             skipPreflight: true,
@@ -81,7 +82,7 @@ export async function executeTxnsInOrder(
           }
           return txid as string;
         })
-      )
+      )),
     ];
   } catch (e: any) {
     if (e.response?.data?.message) {
@@ -91,7 +92,6 @@ export async function executeTxnsInOrder(
     throw wrappedE == null ? e : wrappedE;
   }
 }
-
 
 /**
  * Get and sign transactions from a remote server (either single or multiple transactions)
@@ -104,11 +104,14 @@ export async function executeTxnsInOrder(
 export async function getAndSignRemoteTxns(
   provider: Provider,
   url: string,
-  body: any,
+  body: any
 ): Promise<Buffer[]> {
   const resp = await axios.post(url, body, {
     responseType: "json",
   });
   const rawTxns = Array.isArray(resp.data) ? resp.data : [resp.data];
-  return await signOnlyNeeded(provider, rawTxns.map(t => t.data as Buffer));
+  return await signOnlyNeeded(
+    provider,
+    rawTxns.map((t) => t.data as Buffer)
+  );
 }
