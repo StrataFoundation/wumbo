@@ -24,12 +24,14 @@ function makeId(length: number): string {
 export function useClaimLink({
   handle,
   newTab = false,
+  step = 3,
 }: {
   handle: string;
   newTab?: boolean;
   extension?: boolean;
+  step?: number;
 }): { redirectUri: string; claim: () => Window | null } {
-  const redirectUri = `${SITE_URL}/app/claim?step=3&handle=${handle}`;
+  const redirectUri = `${SITE_URL}/app/claim?step=${step}&handle=${handle}`;
   const claim = () => {
     const state = makeId(6);
 
