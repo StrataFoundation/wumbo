@@ -40,7 +40,8 @@ async function getBurnable(
           new PublicKey("TBondz6ZwSM5fs4v2GpnVBMuwoncPkFLFR9S422ghhN")
         );
 
-        if (await connection.getAccountInfo(oldBondingAddress[0])) {
+        // Exclude net bwum, which also still has a bonding curve from the old contract
+        if (await connection.getAccountInfo(oldBondingAddress[0]) && account.info.mint.toBase58() != "HvdnoodTaRSaB7AEtm7QaDveqW9M3r4hmoNaqTggQkVp") {
           return account;
         }
 
