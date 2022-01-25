@@ -85,9 +85,6 @@ export async function executeTxnsInOrder(
       )),
     ];
   } catch (e: any) {
-    if (e.response?.data?.message) {
-      throw new Error(e.response.data.message);
-    }
     const wrappedE = ProgramError.parse(e, errors);
     throw wrappedE == null ? e : wrappedE;
   }
@@ -106,12 +103,19 @@ export async function getAndSignRemoteTxns(
   url: string,
   body: any
 ): Promise<Buffer[]> {
-  const resp = await axios.post(url, body, {
-    responseType: "json",
-  });
-  const rawTxns = Array.isArray(resp.data) ? resp.data : [resp.data];
-  return await signOnlyNeeded(
-    provider,
-    rawTxns.map((t) => t.data as Buffer)
-  );
+  try {
+    const resp = await axios.post(url, body, {
+      responseType: "json",
+    });
+    const rawTxns = Array.isArray(resp.data) ? resp.data : [resp.data];
+    return await signOnlyNeeded(
+      provider,
+      rawTxns.map((t) => t.data as Buffer)
+    );
+  } catch (e: any) {
+    if (e.response?.data?.message) {
+      throw new Error(e.response.data.message);
+    }
+    throw e;
+  }
 }
