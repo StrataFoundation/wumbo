@@ -2,9 +2,18 @@ import { Button, Flex, Text } from "@chakra-ui/react";
 import { BN, Provider } from "@project-serum/anchor";
 import { Token } from "@solana/spl-token";
 import { useConnection, useWallet } from "@solana/wallet-adapter-react";
-import { Connection, PublicKey, Transaction, TransactionInstruction } from "@solana/web3.js";
 import {
-  Notification, TokenAccount, useErrorHandler, useProvider, useWalletTokenAccounts
+  Connection,
+  PublicKey,
+  Transaction,
+  TransactionInstruction,
+} from "@solana/web3.js";
+import {
+  Notification,
+  TokenAccount,
+  useErrorHandler,
+  useProvider,
+  useWalletTokenAccounts,
 } from "@strata-foundation/react";
 import React from "react";
 import { useAsync, useAsyncCallback } from "react-async-hook";
@@ -13,81 +22,106 @@ import { Spinner, truthy } from "wumbo-common";
 import { TOKEN_PROGRAM_ID } from "../../../../../../common/node_modules/@strata-foundation/spl-utils/dist/lib";
 import WalletRedirect from "../Wallet/WalletRedirect";
 
-async function getBurnable(connection: Connection, accounts?: TokenAccount[]): Promise<TokenAccount[]> {
+async function getBurnable(
+  connection: Connection,
+  accounts?: TokenAccount[]
+): Promise<TokenAccount[]> {
   if (!accounts) {
-    return []
+    return [];
   }
 
-  return (await Promise.all(
-    accounts.map(async account => {
-      const pad = Buffer.alloc(2);
-      new BN(0, 16, "le").toBuffer().copy(pad);
-      const oldBondingAddress = await PublicKey.findProgramAddress([Buffer.from("token-bonding"), account.info.mint.toBuffer(), pad], new PublicKey("TBondz6ZwSM5fs4v2GpnVBMuwoncPkFLFR9S422ghhN"));
+  return (
+    await Promise.all(
+      accounts.map(async (account) => {
+        const pad = Buffer.alloc(2);
+        new BN(0, 16, "le").toBuffer().copy(pad);
+        const oldBondingAddress = await PublicKey.findProgramAddress(
+          [Buffer.from("token-bonding"), account.info.mint.toBuffer(), pad],
+          new PublicKey("TBondz6ZwSM5fs4v2GpnVBMuwoncPkFLFR9S422ghhN")
+        );
 
-      if (await connection.getAccountInfo(oldBondingAddress[0])) {
-        return account;
-      }
+        if (await connection.getAccountInfo(oldBondingAddress[0])) {
+          return account;
+        }
 
-      return null;
-    })
-  )).filter(truthy)
+        return null;
+      })
+    )
+  ).filter(truthy);
 }
 
 function chunkArray<A>(array: A[], chunkSize: number): A[][] {
-  const numberOfChunks = Math.ceil(array.length / chunkSize)
+  const numberOfChunks = Math.ceil(array.length / chunkSize);
 
-  return [...Array(numberOfChunks)]
-    .map((value, index) => {
-      return array.slice(index * chunkSize, (index + 1) * chunkSize)
-    })
+  return [...Array(numberOfChunks)].map((value, index) => {
+    return array.slice(index * chunkSize, (index + 1) * chunkSize);
+  });
 }
 
-async function burn(provider: Provider, tokenAccounts?: TokenAccount[]): Promise<void> {
+async function burn(
+  provider: Provider,
+  tokenAccounts?: TokenAccount[]
+): Promise<void> {
   const publicKey = provider.wallet.publicKey;
-  if(!tokenAccounts) {
+  if (!tokenAccounts) {
     return;
   }
 
-  const recentBlockhash = (await provider.connection.getRecentBlockhash()).blockhash;
+  const recentBlockhash = (await provider.connection.getRecentBlockhash())
+    .blockhash;
 
-  const closeInstrs: TransactionInstruction[][] = tokenAccounts.map(account => {
-    return [
-      Token.createBurnInstruction(
-        TOKEN_PROGRAM_ID,
-        account.info.mint,
-        account.pubkey,
-        account.info.owner,
-        [],
-        account.info.amount
-      ),
-      Token.createCloseAccountInstruction(
-        TOKEN_PROGRAM_ID,
-        account.pubkey,
-        publicKey,
-        publicKey,
-        []
-      )
-    ]
-  })
-  const txs = await chunkArray(closeInstrs, 10).map(group => group.flat()).map(instructions => {
-    const tx = new Transaction({
-      feePayer: publicKey,
-      recentBlockhash
+  const closeInstrs: TransactionInstruction[][] = tokenAccounts.map(
+    (account) => {
+      return [
+        Token.createBurnInstruction(
+          TOKEN_PROGRAM_ID,
+          account.info.mint,
+          account.pubkey,
+          account.info.owner,
+          [],
+          account.info.amount
+        ),
+        Token.createCloseAccountInstruction(
+          TOKEN_PROGRAM_ID,
+          account.pubkey,
+          publicKey,
+          publicKey,
+          []
+        ),
+      ];
+    }
+  );
+  const txs = await chunkArray(closeInstrs, 10)
+    .map((group) => group.flat())
+    .map((instructions) => {
+      const tx = new Transaction({
+        feePayer: publicKey,
+        recentBlockhash,
+      });
+      tx.instructions.push(...instructions);
+
+      return tx;
     });
-    tx.instructions.push(...instructions);
-
-    return tx;
-  });
-  await provider.sendAll(txs.map(tx => ({
-    signers: [],
-    tx
-  })));
+  await provider.sendAll(
+    txs.map((tx) => ({
+      signers: [],
+      tx,
+    }))
+  );
 }
 export const BurnBetaRoute: React.FC = () => {
   const { publicKey } = useWallet();
-  const { loading: loadingAccounts, result, error } = useWalletTokenAccounts(publicKey || undefined);
+  const {
+    loading: loadingAccounts,
+    result,
+    error,
+  } = useWalletTokenAccounts(publicKey || undefined);
   const { connection } = useConnection();
-  const { result: burnableAccounts, loading: loadingBurnable, error: burnableError } = useAsync(getBurnable, [connection, result])
+  const {
+    result: burnableAccounts,
+    loading: loadingBurnable,
+    error: burnableError,
+  } = useAsync(getBurnable, [connection, result]);
   const { handleErrors } = useErrorHandler();
   const { provider, awaitingApproval } = useProvider();
   const { error: burnError, loading: burning } = useAsyncCallback(burn);
@@ -97,7 +131,10 @@ export const BurnBetaRoute: React.FC = () => {
     return <Spinner />;
   }
 
-  const totalLamports = burnableAccounts?.reduce((acc, burn) => acc + burn.account.lamports, 0);
+  const totalLamports = burnableAccounts?.reduce(
+    (acc, burn) => acc + burn.account.lamports,
+    0
+  );
   const totalSol = (totalLamports || 0) / Math.pow(10, 9);
 
   return (
@@ -110,23 +147,28 @@ export const BurnBetaRoute: React.FC = () => {
       p={10}
     >
       <WalletRedirect />
-      <Text>You have {totalSol} SOL reclaimable in rent from {burnableAccounts?.length} wumbo beta accounts</Text>
+      <Text>
+        You have {totalSol} SOL reclaimable in rent from{" "}
+        {burnableAccounts?.length} wumbo beta accounts
+      </Text>
       <Button
         colorScheme="red"
         loading={burning || awaitingApproval}
-        onClick={() => burn(provider!, burnableAccounts).then(() => {
-          toast.custom((t) => (
-            <Notification
-              show={t.visible}
-              type="success"
-              heading="Burn Successful"
-              message={`Closed ${burnableAccounts?.length} accounts to free ${totalSol} SOL`}
-              onDismiss={() => toast.dismiss(t.id)}
-            />
-          ));
-        })}
+        onClick={() =>
+          burn(provider!, burnableAccounts).then(() => {
+            toast.custom((t) => (
+              <Notification
+                show={t.visible}
+                type="success"
+                heading="Burn Successful"
+                message={`Closed ${burnableAccounts?.length} accounts to free ${totalSol} SOL`}
+                onDismiss={() => toast.dismiss(t.id)}
+              />
+            ));
+          })
+        }
       >
-        { awaitingApproval ? "Awaiting Approval" : "BURN!" }
+        {awaitingApproval ? "Awaiting Approval" : "BURN!"}
       </Button>
     </Flex>
   );
