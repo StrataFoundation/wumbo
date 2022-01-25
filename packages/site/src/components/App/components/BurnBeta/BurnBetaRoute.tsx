@@ -41,7 +41,11 @@ async function getBurnable(
         );
 
         // Exclude net bwum, which also still has a bonding curve from the old contract
-        if (await connection.getAccountInfo(oldBondingAddress[0]) && account.info.mint.toBase58() != "HvdnoodTaRSaB7AEtm7QaDveqW9M3r4hmoNaqTggQkVp") {
+        if (
+          (await connection.getAccountInfo(oldBondingAddress[0])) &&
+          account.info.mint.toBase58() !=
+            "HvdnoodTaRSaB7AEtm7QaDveqW9M3r4hmoNaqTggQkVp"
+        ) {
           return account;
         }
 
