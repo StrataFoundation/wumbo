@@ -19,7 +19,7 @@ import React from "react";
 import { useAsync, useAsyncCallback } from "react-async-hook";
 import toast from "react-hot-toast";
 import { Spinner, truthy } from "wumbo-common";
-import { TOKEN_PROGRAM_ID } from "../../../../../../common/node_modules/@strata-foundation/spl-utils/dist/lib";
+import { TOKEN_PROGRAM_ID } from "@solana/spl-token";
 import WalletRedirect from "../Wallet/WalletRedirect";
 
 async function getBurnable(
@@ -153,6 +153,7 @@ export const BurnBetaRoute: React.FC = () => {
       </Text>
       <Button
         colorScheme="red"
+        disabled={burning || awaitingApproval}
         loading={burning || awaitingApproval}
         onClick={() =>
           burn(provider!, burnableAccounts).then(() => {
