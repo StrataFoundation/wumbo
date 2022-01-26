@@ -30,7 +30,7 @@ import { WumboDrawer } from "../WumboDrawer";
 
 export const Profile = () => {
   const params = useParams<{ mint: string | undefined }>();
-  const { publicKey } = useWallet();
+  const { connected, publicKey } = useWallet();
   const query = useQuery();
   const name = query.get("name");
   const tld = useTwitterTld();
@@ -56,6 +56,10 @@ export const Profile = () => {
   }
 
   if (!passedMintKey && !name && !twitterHandle) {
+    if (!connected) {
+      return <WalletRedirect />
+    }
+    
     return (
       <Fragment>
         <WumboDrawer.Header title="Profile" />

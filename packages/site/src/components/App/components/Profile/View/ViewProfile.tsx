@@ -1,4 +1,5 @@
 import { Box } from "@chakra-ui/react";
+import { useWallet } from "@solana/wallet-adapter-react";
 import { PublicKey } from "@solana/web3.js";
 import {
   usePublicKey,
@@ -22,11 +23,13 @@ import {
   swapPath,
 } from "../../../../../constants/routes";
 import { AppContainer } from "../../common/AppContainer";
+import WalletRedirect from "../../Wallet/WalletRedirect";
 
 export const ViewProfileRoute: React.FC = () => {
   const params = useParams<{ mint: string | undefined }>();
   const query = useQuery();
   const name = query.get("name");
+  const { connected } = useWallet();
   const tld = useTwitterTld();
   const { info: tokenRef, loading } = useTokenRefForName(name, null, tld);
   const passedMintKey = usePublicKey(params.mint);
@@ -41,6 +44,9 @@ export const ViewProfileRoute: React.FC = () => {
   }
 
   if (!passedMintKey && !name) {
+    if (!connected) {
+      return <WalletRedirect />
+    }
     return (
       <AppContainer>
         <Box p={4}>
