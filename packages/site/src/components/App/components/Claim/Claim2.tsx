@@ -199,6 +199,7 @@ export const Claim2: React.FC<IClaim2Props> = ({ handle, incrementStep }) => {
           href="https://strataprotocol.com/blog/us-social-token-law"
           color="indigo.500"
           isExternal
+          fontWeight="bold"
         >
           Read "Legality of Wumbo"
         </Link>

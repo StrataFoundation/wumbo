@@ -107,7 +107,7 @@ export const useSetMetadata = (
               files,
               env: "mainnet-beta",
               uploadUrl: ARWEAVE_UPLOAD_URL,
-              existingFiles
+              existingFiles,
             });
 
           setLoadingState("submit-arweave");

@@ -1,6 +1,7 @@
 import { PublicKey } from "@solana/web3.js";
 import { useEffect, useRef, useState } from "react";
 import { useLocation } from "react-router-dom";
+import { truthy } from "../utils";
 
 export function classNames(...classes: (false | null | undefined | string)[]) {
   return classes.filter(Boolean).join(" ");
@@ -45,5 +46,6 @@ export const replaceAll = (str: string, mapObj: Record<string, string>) => {
 
 export const toQueryString = (args: { [key: string]: any }): string =>
   Object.keys(args)
-    .map((key) => key + "=" + args[key])
+    .map((key) => args[key] ? key + "=" + args[key] : null)
+    .filter(truthy)
     .join("&");
