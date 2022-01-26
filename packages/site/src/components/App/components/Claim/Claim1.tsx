@@ -215,7 +215,7 @@ export const Claim1 = React.memo<IClaim1Props>(
         </Flex>
         <VStack
           w="full"
-          border="1px solid"
+          border={{ base: "none", md: "1px solid" }}
           borderColor="gray.300"
           py={12}
           justifyContent="center"

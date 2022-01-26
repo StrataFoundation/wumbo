@@ -73,10 +73,12 @@ export const Claim3 = React.memo<IClaim3Props>(
     }, [createCoinError, setInternalError]);
 
     const hasError = createCoinError || internalError;
+    console.log(internalError);
     const loggedInAsWrongUser =
       hasError &&
-      ["Screen", "name", "does", "not", "match"].every((match) =>
-        internalError?.message.includes(match)
+      ["Screen", "name", "does", "not", "match"].every(
+        (match) =>
+          internalError?.message && internalError.message.includes(match)
       );
 
     return (

@@ -26,6 +26,7 @@
     "@emotion/react": "^11",
     "@emotion/styled": "^11",
     "@google/model-viewer": "^1.8.0",
+    "@metaplex-foundation/mpl-token-metadata": "^1.1.0",
     "@project-serum/anchor": "^0.20.1",
     "@project-serum/serum": "0.13.38",
     "@project-serum/sol-wallet-adapter": "0.2.4",

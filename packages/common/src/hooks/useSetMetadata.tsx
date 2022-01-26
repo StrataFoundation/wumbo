@@ -7,11 +7,8 @@ import {
   useTokenMetadata,
   useTokenRef,
 } from "@strata-foundation/react";
-import {
-  ARWEAVE_UPLOAD_URL,
-  Creator,
-  Data,
-} from "@strata-foundation/spl-utils";
+import { ARWEAVE_UPLOAD_URL } from "@strata-foundation/spl-utils";
+import { Creator, DataV2 } from "@metaplex-foundation/mpl-token-metadata";
 import { useState } from "react";
 import { useAsyncCallback } from "react-async-hook";
 
@@ -143,12 +140,14 @@ export const useSetMetadata = (
           signers: updateMetadataSigners,
         } = await tokenMetadataSdk!.updateMetadataInstructions({
           metadata: tokenRef!.tokenMetadata,
-          data: new Data({
+          data: new DataV2({
             name: args.name,
             symbol: args.symbol,
             uri: arweaveLink,
             sellerFeeBasisPoints: 0,
             creators,
+            uses: null,
+            collection: null,
           }),
         });
 

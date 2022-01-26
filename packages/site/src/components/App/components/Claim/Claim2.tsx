@@ -42,6 +42,10 @@ export const Claim2: React.FC<IClaim2Props> = ({ handle, incrementStep }) => {
   const hasWalletClaimed =
     !!wallet && !walletRefLoading && !!walletRef?.isClaimed;
 
+  const isMobile = window.matchMedia(
+    "only screen and (max-width: 760px)"
+  ).matches;
+
   return (
     <VStack spacing={8} align="left">
       <div>
@@ -53,7 +57,19 @@ export const Claim2: React.FC<IClaim2Props> = ({ handle, incrementStep }) => {
         </Heading>
       </div>
       <Image src={claim1illu} />
-      {!hasWalletClaimed && (
+      {isMobile && !hasWalletClaimed && (
+        <>
+          <Heading as="h2" size="lg" fontWeight="500">
+            Mobile Coming Soon!
+          </Heading>
+          <Text color="gray.600">
+            You'll need to complete this process on a desktop, as we do not
+            currently support mobile. You can visit this same link from your
+            desktop.
+          </Text>
+        </>
+      )}
+      {!isMobile && !hasWalletClaimed && (
         <>
           <Heading as="h2" size="lg" fontWeight="500">
             How do you set up a wallet?
@@ -62,7 +78,7 @@ export const Claim2: React.FC<IClaim2Props> = ({ handle, incrementStep }) => {
             <Text fontSize="md">
               Setting up a wallet is easy! You can use any digital wallet that
               supports Solana tokens or platforms. There are several to choose
-              from. If you already have one, you're one step ahead.
+              from.
             </Text>
             <Text fontSize="md">
               If you don't have a wallet yet, we'll walk you through a quick
@@ -113,58 +129,61 @@ export const Claim2: React.FC<IClaim2Props> = ({ handle, incrementStep }) => {
         </>
       )}
       <Flex w="full" justifyContent="center">
-        <VStack spacing={6} py={4} maxW="412px" w="full">
-          {!connected && (
-            <>
-              <Button
-                isFullWidth
-                colorScheme="indigo"
-                variant="outline"
-                bgColor="indigo.500"
-                color="white"
-                _hover={{ bgColor: "indigo.600" }}
-                onClick={() => showModal("WalletSelect")}
-              >
-                Use my own wallet
-              </Button>
-              <Button
-                isFullWidth
-                colorScheme="gray"
-                borderColor="black"
-                variant="outline"
-                onClick={() => select(new TorusWalletAdapter().name)}
-                leftIcon={<Image src={TorusBlack} w={8} h={8} />}
-              >
-                Log in with Social
-              </Button>
-            </>
-          )}
-          {connected && (
-            <>
-              <Button
-                isFullWidth
-                colorScheme="indigo"
-                variant="outline"
-                bgColor="indigo.500"
-                color="white"
-                _hover={{ bgColor: "indigo.600" }}
-                onClick={incrementStep}
-                disabled={hasWalletClaimed}
-              >
-                Next
-              </Button>
-              <Button
-                isFullWidth
-                colorScheme="gray"
-                borderColor="black"
-                variant="outline"
-                onClick={() => adapter?.disconnect()}
-              >
-                Disconnect Wallet
-              </Button>
-            </>
-          )}
-        </VStack>
+        {!isMobile && (
+          <VStack spacing={6} py={4} maxW="412px" w="full">
+            {!connected && (
+              <>
+                <Button
+                  disabled={isMobile}
+                  isFullWidth
+                  colorScheme="indigo"
+                  variant="outline"
+                  bgColor="indigo.500"
+                  color="white"
+                  _hover={{ bgColor: "indigo.600" }}
+                  onClick={() => showModal("WalletSelect")}
+                >
+                  Use my own wallet
+                </Button>
+                <Button
+                  isFullWidth
+                  colorScheme="gray"
+                  borderColor="black"
+                  variant="outline"
+                  onClick={() => select(new TorusWalletAdapter().name)}
+                  leftIcon={<Image src={TorusBlack} w={8} h={8} />}
+                >
+                  Log in with Social
+                </Button>
+              </>
+            )}
+            {connected && (
+              <>
+                <Button
+                  isFullWidth
+                  colorScheme="indigo"
+                  variant="outline"
+                  bgColor="indigo.500"
+                  color="white"
+                  _hover={{ bgColor: "indigo.600" }}
+                  onClick={incrementStep}
+                  disabled={hasWalletClaimed}
+                >
+                  Next
+                </Button>
+                <Button
+                  isFullWidth
+                  colorScheme="gray"
+                  borderColor="black"
+                  variant="outline"
+                  onClick={() => adapter?.disconnect()}
+                >
+                  Disconnect Wallet
+                </Button>
+              </>
+            )}
+          </VStack>
+        )}
       </Flex>
       <Box
         w="full"

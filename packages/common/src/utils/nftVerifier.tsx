@@ -4,10 +4,8 @@ import {
   NameRegistryState,
 } from "@bonfida/spl-name-service";
 import { PublicKey } from "@solana/web3.js";
-import {
-  AccountFetchCache,
-  decodeMetadata,
-} from "@strata-foundation/spl-utils";
+import { AccountFetchCache } from "@strata-foundation/spl-utils";
+import { Metadata } from "@metaplex-foundation/mpl-token-metadata";
 import { deserializeUnchecked } from "borsh";
 
 export async function getNftNameRecordKey(
@@ -69,7 +67,7 @@ export async function getNftMint(
       (pubkey, account) => ({
         pubkey,
         account,
-        info: decodeMetadata(account.data),
+        info: new Metadata(pubkey, account).data,
       }),
       true
     ));
