@@ -152,9 +152,7 @@ export const Profile = React.memo(
     let { handle: reverseLookupHandle, error: reverseTwitterError2 } =
       useReverseTwitter(mintTokenRef?.owner || undefined);
 
-    const handle =
-      reverseLookupHandle ||
-      query.get("name")
+    const handle = reverseLookupHandle || query.get("name");
 
     const { owner: ownerWalletKey } = useTwitterOwner(handle || undefined);
 
@@ -242,8 +240,8 @@ export const Profile = React.memo(
       return <Spinner />;
     }
 
-    const handleLink = (
-      handle && <PlainLink href={`https://twitter.com/${handle}`}>@{handle}</PlainLink>
+    const handleLink = handle && (
+      <PlainLink href={`https://twitter.com/${handle}`}>@{handle}</PlainLink>
     );
     return (
       <TokenBondingRecentTransactionsProvider

@@ -3,7 +3,7 @@ import { PublicKey } from "@solana/web3.js";
 import {
   usePublicKey,
   useTokenBondingFromMint,
-  useTokenRefForName
+  useTokenRefForName,
 } from "@strata-foundation/react";
 import React from "react";
 import { useHistory, useParams } from "react-router-dom";
@@ -12,14 +12,14 @@ import {
   Spinner,
   useQuery,
   useTwitterOwner,
-  useTwitterTld
+  useTwitterTld,
 } from "wumbo-common";
 import {
   AppRoutes,
   nftPath,
   profilePath,
   sendSearchPath,
-  swapPath
+  swapPath,
 } from "../../../../../constants/routes";
 import { AppContainer } from "../../common/AppContainer";
 
