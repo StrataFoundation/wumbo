@@ -26,6 +26,7 @@ interface IAppRoutes {
   send: Route;
   swap: Route;
   prototype: Route;
+  burnBeta: Route;
 }
 
 export const AppRoutes: IAppRoutes = {
@@ -45,6 +46,7 @@ export const AppRoutes: IAppRoutes = {
   send: { path: "/app/send/:mint" },
   swap: { path: "/app/swap/:tokenBondingKey/:baseMint/:targetMint" },
   prototype: { path: "/app/prototype" },
+  burnBeta: { path: "/app/burn-beta" },
 };
 
 export function sendPath(mint: PublicKey, recipient?: PublicKey): string {

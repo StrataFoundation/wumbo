@@ -16,6 +16,7 @@ import SendSearch from "./components/Wallet/SendSearch";
 import { ViewProfileRoute } from "./components/Profile/View/ViewProfile";
 import { ViewNftRoute } from "./components/Nft/View/ViewNft";
 import { SwapRoute } from "./components/Swap/Swap";
+import { BurnBetaRoute } from "./components/BurnBeta/BurnBetaRoute";
 import { PrototypeRoute } from "./components//Prototype";
 import { ContextProviders } from "./ContextProviders";
 
@@ -57,6 +58,7 @@ export const App: React.FC = () => (
           />
           <Route path={AppRoutes.send.path} component={Send} />
           <Route path={AppRoutes.swap.path} component={SwapRoute} />
+          <Route path={AppRoutes.burnBeta.path} component={BurnBetaRoute} />
           <Route path={AppRoutes.prototype.path} component={PrototypeRoute} />
         </Switch>
         <Toaster
