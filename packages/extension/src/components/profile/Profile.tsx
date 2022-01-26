@@ -57,9 +57,9 @@ export const Profile = () => {
 
   if (!passedMintKey && !name && !twitterHandle) {
     if (!connected) {
-      return <WalletRedirect />
+      return <WalletRedirect />;
     }
-    
+
     return (
       <Fragment>
         <WumboDrawer.Header title="Profile" />

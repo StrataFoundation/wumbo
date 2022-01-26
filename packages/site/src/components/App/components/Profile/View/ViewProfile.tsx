@@ -45,7 +45,7 @@ export const ViewProfileRoute: React.FC = () => {
 
   if (!passedMintKey && !name) {
     if (!connected) {
-      return <WalletRedirect />
+      return <WalletRedirect />;
     }
     return (
       <AppContainer>
