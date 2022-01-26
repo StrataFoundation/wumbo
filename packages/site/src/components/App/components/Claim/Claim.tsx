@@ -15,7 +15,6 @@ export const ClaimRoute = React.memo(() => {
   const handle = query.get("handle") || undefined;
   const code = query.get("code") || undefined;
 
-
   const incrementStep = useCallback(() => {
     if (handle) {
       history.push(claimPath({ step: `${+step + 1}`, handle, code }));

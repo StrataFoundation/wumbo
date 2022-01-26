@@ -46,6 +46,6 @@ export const replaceAll = (str: string, mapObj: Record<string, string>) => {
 
 export const toQueryString = (args: { [key: string]: any }): string =>
   Object.keys(args)
-    .map((key) => args[key] ? key + "=" + args[key] : null)
+    .map((key) => (args[key] ? key + "=" + args[key] : null))
     .filter(truthy)
     .join("&");
