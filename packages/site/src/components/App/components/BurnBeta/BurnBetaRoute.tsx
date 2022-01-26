@@ -36,7 +36,7 @@ async function getBurnable(
         const pad = Buffer.alloc(2);
         new BN(0, 16, "le").toBuffer().copy(pad);
         const oldBondingAddress = await PublicKey.findProgramAddress(
-          [Buffer.from("token-bonding"), account.info.mint.toBuffer(), pad],
+          [Buffer.from("token-bonding"), account.info.mint.toBuffer()],
           new PublicKey("TBondz6ZwSM5fs4v2GpnVBMuwoncPkFLFR9S422ghhN")
         );
 
@@ -46,6 +46,7 @@ async function getBurnable(
           account.info.mint.toBase58() !=
             "HvdnoodTaRSaB7AEtm7QaDveqW9M3r4hmoNaqTggQkVp"
         ) {
+          console.log(account.info.mint.toBase58(), oldBondingAddress[0].toBase58());
           return account;
         }
 
