@@ -51,15 +51,15 @@ export const Profile = () => {
   );
   const { owner: twitterWallet } = useTwitterOwner(name || undefined);
 
-  if (!connected) {
-    return <WalletRedirect />;
-  }
-
   if (loading) {
     return <WumboDrawer.Loading />;
   }
 
   if (!passedMintKey && !name && !twitterHandle) {
+    if (!connected) {
+      return <WalletRedirect />;
+    }
+
     return (
       <Fragment>
         <WumboDrawer.Header title="Profile" />

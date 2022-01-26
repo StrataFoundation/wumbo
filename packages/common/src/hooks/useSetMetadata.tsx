@@ -7,11 +7,8 @@ import {
   useTokenMetadata,
   useTokenRef,
 } from "@strata-foundation/react";
-import {
-  ARWEAVE_UPLOAD_URL,
-  Creator,
-  Data,
-} from "@strata-foundation/spl-utils";
+import { ARWEAVE_UPLOAD_URL, FileOrString } from "@strata-foundation/spl-utils";
+import { Creator, DataV2 } from "@metaplex-foundation/mpl-token-metadata";
 import { useState } from "react";
 import { useAsyncCallback } from "react-async-hook";
 
@@ -65,6 +62,7 @@ export const useSetMetadata = (
   const {
     image,
     metadata,
+    data,
     error: tokenMetadataError,
   } = useTokenMetadata(tokenBonding?.targetMint);
 
@@ -73,6 +71,7 @@ export const useSetMetadata = (
       setLoading(true);
       setLoadingState("gathering-files");
       let files: File[] = [];
+      let existingFiles: FileOrString[] | undefined = [];
       let metadataChanged =
         args.image != undefined ||
         args.name != metadata?.data.name ||
@@ -89,14 +88,14 @@ export const useSetMetadata = (
           if (args.image) {
             files = [args.image];
             imageName = args.image.name;
-          } else if (args.name === null) {
+          } else if (args.image === null) {
             // Intentionaly unset;
             files = [];
           } else {
             // Undefined, keep the old one
-            const [file, fileName] = await getFileFromUrl(image!, "untitled");
-            imageName = fileName;
-            files = [file];
+            imageName = image;
+            files = [];
+            existingFiles = data?.properties.files;
           }
 
           setLoadingState("submit-solana");
@@ -108,6 +107,7 @@ export const useSetMetadata = (
               files,
               env: "mainnet-beta",
               uploadUrl: ARWEAVE_UPLOAD_URL,
+              existingFiles,
             });
 
           setLoadingState("submit-arweave");
@@ -143,12 +143,14 @@ export const useSetMetadata = (
           signers: updateMetadataSigners,
         } = await tokenMetadataSdk!.updateMetadataInstructions({
           metadata: tokenRef!.tokenMetadata,
-          data: new Data({
+          data: new DataV2({
             name: args.name,
             symbol: args.symbol,
             uri: arweaveLink,
             sellerFeeBasisPoints: 0,
             creators,
+            uses: null,
+            collection: null,
           }),
         });
 

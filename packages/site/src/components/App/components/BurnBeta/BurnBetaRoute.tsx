@@ -46,7 +46,10 @@ async function getBurnable(
           account.info.mint.toBase58() !=
             "HvdnoodTaRSaB7AEtm7QaDveqW9M3r4hmoNaqTggQkVp"
         ) {
-          console.log(account.info.mint.toBase58(), oldBondingAddress[0].toBase58());
+          console.log(
+            account.info.mint.toBase58(),
+            oldBondingAddress[0].toBase58()
+          );
           return account;
         }
 

@@ -105,7 +105,7 @@ const resetWallet = () =>
             sendReply({
               signedTransactions: signed!.map((signedT) =>
                 signedT.serialize({
-                  verifySignatures: false,
+                  verifySignatures: true,
                   requireAllSignatures: false,
                 })
               ),

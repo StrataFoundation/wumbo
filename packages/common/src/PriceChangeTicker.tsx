@@ -20,6 +20,7 @@ export const PriceChangeTicker = ({
 }) => {
   const { transactions, loading, error, hasMore } =
     useTokenBondingRecentTransactions();
+
   const { info: tokenBondingAcc, loading: loadingBonding } =
     useTokenBonding(tokenBonding);
   const { info: baseStorage } = useTokenAccount(tokenBondingAcc?.baseStorage);

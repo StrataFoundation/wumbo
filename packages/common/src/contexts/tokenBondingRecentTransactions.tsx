@@ -53,12 +53,12 @@ async function getRecentBondingTransactions(
       sig.blockTime >= new Date().valueOf() / 1000 - 60 * 60 * 24
   );
   const transactions = await Promise.all(
-    filtered.map((f) => connection.getConfirmedTransaction(f.signature))
+    filtered.map((f) => connection.getTransaction(f.signature))
   );
   return transactions
     .filter(truthy)
     .map((txn) => {
-      const serialized = txn.transaction.compileMessage();
+      const serialized = txn.transaction.message;
       const baseStorageIndex = serialized.accountKeys.findIndex((i) =>
         i.equals(tokenBonding.baseStorage)
       );

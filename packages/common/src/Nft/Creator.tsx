@@ -1,6 +1,6 @@
 import React from "react";
 import { Link as PlainLink } from "@chakra-ui/react";
-import { Metadata as MetaplexMetadata } from "@strata-foundation/spl-utils";
+import { MetadataData } from "@metaplex-foundation/mpl-token-metadata";
 import {
   useSocialTokenMetadata,
   useErrorHandler,
@@ -12,7 +12,7 @@ import { Avatar, truncatePubkey, useReverseTwitter } from "../";
 
 export type GetCreatorLink = (
   c: PublicKey,
-  t: MetaplexMetadata | undefined,
+  t: MetadataData | undefined,
   b: ITokenRef | undefined,
   h: string | undefined
 ) => string;
