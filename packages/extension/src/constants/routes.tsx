@@ -26,6 +26,7 @@ export interface IRoutes {
   tagNft: Route;
   sendSearch: Route;
   send: Route;
+  relink: Route;
 }
 
 export function sendPath(mint: PublicKey, recipient?: PublicKey): string {
@@ -87,6 +88,7 @@ export function claimPath({
 }
 
 export const routes: IRoutes = {
+  relink: { path: "/app/relink", Icon: null, isDrawerNav: false },
   create: { path: "/create", Icon: null, isDrawerNav: false },
   claim: { path: "/claim", Icon: null, isDrawerNav: false },
   customize: { path: "/customize", Icon: null, isDrawerNav: false },

@@ -82,7 +82,7 @@ const resetWallet = () =>
             const signed = await adapter?.signTransaction(unsigned);
             sendReply({
               signedTransaction: signed!.serialize({
-                verifySignatures: true,
+                verifySignatures: false,
                 requireAllSignatures: false,
               }),
             });
@@ -105,7 +105,7 @@ const resetWallet = () =>
             sendReply({
               signedTransactions: signed!.map((signedT) =>
                 signedT.serialize({
-                  verifySignatures: true,
+                  verifySignatures: false,
                   requireAllSignatures: false,
                 })
               ),

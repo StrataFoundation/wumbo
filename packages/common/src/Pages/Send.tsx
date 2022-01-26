@@ -179,8 +179,8 @@ export const Send = ({ finishRedirectUrl }: { finishRedirectUrl: string }) => {
       <Notification
         show={t.visible}
         type="success"
-        heading="Transaction Succesful"
-        message={`Succesfully sent ${Number(values.amount).toFixed(4)} of ${
+        heading="Transaction Successful"
+        message={`Successfully sent ${Number(values.amount).toFixed(4)} of ${
           baseMetadata?.data.symbol
         }!`}
         onDismiss={() => toast.dismiss(t.id)}

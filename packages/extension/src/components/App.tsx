@@ -19,6 +19,7 @@ import Claim from "./claim/Claim";
 import { EditProfileRoute } from "./profile/EditProfile";
 import { Send } from "./wallet/Send";
 import { SendSearch } from "./wallet/SendSearch";
+import { RelinkRoute } from "./profile/Relink";
 
 const App: FC = () => (
   <Router initialEntries={[routes.myTokens.path]} initialIndex={0}>
@@ -28,6 +29,7 @@ const App: FC = () => (
 
       <WumboDrawer>
         <Switch>
+          <Route path={routes.relink.path} component={RelinkRoute} />
           <Route path={routes.create.path} component={Create} />
           <Route path={routes.claim.path} component={Claim} />
           <Route path={routes.swap.path} component={SwapRoute} />
