@@ -1,11 +1,9 @@
 import { Box } from "@chakra-ui/react";
-import { useWallet } from "@solana/wallet-adapter-react";
 import { PublicKey } from "@solana/web3.js";
 import {
-  useMetaplexTokenMetadata,
   usePublicKey,
   useTokenBondingFromMint,
-  useTokenRefForName,
+  useTokenRefForName
 } from "@strata-foundation/react";
 import React from "react";
 import { useHistory, useParams } from "react-router-dom";
@@ -14,36 +12,29 @@ import {
   Spinner,
   useQuery,
   useTwitterOwner,
-  useTwitterTld,
+  useTwitterTld
 } from "wumbo-common";
 import {
   AppRoutes,
   nftPath,
   profilePath,
   sendSearchPath,
-  swapPath,
+  swapPath
 } from "../../../../../constants/routes";
 import { AppContainer } from "../../common/AppContainer";
-import WalletRedirect from "../../Wallet/WalletRedirect";
 
 export const ViewProfileRoute: React.FC = () => {
   const params = useParams<{ mint: string | undefined }>();
-  const { connected } = useWallet();
   const query = useQuery();
   const name = query.get("name");
   const tld = useTwitterTld();
   const { info: tokenRef, loading } = useTokenRefForName(name, null, tld);
-  const { metadata } = useMetaplexTokenMetadata(tokenRef?.mint);
   const passedMintKey = usePublicKey(params.mint);
   const history = useHistory();
   const { info: tokenBonding } = useTokenBondingFromMint(
     passedMintKey || tokenRef?.mint
   );
   const { owner: twitterWallet } = useTwitterOwner(name || undefined);
-
-  if (!connected) {
-    return <WalletRedirect />;
-  }
 
   if (loading) {
     return <Spinner />;

@@ -153,12 +153,10 @@ export const Profile = React.memo(
       useReverseTwitter(mintTokenRef?.owner || undefined);
 
     const handle =
-      query.get("name") ||
       reverseLookupHandle ||
-      metadata?.data.name ||
-      walletTwitterHandle;
+      query.get("name")
 
-    const { owner: ownerWalletKey } = useTwitterOwner(handle);
+    const { owner: ownerWalletKey } = useTwitterOwner(handle || undefined);
 
     const { info: walletTokenRef } = usePrimaryClaimedTokenRef(ownerWalletKey);
 
@@ -167,11 +165,6 @@ export const Profile = React.memo(
     const { info: tokenBonding, loading: tokenBondingLoading } =
       useTokenBondingFromMint(mintKey || tokenRef?.mint);
 
-    const royalty = useTokenAccount(tokenBonding?.buyTargetRoyalties);
-    console.log(
-      tokenBonding?.buyTargetRoyalties.toBase58(),
-      royalty.info?.owner.toBase58()
-    );
     const {
       image: collectiveImage,
       metadata: collectiveMetadata,
@@ -250,7 +243,7 @@ export const Profile = React.memo(
     }
 
     const handleLink = (
-      <PlainLink href={`https://twitter.com/${handle}`}>@{handle}</PlainLink>
+      handle && <PlainLink href={`https://twitter.com/${handle}`}>@{handle}</PlainLink>
     );
     return (
       <TokenBondingRecentTransactionsProvider
