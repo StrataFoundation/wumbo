@@ -7,6 +7,7 @@ import { AppContainer } from "../common/AppContainer";
 
 export const SwapRoute: React.FC = () => {
   const history = useHistory();
+  const location = useLocation();
   const query = useParams<{
     tokenBondingKey: string;
     baseMint: string;
@@ -15,8 +16,6 @@ export const SwapRoute: React.FC = () => {
   const tokenBondingKey = usePublicKey(query.tokenBondingKey);
   const baseMint = usePublicKey(query.baseMint);
   const targetMint = usePublicKey(query.targetMint);
-  const location = useLocation();
-
   const redirectUri =
     AppRoutes.manageWallet.path +
     `?redirect=${location.pathname}${location.search}`;

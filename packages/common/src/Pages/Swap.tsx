@@ -23,6 +23,7 @@ import React from "react";
 import toast from "react-hot-toast";
 import { useHistory } from "react-router-dom";
 import { WUMBO_TRANSACTION_FEE } from "../constants/globals";
+import base from "@emotion/styled/types/base";
 
 export const Swap = ({
   onTradingMintsChange,
@@ -47,9 +48,13 @@ export const Swap = ({
   const baseMintInfo = useMint(baseMint);
   const targetMintInfo = useMint(targetMint);
   const wumboConfig = useConfig();
-
   const hasFees = targetTokenRef || baseTokenRef;
-  const { loading, error, execute } = useSwap({
+
+  const {
+    loading: swapping,
+    error,
+    execute,
+  } = useSwap({
     async extraInstructions({ tokenBonding, isBuy, amount }) {
       if (hasFees) {
         const buyingTarget =
@@ -87,7 +92,9 @@ export const Swap = ({
       };
     },
   });
+
   handleErrors(error);
+
   const { loading: driverLoading, ...swapProps } = useSwapDriver({
     extraTransactionInfo: hasFees
       ? [
@@ -99,7 +106,8 @@ export const Swap = ({
           },
         ]
       : [],
-    tradingMints: { base: baseMint, target: targetMint },
+    baseMint,
+    targetMint,
     onTradingMintsChange,
     swap: (args: ISwapArgs & { ticker: string }) =>
       execute(args).then(({ targetAmount }) => {
@@ -119,5 +127,34 @@ export const Swap = ({
     tokenBondingKey: tokenBonding!,
   });
 
-  return <SwapForm isSubmitting={loading} {...swapProps} />;
+  return (
+    <div>
+      <p>{baseMint?.toBase58()}</p>
+      <p>SwapProps: {swapProps.base?.publicKey.toBase58()}</p>
+      <p>{swapProps.base?.ticker}</p>
+      <p>{targetMint?.toBase58()}</p>
+      <p>SwapProps: {swapProps.target?.publicKey.toBase58()}</p>
+      <p>{swapProps.target?.ticker}</p>
+      <span
+        onClick={() =>
+          swapProps.target &&
+          swapProps.base &&
+          onTradingMintsChange({
+            base: swapProps.target?.publicKey,
+            target: swapProps.base?.publicKey,
+          })
+        }
+      >
+        Click Me
+      </span>
+    </div>
+  );
+
+  return (
+    <SwapForm
+      isLoading={driverLoading}
+      isSubmitting={swapping}
+      {...swapProps}
+    />
+  );
 };
