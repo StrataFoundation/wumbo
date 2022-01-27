@@ -218,30 +218,25 @@ export const Claim1 = React.memo<IClaim1Props>(
           border="1px solid"
           borderColor="gray.300"
           py={12}
-          justifyContent="center"
-          align="center"
           rounded="md"
           spacing={5}
         >
-          <VStack spacing={0}>
+          <Box w="full" justifyContent="center" align="center">
             <Text fontWeight="bold">
               Worried about potential legal problems?
             </Text>
-            <Button
-              variant="link"
-              colorScheme="indigo"
-              onClick={() =>
-                window.open(
-                  "https://strataprotocol.com/blog/us-social-token-law"
-                )
-              }
+            <Link
+              href="https://strataprotocol.com/blog/us-social-token-law"
+              color="indigo.500"
+              isExternal
+              fontWeight="bold"
             >
               Read "Legality of Wumbo"
-            </Button>
-          </VStack>
+            </Link>
+          </Box>
           {isLoading ||
             (isClaimable && (
-              <VStack spacing={0}>
+              <Box w="full" justifyContent="center" align="center">
                 <Text fontWeight="bold">
                   Do you want this social token removed?
                 </Text>
@@ -261,7 +256,7 @@ export const Claim1 = React.memo<IClaim1Props>(
                 >
                   Learn about "Opting Out"
                 </Button>
-              </VStack>
+              </Box>
             ))}
         </VStack>
       </VStack>

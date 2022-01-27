@@ -48,6 +48,7 @@ export const Header: React.FC = () => (
       >
         <MenuItem to="" target="_blank" isLast>
           <DownloadButton
+            hideOnMobile
             variant="outline"
             color="white"
             bg="transparent"

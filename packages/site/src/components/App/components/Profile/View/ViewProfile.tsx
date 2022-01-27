@@ -2,7 +2,6 @@ import { Box } from "@chakra-ui/react";
 import { useWallet } from "@solana/wallet-adapter-react";
 import { PublicKey } from "@solana/web3.js";
 import {
-  useMetaplexTokenMetadata,
   usePublicKey,
   useTokenBondingFromMint,
   useTokenRefForName,
@@ -28,12 +27,11 @@ import WalletRedirect from "../../Wallet/WalletRedirect";
 
 export const ViewProfileRoute: React.FC = () => {
   const params = useParams<{ mint: string | undefined }>();
-  const { connected } = useWallet();
   const query = useQuery();
   const name = query.get("name");
+  const { connected } = useWallet();
   const tld = useTwitterTld();
   const { info: tokenRef, loading } = useTokenRefForName(name, null, tld);
-  const { metadata } = useMetaplexTokenMetadata(tokenRef?.mint);
   const passedMintKey = usePublicKey(params.mint);
   const history = useHistory();
   const { info: tokenBonding } = useTokenBondingFromMint(
@@ -41,15 +39,14 @@ export const ViewProfileRoute: React.FC = () => {
   );
   const { owner: twitterWallet } = useTwitterOwner(name || undefined);
 
-  if (!connected) {
-    return <WalletRedirect />;
-  }
-
   if (loading) {
     return <Spinner />;
   }
 
   if (!passedMintKey && !name) {
+    if (!connected) {
+      return <WalletRedirect />;
+    }
     return (
       <AppContainer>
         <Box p={4}>
@@ -64,6 +61,7 @@ export const ViewProfileRoute: React.FC = () => {
   return (
     <AppContainer>
       <Profile
+        relinkPath={AppRoutes.relink.path}
         sendPath={sendSearchPath(tokenRef?.owner || twitterWallet || undefined)}
         collectivePath={
           tokenBonding ? profilePath(tokenBonding.baseMint) : null

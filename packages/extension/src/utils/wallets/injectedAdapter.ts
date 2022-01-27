@@ -186,6 +186,7 @@ export class InjectedWalletAdapter
         this._connected = true;
         this.emit("connect", publicKey);
       } catch (error: any) {
+        console.error(error);
         if (error instanceof WalletError) throw error;
         throw new WalletConnectionError(error?.message, error);
       }
@@ -201,6 +202,7 @@ export class InjectedWalletAdapter
         this.emit("disconnect");
         this._connected = false;
       } catch (error: any) {
+        console.error(error);
         throw new WalletDisconnectionError();
       }
     }
@@ -223,6 +225,7 @@ export class InjectedWalletAdapter
         transaction.signatures = signed.signatures;
         return signed;
       } catch (error: any) {
+        console.error(error);
         throw new WalletSignMessageError(error?.message, error);
       }
     } catch (error) {
@@ -249,6 +252,7 @@ export class InjectedWalletAdapter
         const txns = signedTransactions.map(Transaction.from);
         return txns;
       } catch (error: any) {
+        console.error(error);
         throw new WalletSignMessageError(error?.message, error);
       }
     } catch (error) {

@@ -11,7 +11,7 @@ import { Claim4 } from "./Claim4";
 export const ClaimRoute = React.memo(() => {
   const history = useHistory();
   const query = useQuery();
-  const step = query.get("step") || 1;
+  const step = query.get("step") || "1";
   const handle = query.get("handle") || undefined;
   const code = query.get("code") || undefined;
 

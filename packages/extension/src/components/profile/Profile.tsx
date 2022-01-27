@@ -51,15 +51,15 @@ export const Profile = () => {
   );
   const { owner: twitterWallet } = useTwitterOwner(name || undefined);
 
-  if (!connected) {
-    return <WalletRedirect />;
-  }
-
   if (loading) {
     return <WumboDrawer.Loading />;
   }
 
   if (!passedMintKey && !name && !twitterHandle) {
+    if (!connected) {
+      return <WalletRedirect />;
+    }
+
     return (
       <Fragment>
         <WumboDrawer.Header title="Profile" />
@@ -82,6 +82,7 @@ export const Profile = () => {
       />
       <WumboDrawer.Content>
         <CommonProfile
+          relinkPath={routes.relink.path}
           sendPath={sendSearchPath(
             tokenRef?.owner || twitterWallet || undefined
           )}

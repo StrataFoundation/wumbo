@@ -23,6 +23,8 @@ echo "Bootstrapping localnet"
 ./bootstrap-localnet.sh
 popd
 
+sleep 10
+
 echo "Setting up identity service"
 pushd ../wumbo-identity-service
 echo "[65,132,47,88,190,203,121,144,128,74,168,72,223,142,99,217,37,69,160,251,149,35,244,207,84,215,60,50,97,177,113,194,233,135,171,110,133,84,123,5,221,78,104,240,67,217,2,28,6,229,231,56,141,138,249,55,23,239,192,197,165,117,249,85]" > $HOME/.config/solana/twitter-dev.json

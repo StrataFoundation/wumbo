@@ -115,8 +115,8 @@ export const Swap = ({
           <Notification
             show={t.visible}
             type="success"
-            heading="Transaction Succesful"
-            message={`Succesfully purchased ${Number(targetAmount).toFixed(
+            heading="Transaction Successful"
+            message={`Successfully purchased ${Number(targetAmount).toFixed(
               9
             )} ${args.ticker}!`}
             onDismiss={() => toast.dismiss(t.id)}
