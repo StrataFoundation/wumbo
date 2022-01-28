@@ -191,9 +191,11 @@ export const Wallet = React.memo(
     const { amount: solOwned } = useSolOwnedAmount();
     const solPrice = usePriceInUsd(SOL_TOKEN);
     const { publicKey } = useWallet();
-    const { data: tokens, loading } = useUserTokensWithMeta(
+    const { data: tokens, loading, error } = useUserTokensWithMeta(
       publicKey || undefined
     );
+    const { handleErrors } = useErrorHandler();
+    handleErrors(error);
     const twSol = useTwWrappedSolMint();
 
     return (
