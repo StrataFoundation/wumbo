@@ -1,6 +1,6 @@
+import React, { Fragment } from "react";
 import { routes, swapPath } from "@/constants/routes";
 import { usePublicKey } from "@strata-foundation/react";
-import React, { Fragment } from "react";
 import { useHistory, useLocation, useParams } from "react-router-dom";
 import { Swap } from "wumbo-common";
 import { WumboDrawer } from "../WumboDrawer";

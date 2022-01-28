@@ -16,6 +16,7 @@ export const SwapRoute: React.FC = () => {
   const tokenBondingKey = usePublicKey(query.tokenBondingKey);
   const baseMint = usePublicKey(query.baseMint);
   const targetMint = usePublicKey(query.targetMint);
+
   const redirectUri =
     AppRoutes.manageWallet.path +
     `?redirect=${location.pathname}${location.search}`;

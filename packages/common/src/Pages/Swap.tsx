@@ -23,7 +23,6 @@ import React from "react";
 import toast from "react-hot-toast";
 import { useHistory } from "react-router-dom";
 import { WUMBO_TRANSACTION_FEE } from "../constants/globals";
-import base from "@emotion/styled/types/base";
 
 export const Swap = ({
   onTradingMintsChange,
@@ -106,8 +105,7 @@ export const Swap = ({
           },
         ]
       : [],
-    baseMint,
-    targetMint,
+    tradingMints: { base: baseMint, target: targetMint },
     onTradingMintsChange,
     swap: (args: ISwapArgs & { ticker: string }) =>
       execute(args).then(({ targetAmount }) => {
@@ -126,29 +124,6 @@ export const Swap = ({
     onConnectWallet: () => history.push(manageWalletPath),
     tokenBondingKey: tokenBonding!,
   });
-
-  return (
-    <div>
-      <p>{baseMint?.toBase58()}</p>
-      <p>SwapProps: {swapProps.base?.publicKey.toBase58()}</p>
-      <p>{swapProps.base?.ticker}</p>
-      <p>{targetMint?.toBase58()}</p>
-      <p>SwapProps: {swapProps.target?.publicKey.toBase58()}</p>
-      <p>{swapProps.target?.ticker}</p>
-      <span
-        onClick={() =>
-          swapProps.target &&
-          swapProps.base &&
-          onTradingMintsChange({
-            base: swapProps.target?.publicKey,
-            target: swapProps.base?.publicKey,
-          })
-        }
-      >
-        Click Me
-      </span>
-    </div>
-  );
 
   return (
     <SwapForm
