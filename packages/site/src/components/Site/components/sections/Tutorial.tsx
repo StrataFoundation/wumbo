@@ -89,7 +89,7 @@ const tutItems = (isMobile: boolean): Array<ITutItem> => {
       tag: 6,
       bg: "gray.800",
       heading: "Reply Tokens",
-      subText: "See which tokens others in the community are invested in.",
+      subText: "See which tokens others in the community are backed in.",
       children: <Spacer p={4} />,
     },
   ];

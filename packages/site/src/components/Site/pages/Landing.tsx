@@ -1,5 +1,4 @@
 import React from "react";
-import { Header } from "../components/sections/Header";
 import { Hero } from "../components/sections/Hero";
 import { Monetize } from "../components/sections/Monetize";
 import { XRay } from "../components/sections/XRay";
@@ -11,9 +10,8 @@ import { Support } from "../components/sections/Support";
 import { Team } from "../components/sections/Team";
 import { Footer } from "../components/sections/Footer";
 
-export const Landing: React.FC = () => (
+export const LandingPage: React.FC = () => (
   <>
-    <Header zIndex="1" />
     <Hero />
     <Monetize />
     <XRay />

@@ -19,6 +19,7 @@ const MenuItem: React.FC<IMenuItemProps> = ({
     mb={{ base: isLast ? 0 : 8, sm: 0 }}
     mr={{ base: 0, sm: isLast ? 0 : 8 }}
     display="block"
+    _hover={{ textDecoration: "underline" }}
   >
     {rest.target === "_blank" ? (
       <Link to={{ pathname: to as string }} {...rest}>
@@ -109,6 +110,7 @@ export const Header: React.FC<IHeaderProps> = (props) => {
               <MenuItem to="https://teamwumbo.medium.com/" target="_blank">
                 Blog
               </MenuItem>
+              <MenuItem to="/tutorial">Tutorial</MenuItem>
               <MenuItem to="" target="_blank" isLast>
                 <DownloadButton
                   variant="outline"

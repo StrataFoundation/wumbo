@@ -7,6 +7,7 @@ type Route = {
 
 interface ISiteRoutes {
   root: Route;
+  tutorial: Route;
 }
 
 interface IAppRoutes {
@@ -96,6 +97,7 @@ export const swapPath = (
 
 export const SiteRoutes: ISiteRoutes = {
   root: { path: "/" },
+  tutorial: { path: "/tutorial" },
 };
 
 export const claimPath = (args: {
