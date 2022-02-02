@@ -5,6 +5,7 @@ import { Monetize } from "../components/sections/Monetize";
 import { XRay } from "../components/sections/XRay";
 import { Download } from "../components/sections/Download";
 import { Nft } from "../components/sections/Nft";
+import { Tutorial } from "../components/sections/Tutorial";
 import { Investors } from "../components/sections/Investors";
 import { Support } from "../components/sections/Support";
 import { Team } from "../components/sections/Team";
@@ -18,7 +19,8 @@ export const Landing: React.FC = () => (
     <XRay />
     <Download />
     <Nft />
-    {/*     <Investors /> */}
+    <Tutorial />
+    {/* <Investors /> */}
     <Support />
     <Download />
     <Team />

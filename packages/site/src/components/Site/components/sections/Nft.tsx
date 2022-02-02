@@ -3,7 +3,7 @@ import { Box, Flex, Stack, Heading, Image } from "@chakra-ui/react";
 import { LandingLayout } from "../layouts/LandingLayout";
 
 export const Nft: React.FC = () => (
-  <Box position="relative" bg="gray.100">
+  <Box position="relative">
     <LandingLayout>
       <Flex
         align="center"
