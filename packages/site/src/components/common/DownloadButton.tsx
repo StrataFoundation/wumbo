@@ -8,8 +8,7 @@ export const DownloadButton: React.FC<
 > = ({ onClick, hideOnMobile = false, ...rest }) => (
   <Button
     colorScheme="green"
-    py="4"
-    px="4"
+    p={rest.variant === "link" ? "0" : "4"}
     lineHeight="1"
     size="md"
     display={{ base: hideOnMobile ? "none" : "inline-flex", md: "inline-flex" }}

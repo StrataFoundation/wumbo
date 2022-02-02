@@ -1,5 +1,5 @@
-import React from "react";
-import { Link, LinkProps } from "react-router-dom";
+import React, { useState } from "react";
+import { Link, LinkProps, useHistory } from "react-router-dom";
 import { Box, Flex, Text, FlexProps, Icon } from "@chakra-ui/react";
 import { WumboIcon } from "wumbo-common";
 import { LandingLayout } from "../layouts/LandingLayout";
@@ -20,9 +20,15 @@ const MenuItem: React.FC<IMenuItemProps> = ({
     mr={{ base: 0, sm: isLast ? 0 : 8 }}
     display="block"
   >
-    <Link to={to} {...rest}>
-      {children}
-    </Link>
+    {rest.target === "_blank" ? (
+      <Link to={{ pathname: to as string }} {...rest}>
+        {children}
+      </Link>
+    ) : (
+      <Link to={to} {...rest}>
+        {children}
+      </Link>
+    )}
   </Text>
 );
 
@@ -51,7 +57,9 @@ const MenuIcon = () => (
 interface IHeaderProps extends FlexProps {}
 
 export const Header: React.FC<IHeaderProps> = (props) => {
-  const [show, setShow] = React.useState(false);
+  const [show, setShow] = useState(false);
+  const history = useHistory();
+
   const toggleMenu = () => setShow(!show);
 
   return (
@@ -72,7 +80,13 @@ export const Header: React.FC<IHeaderProps> = (props) => {
           {...props}
         >
           <Flex align="center">
-            <Icon as={WumboIcon} w={10} h={10} />
+            <Icon
+              as={WumboIcon}
+              w={10}
+              h={10}
+              _hover={{ cursor: "pointer" }}
+              onClick={() => history.replace("/")}
+            />
             <Text fontSize="xl" ml={4}>
               Wum.bo
             </Text>
@@ -92,7 +106,9 @@ export const Header: React.FC<IHeaderProps> = (props) => {
               direction={["column", "row", "row", "row"]}
               pt={[4, 4, 0, 0]}
             >
-              <MenuItem to="/">Blog</MenuItem>
+              <MenuItem to="https://teamwumbo.medium.com/" target="_blank">
+                Blog
+              </MenuItem>
               <MenuItem to="" target="_blank" isLast>
                 <DownloadButton
                   variant="outline"

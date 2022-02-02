@@ -62,17 +62,6 @@ export const Hero: React.FC = () => {
               you mint tokens for your favorite creators. Build a thriving
               community and join them on their journey to the top!
             </Heading>
-            <Heading
-              as="h2"
-              size="md"
-              opacity="0.9"
-              fontWeight="bold"
-              color="white"
-              textAlign={["center", "center", "left", "left"]}
-            >
-              Prelaunch tokens go on sale January 19th. <br />
-              All tokens go on sale January 20th.
-            </Heading>
             <DownloadButton />
           </Stack>
           {isLargerThan1280 ? (
