@@ -7,6 +7,7 @@ import {
   useTokenRefForName,
 } from "@strata-foundation/react";
 import React from "react";
+import { Helmet } from "react-helmet";
 import { useHistory, useParams } from "react-router-dom";
 import {
   Profile,
@@ -60,6 +61,17 @@ export const ViewProfileRoute: React.FC = () => {
 
   return (
     <AppContainer>
+      <Helmet>
+        <meta property="og:image:width" content="600" />
+        <meta property="og:image:height" content="314" />
+        <meta
+          property="og:image"
+          content="https://i.natgeofe.com/n/46b07b5e-1264-42e1-ae4b-8a021226e2d0/domestic-cat_thumb_square.jpg"
+        />
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content={name ? name : "Test"} />
+        <meta name="twitter:description" content="Brys Profile" />
+      </Helmet>
       <Profile
         relinkPath={AppRoutes.relink.path}
         sendPath={sendSearchPath(tokenRef?.owner || twitterWallet || undefined)}
