@@ -47,9 +47,13 @@ export const Swap = ({
   const baseMintInfo = useMint(baseMint);
   const targetMintInfo = useMint(targetMint);
   const wumboConfig = useConfig();
-
   const hasFees = targetTokenRef || baseTokenRef;
-  const { loading, error, execute } = useSwap({
+
+  const {
+    loading: swapping,
+    error,
+    execute,
+  } = useSwap({
     async extraInstructions({ tokenBonding, isBuy, amount }) {
       if (hasFees) {
         const buyingTarget =
@@ -87,7 +91,9 @@ export const Swap = ({
       };
     },
   });
+
   handleErrors(error);
+
   const { loading: driverLoading, ...swapProps } = useSwapDriver({
     extraTransactionInfo: hasFees
       ? [
@@ -119,5 +125,11 @@ export const Swap = ({
     tokenBondingKey: tokenBonding!,
   });
 
-  return <SwapForm isSubmitting={loading} {...swapProps} />;
+  return (
+    <SwapForm
+      isLoading={driverLoading}
+      isSubmitting={swapping}
+      {...swapProps}
+    />
+  );
 };
