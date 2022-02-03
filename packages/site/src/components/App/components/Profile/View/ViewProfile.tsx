@@ -60,59 +60,16 @@ export const ViewProfileRoute: React.FC = () => {
   }
 
   return (
-    <AppContainer>
-      <Helmet>
-        <meta property="og:image:width" content="600" />
-        <meta property="og:image:height" content="314" />
-        <meta
-          property="og:image"
-          content="https://i.natgeofe.com/n/46b07b5e-1264-42e1-ae4b-8a021226e2d0/domestic-cat_thumb_square.jpg"
-        />
-        <meta name="twitter:card" content="summary_large_image" />
-        <meta name="twitter:title" content={name ? name : "Test"} />
-        <meta name="twitter:description" content="Brys Profile" />
-      </Helmet>
-      <Profile
-        relinkPath={AppRoutes.relink.path}
-        sendPath={sendSearchPath(tokenRef?.owner || twitterWallet || undefined)}
-        collectivePath={
-          tokenBonding ? profilePath(tokenBonding.baseMint) : null
-        }
-        editPath={AppRoutes.editProfile.path}
-        useClaimFlow={(handle) => ({
-          error: undefined,
-          claimLoading: false,
-          linkLoading: false,
-          claim: async () => {
-            history.push(AppRoutes.claim + `?handle=${handle}`);
-          },
-          link: async () => {
-            throw new Error("Not yet supported on site");
-          },
-        })}
-        mintKey={passedMintKey || tokenRef?.mint}
-        onAccountClick={(mintKey, handle) => {
-          if (handle) {
-            history.push(AppRoutes.profile.path + `?name=${handle}`);
-          } else if (mintKey) {
-            history.push(profilePath(mintKey));
-          }
-        }}
-        onTradeClick={() =>
-          tokenBonding &&
-          history.push(
-            swapPath(
-              tokenBonding.publicKey,
-              tokenBonding!.baseMint,
-              tokenBonding!.targetMint
-            )
-          )
-        }
-        getNftLink={(token) => {
-          const mint = token?.metadata?.mint;
-          return mint ? nftPath(new PublicKey(mint)) : "";
-        }}
+    <Helmet>
+      <meta property="og:image:width" content="600" />
+      <meta property="og:image:height" content="314" />
+      <meta
+        property="og:image"
+        content="https://i.natgeofe.com/n/46b07b5e-1264-42e1-ae4b-8a021226e2d0/domestic-cat_thumb_square.jpg"
       />
-    </AppContainer>
+      <meta name="twitter:card" content="summary_large_image" />
+      <meta name="twitter:title" content={name ? name : "Test"} />
+      <meta name="twitter:description" content="Brys Profile" />
+    </Helmet>
   );
 };
