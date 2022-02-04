@@ -61,15 +61,22 @@ export const ViewProfileRoute: React.FC = () => {
 
   return (
     <Helmet>
-      <meta property="og:image:width" content="600" />
-      <meta property="og:image:height" content="314" />
+      <meta name="twitter:card" content="summary" />
+      <meta name="twitter:site" content="@nytimesbits" />
+      <meta name="twitter:creator" content="@nickbilton" />
+      <meta
+        property="og:url"
+        content="http://bits.blogs.nytimes.com/2011/12/08/a-twitter-for-my-sister/"
+      />
+      <meta property="og:title" content="A Twitter for My Sister" />
+      <meta
+        property="og:description"
+        content="In the early days, Twitter grew so quickly that it was almost impossible to add new features because engineers spent their time trying to keep the rocket ship from stalling."
+      />
       <meta
         property="og:image"
-        content="https://i.natgeofe.com/n/46b07b5e-1264-42e1-ae4b-8a021226e2d0/domestic-cat_thumb_square.jpg"
+        content="http://graphics8.nytimes.com/images/2011/12/08/technology/bits-newtwitter/bits-newtwitter-tmagArticle.jpg"
       />
-      <meta name="twitter:card" content="summary_large_image" />
-      <meta name="twitter:title" content={name ? name : "Test"} />
-      <meta name="twitter:description" content="Brys Profile" />
     </Helmet>
   );
 };
