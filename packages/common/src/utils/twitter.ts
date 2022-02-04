@@ -7,20 +7,18 @@ import {
 } from "@bonfida/spl-name-service";
 import { useConnection } from "@solana/wallet-adapter-react";
 import { Connection, PublicKey } from "@solana/web3.js";
-import axios from "axios";
+import {
+  getOwnerForName,
+  useAccountFetchCache,
+} from "@strata-foundation/react";
 import { deserializeUnchecked } from "borsh";
 import { useAsync } from "react-async-hook";
-import { WUMBO_IDENTITY_SERVICE_URL } from "../constants/globals";
+import { fetchConfig } from "../contexts";
+import { useTwitterTld } from "../hooks";
 import {
   createVerifiedTwitterRegistry,
   getTwitterRegistry,
 } from "./testableNameServiceTwitter";
-import {
-  useAccountFetchCache,
-  getOwnerForName,
-} from "@strata-foundation/react";
-import { useTwitterTld } from "../hooks";
-import { fetchConfig } from "../contexts";
 
 let twitterTld: PublicKey, twitterVerifier: PublicKey;
 

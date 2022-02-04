@@ -12,9 +12,11 @@ type Route = {
 
 export interface IRoutes {
   create: Route;
+  mintConfirmation: Route;
   claim: Route;
   customize: Route;
   swap: Route;
+  swapConfirmation: Route;
   myTokens: Route;
   manageWallet: Route;
   profile: Route;
@@ -90,6 +92,11 @@ export function claimPath({
 export const routes: IRoutes = {
   relink: { path: "/app/relink", Icon: null, isDrawerNav: false },
   create: { path: "/create", Icon: null, isDrawerNav: false },
+  mintConfirmation: {
+    path: "/mint/confirmation",
+    Icon: null,
+    isDrawerNav: false,
+  },
   claim: { path: "/claim", Icon: null, isDrawerNav: false },
   customize: { path: "/customize", Icon: null, isDrawerNav: false },
   profile: {
@@ -104,6 +111,11 @@ export const routes: IRoutes = {
     path: "/swap/:tokenBondingKey/:baseMint/:targetMint",
     Icon: RiArrowUpDownFill,
     isDrawerNav: true,
+  },
+  swapConfirmation: {
+    path: "/swap/confirmation",
+    Icon: null,
+    isDrawerNav: false,
   },
   editProfile: { path: "/profile/edit", Icon: null, isDrawerNav: false },
   viewProfile: {

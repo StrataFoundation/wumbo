@@ -26,6 +26,7 @@ interface IAppRoutes {
   sendSearch: Route;
   send: Route;
   swap: Route;
+  swapConfirmation: Route;
   prototype: Route;
   burnBeta: Route;
   relink: Route;
@@ -48,6 +49,7 @@ export const AppRoutes: IAppRoutes = {
   sendSearch: { path: "/app/send" },
   send: { path: "/app/send/:mint" },
   swap: { path: "/app/swap/:tokenBondingKey/:baseMint/:targetMint" },
+  swapConfirmation: { path: "/app/swap/confirmation" },
   prototype: { path: "/app/prototype" },
   burnBeta: { path: "/app/burn-beta" },
 };

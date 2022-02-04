@@ -26,6 +26,7 @@ export const SwapRoute = () => {
       <WumboDrawer.Header title="Trade" />
       <WumboDrawer.Content>
         <Swap
+          swapConfirmationPath={routes.swapConfirmation.path}
           manageWalletPath={redirectUri}
           tokenBonding={tokenBondingKey}
           baseMint={baseMint}

@@ -1,12 +1,22 @@
+import {
+  Button,
+  Flex,
+  Heading,
+  Icon,
+  Image,
+  Link,
+  Text,
+  VStack,
+} from "@chakra-ui/react";
 import React from "react";
-import { useHistory } from "react-router-dom";
-import { Image, Flex, VStack, Heading, Text, Button } from "@chakra-ui/react";
-import { DownloadButton } from "../../../common/DownloadButton";
+import { RiTwitterFill } from "react-icons/ri";
+import { sample, useConfig } from "wumbo-common";
 import ChromeStoreScreen from "../../../../assets/images/chromestore.png";
+import { DownloadButton } from "../../../common/DownloadButton";
 
-export const Claim4: React.FC = () => {
-  const history = useHistory();
-
+export const Claim4 = ({ handle }: { handle: string }) => {
+  const config = useConfig();
+  const tweet = sample(config.tweets.claim)?.replace("{handle}", handle);
   return (
     <VStack spacing={8} align="left">
       <div>
@@ -33,15 +43,21 @@ export const Claim4: React.FC = () => {
       <Image src={ChromeStoreScreen} />
       <Flex w="full" justifyContent="center">
         <VStack spacing={6} py={4} maxW="412px" w="full">
+          {tweet && (
+            <Button
+              isFullWidth
+              colorScheme="twitter"
+              leftIcon={<Icon as={RiTwitterFill} />}
+              as={Link}
+              isExternal
+              href={`https://twitter.com/intent/tweet?text=${encodeURIComponent(
+                tweet
+              )}`}
+            >
+              Tweet
+            </Button>
+          )}
           <DownloadButton isFullWidth colorScheme="indigo" />
-          <Button
-            isFullWidth
-            colorScheme="indigo"
-            variant="outline"
-            onClick={() => history.push("/")}
-          >
-            Learn More
-          </Button>
         </VStack>
       </Flex>
     </VStack>

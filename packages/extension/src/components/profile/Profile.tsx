@@ -82,7 +82,6 @@ export const Profile = () => {
       />
       <WumboDrawer.Content>
         <CommonProfile
-          relinkPath={routes.relink.path}
           sendPath={sendSearchPath(
             tokenRef?.owner || twitterWallet || undefined
           )}
