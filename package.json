@@ -19,6 +19,7 @@
     "watch:common": "lerna exec yarn watch --scope wumbo-common",
     "watch:all": "lerna exec --parallel yarn run watch --scope wumbo-common --scope wumbo-extension",
     "start:site": "lerna exec yarn start --scope site",
+    "start:app": "lerna exec yarn start --scope app",
     "prepare": "husky install"
   },
   "dependencies": {
