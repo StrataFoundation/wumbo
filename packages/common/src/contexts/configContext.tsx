@@ -6,6 +6,7 @@ import {
 import React from "react";
 import axios from "axios";
 import { useAsync } from "react-async-hook";
+import { merge } from "lodash";
 
 export interface IWumboConfig {
   tlds: {
@@ -58,7 +59,7 @@ export async function fetchConfig(): Promise<IWumboConfig> {
     console.error(e);
   }
 
-  return config;
+  return merge(DEFAULT_CONFIG, config);
 }
 
 const DEFAULT_CONFIG = {

@@ -232,10 +232,10 @@ async function ownsTokensOf(
 const getMentionsWithTokens = async (
   owner: PublicKey | undefined,
   tokenCollectiveSdk: SplTokenCollective | undefined,
-  cache: AccountFetchCache,
+  cache: AccountFetchCache | undefined,
   mentions: string[]
 ): Promise<string[]> => {
-  if (!owner) {
+  if (!owner || !cache) {
     return [];
   }
   const tld = await getTwitterTld();
