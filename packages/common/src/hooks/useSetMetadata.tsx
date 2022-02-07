@@ -105,8 +105,6 @@ export const useSetMetadata = (
               symbol: args.symbol,
               image: imageName,
               files,
-              env: "mainnet-beta",
-              uploadUrl: ARWEAVE_UPLOAD_URL,
               existingFiles,
             });
 

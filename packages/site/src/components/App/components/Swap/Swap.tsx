@@ -24,6 +24,7 @@ export const SwapRoute: React.FC = () => {
   return (
     <AppContainer>
       <Swap
+        swapConfirmationPath={AppRoutes.swapConfirmation.path}
         manageWalletPath={redirectUri}
         tokenBonding={tokenBondingKey}
         baseMint={baseMint}

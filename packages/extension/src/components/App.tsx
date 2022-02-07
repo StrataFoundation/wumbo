@@ -9,7 +9,9 @@ import { Twitter } from "./twitter/Twitter";
 import { NftEnhancer } from "./nft/NftEnhancer";
 
 import { Create } from "./create/Create";
+import { MintConfirmationRoute } from "./create/MintConfirmation";
 import { SwapRoute } from "./swap/Swap";
+import { SwapConfirmationRoute } from "./swap/SwapConfirmation";
 import { Wallet } from "./wallet/Wallet";
 import { ManageWallet } from "./wallet/ManageWallet";
 import { ViewNft } from "./nft/ViewNft";
@@ -31,8 +33,16 @@ const App: FC = () => (
         <Switch>
           <Route path={routes.relink.path} component={RelinkRoute} />
           <Route path={routes.create.path} component={Create} />
+          <Route
+            path={routes.mintConfirmation.path}
+            component={MintConfirmationRoute}
+          />
           <Route path={routes.claim.path} component={Claim} />
           <Route path={routes.swap.path} component={SwapRoute} />
+          <Route
+            path={routes.swapConfirmation.path}
+            component={SwapConfirmationRoute}
+          />
           <Route path={routes.myTokens.path} component={Wallet} />
           <Route path={routes.manageWallet.path} component={ManageWallet} />
           <Route path={routes.viewProfile.path} component={Profile} />

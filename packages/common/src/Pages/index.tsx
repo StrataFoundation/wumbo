@@ -6,3 +6,5 @@ export * from "./Wallet";
 export * from "./Send";
 export * from "./SendSearch";
 export * from "./Swap";
+export * from "./SwapConfirmation";
+export * from "./MintConfirmation";

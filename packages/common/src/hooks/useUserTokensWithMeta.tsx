@@ -26,11 +26,11 @@ export const useUserTokensWithMeta = (
 
   useEffect(() => {
     (async function () {
-      if (owner && tokenAccounts) {
+      if (owner && tokenAccounts && tokenCollectiveSdk) {
         try {
           setLoading(true);
           const tokenAccountsWithMeta =
-            await tokenCollectiveSdk!.getUserTokensWithMeta(tokenAccounts);
+            await tokenCollectiveSdk.getUserTokensWithMeta(tokenAccounts);
           setData(tokenAccountsWithMeta);
         } catch (e: any) {
           setError(e);

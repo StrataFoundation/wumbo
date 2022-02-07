@@ -16,6 +16,11 @@ export interface IWumboConfig {
     twitter: PublicKey;
     nftVerifier: PublicKey;
   };
+  tweets: {
+    claim: string[];
+    mint: string[];
+    swap: string[];
+  };
   feeWallet: PublicKey;
   goLiveUnixTime: number;
   nftMismatchThreshold: number;
@@ -64,6 +69,17 @@ const DEFAULT_CONFIG = {
   verifiers: {
     twitter: new PublicKey("DTok7pfUzNeNPqU3Q6foySCezPQE82eRyhX1HdhVNLVC"),
     nftVerifier: new PublicKey("Gzyvrg8gJfShKQwhVYFXV5utp86tTcMxSzrN7zcfebKj"),
+  },
+  tweets: {
+    claim: [
+      "I just claimed my #socialtoken on @TeamWumbo! You can get it at wum.bo/t/{handle}",
+    ],
+    mint: [
+      "Hey @{handle}, I created a #socialtoken for you on @TeamWumbo. You should claim it so I can ...",
+    ],
+    swap: [
+      "Just grabbed a bag of @{handle}'s #socialtoken on @TeamWumbo because...",
+    ],
   },
   feeWallet: new PublicKey("wumbo8oWB2xsFs1V2VhcUDwyN3edoa3UuSnJJuG4qko"),
   goLiveUnixTime: 1642604400,

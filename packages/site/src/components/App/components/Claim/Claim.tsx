@@ -71,7 +71,7 @@ export const ClaimRoute = React.memo(() => {
           decrementStep={decrementStep}
         />
       )}
-      {step === "4" && <Claim4 />}
+      {step === "4" && <Claim4 handle={handle} />}
     </Flex>
   );
 });
