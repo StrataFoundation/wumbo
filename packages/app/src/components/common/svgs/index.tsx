@@ -1,1 +1,0 @@
-export { MatchaLogo } from "./Matcha";
