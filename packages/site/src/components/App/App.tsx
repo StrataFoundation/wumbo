@@ -22,6 +22,7 @@ import { ContextProviders } from "./ContextProviders";
 import { RelinkRoute } from "./components/Relink/Relink";
 
 import { WalletSelectModal } from "./components/modals/WalletSelectModal";
+import { SwapConfirmationRoute } from "./components/Swap/SwapConfirmation";
 
 export const App: React.FC = () => (
   <ContextProviders>
@@ -60,6 +61,10 @@ export const App: React.FC = () => (
           />
           <Route path={AppRoutes.send.path} component={Send} />
           <Route path={AppRoutes.swap.path} component={SwapRoute} />
+          <Route
+            path={AppRoutes.swapConfirmation.path}
+            component={SwapConfirmationRoute}
+          />
           <Route path={AppRoutes.burnBeta.path} component={BurnBetaRoute} />
           <Route path={AppRoutes.prototype.path} component={PrototypeRoute} />
         </Switch>

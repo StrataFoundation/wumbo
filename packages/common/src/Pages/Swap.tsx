@@ -18,11 +18,11 @@ import {
   useSwapDriver,
 } from "@strata-foundation/react";
 import { ISwapArgs, toNumber } from "@strata-foundation/spl-token-bonding";
-import { useConfig } from "../hooks";
 import React from "react";
 import toast from "react-hot-toast";
 import { useHistory } from "react-router-dom";
 import { WUMBO_TRANSACTION_FEE } from "../constants/globals";
+import { useConfig } from "../hooks";
 
 export const Swap = ({
   onTradingMintsChange,
@@ -30,11 +30,13 @@ export const Swap = ({
   baseMint,
   targetMint,
   manageWalletPath,
+  swapConfirmationPath,
 }: {
   tokenBonding?: PublicKey;
   baseMint?: PublicKey;
   targetMint?: PublicKey;
   manageWalletPath: string;
+  swapConfirmationPath: string;
 } & Pick<ISwapDriverArgs, "onTradingMintsChange">) => {
   const history = useHistory();
   const { wallet } = useWallet();
@@ -47,9 +49,13 @@ export const Swap = ({
   const baseMintInfo = useMint(baseMint);
   const targetMintInfo = useMint(targetMint);
   const wumboConfig = useConfig();
-
   const hasFees = targetTokenRef || baseTokenRef;
-  const { loading, error, execute } = useSwap({
+
+  const {
+    loading: swapping,
+    error,
+    execute,
+  } = useSwap({
     async extraInstructions({ tokenBonding, isBuy, amount }) {
       if (hasFees) {
         const buyingTarget =
@@ -87,7 +93,9 @@ export const Swap = ({
       };
     },
   });
+
   handleErrors(error);
+
   const { loading: driverLoading, ...swapProps } = useSwapDriver({
     extraTransactionInfo: hasFees
       ? [
@@ -103,21 +111,20 @@ export const Swap = ({
     onTradingMintsChange,
     swap: (args: ISwapArgs & { ticker: string }) =>
       execute(args).then(({ targetAmount }) => {
-        toast.custom((t) => (
-          <Notification
-            show={t.visible}
-            type="success"
-            heading="Transaction Successful"
-            message={`Successfully purchased ${Number(targetAmount).toFixed(
-              9
-            )} ${args.ticker}!`}
-            onDismiss={() => toast.dismiss(t.id)}
-          />
-        ));
+        history.push(
+          swapConfirmationPath +
+            `?amount=${targetAmount}&mint=${args.targetMint}`
+        );
       }),
     onConnectWallet: () => history.push(manageWalletPath),
     tokenBondingKey: tokenBonding!,
   });
 
-  return <SwapForm isSubmitting={loading} {...swapProps} />;
+  return (
+    <SwapForm
+      isLoading={driverLoading}
+      isSubmitting={swapping}
+      {...swapProps}
+    />
+  );
 };

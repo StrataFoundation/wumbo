@@ -7,3 +7,4 @@ export * from "./truthy";
 export * from "./testableNameServiceTwitter";
 export * from "./sleep";
 export * from "./executeRemoteTxn";
+export * from "./sample";

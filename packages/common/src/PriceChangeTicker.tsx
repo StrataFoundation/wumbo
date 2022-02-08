@@ -8,7 +8,11 @@ import {
   useTokenAccount,
   useTokenBonding,
 } from "@strata-foundation/react";
-import { fromCurve, toBN } from "@strata-foundation/spl-token-bonding";
+import {
+  amountAsNum,
+  fromCurve,
+  toBN,
+} from "@strata-foundation/spl-token-bonding";
 import React, { useMemo } from "react";
 import { AiFillCaretDown, AiFillCaretUp } from "react-icons/ai";
 import { useTokenBondingRecentTransactions } from "./contexts";
@@ -40,17 +44,14 @@ export const PriceChangeTicker = ({
       }, 0);
       return fromCurve(
         curve,
-        {
-          ...baseStorage,
-          amount: baseStorage?.amount.sub(toBN(totalBaseMintChange, baseMint)),
-        },
-        baseMint,
-        {
-          ...targetMint,
-          supply: targetMint.supply.sub(
-            toBN(totalTargetMintChange, targetMint)
-          ),
-        },
+        amountAsNum(
+          baseStorage?.amount.sub(toBN(totalBaseMintChange, baseMint)),
+          baseMint
+        ),
+        amountAsNum(
+          targetMint?.supply.sub(toBN(totalTargetMintChange, targetMint)),
+          targetMint
+        ),
         tokenBondingAcc.goLiveUnixTime.toNumber()
       );
     }
@@ -59,9 +60,8 @@ export const PriceChangeTicker = ({
     if (tokenBondingAcc && curve && baseStorage && baseMint && targetMint) {
       return fromCurve(
         curve,
-        baseStorage,
-        baseMint,
-        targetMint,
+        amountAsNum(baseStorage.amount, baseMint),
+        amountAsNum(targetMint.supply, targetMint),
         tokenBondingAcc.goLiveUnixTime.toNumber()
       );
     }

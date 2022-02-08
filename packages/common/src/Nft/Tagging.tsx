@@ -282,7 +282,7 @@ export const TaggableImages = ({
                   config.verifiers.nftVerifier,
                   config.tlds.nftVerifier
                 );
-                const alreadyExists = await cache.search(key, undefined, true);
+                const alreadyExists = await cache?.search(key, undefined, true);
 
                 if (!alreadyExists) {
                   const img2 = await getBufferFromUrl(img2Src);

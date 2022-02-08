@@ -1,6 +1,6 @@
+import React, { Fragment } from "react";
 import { routes, swapPath } from "@/constants/routes";
 import { usePublicKey } from "@strata-foundation/react";
-import React, { Fragment } from "react";
 import { useHistory, useLocation, useParams } from "react-router-dom";
 import { Swap } from "wumbo-common";
 import { WumboDrawer } from "../WumboDrawer";
@@ -26,6 +26,7 @@ export const SwapRoute = () => {
       <WumboDrawer.Header title="Trade" />
       <WumboDrawer.Content>
         <Swap
+          swapConfirmationPath={routes.swapConfirmation.path}
           manageWalletPath={redirectUri}
           tokenBonding={tokenBondingKey}
           baseMint={baseMint}

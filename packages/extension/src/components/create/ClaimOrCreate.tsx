@@ -1,4 +1,4 @@
-import { swapPath } from "@/constants/routes";
+import { routes, swapPath } from "@/constants/routes";
 import { useClaimFlow } from "@/utils/claim";
 import { useUserInfo } from "@/utils/userState";
 import { Box, Button, Text } from "@chakra-ui/react";
@@ -74,12 +74,15 @@ export default React.memo(() => {
         ),
       },
     });
-    history.push(
+    const buyLink =
       swapPath(
         tokenBonding!,
         SplTokenCollective.OPEN_COLLECTIVE_MINT_ID,
         mint
-      ) + `?name=${query.get("name")!}`
+      ) + `?name=${query.get("name")!}`;
+    history.push(
+      routes.mintConfirmation.path +
+        `?handle=${query.get("name")!}&buyLink=${buyLink}`
     );
   };
 
