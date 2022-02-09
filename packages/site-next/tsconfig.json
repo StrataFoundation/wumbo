@@ -4,7 +4,8 @@
   "compilerOptions": {
     "baseUrl": ".",
     "paths": {
-      "@/components/*": ["components/*"]
+      "@/components/*": ["components/*"],
+      "@/constants/*": ["constants/*"]
     },
     "target": "es6",
     "lib": ["dom", "dom.iterable", "esnext"],

@@ -4940,7 +4940,19 @@
     bn.js "^5.2.0"
     copyfiles "^2.4.1"
 
-"@strata-foundation/react@^3.2.0", "@strata-foundation/react@^3.2.1":
+"@strata-foundation/marketplace-sdk@^3.2.3":
+  version "3.2.3"
+  resolved "https://registry.yarnpkg.com/@strata-foundation/marketplace-sdk/-/marketplace-sdk-3.2.3.tgz#8295263fed1c960d92914934f7d93be4e95d5ba8"
+  integrity sha512-J/y5eJ8tJAuLphSi0fWJfzo2bgF+1X8DT411W+v4fO1C3ZulCtFq7TBMcqQ3rp/Q31yHMMntg5/UZaCKqStWdg==
+  dependencies:
+    "@project-serum/anchor" "^0.20.1"
+    "@solana/web3.js" "^1.32.0"
+    "@strata-foundation/spl-token-bonding" "^3.2.3"
+    "@strata-foundation/spl-utils" "^3.2.3"
+    bn.js "^5.2.0"
+    copyfiles "^2.4.1"
+
+"@strata-foundation/react@^3.2.0":
   version "3.2.1"
   resolved "https://registry.yarnpkg.com/@strata-foundation/react/-/react-3.2.1.tgz#153197af5b7b1bcc0b2ae37204381e8323e6266c"
   integrity sha512-hYuTRiVc7bRUcu8NlrIjnJncdIdLVXIVhsuzoMpqy0fvrQ5riMmso0ZBiHF5T9r3SnfK0OHazN71MJ+MYOhSwQ==
@@ -4973,6 +4985,39 @@
     react-icons "^4.3.1"
     yup "^0.32.11"
 
+"@strata-foundation/react@^3.2.3":
+  version "3.2.3"
+  resolved "https://registry.yarnpkg.com/@strata-foundation/react/-/react-3.2.3.tgz#7ed94013d1beb98d30bf06c650419b72dac95796"
+  integrity sha512-dm+Dlb/xSv+aXg7+K1feJUhneH1fXDxr/YLhYTFO7BBS30ZiwrGH6vB2LIt8LIR7+eStiVfD8HniJTRc8XTlxA==
+  dependencies:
+    "@chakra-ui/react" "^1.7.2"
+    "@emotion/react" "^11.6.0"
+    "@emotion/styled" "^11.6.0"
+    "@hookform/resolvers" "^2.8.3"
+    "@project-serum/anchor" "^0.20.1"
+    "@project-serum/serum" "^0.13.61"
+    "@solana/spl-token" "^0.1.8"
+    "@solana/wallet-adapter-base" "^0.9.1"
+    "@solana/wallet-adapter-react" "^0.15.1"
+    "@solana/wallet-adapter-wallets" "^0.14.0"
+    "@solana/web3.js" "^1.32.0"
+    "@strata-foundation/marketplace-sdk" "^3.2.3"
+    "@strata-foundation/spl-token-bonding" "^3.2.3"
+    "@strata-foundation/spl-token-collective" "^3.2.3"
+    "@strata-foundation/spl-utils" "^3.2.3"
+    "@toruslabs/solana-embed" "0.0.9"
+    axios "^0.25.0"
+    buffer "^6.0.3"
+    dotenv "^10.0.0"
+    eventemitter3 "^4.0.7"
+    framer-motion "^5.3.0"
+    path "^0.12.7"
+    react-async-hook "^4.0.0"
+    react-hook-form "^7.19.5"
+    react-hot-toast "^2.1.1"
+    react-icons "^4.3.1"
+    yup "^0.32.11"
+
 "@strata-foundation/spl-token-bonding@^3.2.0", "@strata-foundation/spl-token-bonding@^3.2.1":
   version "3.2.1"
   resolved "https://registry.yarnpkg.com/@strata-foundation/spl-token-bonding/-/spl-token-bonding-3.2.1.tgz#d5dd012a90ff136ebf0739cddeb8927e9a5026ab"
@@ -4981,6 +5026,17 @@
     "@project-serum/anchor" "^0.20.1"
     "@solana/web3.js" "^1.32.0"
     "@strata-foundation/spl-utils" "^3.2.1"
+    bn.js "^5.2.0"
+    copyfiles "^2.4.1"
+
+"@strata-foundation/spl-token-bonding@^3.2.3":
+  version "3.2.3"
+  resolved "https://registry.yarnpkg.com/@strata-foundation/spl-token-bonding/-/spl-token-bonding-3.2.3.tgz#de91b4d3bbe4a3ca170824604773778c82ae333d"
+  integrity sha512-uMyRNyGRDYR6YGkrBWGLoUTkgqiB4Ne+h7a7ZqS9YtFitt1iVYFq0zK+IPSTSBKQpHAjR/A0Fs3f6mXiyg8FyQ==
+  dependencies:
+    "@project-serum/anchor" "^0.20.1"
+    "@solana/web3.js" "^1.32.0"
+    "@strata-foundation/spl-utils" "^3.2.3"
     bn.js "^5.2.0"
     copyfiles "^2.4.1"
 
@@ -4998,6 +5054,20 @@
     bn.js "^5.2.0"
     copyfiles "^2.4.1"
 
+"@strata-foundation/spl-token-collective@^3.2.3":
+  version "3.2.3"
+  resolved "https://registry.yarnpkg.com/@strata-foundation/spl-token-collective/-/spl-token-collective-3.2.3.tgz#cf686b10d7f81bd7be95a29eee8823791b47a2c1"
+  integrity sha512-xHIR2ZFIt6VPatBz4gki45a35CS/dj37mmo9VNNHKri6dyJckKlTZaN4d2d1ceOUFvN9UXDiHt+iB5zPyC78nA==
+  dependencies:
+    "@bonfida/spl-name-service" "^0.1.22"
+    "@project-serum/anchor" "^0.20.1"
+    "@solana/web3.js" "^1.32.0"
+    "@strata-foundation/spl-token-bonding" "^3.2.3"
+    "@strata-foundation/spl-token-staking" "^3.2.3"
+    "@strata-foundation/spl-utils" "^3.2.3"
+    bn.js "^5.2.0"
+    copyfiles "^2.4.1"
+
 "@strata-foundation/spl-token-staking@^3.2.0", "@strata-foundation/spl-token-staking@^3.2.1":
   version "3.2.1"
   resolved "https://registry.yarnpkg.com/@strata-foundation/spl-token-staking/-/spl-token-staking-3.2.1.tgz#f40175a59c6825a4bb72d463f85950318a0bd146"
@@ -5008,10 +5078,35 @@
     bn.js "^5.2.0"
     semver "^7.3.5"
 
+"@strata-foundation/spl-token-staking@^3.2.3":
+  version "3.2.3"
+  resolved "https://registry.yarnpkg.com/@strata-foundation/spl-token-staking/-/spl-token-staking-3.2.3.tgz#b75a910c945389966556789337cc7dc22e5b580a"
+  integrity sha512-mpO13/Rkg85aNRtmY5ilxB6L3z7epnM2R9rZKc3DaAnnJT5GQkSyY7V4VUKC8XvPwdqEP0KjGc+ugsaxBPYFEA==
+  dependencies:
+    "@solana/web3.js" "^1.32.0"
+    "@strata-foundation/spl-utils" "^3.2.3"
+    bn.js "^5.2.0"
+    semver "^7.3.5"
+
 "@strata-foundation/spl-utils@^3.2.0", "@strata-foundation/spl-utils@^3.2.1":
   version "3.2.1"
   resolved "https://registry.yarnpkg.com/@strata-foundation/spl-utils/-/spl-utils-3.2.1.tgz#22df579b0e31ab7524f462e404e5bffdc9bed1c7"
   integrity sha512-psDkZDrmaJXzf7/8+jU01DQsvYmpZvNRjTkBpC7FrG1tPOMk/2gcWa7N4Ai6Rzh/BbVmJ4iujoXhGdutp8cYdA==
+  dependencies:
+    "@metaplex-foundation/mpl-token-metadata" "^1.1.0"
+    "@metaplex/arweave-cost" "1.0.4"
+    "@metaplex/js" "^4.3.0"
+    "@solana/spl-name-service" "^0.1.3"
+    "@solana/web3.js" "^1.32.0"
+    bs58 "^4.0.1"
+    localstorage-memory "^1.0.3"
+    superstruct "0.14.2"
+    tweetnacl "^1.0.3"
+
+"@strata-foundation/spl-utils@^3.2.3":
+  version "3.2.3"
+  resolved "https://registry.yarnpkg.com/@strata-foundation/spl-utils/-/spl-utils-3.2.3.tgz#76a554d103f96668b23b60a0afb2e0778bce2683"
+  integrity sha512-ByIz0Uu+rJmd7E2dmtRdPlhYY34wIRQmq3RdNdAH98iwJ98nH8MXo2KVFTLcWxMYTkmlCyhiikrHiMe0YHFu4A==
   dependencies:
     "@metaplex-foundation/mpl-token-metadata" "^1.1.0"
     "@metaplex/arweave-cost" "1.0.4"
@@ -11247,6 +11342,11 @@ gh-pages@3.2.0:
     find-cache-dir "^3.3.1"
     fs-extra "^8.1.0"
     globby "^6.1.0"
+
+git-format-staged@^2.1.3:
+  version "2.1.3"
+  resolved "https://registry.yarnpkg.com/git-format-staged/-/git-format-staged-2.1.3.tgz#d1d033942a0d31b83fa64f6587b01ca13de0d29e"
+  integrity sha512-M9q3W4CCQShYPHUiINhYUtHPJ3E1/aa3Ajbk8q2OAaCgqEmqZ6gBI6P1fnwD54/Fs9SA2MaOvDxpYRNa1OVGIA==
 
 git-raw-commits@2.0.0:
   version "2.0.0"
