@@ -1,7 +1,14 @@
 import React, { useState } from "react";
-import { Box, Flex, Text, FlexProps, Link, LinkProps } from "@chakra-ui/react";
-import { LandingLayout } from "./";
-import { DownloadButton } from "./";
+import {
+  Box,
+  Flex,
+  Text,
+  FlexProps,
+  Link,
+  LinkProps,
+  Icon,
+} from "@chakra-ui/react";
+import { LandingLayout, DownloadButton, WumboIcon } from "./";
 
 interface IMenuItemProps extends LinkProps {
   isLast?: boolean;
@@ -18,6 +25,7 @@ const MenuItem: React.FC<IMenuItemProps> = ({
     mr={{ base: 0, sm: isLast ? 0 : 8 }}
     display="block"
     _hover={{ textDecoration: "underline" }}
+    zIndex="1"
   >
     <Link href={href} {...rest}>
       {children}
@@ -71,13 +79,9 @@ export const Header: React.FC<IHeaderProps> = (props) => {
           {...props}
         >
           <Flex align="center">
-            {/* <Icon
-              as={WumboIcon}
-              w={10}
-              h={10}
-              _hover={{ cursor: "pointer" }}
-              onClick={() => history.replace("/")}
-            /> */}
+            <Link href="/">
+              <Icon as={WumboIcon} w={10} h={10} />
+            </Link>
             <Text fontSize="xl" ml={4}>
               Wum.bo
             </Text>

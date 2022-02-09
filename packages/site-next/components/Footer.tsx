@@ -10,7 +10,7 @@ import {
   Link,
 } from "@chakra-ui/react";
 import { RiTwitterFill, RiDiscordFill } from "react-icons/ri";
-import { LandingLayout } from "./";
+import { LandingLayout, WumboIcon } from "./";
 
 export const Footer: React.FC = () => (
   <Box bg="indigo.900">
@@ -46,7 +46,7 @@ export const Footer: React.FC = () => (
           </HStack>
           <HStack divider={<StackDivider />} spacing={4} color="white">
             <Flex align="center">
-              {/* <Icon as={WumboIcon} w={7} h={7} /> */}
+              <Icon as={WumboIcon} w={7} h={7} />
               <Text fontSize="sm" ml={3}>
                 Wum.bo
               </Text>
