@@ -42,43 +42,45 @@ export const useNfts = (): INft[] | null => {
         const newNfts = (
           await Promise.all(
             images.flatMap(async (img) => {
-              const mintKey = await getNftMintCached(
-                cache,
-                img.src,
-                config.verifiers.nftVerifier,
-                config.tlds.nftVerifier
-              );
-              if (mintKey) {
-                img.className = `${img.className} nft-tagged`;
-                if (!img.id) {
-                  incrementingId++;
-                  img.id = "nft_id_" + incrementingId;
+              if (cache) {
+                const mintKey = await getNftMintCached(
+                  cache,
+                  img.src,
+                  config.verifiers.nftVerifier,
+                  config.tlds.nftVerifier
+                );
+                if (mintKey) {
+                  img.className = `${img.className} nft-tagged`;
+                  if (!img.id) {
+                    incrementingId++;
+                    img.id = "nft_id_" + incrementingId;
+                  }
+
+                  const observer = new MutationObserver(function (changes) {
+                    if (
+                      changes.some((change) =>
+                        change.attributeName?.includes("src")
+                      )
+                    ) {
+                      img.className = img.className.replace("nft-tagged", "");
+                      setNfts((nfts) => {
+                        observer.disconnect();
+                        return nfts.filter((nft) => nft.img != img);
+                      });
+                    }
+                  });
+                  observer.observe(img, { attributeFilter: ["src"] });
+
+                  return {
+                    img,
+                    // Have to use a string so that isEqual doesn't fail
+                    mintKey,
+                    observer,
+                  };
                 }
 
-                const observer = new MutationObserver(function (changes) {
-                  if (
-                    changes.some((change) =>
-                      change.attributeName?.includes("src")
-                    )
-                  ) {
-                    img.className = img.className.replace("nft-tagged", "");
-                    setNfts((nfts) => {
-                      observer.disconnect();
-                      return nfts.filter((nft) => nft.img != img);
-                    });
-                  }
-                });
-                observer.observe(img, { attributeFilter: ["src"] });
-
-                return {
-                  img,
-                  // Have to use a string so that isEqual doesn't fail
-                  mintKey,
-                  observer,
-                };
+                return null;
               }
-
-              return null;
             })
           )
         ).filter(truthy);

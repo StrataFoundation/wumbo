@@ -27,7 +27,11 @@ export const SwapConfirmation = ({
   const { handle: refHandle } = useReverseTwitter(
     tokenRef?.owner as PublicKey | undefined
   );
-  const handle = refHandle || metadata?.data.name;
+  const handle = tokenRef
+    ? tokenRef.isClaimed
+      ? refHandle
+      : metadata?.data.name
+    : undefined;
   const config = useConfig();
   const tweets = config.tweets.swap;
 
