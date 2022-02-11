@@ -17,13 +17,12 @@ import {
   GetServerSideProps,
   InferGetServerSidePropsType,
 } from "next";
-import { useTwitterTld } from "wumbo-common";
-import dynamic from "next/dynamic";
 import { useRouter } from "next/router";
 import Head from "next/head";
 import { Box, Center } from "@chakra-ui/react";
-import { LandingLayout } from "@/components/index";
-import { DEFAULT_ENDPOINT } from "@/constants/index";
+import { LandingLayout } from "@/components";
+import { useTwitterTld } from "@/hooks";
+import { DEFAULT_ENDPOINT } from "@/constants";
 
 // export const getServerSideProps: GetServerSideProps = async (context) => {
 //   const connection = new Connection(DEFAULT_ENDPOINT);
@@ -95,6 +94,7 @@ const ProfileEntityMapper: NextPage = () => {
   const tld = useTwitterTld();
   // const { loading, tokenRef, error } = useTokenRefFromEntity({ entity, tld });
 
+  console.log(tld);
   return (
     <Box>
       {/* <Head>

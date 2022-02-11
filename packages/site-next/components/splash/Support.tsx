@@ -9,7 +9,7 @@ import {
   VStack,
   HStack,
 } from "@chakra-ui/react";
-import { LandingLayout } from "@/components/index";
+import { LandingLayout } from "@/components";
 
 interface ISupportItemProps {
   image: string;

@@ -1,7 +1,7 @@
 /* eslint-disable react/no-unescaped-entities */
 import React from "react";
 import { Box, Flex, Stack, Heading, Image } from "@chakra-ui/react";
-import { LandingLayout } from "@/components/index";
+import { LandingLayout } from "@/components";
 
 export const XRay: React.FC = () => (
   <Box bg="gray.100">

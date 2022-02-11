@@ -15,7 +15,7 @@ import {
   RiDiscordFill,
   RiExternalLinkLine,
 } from "react-icons/ri";
-import { LandingLayout, MatchaLogo } from "@/components/index";
+import { LandingLayout, MatchaLogo } from "@/components";
 
 interface ITeamMemberProps {
   image: string;

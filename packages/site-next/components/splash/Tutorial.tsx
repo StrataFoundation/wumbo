@@ -10,7 +10,7 @@ import {
   useMediaQuery,
 } from "@chakra-ui/react";
 import React from "react";
-import { LandingLayout, DownloadButton } from "@/components/index";
+import { LandingLayout, DownloadButton } from "@/components";
 
 interface ITutItem {
   imgSrc: string;

@@ -13,7 +13,7 @@ import {
   Support,
   Team,
   DownloadRow,
-} from "@/components/index";
+} from "@/components";
 
 const Home: NextPage = () => {
   const seoDescription =

@@ -4,7 +4,7 @@ import Head from "next/head";
 import { Box } from "@chakra-ui/react";
 
 // Splash sections
-import { Tutorial as TutorialContent } from "@/components/index";
+import { Tutorial as TutorialContent } from "@/components";
 
 const Tutorial: NextPage = () => {
   return (

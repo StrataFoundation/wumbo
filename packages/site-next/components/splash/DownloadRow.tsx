@@ -1,6 +1,6 @@
 import React from "react";
 import { Box, Flex, Stack, Heading, Text } from "@chakra-ui/react";
-import { LandingLayout, DownloadButton } from "@/components/index";
+import { LandingLayout, DownloadButton } from "@/components";
 
 export const DownloadRow: React.FC = () => (
   <Box bg="linear-gradient(272.23deg, #5D34A9 -0.32%, #413BB1 93.88%), #FFFFFF;">

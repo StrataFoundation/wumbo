@@ -1,6 +1,6 @@
 import React from "react";
 import { Box, Flex, Stack, Heading, Image } from "@chakra-ui/react";
-import { LandingLayout } from "@/components/index";
+import { LandingLayout } from "@/components";
 
 export const Monetize: React.FC = () => (
   <LandingLayout>

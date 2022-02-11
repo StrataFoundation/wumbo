@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Box, Flex, Heading, Text, Stack, Image } from "@chakra-ui/react";
-import { LandingLayout, DownloadButton } from "@/components/index";
+import { LandingLayout, DownloadButton } from "@/components";
 
 export const Hero: React.FC = () => {
   const [isMobile, setMobile] = useState<boolean | undefined>(undefined);
