@@ -11,10 +11,14 @@ module.exports = {
       os: false,
     };
 
+    config.resolve.extensions.push(".mjs");
+
     config.module.rules.push({
-      test: /\.mjs$/,
-      include: /node_modules/,
+      test: /\.m?js$/,
       type: "javascript/auto",
+      resolve: {
+        fullySpecified: false,
+      },
     });
 
     config.resolve.alias = {

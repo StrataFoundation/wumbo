@@ -95,7 +95,6 @@ const ProfileEntityMapper: NextPage = () => {
   const tld = useTwitterTld();
   // const { loading, tokenRef, error } = useTokenRefFromEntity({ entity, tld });
 
-  console.log(tld);
   return (
     <Box>
       {/* <Head>
