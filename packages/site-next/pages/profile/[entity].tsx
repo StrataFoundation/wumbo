@@ -1,103 +1,150 @@
-import React, { useState, useEffect } from "react";
-import { Metadata } from "@metaplex-foundation/mpl-token-metadata";
+import React from "react";
+import {
+  GetServerSideProps,
+  InferGetServerSidePropsType,
+  NextPage,
+} from "next";
+import { Connection, Keypair, PublicKey } from "@solana/web3.js";
 import { Provider } from "@project-serum/anchor";
 import NodeWallet from "@project-serum/anchor/dist/cjs/nodewallet";
 import {
-  usePublicKey,
-  useTokenRef,
-  useTokenRefForName,
-  useTokenRefFromBonding,
-} from "@strata-foundation/react";
-import { Connection, Keypair, PublicKey } from "@solana/web3.js";
-import { SplTokenBonding } from "@strata-foundation/spl-token-bonding";
-import { ITokenRef } from "@strata-foundation/spl-token-collective";
+  ITokenRef,
+  SplTokenCollective,
+} from "@strata-foundation/spl-token-collective";
 import { SplTokenMetadata } from "@strata-foundation/spl-utils";
-import {
-  NextPage,
-  GetServerSideProps,
-  InferGetServerSidePropsType,
-} from "next";
-import { useRouter } from "next/router";
 import Head from "next/head";
+import { useRouter } from "next/router";
 import { Box, Center } from "@chakra-ui/react";
 import { LandingLayout } from "@/components";
-import { useTwitterTld } from "@/hooks";
 import { DEFAULT_ENDPOINT } from "@/constants";
+import { getTwitterTld } from "utils/twitter";
+import {
+  getHashedName,
+  getNameAccountKey,
+  NameRegistryState,
+} from "@solana/spl-name-service";
 
-// export const getServerSideProps: GetServerSideProps = async (context) => {
-//   const connection = new Connection(DEFAULT_ENDPOINT);
-//   const provider = new Provider(
-//     connection,
-//     new NodeWallet(Keypair.generate()),
-//     {}
-//   );
-//   const tokenBondingSdk = await SplTokenBonding.init(provider);
+async function tryProm<A>(prom: Promise<A>): Promise<A | undefined> {
+  try {
+    return await prom;
+  } catch (e) {
+    console.error(e);
+  }
 
-//   const [tokenBondingKey] = await SplTokenBonding.tokenBondingKey(
-//     new PublicKey(context.params?.tokenMintKey as string)
-//   );
+  return undefined;
+}
 
-//   const tokenBondingAcct = await tokenBondingSdk.getTokenBonding(
-//     tokenBondingKey
-//   );
+const findTokenRef = async (entity: string) => {};
 
-//   const tokenMetadataSdk = await SplTokenMetadata.init(provider);
+export const getServerSideProps: GetServerSideProps = async (context) => {
+  const connection = new Connection(DEFAULT_ENDPOINT);
+  const provider = new Provider(
+    connection,
+    new NodeWallet(Keypair.generate()),
+    {}
+  );
 
-//   const metadataAcc =
-//     tokenBondingAcct &&
-//     (await tokenMetadataSdk.getMetadata(
-//       await Metadata.getPDA(tokenBondingAcct?.targetMint)
-//     ));
+  const entity = context.params?.entity as string;
+  const tld = await getTwitterTld();
+  const pK: PublicKey | undefined = (() => {
+    try {
+      return new PublicKey(entity);
+    } catch {
+      // ignore
+    }
+  })();
 
-//   const metadata = await SplTokenMetadata.getArweaveMetadata(
-//     metadataAcc?.data.uri
-//   );
+  const [tokenCollectiveSdk, splTokenMetadataSdk] =
+    (await tryProm(
+      Promise.all([
+        SplTokenCollective.init(provider),
+        SplTokenMetadata.init(provider),
+      ])
+    )) || [];
 
-//   const name = metadataAcc?.data.name || null;
-//   const description = `View TVL, Holders, Price Trend, And support ${name} by becoming a holder yourself!`;
-//   const image =
-//     (await SplTokenMetadata.getImage(metadataAcc?.data.uri)) || null;
+  let tokenRef: ITokenRef | null | undefined;
 
-//   return {
-//     props: {
-//       name,
-//       description,
-//       image,
-//     },
-//   };
-// };
+  if (!tokenRef && pK) {
+    try {
+      tokenRef = await tokenCollectiveSdk?.getTokenRef(pK);
+    } catch {}
+  }
 
-// can pass it any of the following for entity
-// handle | tokenRef | tokenMint | tokenBonding
-// and will return a tokenRef
-const useTokenRefFromEntity = ({
-  entity,
-  tld,
-}: {
-  entity?: string;
-  tld?: PublicKey;
-}): {
-  loading: boolean;
-  tokenRef: ITokenRef | undefined;
-  error: Error | undefined;
-} => {
-  const [loading, setLoading] = useState<boolean>(false);
-  const [tokenRef, setTokenRef] = useState<ITokenRef | undefined>(undefined);
-  const [error, setError] = useState<Error | undefined>(undefined);
+  if (!tokenRef && pK) {
+    try {
+      const [mTRK] = await SplTokenCollective.mintTokenRefKey(pK);
+      tokenRef = await tokenCollectiveSdk?.getTokenRef(mTRK);
+    } catch {}
+  }
 
-  return { loading, tokenRef, error };
+  if (!tokenRef && pK) {
+    try {
+      const [wTRK] = await SplTokenCollective.ownerTokenRefKey({
+        owner: pK,
+        isPrimary: true,
+      });
+      tokenRef = await tokenCollectiveSdk?.getTokenRef(wTRK);
+    } catch {}
+  }
+
+  if (!tokenRef && !pK) {
+    const twitterRegistryKey = await getNameAccountKey(
+      await getHashedName(entity),
+      undefined,
+      tld
+    );
+
+    try {
+      const { owner } = await NameRegistryState.retrieve(
+        connection,
+        twitterRegistryKey
+      );
+
+      const [cTRK] = await SplTokenCollective.ownerTokenRefKey({
+        owner: owner,
+      });
+      tokenRef = await tokenCollectiveSdk?.getTokenRef(cTRK);
+    } catch {}
+  }
+
+  if (!tokenRef && !pK) {
+    const twitterRegistryKey = await getNameAccountKey(
+      await getHashedName(entity),
+      undefined,
+      tld
+    );
+
+    try {
+      const [ucTRK] = await SplTokenCollective.ownerTokenRefKey({
+        owner: twitterRegistryKey,
+        mint: SplTokenCollective.OPEN_COLLECTIVE_MINT_ID,
+      });
+      tokenRef = await tokenCollectiveSdk?.getTokenRef(ucTRK);
+    } catch {}
+  }
+
+  console.log(tokenRef?.mint?.toBase58());
+
+  return {
+    props: {
+      name: "test" || null,
+      description: "description" || null,
+      image: "image" || null,
+    },
+  };
 };
 
-const ProfileEntityMapper: NextPage = () => {
+const ProfileEntityMapper: NextPage = ({
+  name,
+  image,
+  description,
+}: InferGetServerSidePropsType<typeof getServerSideProps>) => {
   const router = useRouter();
   const { entity } = router.query as { entity: string | undefined };
-  const tld = useTwitterTld();
-  // const { loading, tokenRef, error } = useTokenRefFromEntity({ entity, tld });
 
-  console.log(tld);
   return (
     <Box>
-      {/* <Head>
+      <Head>
         <title>{name}</title>
         <link rel="icon" href="/favicon.svg" />
         <meta name="twitter:card" content="summary_large_image" />
@@ -109,14 +156,11 @@ const ProfileEntityMapper: NextPage = () => {
 
         <meta name="twitter:card" content="summary_large_image" />
         <meta property="twitter:domain" content="wum.bo" />
-        <meta
-          property="twitter:url"
-          content={`https://wum.bo/profile/${tokenMintKeyRaw}/`}
-        />
+        <meta property="twitter:url" content={`REPLACEME`} />
         <meta name="twitter:title" content={`${name}'s Wum.bo Profile`} />
         <meta name="twitter:description" content={description} />
         <meta name="twitter:image" content={image} />
-      </Head> */}
+      </Head>
 
       <LandingLayout>
         <Box w="full" h="full" overflow="auto" paddingTop={{ sm: "18px" }}>

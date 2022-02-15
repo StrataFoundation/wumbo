@@ -8,6 +8,7 @@
       "@/utils": ["utils/index"],
       "@/hooks": ["hooks/index"],
       "@/components": ["components/index"],
+      "@/components/*": ["components/*"],
       "@/constants": ["constants/index"]
     },
     "target": "es6",

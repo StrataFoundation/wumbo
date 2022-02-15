@@ -1,15 +1,16 @@
 import React, { FC, useCallback } from "react";
+import { ConnectionProvider } from "@solana/wallet-adapter-react";
 import {
   extendTheme,
   ChakraProvider,
   theme as chakraTheme,
 } from "@chakra-ui/react";
-
 import {
   AccountProvider,
   ErrorHandlerProvider,
   StrataSdksProvider,
 } from "@strata-foundation/react";
+import { DEFAULT_ENDPOINT } from "@/constants";
 
 export const theme = extendTheme({
   shadows: {
@@ -89,9 +90,11 @@ export const Providers: FC = ({ children }) => {
   return (
     <ThemeProvider>
       <ErrorHandlerProvider onError={onError}>
-        <StrataSdksProvider>
-          <AccountProvider commitment="confirmed">{children}</AccountProvider>
-        </StrataSdksProvider>
+        <ConnectionProvider endpoint={DEFAULT_ENDPOINT}>
+          <StrataSdksProvider>
+            <AccountProvider commitment="confirmed">{children}</AccountProvider>
+          </StrataSdksProvider>
+        </ConnectionProvider>
       </ErrorHandlerProvider>
     </ThemeProvider>
   );

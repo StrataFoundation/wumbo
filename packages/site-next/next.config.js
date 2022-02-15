@@ -23,9 +23,24 @@ module.exports = {
 
     config.resolve.alias = {
       ...config.resolve.alias,
-      "@solana/wallet-adapter-react": path.resolve(
-        "../../node_modules/@solana/wallet-adapter-react"
-      ),
+      react: path.resolve("../../node_modules/react"),
+      // For local dev with linked packages:
+      ...(process.env.NEXT_PUBLIC_LINKED_DEV === "true"
+        ? {
+            "@strata-foundation/react": path.resolve(
+              "./node_modules/@strata-foundation/react"
+            ),
+            "@strata-foundation/spl-token-bonding": path.resolve(
+              "./node_modules/@strata-foundation/spl-token-bonding"
+            ),
+            "@strata-foundation/spl-token-bonding": path.resolve(
+              "./node_modules/@strata-foundation/spl-token-collective"
+            ),
+            "@strata-foundation/spl-utils": path.resolve(
+              "./node_modules/@strata-foundation/spl-utils"
+            ),
+          }
+        : {}),
     };
 
     return config;
