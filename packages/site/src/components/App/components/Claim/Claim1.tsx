@@ -38,6 +38,7 @@ export const Claim1 = React.memo<IClaim1Props>(
   ({ handle, incrementStep, decrementStep }) => {
     const history = useHistory();
     const tld = useTwitterTld();
+
     const { info: tokenRef, loading: tokenRefLoading } = useTokenRefForName(
       handle,
       null,

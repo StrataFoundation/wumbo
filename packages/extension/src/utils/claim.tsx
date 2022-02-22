@@ -2,12 +2,12 @@ import { routes } from "@/constants/routes";
 import { useWallet } from "@solana/wallet-adapter-react";
 import { useAsyncCallback } from "react-async-hook";
 import { useHistory } from "react-router-dom";
+import { executeRemoteTxn } from "@strata-foundation/spl-utils";
 import {
   IClaimFlowOutput,
   useClaimLink,
   useCreateOrClaimCoin,
   useReverseTwitter,
-  executeRemoteTxn,
   WUMBO_IDENTITY_SERVICE_URL,
 } from "wumbo-common";
 import { useProvider } from "@strata-foundation/react";
