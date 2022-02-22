@@ -5,8 +5,6 @@ import {
   ThemeProvider,
   AppendChildPortal,
   usePrevious,
-  useUserTokensWithMeta,
-  truthy,
   useConfig,
 } from "wumbo-common";
 import { useProfile } from "../../utils/twitterSpotter";
@@ -17,7 +15,10 @@ import { Spinner, useBufferFromUrl, getBufferFromUrl } from "wumbo-common";
 import compareImages from "resemblejs/compareImages";
 import { useWallet } from "@solana/wallet-adapter-react";
 import { ITokenWithMetaAndAccount } from "@strata-foundation/spl-token-collective";
-import { useErrorHandler } from "@strata-foundation/react";
+import {
+  useErrorHandler,
+  useUserTokensWithMeta,
+} from "@strata-foundation/react";
 import { useAsync } from "react-async-hook";
 import { useHistory } from "react-router-dom";
 import { useDrawer } from "../../contexts/drawerContext";

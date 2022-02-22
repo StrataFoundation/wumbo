@@ -40,7 +40,7 @@ import {
   useWalletTokenAccounts,
 } from "@strata-foundation/react";
 import { ITokenWithMetaAndAccount } from "@strata-foundation/spl-token-collective";
-import { TROPHY_CREATOR } from "../constants";
+import { SITE_URL, TROPHY_CREATOR } from "../constants";
 import React from "react";
 import { AiOutlineSend } from "react-icons/ai";
 import { FaChevronRight } from "react-icons/fa";
@@ -215,8 +215,6 @@ export const Profile = React.memo(
       toFiat(pricing.current(NATIVE_MINT)) * buyTargetRoyaltiesAmount;
 
     const {
-      claim,
-      claimLoading: claiming,
       link,
       linkLoading: linking,
       error: claimError,
@@ -370,14 +368,12 @@ export const Profile = React.memo(
                 <Popover placement="bottom" trigger="hover">
                   <PopoverTrigger>
                     <Button
+                      as={PlainLink}
+                      isExternal
+                      href={SITE_URL + "/app/claim?handle=" + handle}
                       size="xs"
                       colorScheme="indigo"
                       variant="outline"
-                      onClick={claim}
-                      isLoading={claiming}
-                      loadingText={
-                        awaitingApproval ? "Awaiting Approval" : "Claiming"
-                      }
                     >
                       Claim Token
                     </Button>

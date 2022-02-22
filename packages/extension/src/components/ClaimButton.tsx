@@ -1,12 +1,12 @@
 import { routes, viewProfilePath } from "@/constants/routes";
 import { useDrawer } from "@/contexts/drawerContext";
-import { Button, ButtonProps, SpinnerProps } from "@chakra-ui/react";
+import { Link, Button, ButtonProps, SpinnerProps } from "@chakra-ui/react";
 import { useWallet } from "@solana/wallet-adapter-react";
 import { useErrorHandler, useTokenRefForName } from "@strata-foundation/react";
 import React, { FC } from "react";
-import { Link } from "react-router-dom";
 import {
   PriceButton,
+  SITE_URL,
   Spinner,
   useReverseTwitter,
   useTwitterTld,
@@ -52,7 +52,8 @@ export const ClaimButton: FC<Props> = ({
     return (
       <Button
         as={Link}
-        to={routes.create.path + `?name=${creatorName}&src=${creatorImg}`}
+        isExternal
+        href={SITE_URL + "/claim?handle=" + creatorName}
         size="xs"
         fontFamily="body"
         colorScheme="twitter"
@@ -60,12 +61,6 @@ export const ClaimButton: FC<Props> = ({
         _hover={{ bg: "indigo.900" }}
         _active={{ bg: "indigo.900" }}
         _focus={{ boxShadow: "none" }}
-        onClick={() => {
-          toggleDrawer({
-            isOpen: true,
-            creator: { name: creatorName, img: creatorImg },
-          });
-        }}
         {...btnProps}
       >
         Claim

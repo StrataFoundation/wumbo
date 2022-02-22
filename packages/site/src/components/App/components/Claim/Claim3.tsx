@@ -30,6 +30,8 @@ export const Claim3 = React.memo<IClaim3Props>(
       handle: `${handle}`,
     });
 
+    console.log("CODE", code)
+
     const {
       create,
       error: createCoinError,
