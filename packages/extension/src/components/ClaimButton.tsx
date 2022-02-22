@@ -53,7 +53,7 @@ export const ClaimButton: FC<Props> = ({
       <Button
         as={Link}
         isExternal
-        href={SITE_URL + "/claim?handle=" + creatorName}
+        href={SITE_URL + "/app/claim?handle=" + creatorName}
         size="xs"
         fontFamily="body"
         colorScheme="twitter"

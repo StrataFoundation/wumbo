@@ -29,9 +29,7 @@ export const Claim3 = React.memo<IClaim3Props>(
     const { claim, redirectUri } = useClaimLink({
       handle: `${handle}`,
     });
-
-    console.log("CODE", code)
-
+    
     const {
       create,
       error: createCoinError,
