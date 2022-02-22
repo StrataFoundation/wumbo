@@ -6,14 +6,18 @@ import {
   wumNetWorthPath,
   routes,
 } from "@/constants/routes";
-import { Wallet as CommonWallet } from "wumbo-common";
 import { useWallet } from "@solana/wallet-adapter-react";
-import { useFtxPayLink } from "@strata-foundation/react";
+import {
+  useFtxPayLink,
+  Wallet as CommonWallet,
+} from "@strata-foundation/react";
 import { WumboDrawer } from "../WumboDrawer";
 import WalletRedirect from "./WalletRedirect";
+import { useHistory } from "react-router-dom";
 
 export const Wallet = () => {
   const solLink = useFtxPayLink();
+  const history = useHistory();
   const { publicKey } = useWallet();
 
   return (
@@ -23,12 +27,14 @@ export const Wallet = () => {
         <Box>
           <WalletRedirect />
           <CommonWallet
-            sendLink={routes.sendSearch.path}
+            onSendClick={() => history.push(routes.sendSearch.path)}
             wumLeaderboardLink={publicKey ? wumNetWorthPath(publicKey) : ""}
             solLink={solLink}
-            getTokenLink={(t) =>
-              t.account ? viewProfilePath(t.account.mint) : ""
-            }
+            onSelect={(t) => {
+              if (t.account) {
+                history.push(viewProfilePath(t.account.mint));
+              }
+            }}
           />
         </Box>
       </WumboDrawer.Content>

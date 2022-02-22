@@ -1,11 +1,11 @@
-import React from "react";
 import { useWallet } from "@solana/wallet-adapter-react";
-import { useFtxPayLink } from "@strata-foundation/react";
-import { Wallet } from "wumbo-common";
+import { useFtxPayLink, Wallet } from "@strata-foundation/react";
+import { ITokenWithMetaAndAccount } from "@strata-foundation/spl-token-collective";
+import React from "react";
+import { useHistory } from "react-router-dom";
 import {
   AppRoutes,
   profilePath,
-  swapPath,
   wumNetWorthPath,
 } from "../../../../constants/routes";
 import { AppContainer } from "../common/AppContainer";
@@ -14,24 +14,20 @@ import WalletRedirect from "./WalletRedirect";
 export default React.memo(() => {
   const solLink = useFtxPayLink();
   const { publicKey } = useWallet();
+  const history = useHistory();
+
   return (
     <AppContainer>
       <WalletRedirect />
       <Wallet
         wumLeaderboardLink={publicKey ? wumNetWorthPath(publicKey) : ""}
-        getTokenLink={(t) =>
-          t.tokenRef
-            ? profilePath(t.tokenRef.mint)
-            : t.tokenBonding
-            ? swapPath(
-                t.tokenBonding.publicKey,
-                t.tokenBonding.baseMint,
-                t.tokenBonding.targetMint
-              )
-            : null
-        }
+        onSelect={(t: ITokenWithMetaAndAccount) => {
+          if (t.account) {
+            history.push(profilePath(t.account.mint));
+          }
+        }}
         solLink={solLink}
-        sendLink={AppRoutes.sendSearch.path}
+        onSendClick={() => history.push(AppRoutes.sendSearch.path)}
       />
     </AppContainer>
   );
