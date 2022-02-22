@@ -23,11 +23,10 @@ import { useAsync, useAsyncCallback } from "react-async-hook";
 import { WUMBO_IDENTITY_SERVICE_URL } from "./constants";
 import { WalletSelect } from "./Pages/WalletSelect";
 import {
-  executeRemoteTxn,
   executeTxnsInOrder,
   getAndSignRemoteTxns,
   signOnlyNeeded,
-} from "./utils";
+} from "@strata-foundation/spl-utils";
 import toast from "react-hot-toast";
 
 type Selecting = "prev" | "new" | "final";

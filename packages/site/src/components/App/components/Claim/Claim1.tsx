@@ -38,6 +38,7 @@ export const Claim1 = React.memo<IClaim1Props>(
   ({ handle, incrementStep, decrementStep }) => {
     const history = useHistory();
     const tld = useTwitterTld();
+
     const { info: tokenRef, loading: tokenRefLoading } = useTokenRefForName(
       handle,
       null,
@@ -92,7 +93,7 @@ export const Claim1 = React.memo<IClaim1Props>(
     ]);
 
     const tokenExists = !isLoading && tokenRef && tokenBonding;
-    const isClaimable = tokenExists && !tokenRef?.isClaimed;
+    const isClaimable = (tokenExists && !tokenRef?.isClaimed) || !tokenExists;
 
     return (
       <VStack w="full" spacing={8} align="left">
@@ -119,61 +120,44 @@ export const Claim1 = React.memo<IClaim1Props>(
             bgRepeat="no-repeat"
             bgSize="contain"
           >
-            <HStack w="full" color="white" py={5} px={8} spacing={6}>
-              {(isLoading || (tokenExists && isClaimable)) && (
-                <>
-                  <Icon as={RiGift2Line} w="29px" h="29px" />
-                  <Text maxW="346px">
-                    Your fans have already put{" "}
-                    <Text as="span" fontWeight="bold">
-                      {fiatLocked ? "$" + fiatLocked : "Loading...."}
-                    </Text>{" "}
-                    into your social token, you'll get{" "}
-                    <Text as="span" fontWeight="bold">
-                      {claimableAmount ? "$" + claimableAmount : "Loading..."}
-                    </Text>{" "}
-                    worth of your own token if you claim!
-                  </Text>
-                </>
-              )}
-              {!isLoading && !isClaimable && !tokenExists && (
-                <>
-                  <Icon as={RiAlertLine} w="29px" h="29px" />
-                  <Text>
-                    {`There is no social token which can be claimed for ${handle}. Please reach out to the team via`}{" "}
-                    <Link href="discord.gg/S8wJBR2BQV" textDecor="underline">
-                      discord
-                    </Link>{" "}
-                    or{" "}
-                    <Link
-                      href="https://twitter.com/TeamWumbo"
-                      textDecor="underline"
-                    >
-                      twitter
-                    </Link>{" "}
-                    if you believe there should be.
-                  </Text>
-                </>
-              )}
-              {!isLoading && tokenExists && !isClaimable && (
-                <>
-                  <Icon as={RiAlertLine} w="29px" h="29px" />
-                  <Text>
-                    {`The social token for ${handle} has already been claimed! If you're the owner of this handle and haven't claimed this token, please reach out to the team via`}{" "}
-                    <Link href="discord.gg/S8wJBR2BQV" textDecor="underline">
-                      discord
-                    </Link>{" "}
-                    or{" "}
-                    <Link
-                      href="https://twitter.com/TeamWumbo"
-                      textDecor="underline"
-                    >
-                      twitter
-                    </Link>
-                  </Text>
-                </>
-              )}
-            </HStack>
+            {(isLoading || tokenExists) && (
+              <HStack w="full" color="white" py={5} px={8} spacing={6}>
+                {(isLoading || (tokenExists && isClaimable)) && (
+                  <>
+                    <Icon as={RiGift2Line} w="29px" h="29px" />
+                    <Text maxW="346px">
+                      Your fans have already put{" "}
+                      <Text as="span" fontWeight="bold">
+                        {fiatLocked ? "$" + fiatLocked : "Loading...."}
+                      </Text>{" "}
+                      into your social token, you'll get{" "}
+                      <Text as="span" fontWeight="bold">
+                        {claimableAmount ? "$" + claimableAmount : "Loading..."}
+                      </Text>{" "}
+                      worth of your own token if you claim!
+                    </Text>
+                  </>
+                )}
+                {!isLoading && tokenExists && !isClaimable && (
+                  <>
+                    <Icon as={RiAlertLine} w="29px" h="29px" />
+                    <Text>
+                      {`The social token for ${handle} has already been claimed! If you're the owner of this handle and haven't claimed this token, please reach out to the team via`}{" "}
+                      <Link href="discord.gg/S8wJBR2BQV" textDecor="underline">
+                        discord
+                      </Link>{" "}
+                      or{" "}
+                      <Link
+                        href="https://twitter.com/TeamWumbo"
+                        textDecor="underline"
+                      >
+                        twitter
+                      </Link>
+                    </Text>
+                  </>
+                )}
+              </HStack>
+            )}
           </Box>
           <Image src={claim1illu} />
         </VStack>
@@ -231,11 +215,11 @@ export const Claim1 = React.memo<IClaim1Props>(
               isExternal
               fontWeight="bold"
             >
-              Read "Legality of Wumbo"
+              Read "Legality of Social Tokens"
             </Link>
           </Box>
           {isLoading ||
-            (isClaimable && (
+            (isClaimable && tokenExists && (
               <Box w="full" justifyContent="center" align="center">
                 <Text fontWeight="bold">
                   Do you want this social token removed?

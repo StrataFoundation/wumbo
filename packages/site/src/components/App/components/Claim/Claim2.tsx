@@ -201,7 +201,7 @@ export const Claim2: React.FC<IClaim2Props> = ({ handle, incrementStep }) => {
           isExternal
           fontWeight="bold"
         >
-          Read "Legality of Wumbo"
+          Read "Legality of Social Tokens"
         </Link>
       </Box>
     </VStack>
