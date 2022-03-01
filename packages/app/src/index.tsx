@@ -6,9 +6,8 @@ import ReactGA from "react-ga";
 import { BrowserRouter, Switch, Route, useLocation } from "react-router-dom";
 import { ThemeProvider } from "wumbo-common";
 import { ModalProvider } from "./contexts";
-import { SiteRoutes, AppRoutes } from "./constants/routes";
-import { App } from "./components/App/App";
-import { Site } from "./components/Site/Site";
+import { Routes } from "./constants/routes";
+import { App } from "./components/App";
 import reportWebVitals from "./reportWebVitals";
 
 const TRACKING_ID = "G-3K3X1TLYCC";
@@ -32,8 +31,7 @@ ReactDOM.render(
         <BrowserRouter>
           <ScrollToTop />
           <Switch>
-            <Route path={AppRoutes.root.path} component={App} />
-            <Route path={SiteRoutes.root.path} component={Site} />
+            <Route path={Routes.root.path} component={App} />
           </Switch>
         </BrowserRouter>
       </ModalProvider>
