@@ -56,7 +56,7 @@ const ProfileEntityMapper: NextPage = ({
   const handleOnLearnMore = () => router.push("/tutorial");
   const handleOnBecomeABacker = () => {
     location.replace(
-      `https://app.${location.host}/${tokenBondingKeyRaw}/${baseMintKeyRaw}/${targetMintKeyRaw}`
+      `https://app.${location.host}/swap/${tokenBondingKeyRaw}/${baseMintKeyRaw}/${targetMintKeyRaw}`
     );
   };
 

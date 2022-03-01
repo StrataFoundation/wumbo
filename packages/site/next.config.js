@@ -42,7 +42,15 @@ module.exports = {
           }
         : {}),
     };
-
     return config;
+  },
+  async redirects() {
+    return [
+      {
+        source: "/app/:path*",
+        destination: `${process.env.NEXT_PUBLIC_APP_REDIRECT_URL}/:path*`,
+        permanent: false,
+      },
+    ];
   },
 };
