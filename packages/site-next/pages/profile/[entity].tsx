@@ -4,14 +4,6 @@ import {
   InferGetServerSidePropsType,
   NextPage,
 } from "next";
-import { Connection, Keypair, PublicKey } from "@solana/web3.js";
-import { Provider } from "@project-serum/anchor";
-import NodeWallet from "@project-serum/anchor/dist/cjs/nodewallet";
-import {
-  ITokenRef,
-  SplTokenCollective,
-} from "@strata-foundation/spl-token-collective";
-import { SplTokenMetadata } from "@strata-foundation/spl-utils";
 import Head from "next/head";
 import { useRouter } from "next/router";
 import {
@@ -27,124 +19,7 @@ import {
   Stack,
   useColorModeValue,
 } from "@chakra-ui/react";
-import { LandingLayout } from "@/components";
-import { DEFAULT_ENDPOINT } from "@/constants";
-import { getTwitterTld } from "utils/twitter";
-import {
-  getHashedName,
-  getNameAccountKey,
-  NameRegistryState,
-} from "@solana/spl-name-service";
-import { Metadata } from "@metaplex-foundation/mpl-token-metadata";
-
-export const getServerSideProps: GetServerSideProps = async (context) => {
-  const connection = new Connection(DEFAULT_ENDPOINT);
-  const provider = new Provider(
-    connection,
-    new NodeWallet(Keypair.generate()),
-    {}
-  );
-
-  const entity = context.params?.entity as string;
-  const tld = await getTwitterTld();
-  const pK: PublicKey | undefined = (() => {
-    try {
-      return new PublicKey(entity);
-    } catch {
-      // ignore
-    }
-  })();
-
-  const tokenCollectiveSdk = await SplTokenCollective.init(provider);
-  const tokenMetadataSdk = await SplTokenMetadata.init(provider);
-  let tokenRef: ITokenRef | null | undefined;
-
-  if (!tokenRef && pK) {
-    try {
-      tokenRef = await tokenCollectiveSdk?.getTokenRef(pK);
-    } catch {}
-  }
-
-  if (!tokenRef && pK) {
-    try {
-      const [mTRK] = await SplTokenCollective.mintTokenRefKey(pK);
-      tokenRef = await tokenCollectiveSdk?.getTokenRef(mTRK);
-    } catch {}
-  }
-
-  if (!tokenRef && pK) {
-    try {
-      const [wTRK] = await SplTokenCollective.ownerTokenRefKey({
-        owner: pK,
-        isPrimary: true,
-      });
-      tokenRef = await tokenCollectiveSdk?.getTokenRef(wTRK);
-    } catch {}
-  }
-
-  if (!tokenRef && !pK) {
-    const twitterRegistryKey = await getNameAccountKey(
-      await getHashedName(entity),
-      undefined,
-      tld
-    );
-
-    try {
-      const { owner } = await NameRegistryState.retrieve(
-        connection,
-        twitterRegistryKey
-      );
-
-      const [cTRK] = await SplTokenCollective.ownerTokenRefKey({
-        owner: owner,
-      });
-      tokenRef = await tokenCollectiveSdk?.getTokenRef(cTRK);
-    } catch {}
-  }
-
-  if (!tokenRef && !pK) {
-    const twitterRegistryKey = await getNameAccountKey(
-      await getHashedName(entity),
-      undefined,
-      tld
-    );
-
-    try {
-      const [ucTRK] = await SplTokenCollective.ownerTokenRefKey({
-        owner: twitterRegistryKey,
-        mint: SplTokenCollective.OPEN_COLLECTIVE_MINT_ID,
-      });
-      tokenRef = await tokenCollectiveSdk?.getTokenRef(ucTRK);
-      console.log("here", tokenRef);
-    } catch {}
-  }
-
-  const metadataAcc = await tokenMetadataSdk.getMetadata(
-    await Metadata.getPDA(tokenRef!.mint.toBase58())
-  );
-
-  let metadata = null;
-
-  try {
-    metadata = await SplTokenMetadata.getArweaveMetadata(metadataAcc?.data.uri);
-  } catch (e: any) {
-    console.error(e);
-  }
-
-  const name =
-    metadataAcc?.data?.name.length == 32
-      ? metadata?.name
-      : metadataAcc?.data?.name;
-
-  return {
-    props: {
-      name: name || null,
-      symbol: metadataAcc?.data?.symbol || null,
-      description: metadata?.description || null,
-      image: (await SplTokenMetadata.getImage(metadataAcc?.data.uri)) || null,
-    },
-  };
-};
+import { profileServerSideProps } from "./profileServerSideProps";
 
 export const Blob = (props: IconProps) => {
   return (
@@ -165,21 +40,31 @@ export const Blob = (props: IconProps) => {
   );
 };
 
+export const getServerSideProps: GetServerSideProps = profileServerSideProps;
+
 const ProfileEntityMapper: NextPage = ({
+  tokenBondingKeyRaw,
+  baseMintKeyRaw,
+  targetMintKeyRaw,
+  handle,
   name,
   symbol,
   image,
   description,
 }: InferGetServerSidePropsType<typeof getServerSideProps>) => {
   const router = useRouter();
-  const { entity } = router.query as { entity: string | undefined };
+  const handleOnLearnMore = () => router.push("/tutorial");
+  const handleOnBecomeABacker = () => {
+    location.replace(
+      `https://app.${location.host}/${tokenBondingKeyRaw}/${baseMintKeyRaw}/${targetMintKeyRaw}`
+    );
+  };
 
   return (
     <Box>
       <Head>
         <title>{name}</title>
         <link rel="icon" href="/favicon.svg" />
-        <meta name="twitter:card" content="summary_large_image" />
         <meta property="og:type" content="website" />
         <meta name="description" content={description} />
         <meta property="og:title" content={name} />
@@ -204,7 +89,7 @@ const ProfileEntityMapper: NextPage = ({
           <Flex
             flex={1}
             justify={"center"}
-            align={"center"}
+            aling={"center"}
             position={"relative"}
             w={"full"}
           >
@@ -226,7 +111,7 @@ const ProfileEntityMapper: NextPage = ({
             >
               <Image
                 alt={"CoinImage"}
-                fit={"cover"}
+                fit={"contain"}
                 align={"center"}
                 w={"100%"}
                 h={"100%"}
@@ -235,29 +120,58 @@ const ProfileEntityMapper: NextPage = ({
             </Box>
           </Flex>
           <Stack flex={1} spacing={{ base: 5, md: 10 }}>
-            <Heading
-              as="h1"
-              fontWeight="bold"
-              lineHeight={1.1}
-              fontSize={{ base: "3xl", sm: "4xl", lg: "5xl" }}
-            >
-              <Text as={"span"} position={"relative"}>
-                Back {name} Today!
-              </Text>
-              <br />
-              <Text
-                as={"span"}
-                bg="linear-gradient(273.71deg, #453AAF 14.63%, #106FEE 100.31%);"
-                bgClip="text"
+            <span>
+              <Heading
+                as="h1"
+                fontWeight="bold"
+                lineHeight={1.1}
+                fontSize={{ base: "3xl", sm: "4xl", lg: "5xl" }}
               >
-                use everywhere!
+                <Text
+                  as={"span"}
+                  position={"relative"}
+                  bg="linear-gradient(273.71deg, #453AAF 14.63%, #106FEE 100.31%);"
+                  bgClip="text"
+                >
+                  Show Your Support!
+                </Text>
+              </Heading>
+              <Heading
+                as="h1"
+                fontWeight="bold"
+                lineHeight={1.1}
+                fontSize={{ base: "2xl", sm: "3xl", lg: "4xl" }}
+              >
+                <Text as={"span"}>
+                  {handle
+                    ? `Back @${handle} Today`
+                    : `Become a holder of $${name} Today!`}
+                </Text>
+              </Heading>
+            </span>
+            {description && <Text color="gray.500">{description}</Text>}
+            {!description && (
+              <Text>
+                <Text color="indigo.500" as="span">
+                  ${symbol}
+                </Text>
+                &nbsp;is a social token minted through Wumbo
+                {handle ? (
+                  <>
+                    {" "}
+                    for{" "}
+                    <Text color="indigo.500" as="span">
+                      {handle}
+                    </Text>
+                  </>
+                ) : (
+                  ""
+                )}
+                . Wumbo is a Browser Extension that sits on top of Twitter and
+                lets you mint tokens for your favorite creators. Build a
+                thriving community and join them on their journey to the top!
               </Text>
-            </Heading>
-            <Text color={"gray.500"}>
-              {description
-                ? description
-                : `$${symbol} is a social token minted through Wum.bo for @redacted_noah. `}
-            </Text>
+            )}
             <Stack
               spacing={{ base: 4, sm: 6 }}
               direction={{ base: "column", sm: "row" }}
@@ -267,10 +181,16 @@ const ProfileEntityMapper: NextPage = ({
                 fontWeight={"normal"}
                 px={6}
                 colorScheme={"indigo"}
+                onClick={handleOnBecomeABacker}
               >
                 Become a Backer
               </Button>
-              <Button size={"lg"} fontWeight={"normal"} px={6}>
+              <Button
+                size={"lg"}
+                fontWeight={"normal"}
+                px={6}
+                onClick={handleOnLearnMore}
+              >
                 Learn More
               </Button>
             </Stack>

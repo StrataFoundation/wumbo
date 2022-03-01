@@ -1,3 +1,5 @@
+export const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://wum.bo";
+
 export const DEFAULT_ENDPOINT =
   process.env.NEXT_PUBLIC_SOLANA_API_URL || "https://api.devnet.solana.com";
 

@@ -2,6 +2,7 @@ import React from "react";
 import type { NextPage } from "next";
 import Head from "next/head";
 import { Box } from "@chakra-ui/react";
+import { SITE_URL } from "@/constants";
 
 // Splash sections
 import {
@@ -24,11 +25,10 @@ const Home: NextPage = () => {
       <Head>
         <title>Wum.bo</title>
         <link rel="icon" href="/favicon.svg" />
-        <meta name="twitter:card" content="summary_large_image" />
         <meta property="og:type" content="website" />
         <meta name="description" content={seoDescription} />
         <meta property="og:title" content="Wum.bo" />
-        <meta property="og:image" content="/seo/splash_head_image.png" />
+        <meta property="og:image" content={`${SITE_URL}/seo-splash.png`} />
         <meta property="og:description" content={seoDescription} />
 
         <meta name="twitter:card" content="summary_large_image" />
@@ -36,10 +36,7 @@ const Home: NextPage = () => {
         <meta property="twitter:url" content={`https://wum.bo`} />
         <meta name="twitter:title" content="Wum.bo" />
         <meta name="twitter:description" content={seoDescription} />
-        <meta
-          name="twitter:image"
-          content="http://wumbotest.ngrok.io/seo/splash_head_image.png"
-        />
+        <meta name="twitter:image" content={`${SITE_URL}/seo-splash.png`} />
       </Head>
 
       <Box>
