@@ -20,6 +20,7 @@ import {
   useColorModeValue,
 } from "@chakra-ui/react";
 import { profileServerSideProps } from "../../utils/profileServerSideProps";
+import { APP_URL } from "@/constants";
 
 export const Blob = (props: IconProps) => {
   return (
@@ -56,7 +57,7 @@ const ProfileEntityMapper: NextPage = ({
   const handleOnLearnMore = () => router.push("/tutorial");
   const handleOnBecomeABacker = () => {
     location.replace(
-      `https://app.${location.host}/swap/${tokenBondingKeyRaw}/${baseMintKeyRaw}/${targetMintKeyRaw}`
+      `${APP_URL}/swap/${tokenBondingKeyRaw}/${baseMintKeyRaw}/${targetMintKeyRaw}`
     );
   };
 
