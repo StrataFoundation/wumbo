@@ -19,7 +19,7 @@ import {
   Stack,
   useColorModeValue,
 } from "@chakra-ui/react";
-import { profileServerSideProps } from "./profileServerSideProps";
+import { profileServerSideProps } from "../../utils/profileServerSideProps";
 
 export const Blob = (props: IconProps) => {
   return (
