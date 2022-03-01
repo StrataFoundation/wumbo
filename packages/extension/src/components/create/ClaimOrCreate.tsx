@@ -1,7 +1,7 @@
 import { routes, swapPath } from "@/constants/routes";
 import { useClaimFlow } from "@/utils/claim";
 import { useUserInfo } from "@/utils/userState";
-import { Box, Button, Text } from "@chakra-ui/react";
+import { Box, Button, Link, Text } from "@chakra-ui/react";
 import { useWallet } from "@solana/wallet-adapter-react";
 import {
   useErrorHandler,
@@ -15,6 +15,7 @@ import { useHistory } from "react-router-dom";
 import {
   getTwitterRegistryKey,
   getTwitterTld,
+  SITE_URL,
   useConfig,
   useQuery,
   useReverseTwitter,
@@ -93,8 +94,6 @@ export default React.memo(() => {
   } = useAsyncCallback(createCreator);
   const {
     link,
-    claim,
-    claimLoading: loading,
     linkLoading,
     error: claimError,
   } = useClaimFlow(query.get("name"));
@@ -138,12 +137,12 @@ export default React.memo(() => {
         <>
           {showCreate && or}
           <Button
+            as={Link}
+            isExternal
+            href={SITE_URL + "/app/claim?handle=" + query.get("name")}
             w="full"
             size="md"
             colorScheme="twitter"
-            onClick={claim}
-            isLoading={loading}
-            loadingText={awaitingApproval ? "Awaiting Approval" : "Claiming"}
           >
             This is me, Claim and Create my Token
           </Button>

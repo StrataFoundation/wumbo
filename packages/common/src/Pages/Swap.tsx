@@ -120,11 +120,5 @@ export const Swap = ({
     tokenBondingKey: tokenBonding!,
   });
 
-  return (
-    <SwapForm
-      isLoading={driverLoading}
-      isSubmitting={swapping}
-      {...swapProps}
-    />
-  );
+  return <SwapForm isSubmitting={swapping} {...swapProps} />;
 };
