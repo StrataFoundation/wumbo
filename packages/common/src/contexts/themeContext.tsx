@@ -5,7 +5,20 @@ import {
   theme as chakraTheme,
 } from "@chakra-ui/react";
 
-export const theme: any = extendTheme({
+const primary = {
+  50: "#E0E7FF",
+  100: "#C7D2FE",
+  200: "#A5B4FC",
+  300: "#818CF8",
+  400: "#6366F1",
+  500: "#4F46E5",
+  600: "#4338CA",
+  700: "#3730A3",
+  800: "#312E81",
+  900: "#23215e",
+};
+
+export const theme = extendTheme({
   shadows: {
     outline: "none",
   },
@@ -40,18 +53,8 @@ export const theme: any = extendTheme({
       800: "#065F46",
       900: "#064E3B",
     },
-    indigo: {
-      50: "#E0E7FF",
-      100: "#C7D2FE",
-      200: "#A5B4FC",
-      300: "#818CF8",
-      400: "#6366F1",
-      500: "#4F46E5",
-      600: "#4338CA",
-      700: "#3730A3",
-      800: "#312E81",
-      900: "#23215e",
-    },
+    indigo: primary,
+    primary,
   },
 });
 

@@ -24,6 +24,7 @@ import {
   ConnectionProvider,
   WalletProvider,
 } from "@solana/wallet-adapter-react";
+import { MarketplaceSdkProvider } from "@strata-foundation/marketplace-ui";
 
 export const ContextProviders: FC = ({ children }) => {
   const alteredWallets = useMemo(
@@ -90,7 +91,9 @@ export const ContextProviders: FC = ({ children }) => {
                   <SolPriceProvider>
                     <HistoryContextProvider>
                       <DrawerProvider>
-                        <ThemeProvider>{children}</ThemeProvider>
+                        <MarketplaceSdkProvider>
+                          <ThemeProvider>{children}</ThemeProvider>
+                        </MarketplaceSdkProvider>
                       </DrawerProvider>
                     </HistoryContextProvider>
                   </SolPriceProvider>

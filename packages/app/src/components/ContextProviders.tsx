@@ -19,6 +19,7 @@ import {
   ConnectionProvider,
   WalletProvider,
 } from "@solana/wallet-adapter-react";
+import { MarketplaceSdkProvider } from "@strata-foundation/marketplace-ui";
 
 export const ContextProviders: React.FC = ({ children }) => {
   const wallets = useMemo(() => WALLET_PROVIDERS, []);
@@ -67,7 +68,11 @@ export const ContextProviders: React.FC = ({ children }) => {
                     onError={console.error}
                     autoConnect
                   >
-                    <StrataSdksProvider>{children}</StrataSdksProvider>
+                    <StrataSdksProvider>
+                      <MarketplaceSdkProvider>
+                        {children}
+                      </MarketplaceSdkProvider>
+                    </StrataSdksProvider>
                   </WalletProvider>
                 </SolPriceProvider>
               </ThemeProvider>
