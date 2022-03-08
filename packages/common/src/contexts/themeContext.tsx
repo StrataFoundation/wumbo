@@ -4,6 +4,7 @@ import {
   ChakraProvider,
   theme as chakraTheme,
 } from "@chakra-ui/react";
+import { Dict } from "@chakra-ui/react/node_modules/@chakra-ui/utils";
 
 const primary = {
   50: "#E0E7FF",
@@ -18,7 +19,7 @@ const primary = {
   900: "#23215e",
 };
 
-export const theme = extendTheme({
+export const theme: Dict<any> = extendTheme({
   shadows: {
     outline: "none",
   },
