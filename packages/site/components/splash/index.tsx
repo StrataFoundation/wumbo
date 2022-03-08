@@ -4,5 +4,6 @@ export { XRay } from "./XRay";
 export { DownloadRow } from "./DownloadRow";
 export { NFT } from "./NFT";
 export { Tutorial } from "./Tutorial";
+export { Investors } from "./Investors";
 export { Support } from "./Support";
 export { Team } from "./Team";

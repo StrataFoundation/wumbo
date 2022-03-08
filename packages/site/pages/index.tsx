@@ -14,6 +14,7 @@ import {
   Support,
   Team,
   DownloadRow,
+  Investors,
 } from "@/components";
 
 const Home: NextPage = () => {
@@ -46,6 +47,7 @@ const Home: NextPage = () => {
         <DownloadRow />
         <NFT />
         <Tutorial />
+        {/* <Investors /> */}
         <Support />
         <DownloadRow />
         <Team />

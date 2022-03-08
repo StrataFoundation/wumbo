@@ -1,9 +1,7 @@
 import type { AppProps } from "next/app";
 import { FC } from "react";
 import "../utils/bufferFill";
-import { Providers } from "@/components/Providers";
-import { Header } from "@/components/Header";
-import { Footer } from "@/components/Footer";
+import { Providers, Header, Footer } from "@/components";
 
 // Use require instead of import since order matters
 require("../styles/globals.css");
