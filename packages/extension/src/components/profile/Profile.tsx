@@ -4,6 +4,8 @@ import {
   sendSearchPath,
   swapPath,
   viewProfilePath,
+  bountyPath,
+  createBountyPath,
 } from "@/constants/routes";
 import { useClaimFlow } from "@/utils/claim";
 import { Box } from "@chakra-ui/react";
@@ -11,7 +13,6 @@ import { useWallet } from "@solana/wallet-adapter-react";
 import { PublicKey } from "@solana/web3.js";
 import {
   useMetaplexTokenMetadata,
-  usePrimaryClaimedTokenRef,
   usePublicKey,
   useTokenBondingFromMint,
   useTokenRefForName,
@@ -82,6 +83,8 @@ export const Profile = () => {
       />
       <WumboDrawer.Content>
         <CommonProfile
+          onBountyCreateClick={(mint) => history.push(createBountyPath(mint))}
+          onBountyClick={(bountyMint) => history.push(bountyPath(bountyMint))}
           sendPath={sendSearchPath(
             tokenRef?.owner || twitterWallet || undefined
           )}

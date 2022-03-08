@@ -25,6 +25,9 @@ export interface IRoutes {
   topTokens: Route;
   wumNetWorth: Route;
   viewNft: Route;
+  viewBounty: Route;
+  editBounty: Route;
+  createBounty: Route;
   tagNft: Route;
   sendSearch: Route;
   send: Route;
@@ -45,6 +48,21 @@ export function sendSearchPath(recipient?: PublicKey): string {
 export const viewProfilePath = (mintKey: PublicKey): string =>
   replaceAll(routes.viewProfile.path, {
     ":mint": mintKey.toBase58(),
+  });
+
+export const editBountyPath = (mintKey: PublicKey): string =>
+  replaceAll(routes.editBounty.path, {
+    ":mint": mintKey.toBase58(),
+  });
+
+export const createBountyPath = (mintKey: PublicKey): string =>
+  replaceAll(routes.createBounty.path, {
+    ":mint": mintKey.toBase58(),
+  });
+
+export const bountyPath = (mint: PublicKey): string =>
+  replaceAll(routes.viewBounty.path, {
+    ":mint": mint.toBase58(),
   });
 
 export const nftPath = (mint: PublicKey): string =>
@@ -135,6 +153,9 @@ export const routes: IRoutes = {
   },
   viewNft: { path: "/nft/view/:mint", Icon: null, isDrawerNav: false },
   tagNft: { path: "/nft/tag/:mint", Icon: null, isDrawerNav: false },
+  viewBounty: { path: "/bounty/view/:mint", Icon: null, isDrawerNav: false },
+  createBounty: { path: "/bounty/new/:mint", Icon: null, isDrawerNav: false },
+  editBounty: { path: "/bounty/:mint/edit", Icon: null, isDrawerNav: false },
   sendSearch: { path: "/send", Icon: null, isDrawerNav: false },
   send: { path: "/send/:mint", Icon: null, isDrawerNav: false },
 };

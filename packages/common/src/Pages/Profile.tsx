@@ -60,11 +60,14 @@ import { Spinner } from "../Spinner";
 import { StatCard } from "../StatCard";
 import { useQuery, useReverseTwitter, useTwitterOwner } from "../utils";
 import { ITokenWithMeta } from "@strata-foundation/spl-utils";
+import { Bounties } from "../Bounty/Bounties";
 
 interface ISocialTokenTabsProps {
   wallet: PublicKey | undefined;
   tokenBondingKey: PublicKey;
   onAccountClick?: (mintKey?: PublicKey, handle?: string) => void;
+  onBountyClick?: (mintKey: PublicKey) => void;
+  onBountyCreateClick?: (mintKey: PublicKey) => void;
   getNftLink: (t: ITokenWithMetaAndAccount) => string;
 }
 
@@ -78,6 +81,8 @@ interface IProfileProps
   collectivePath: string | null;
   onTradeClick?: () => void;
   useClaimFlow: (handle: string | undefined | null) => IClaimFlowOutput;
+  onBountyClick?: (mintKey: PublicKey) => void;
+  onBountyCreateClick?: (mintKey: PublicKey) => void;
 }
 
 export interface IClaimFlowOutput {
@@ -133,6 +138,8 @@ export const Profile = React.memo(
     collectivePath,
     sendPath,
     createPath,
+    onBountyClick,
+    onBountyCreateClick,
     relinkPath,
   }: IProfileProps) => {
     const { publicKey } = useWallet();
@@ -491,6 +498,8 @@ export const Profile = React.memo(
           <div id="tabs" />
           {tokenRef && tokenBonding ? (
             <SocialTokenTabs
+              onBountyCreateClick={onBountyCreateClick}
+              onBountyClick={onBountyClick}
               wallet={ownerWalletKey}
               onAccountClick={onAccountClick}
               tokenBondingKey={tokenBonding.publicKey}
@@ -512,9 +521,10 @@ function SocialTokenTabs({
   tokenBondingKey,
   onAccountClick,
   getNftLink,
+  onBountyClick,
+  onBountyCreateClick,
 }: ISocialTokenTabsProps) {
   const { info: tokenRef, loading } = useTokenRefFromBonding(tokenBondingKey);
-  const ownerWalletKey = wallet || (tokenRef?.owner as PublicKey | undefined);
 
   const {
     result: tokenAccounts,
@@ -522,23 +532,18 @@ function SocialTokenTabs({
     error,
   } = useWalletTokenAccounts(wallet);
   const { handleErrors } = useErrorHandler();
-
-  const isTrophy = (t: ITokenWithMetaAndAccount): boolean => {
-    return Boolean(
-      t.metadata?.data?.creators?.some(
-        // @ts-ignore
-        (c) =>
-          c.address == TROPHY_CREATOR.toBase58() &&
-          (t.data?.attributes || []).some(
-            (attr) => attr.trait_type == "is_trophy" && attr.value == "true"
-          )
-      )
-    );
-  };
+  handleErrors(error);
 
   return (
     <Tabs isFitted w="full">
       <TabList>
+        <Tab
+          color="gray.300"
+          borderColor="gray.300"
+          _selected={{ color: "indigo.500", borderColor: "indigo.500" }}
+        >
+          Bounties
+        </Tab>
         <Tab
           color="gray.300"
           borderColor="gray.300"
@@ -553,16 +558,18 @@ function SocialTokenTabs({
         >
           Collectibles
         </Tab>
-        <Tab
-          color="gray.300"
-          borderColor="gray.300"
-          _selected={{ color: "indigo.500", borderColor: "indigo.500" }}
-        >
-          Trophies
-        </Tab>
       </TabList>
 
       <TabPanels>
+        <TabPanel paddingX={0}>
+          <Bounties
+            onCreateClick={() =>
+              onBountyCreateClick && onBountyCreateClick(tokenRef!.mint)
+            }
+            mintKey={tokenRef?.mint}
+            onBountyClick={onBountyClick || (() => {})}
+          />
+        </TabPanel>
         <TabPanel paddingX={0}>
           <TokenLeaderboard
             onAccountClick={onAccountClick}
@@ -573,15 +580,6 @@ function SocialTokenTabs({
           <NftListRaw
             loading={loadingCollectibles}
             tokenAccounts={tokenAccounts}
-            filter={(t: ITokenWithMeta) => !isTrophy(t)}
-            getLink={getNftLink}
-          />
-        </TabPanel>
-        <TabPanel paddingX={0}>
-          <NftListRaw
-            loading={loadingCollectibles}
-            tokenAccounts={tokenAccounts}
-            filter={(t: ITokenWithMeta) => isTrophy(t)}
             getLink={getNftLink}
           />
         </TabPanel>

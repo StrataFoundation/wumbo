@@ -18,3 +18,4 @@ export * from "./Nft";
 export * from "./PriceChangeTicker";
 export * from "./PriceButton";
 export * from "./Relink";
+export * from "./Bounty";

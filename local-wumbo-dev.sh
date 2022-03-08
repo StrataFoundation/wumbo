@@ -5,15 +5,6 @@ anchor localnet &
 localnet_pid=$!
 popd
 
-
-pushd ../strata-data-pipelines
-docker-compose up -d
-sleep 15
-pushd strata-compose
-docker-compose up -d
-popd
-popd
-
 sleep 15
 solana transfer -u http://127.0.0.1:8899 wwm872RcvN7XwNZBjXLSHfAYrFUATKgkV9v3BewHj5M 10  --allow-unfunded-recipient
 solana transfer -u http://127.0.0.1:8899 GibysS6yTqHWw4AZap416Xs26rAo9nV9HTRviKuutytp 10  --allow-unfunded-recipient

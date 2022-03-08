@@ -1,5 +1,18 @@
 import { extendTheme } from "@chakra-ui/react";
 
+const primary = {
+  50: "#E0E7FF",
+  100: "#C7D2FE",
+  200: "#A5B4FC",
+  300: "#818CF8",
+  400: "#6366F1",
+  500: "#4F46E5",
+  600: "#4338CA",
+  700: "#3730A3",
+  800: "#312E81",
+  900: "#23215e",
+};
+
 export const theme = extendTheme({
   colors: {
     gray: {
@@ -26,17 +39,7 @@ export const theme = extendTheme({
       800: "#065F46",
       900: "#064E3B",
     },
-    indigo: {
-      50: "#E0E7FF",
-      100: "#C7D2FE",
-      200: "#A5B4FC",
-      300: "#818CF8",
-      400: "#6366F1",
-      500: "#4F46E5",
-      600: "#4338CA",
-      700: "#3730A3",
-      800: "#312E81",
-      900: "#312E81",
-    },
+    indigo: primary,
+    primary,
   },
 });

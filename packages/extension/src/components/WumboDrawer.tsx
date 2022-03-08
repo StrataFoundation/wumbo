@@ -30,6 +30,7 @@ import {
   OPEN_BONDING,
   useReverseTwitter,
   SITE_URL,
+  APP_URL,
 } from "wumbo-common";
 import { useHistoryList } from "@/utils/history";
 import { useWallet } from "@solana/wallet-adapter-react";
@@ -168,7 +169,7 @@ WumboDrawer.Header = (props: HeaderProps) => {
           color="gray.500"
           _hover={{ color: "gray.600", cursor: "pointer" }}
           isExternal
-          href={`${SITE_URL}/app${currentUri}`}
+          href={mapUrl(currentUri)}
         >
           <Icon as={RiExternalLinkLine} w={5} h={5} />
         </ChakraLink>
@@ -324,3 +325,15 @@ WumboDrawer.Loading = () => (
     </WumboDrawer.Content>
   </Fragment>
 );
+
+function mapUrl(currentUri: string): string | undefined {
+  if (currentUri.startsWith("/bounty/view")) {
+    return `${SITE_URL}/${currentUri.replace("/bounty/view", "/bounties")}`;
+  } else if (currentUri.startsWith("/profile/view")) {
+    return `${SITE_URL}/${currentUri.replace("/profile/view", "/profile")}`;
+  } else if (currentUri.startsWith("/profile")) {
+    return `${SITE_URL}/${currentUri.replace("?name=", "/")}`;
+  }
+  
+  return `${APP_URL}/${currentUri}`;
+}
