@@ -104,6 +104,7 @@ module.exports = {
     new webpack.EnvironmentPlugin([
       "REACT_APP_WUMBO_TRANSACTION_FEE",
       "REACT_APP_SITE_URL",
+      "REACT_APP_APP_URL",
       "REACT_APP_TROPHY_CREATOR",
       "REACT_APP_SOLANA_API_URL",
       "REACT_APP_NFT_VERIFIER_URL",

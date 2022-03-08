@@ -1,5 +1,4 @@
 import React, { FC, useCallback } from "react";
-import { ConnectionProvider } from "@solana/wallet-adapter-react";
 import {
   extendTheme,
   ChakraProvider,
@@ -11,7 +10,21 @@ import {
   StrataSdksProvider,
 } from "@strata-foundation/react";
 import { DEFAULT_ENDPOINT } from "@/constants";
+import { WalletModalProvider } from "@solana/wallet-adapter-react-ui";
+import { Wallet } from "./Wallet";
 
+const primary = {
+  50: "#E0E7FF",
+  100: "#C7D2FE",
+  200: "#A5B4FC",
+  300: "#818CF8",
+  400: "#6366F1",
+  500: "#4F46E5",
+  600: "#4338CA",
+  700: "#3730A3",
+  800: "#312E81",
+  900: "#23215e",
+};
 export const theme = extendTheme({
   shadows: {
     outline: "none",
@@ -47,18 +60,8 @@ export const theme = extendTheme({
       800: "#065F46",
       900: "#064E3B",
     },
-    indigo: {
-      50: "#E0E7FF",
-      100: "#C7D2FE",
-      200: "#A5B4FC",
-      300: "#818CF8",
-      400: "#6366F1",
-      500: "#4F46E5",
-      600: "#4338CA",
-      700: "#3730A3",
-      800: "#312E81",
-      900: "#23215e",
-    },
+    indigo: primary,
+    primary
   },
 });
 
@@ -89,13 +92,17 @@ export const Providers: FC = ({ children }) => {
 
   return (
     <ThemeProvider>
-      <ErrorHandlerProvider onError={onError}>
-        <ConnectionProvider endpoint={DEFAULT_ENDPOINT}>
-          <StrataSdksProvider>
-            <AccountProvider commitment="confirmed">{children}</AccountProvider>
-          </StrataSdksProvider>
-        </ConnectionProvider>
-      </ErrorHandlerProvider>
+      <Wallet cluster={DEFAULT_ENDPOINT}>
+        <ErrorHandlerProvider onError={onError}>
+            <StrataSdksProvider>
+              <WalletModalProvider>
+                <AccountProvider commitment="confirmed">
+                  {children}
+                </AccountProvider>
+              </WalletModalProvider>
+            </StrataSdksProvider>
+        </ErrorHandlerProvider>
+      </Wallet>
     </ThemeProvider>
   );
 };

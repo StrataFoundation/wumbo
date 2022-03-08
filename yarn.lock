@@ -4654,6 +4654,22 @@
     "@solana/wallet-adapter-base" "^0.9.3"
     "@solana/web3.js" "^1.20.0"
 
+"@solana/wallet-adapter-glow@^0.1.0":
+  version "0.1.0"
+  resolved "https://registry.yarnpkg.com/@solana/wallet-adapter-glow/-/wallet-adapter-glow-0.1.0.tgz#86c97ada8b197bcdf9efe831bef121b399ab4e07"
+  integrity sha512-gmML6XuHI/oIos8JpLQF21+xrNStaQrdS2wurQhOgH20V6AVczAH+8+GfmD4bVJ6MRo+h981N6/K0I5NuEbVOg==
+  dependencies:
+    "@solana/wallet-adapter-base" "^0.9.3"
+    "@solana/web3.js" "^1.20.0"
+
+"@solana/wallet-adapter-huobi@^0.1.0":
+  version "0.1.0"
+  resolved "https://registry.yarnpkg.com/@solana/wallet-adapter-huobi/-/wallet-adapter-huobi-0.1.0.tgz#aa5158e9b2d79e753c2da55f26609777eb4651c6"
+  integrity sha512-VdJT/eSO1qhVYODV+BYEptqlZoy3YhZHJsP0+4EdrBcyFqg8MHu1+kZujhMThccWoZmpl+CcetnYHuxz7EYZdg==
+  dependencies:
+    "@solana/wallet-adapter-base" "^0.9.4"
+    "@solana/web3.js" "^1.20.0"
+
 "@solana/wallet-adapter-ledger@^0.9.1":
   version "0.9.1"
   resolved "https://registry.yarnpkg.com/@solana/wallet-adapter-ledger/-/wallet-adapter-ledger-0.9.1.tgz#7bc5746d46dab2278b849f948b19a64e2281edde"
@@ -4708,7 +4724,7 @@
     "@solana/wallet-adapter-base" "^0.9.1"
     "@solana/web3.js" "^1.20.0"
 
-"@solana/wallet-adapter-react-ui@^0.9.1":
+"@solana/wallet-adapter-react-ui@^0.9.1", "@solana/wallet-adapter-react-ui@^0.9.5":
   version "0.9.5"
   resolved "https://registry.yarnpkg.com/@solana/wallet-adapter-react-ui/-/wallet-adapter-react-ui-0.9.5.tgz#ccd3a618f8485c8e7313cc53ec4fdbedf3804512"
   integrity sha512-+869B9F453K9B47FyGEuoBRSziDTu1hlWGAl2KtF3KrzxnBiu97i+GMRRfT92CQQI1pYHA/FIhIfOHwOb7b6cw==
@@ -4941,6 +4957,31 @@
     "@solana/wallet-adapter-clover" "^0.4.2"
     "@solana/wallet-adapter-coin98" "^0.5.2"
     "@solana/wallet-adapter-coinhub" "^0.3.2"
+    "@solana/wallet-adapter-ledger" "^0.9.8"
+    "@solana/wallet-adapter-mathwallet" "^0.9.2"
+    "@solana/wallet-adapter-phantom" "^0.9.2"
+    "@solana/wallet-adapter-safepal" "^0.5.2"
+    "@solana/wallet-adapter-slope" "^0.5.2"
+    "@solana/wallet-adapter-solflare" "^0.6.3"
+    "@solana/wallet-adapter-sollet" "^0.11.0"
+    "@solana/wallet-adapter-solong" "^0.9.2"
+    "@solana/wallet-adapter-tokenpocket" "^0.4.2"
+    "@solana/wallet-adapter-torus" "^0.11.10"
+
+"@solana/wallet-adapter-wallets@^0.15.5":
+  version "0.15.5"
+  resolved "https://registry.yarnpkg.com/@solana/wallet-adapter-wallets/-/wallet-adapter-wallets-0.15.5.tgz#a4f0cb38430705d89b45872a0b4883c7ea32aa9a"
+  integrity sha512-wDy3AhfoXemIPubKasQm/yhWyA0/2mjLJbQpn9jQ/JcxSEwSeUjSrebNE3tYMZ9Pi94ShLmtN/bEHSwo7nCoug==
+  dependencies:
+    "@solana/wallet-adapter-base" "^0.9.4"
+    "@solana/wallet-adapter-bitkeep" "^0.3.2"
+    "@solana/wallet-adapter-bitpie" "^0.5.2"
+    "@solana/wallet-adapter-blocto" "^0.5.2"
+    "@solana/wallet-adapter-clover" "^0.4.2"
+    "@solana/wallet-adapter-coin98" "^0.5.2"
+    "@solana/wallet-adapter-coinhub" "^0.3.2"
+    "@solana/wallet-adapter-glow" "^0.1.0"
+    "@solana/wallet-adapter-huobi" "^0.1.0"
     "@solana/wallet-adapter-ledger" "^0.9.8"
     "@solana/wallet-adapter-mathwallet" "^0.9.2"
     "@solana/wallet-adapter-phantom" "^0.9.2"

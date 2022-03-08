@@ -7,8 +7,16 @@ import {
   Link,
   LinkProps,
   Icon,
+  Button,
+  HStack,
 } from "@chakra-ui/react";
-import { LandingLayout, DownloadButton, WumboIcon } from "./";
+import {
+  LandingLayout,
+  DownloadButton,
+  WumboIcon,
+  WalletModalButton,
+} from "./";
+import { useWallet } from "@solana/wallet-adapter-react";
 
 interface IMenuItemProps extends LinkProps {
   isLast?: boolean;
@@ -55,7 +63,9 @@ const MenuIcon = () => (
   </svg>
 );
 
-interface IHeaderProps extends FlexProps {}
+interface IHeaderProps extends FlexProps {
+  showWallet?: boolean;
+}
 
 export const Header: React.FC<IHeaderProps> = (props) => {
   const [show, setShow] = useState(false);
@@ -116,6 +126,9 @@ export const Header: React.FC<IHeaderProps> = (props) => {
                   }}
                 />
               </MenuItem>
+              { props.showWallet && <HStack spacing={2} ml={4}>
+                <WalletModalButton />
+              </HStack> }
             </Flex>
           </Box>
         </Flex>

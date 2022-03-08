@@ -4,7 +4,7 @@ import Head from "next/head";
 import { Box } from "@chakra-ui/react";
 
 // Splash sections
-import { Tutorial as TutorialContent } from "@/components";
+import { Header, Tutorial as TutorialContent } from "@/components";
 
 const Tutorial: NextPage = () => {
   return (
@@ -17,6 +17,7 @@ const Tutorial: NextPage = () => {
         />
         <link rel="icon" href="/favicon.svg" />
       </Head>
+      <Header />
 
       <Box>
         <TutorialContent />

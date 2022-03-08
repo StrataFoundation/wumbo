@@ -14,7 +14,7 @@ import {
   Support,
   Team,
   DownloadRow,
-  Investors,
+  Header,
 } from "@/components";
 
 const Home: NextPage = () => {
@@ -39,6 +39,8 @@ const Home: NextPage = () => {
         <meta name="twitter:description" content={seoDescription} />
         <meta name="twitter:image" content={`${SITE_URL}/seo-splash.png`} />
       </Head>
+
+      <Header />
 
       <Box>
         <Hero />

@@ -5,3 +5,4 @@ export { Header } from "./Header";
 export { Footer } from "./Footer";
 export { DownloadButton } from "./DownloadButton";
 export * from "./splash";
+export * from "./WalletModalButton";
