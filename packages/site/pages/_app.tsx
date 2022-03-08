@@ -5,10 +5,11 @@ import { Providers, Header, Footer } from "@/components";
 
 // Use require instead of import since order matters
 require("../styles/globals.css");
+require("@solana/wallet-adapter-react-ui/styles.css");
+
 
 const App: FC<AppProps> = ({ Component, pageProps }) => (
   <Providers>
-    <Header />
     <Component {...pageProps} />
     <Footer />
   </Providers>

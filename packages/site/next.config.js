@@ -24,6 +24,13 @@ module.exports = {
     config.resolve.alias = {
       ...config.resolve.alias,
       react: path.resolve("../../node_modules/react"),
+      "@solana/wallet-adapter-react": path.resolve(
+        "../../node_modules/@solana/wallet-adapter-react"
+      ),
+      "@toruslabs/solana-embed": path.resolve(
+        "../../node_modules/@toruslabs/solana-embed"
+      ),
+      "@chakra-ui/react": path.resolve("../../node_modules/@chakra-ui/react"),
       // For local dev with linked packages:
       ...(process.env.NEXT_PUBLIC_LINKED_DEV === "true"
         ? {

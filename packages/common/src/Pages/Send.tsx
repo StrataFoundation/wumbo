@@ -101,7 +101,6 @@ export const Send = ({ finishRedirectUrl }: { finishRedirectUrl: string }) => {
   const recipientStr = watch("recipient");
   const amount = watch("amount");
   const recipient = usePublicKey(recipientStr);
-  console.log(recipientRaw, recipientStr, recipient);
   const {
     associatedAccount: ata,
     loading: ataLoading,

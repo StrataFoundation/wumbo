@@ -1,35 +1,32 @@
-import React from "react";
-import {
-  Switch,
-  Route,
-  Redirect,
-  useHistory,
-  useLocation,
-} from "react-router-dom";
 import { Flex } from "@chakra-ui/react";
-import { Header } from "./Header";
-import { Workspace } from "./Workspace";
-import { Toaster } from "react-hot-toast";
-import { profilePath, Routes } from "../constants/routes";
-import { ClaimRoute } from "./Claim/Claim";
-import { OptOutRoute } from "./Claim/OptOut";
-import { ClaimedOptOutRoute } from "./Claim/ClaimedOptOut";
-import { EditProfileRoute } from "./Profile/Edit/EditProfile";
-import ManageWallet from "./Wallet/ManageWallet";
-import Wallet from "./Wallet/Wallet";
-import Send from "./Wallet/Send";
-import SendSearch from "./Wallet/SendSearch";
-import { ViewProfileRoute } from "./Profile/View/ViewProfile";
-import { ViewNftRoute } from "./Nft/View/ViewNft";
-import { SwapRoute } from "./Swap/Swap";
-import { BurnBetaRoute } from "./BurnBeta/BurnBetaRoute";
-import { PrototypeRoute } from "./Prototype";
-import { ContextProviders } from "./ContextProviders";
-import { RelinkRoute } from "./Relink/Relink";
-import { WalletSelectModal } from "./modals/WalletSelectModal";
-import { SwapConfirmationRoute } from "./Swap/SwapConfirmation";
 import { PublicKey } from "@solana/web3.js";
 import { SplTokenCollective } from "@strata-foundation/spl-token-collective";
+import React from "react";
+import { Toaster } from "react-hot-toast";
+import { Redirect, Route, Switch, useLocation } from "react-router-dom";
+import { profilePath, Routes } from "../constants/routes";
+import { CreateBountyRoute } from "./Bounty/CreateBountyRoute";
+import { EditBountyRoute } from "./Bounty/EditBountyRoute";
+import { ViewBountyRoute } from "./Bounty/ViewBountyRoute";
+import { BurnBetaRoute } from "./BurnBeta/BurnBetaRoute";
+import { ClaimRoute } from "./Claim/Claim";
+import { ClaimedOptOutRoute } from "./Claim/ClaimedOptOut";
+import { OptOutRoute } from "./Claim/OptOut";
+import { ContextProviders } from "./ContextProviders";
+import { Header } from "./Header";
+import { WalletSelectModal } from "./modals/WalletSelectModal";
+import { ViewNftRoute } from "./Nft/View/ViewNft";
+import { EditProfileRoute } from "./Profile/Edit/EditProfile";
+import { ViewProfileRoute } from "./Profile/View/ViewProfile";
+import { PrototypeRoute } from "./Prototype";
+import { RelinkRoute } from "./Relink/Relink";
+import { SwapRoute } from "./Swap/Swap";
+import { SwapConfirmationRoute } from "./Swap/SwapConfirmation";
+import ManageWallet from "./Wallet/ManageWallet";
+import Send from "./Wallet/Send";
+import SendSearch from "./Wallet/SendSearch";
+import Wallet from "./Wallet/Wallet";
+import { Workspace } from "./Workspace";
 
 const LegacyAppRouteRedirect: React.FC = () => {
   const { pathname, search } = useLocation();
@@ -56,6 +53,12 @@ export const App: React.FC = () => (
           <Route path={Routes.manageWallet.path} component={ManageWallet} />
           <Route path={Routes.viewProfile.path} component={ViewProfileRoute} />
           <Route path={Routes.viewNft.path} component={ViewNftRoute} />
+          <Route path={Routes.viewBounty.path} component={ViewBountyRoute} />
+          <Route
+            path={Routes.createBounty.path}
+            component={CreateBountyRoute}
+          />
+          <Route path={Routes.editBounty.path} component={EditBountyRoute} />
           <Route
             path={Routes.profile.path}
             exact

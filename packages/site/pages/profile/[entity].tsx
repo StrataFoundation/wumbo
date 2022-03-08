@@ -21,6 +21,7 @@ import {
 } from "@chakra-ui/react";
 import { profileServerSideProps } from "../../utils/profileServerSideProps";
 import { APP_URL } from "@/constants";
+import { Header } from "@/components";
 
 export const Blob = (props: IconProps) => {
   return (
@@ -79,6 +80,8 @@ const ProfileEntityMapper: NextPage = ({
         <meta name="twitter:description" content={description} />
         <meta name="twitter:image" content={image} />
       </Head>
+
+      <Header />
 
       <Container maxW={"7xl"}>
         <Stack

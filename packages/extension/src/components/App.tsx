@@ -1,27 +1,25 @@
+import { routes } from "@/constants/routes";
 import React, { FC } from "react";
-import { MemoryRouter as Router, Switch, Route } from "react-router-dom";
-
-import { routes, paths } from "@/constants/routes";
+import { MemoryRouter as Router, Route, Switch } from "react-router-dom";
+import { CreateBounty, EditBounty, ViewBounty } from "./bounty";
+import Claim from "./claim/Claim";
 import { ContextProviders } from "./ContextProviders";
-import { WumboDrawer } from "./WumboDrawer";
-
-import { Twitter } from "./twitter/Twitter";
-import { NftEnhancer } from "./nft/NftEnhancer";
-
 import { Create } from "./create/Create";
 import { MintConfirmationRoute } from "./create/MintConfirmation";
+import { NftEnhancer } from "./nft/NftEnhancer";
+import { TagNft } from "./nft/TagNft";
+import { ViewNft } from "./nft/ViewNft";
+import { EditProfileRoute } from "./profile/EditProfile";
+import { Profile } from "./profile/Profile";
+import { RelinkRoute } from "./profile/Relink";
 import { SwapRoute } from "./swap/Swap";
 import { SwapConfirmationRoute } from "./swap/SwapConfirmation";
-import { Wallet } from "./wallet/Wallet";
+import { Twitter } from "./twitter/Twitter";
 import { ManageWallet } from "./wallet/ManageWallet";
-import { ViewNft } from "./nft/ViewNft";
-import { TagNft } from "./nft/TagNft";
-import { Profile } from "./profile/Profile";
-import Claim from "./claim/Claim";
-import { EditProfileRoute } from "./profile/EditProfile";
 import { Send } from "./wallet/Send";
 import { SendSearch } from "./wallet/SendSearch";
-import { RelinkRoute } from "./profile/Relink";
+import { Wallet } from "./wallet/Wallet";
+import { WumboDrawer } from "./WumboDrawer";
 
 const App: FC = () => (
   <Router initialEntries={[routes.myTokens.path]} initialIndex={0}>
@@ -49,6 +47,9 @@ const App: FC = () => (
           <Route path={routes.viewNft.path} component={ViewNft} />
           <Route path={routes.tagNft.path} component={TagNft} />
           <Route path={routes.editProfile.path} component={EditProfileRoute} />
+          <Route path={routes.viewBounty.path} component={ViewBounty} />
+          <Route path={routes.editBounty.path} component={EditBounty} />
+          <Route path={routes.createBounty.path} component={CreateBounty} />
           <Route path={routes.profile.path} exact component={Profile} />
           <Route path={routes.sendSearch.path} exact component={SendSearch} />
           <Route path={routes.send.path} component={Send} />

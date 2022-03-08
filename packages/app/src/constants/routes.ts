@@ -12,6 +12,9 @@ interface IRoutes {
   claimedOptOut: Route;
   viewProfile: Route;
   viewNft: Route;
+  viewBounty: Route;
+  editBounty: Route;
+  createBounty: Route;
   profile: Route;
   editProfile: Route;
   manageWallet: Route;
@@ -47,7 +50,25 @@ export const Routes: IRoutes = {
   swapConfirmation: { path: "/swap/confirmation" },
   prototype: { path: "/prototype" },
   burnBeta: { path: "/burn-beta" },
+  viewBounty: { path: "/bounty/view/:mint" },
+  createBounty: { path: "/bounty/new/:mint" },
+  editBounty: { path: "/bounty/:mint/edit" },
 };
+
+export const editBountyPath = (mintKey: PublicKey): string =>
+  replaceAll(Routes.editBounty.path, {
+    ":mint": mintKey.toBase58(),
+  });
+
+export const createBountyPath = (mintKey: PublicKey): string =>
+  replaceAll(Routes.createBounty.path, {
+    ":mint": mintKey.toBase58(),
+  });
+
+export const bountyPath = (mint: PublicKey): string =>
+  replaceAll(Routes.viewBounty.path, {
+    ":mint": mint.toBase58(),
+  });
 
 export const sendPath = (mint: PublicKey, recipient?: PublicKey): string =>
   Routes.send.path.replace(":mint", mint.toBase58()) +

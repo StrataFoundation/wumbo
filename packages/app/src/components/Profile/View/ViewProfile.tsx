@@ -17,6 +17,8 @@ import {
 } from "wumbo-common";
 import {
   Routes,
+  bountyPath,
+  createBountyPath,
   nftPath,
   profilePath,
   sendSearchPath,
@@ -62,6 +64,8 @@ export const ViewProfileRoute: React.FC = () => {
     <AppContainer>
       <Profile
         relinkPath={Routes.relink.path}
+        onBountyCreateClick={(mint) => history.push(createBountyPath(mint))}
+        onBountyClick={(bountyMint) => history.push(bountyPath(bountyMint))}
         sendPath={sendSearchPath(tokenRef?.owner || twitterWallet || undefined)}
         collectivePath={
           tokenBonding ? profilePath(tokenBonding.baseMint) : null

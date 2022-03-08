@@ -7,6 +7,7 @@ export const WUMBO_TRANSACTION_FEE: number = Number(
 );
 export const DEFAULT_COMMITMENT = "processed";
 export const SITE_URL = process.env.REACT_APP_SITE_URL;
+export const APP_URL = process.env.REACT_APP_APP_URL;
 export const ARWEAVE_UPLOAD_URL = process.env.REACT_APP_ARWEAVE_UPLOAD_URL!;
 export const STRATA_API_URL = process.env.REACT_APP_STRATA_API_URL!;
 export const WUMBO_IDENTITY_SERVICE_URL =
