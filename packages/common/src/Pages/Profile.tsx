@@ -61,7 +61,6 @@ import { StatCard } from "../StatCard";
 import { useQuery, useReverseTwitter, useTwitterOwner } from "../utils";
 import { ITokenWithMeta } from "@strata-foundation/spl-utils";
 import { Bounties } from "../Bounty/Bounties";
-import { numberWithCommas } from "@strata-foundation/marketplace-ui";
 
 interface ISocialTokenTabsProps {
   wallet: PublicKey | undefined;

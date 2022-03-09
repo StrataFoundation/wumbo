@@ -334,6 +334,6 @@ function mapUrl(currentUri: string): string | undefined {
   } else if (currentUri.startsWith("/profile")) {
     return `${SITE_URL}/${currentUri.replace("?name=", "/")}`;
   }
-
+  
   return `${APP_URL}/${currentUri}`;
 }
