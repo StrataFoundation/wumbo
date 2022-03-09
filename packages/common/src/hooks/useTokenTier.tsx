@@ -2,7 +2,7 @@ import { NATIVE_MINT } from "@solana/spl-token";
 import { PublicKey } from "@solana/web3.js";
 import {
   useBondingPricing,
-  usePriceInUsd,
+  useUsdLocked,
   useSolPrice,
 } from "@strata-foundation/react";
 
@@ -31,9 +31,7 @@ export function getTierGradient(
 export function useTokenTier(
   tokenBonding: PublicKey | undefined | null
 ): TokenTier | undefined {
-  const { pricing } = useBondingPricing(tokenBonding);
-  const fiatPrice = useSolPrice();
-  const locked = (pricing?.locked(NATIVE_MINT) || 0) * (fiatPrice || 0);
+  const locked = useUsdLocked(tokenBonding || undefined);
 
   const found = Object.entries(TierCutoffs)
     .sort(([tier, value], [tier2, value2]) => (value2 > value ? 1 : -1))
