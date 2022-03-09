@@ -94,6 +94,9 @@ export const Claim1 = React.memo<IClaim1Props>(
     const tokenExists = !isLoading && tokenRef && tokenBonding;
     const isClaimable = (tokenExists && !tokenRef?.isClaimed) || !tokenExists;
 
+    console.log("isLoading tokenExists", isLoading, tokenExists);
+    console.log("tld", tld?.toBase58());
+
     return (
       <VStack w="full" spacing={8} align="left">
         <div>
