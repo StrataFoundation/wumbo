@@ -1,16 +1,14 @@
-import React, { useMemo } from "react";
-import { PublicKey } from "@solana/web3.js";
 import { gql, useApolloClient } from "@apollo/client";
+import { PublicKey } from "@solana/web3.js";
+import { numberWithCommas } from "@strata-foundation/marketplace-ui";
 import {
   useBondingPricing,
   usePriceInUsd,
-  useTokenRefFromBonding,
   useTokenBonding,
-  useTokenBondingFromMint,
 } from "@strata-foundation/react";
-import { WumboUserLeaderboard } from "./WumboUserLeaderboard";
+import React, { useMemo } from "react";
 import { UserLeaderboardElement } from "./UserLeaderboardElement";
-import { NATIVE_MINT } from "@solana/spl-token";
+import { WumboUserLeaderboard } from "./WumboUserLeaderboard";
 
 const GET_TOP_TOKENS = gql`
   query GetTopTokens($baseMint: String!, $startRank: Int!, $stopRank: Int!) {
@@ -33,13 +31,18 @@ const Element = React.memo(
     tokenBondingKey: PublicKey;
     onClick?: (mintKey: PublicKey) => void;
   }) => {
-    const { pricing } = useBondingPricing(tokenBondingKey);
     const { info: tokenBonding } = useTokenBonding(tokenBondingKey);
-    const fiatPrice = usePriceInUsd(NATIVE_MINT);
-    const toFiat = (a: number) => (fiatPrice || 0) * a;
-
-    const current = pricing?.locked(NATIVE_MINT);
-    const amount = current ? "$" + toFiat(current).toFixed(2) : "";
+    const { pricing } = useBondingPricing(tokenBondingKey);
+    const lowestMint = useMemo(() => {
+      const arr = pricing?.hierarchy.toArray() || [];
+      if (arr.length > 0) {
+        return arr[arr.length - 1].tokenBonding.baseMint;
+      }
+    }, [pricing]);
+    const fiatPrice = usePriceInUsd(lowestMint);
+    const baseLocked = pricing?.locked(lowestMint);
+    const amount =
+      baseLocked && fiatPrice ? "$" + (baseLocked * fiatPrice).toFixed(2) : "";
 
     return (
       <UserLeaderboardElement

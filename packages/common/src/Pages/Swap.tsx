@@ -1,4 +1,3 @@
-import { NATIVE_MINT } from "@solana/spl-token";
 import { useWallet } from "@solana/wallet-adapter-react";
 import {
   PublicKey,
@@ -8,18 +7,17 @@ import {
 } from "@solana/web3.js";
 import {
   ISwapDriverArgs,
-  Notification,
   SwapForm,
   useBondingPricing,
   useErrorHandler,
   useMint,
   useMintTokenRef,
+  usePriceInSol,
   useSwap,
   useSwapDriver,
 } from "@strata-foundation/react";
 import { ISwapArgs, toNumber } from "@strata-foundation/spl-token-bonding";
-import React from "react";
-import toast from "react-hot-toast";
+import React, { useMemo } from "react";
 import { useHistory } from "react-router-dom";
 import { WUMBO_TRANSACTION_FEE } from "../constants/globals";
 import { useConfig } from "../hooks";
@@ -50,6 +48,13 @@ export const Swap = ({
   const targetMintInfo = useMint(targetMint);
   const wumboConfig = useConfig();
   const hasFees = targetTokenRef || baseTokenRef;
+  const lowestMint = useMemo(() => {
+    const arr = pricing?.hierarchy.toArray() || [];
+    if (arr.length > 0) {
+      return arr[arr.length - 1].tokenBonding.baseMint;
+    }
+  }, [pricing]);
+  const basePriceInSol = usePriceInSol(lowestMint);
 
   const {
     loading: swapping,
@@ -64,12 +69,22 @@ export const Swap = ({
           !isBuy && tokenBonding.targetMint.equals(baseMint!);
         // Only inject fees on the transaction going from the collective to a social token
         if (sellingTarget || buyingTarget) {
-          const priceInSol = pricing!.swap(
-            // Buying target will be a buyWithBase, selling target will be a sell target amount
-            toNumber(amount, (buyingTarget ? baseMintInfo : targetMintInfo)!),
-            buyingTarget ? tokenBonding.baseMint : tokenBonding.targetMint,
-            NATIVE_MINT
-          );
+          let priceInSol;
+          if (buyingTarget && tokenBonding.baseMint.equals(lowestMint!)) {
+            priceInSol = toNumber(amount, baseMintInfo) * basePriceInSol!;
+          } else {
+            priceInSol =
+              pricing!.swap(
+                // Buying target will be a buyWithBase, selling target will be a sell target amount
+                toNumber(
+                  amount,
+                  (buyingTarget ? baseMintInfo : targetMintInfo)!
+                ),
+                buyingTarget ? tokenBonding.baseMint : tokenBonding.targetMint,
+                lowestMint!
+              ) * basePriceInSol!;
+          }
+
           const solAmount = priceInSol * (WUMBO_TRANSACTION_FEE / 100);
           console.log(`Taking ${solAmount} in Wum.bo fees.`);
 

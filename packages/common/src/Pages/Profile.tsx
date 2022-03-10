@@ -18,7 +18,6 @@ import {
   Text,
   VStack,
 } from "@chakra-ui/react";
-import { NATIVE_MINT } from "@solana/spl-token";
 import { useWallet } from "@solana/wallet-adapter-react";
 import { PublicKey } from "@solana/web3.js";
 import {
@@ -38,10 +37,11 @@ import {
   useTokenMetadata,
   useTokenRefFromBonding,
   useWalletTokenAccounts,
+  useUsdLocked,
 } from "@strata-foundation/react";
 import { ITokenWithMetaAndAccount } from "@strata-foundation/spl-token-collective";
 import { SITE_URL, TROPHY_CREATOR } from "../constants";
-import React from "react";
+import React, { useMemo } from "react";
 import { AiOutlineSend } from "react-icons/ai";
 import { FaChevronRight } from "react-icons/fa";
 import { HiOutlinePencilAlt } from "react-icons/hi";
@@ -196,16 +196,19 @@ export const Profile = React.memo(
       },
     });
 
+    const { pricing } = useBondingPricing(tokenBonding?.publicKey);
+    const lowestMint = useMemo(() => {
+      const arr = pricing?.hierarchy.toArray() || [];
+      if (arr.length > 0) {
+        return arr[arr.length - 1].tokenBonding.baseMint;
+      }
+    }, [pricing]);
     const mint = useMint(mintKey);
     const supply = mint ? supplyAsNum(mint) : 0;
-    const { pricing } = useBondingPricing(tokenBonding?.publicKey);
-    const fiatPrice = usePriceInUsd(NATIVE_MINT);
+    const fiatPrice = usePriceInUsd(lowestMint);
     const toFiat = (a: number) => (fiatPrice || 0) * a;
-    const nativeLocked = pricing?.locked(NATIVE_MINT);
-    const fiatLocked =
-      mint &&
-      typeof nativeLocked !== "undefined" &&
-      toFiat(nativeLocked || 0).toFixed(2);
+    const fiatLockedNum = useUsdLocked(tokenBonding?.publicKey);
+    const fiatLocked = fiatLockedNum && fiatLockedNum.toFixed(2);
 
     const { info: buyTargetRoyalties } = useTokenAccount(
       tokenBonding?.buyTargetRoyalties
@@ -219,7 +222,7 @@ export const Profile = React.memo(
       buyTargetRoyaltiesAmount &&
       fiatPrice &&
       pricing &&
-      toFiat(pricing.current(NATIVE_MINT)) * buyTargetRoyaltiesAmount;
+      toFiat(pricing.current(lowestMint)) * buyTargetRoyaltiesAmount;
 
     const {
       link,
