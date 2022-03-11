@@ -84,12 +84,7 @@ const MentionToken = ({ owner, mention, size }: IMentionTokenProps) => {
 
   if (nullState) return null;
 
-  return (
-    <MetadataAvatar
-      mint={token?.targetMint}
-      size={size}
-    />
-  );
+  return <MetadataAvatar mint={token?.targetMint} size={size} />;
 };
 
 interface IPopoverTokenProps {
@@ -126,10 +121,7 @@ const PopoverToken = ({ owner, mention }: IPopoverTokenProps) => {
 
   return (
     <HStack padding={2} spacing={2} fontFamily="body">
-      <MetadataAvatar
-        mint={token?.targetMint}
-        size="md"
-      />
+      <MetadataAvatar mint={token?.targetMint} size="md" />
       <VStack
         flexGrow={1}
         spacing={0}
