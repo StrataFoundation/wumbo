@@ -67,7 +67,7 @@ const ProfileEntityMapper: NextPage = ({
   return (
     <Box>
       <NextSeo
-        title={name}
+        title={`Wum.bo Profile | ${name}`}
         description={description}
         openGraph={{
           url: `${SITE_URL}/profile/${entityRaw}`,
