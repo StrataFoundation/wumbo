@@ -6,6 +6,7 @@
     "paths": {
       "@/contexts": ["contexts/index"],
       "@/utils": ["utils/index"],
+      "@/utils/*": ["utils/*"],
       "@/hooks": ["hooks/index"],
       "@/components": ["components/index"],
       "@/components/*": ["components/*"],

@@ -4,7 +4,7 @@ import {
   InferGetServerSidePropsType,
   NextPage,
 } from "next";
-import Head from "next/head";
+import { NextSeo } from "next-seo";
 import { useRouter } from "next/router";
 import {
   Box,
@@ -20,7 +20,7 @@ import {
   useColorModeValue,
 } from "@chakra-ui/react";
 import { profileServerSideProps } from "../../utils/profileServerSideProps";
-import { APP_URL } from "@/constants";
+import { APP_URL, SITE_URL } from "@/constants";
 import { Header } from "@/components";
 
 export const Blob = (props: IconProps) => {
@@ -55,6 +55,8 @@ const ProfileEntityMapper: NextPage = ({
   description,
 }: InferGetServerSidePropsType<typeof getServerSideProps>) => {
   const router = useRouter();
+  const { entity: entityRaw } = router.query;
+
   const handleOnLearnMore = () => router.push("/tutorial");
   const handleOnBecomeABacker = () => {
     location.replace(
@@ -64,23 +66,19 @@ const ProfileEntityMapper: NextPage = ({
 
   return (
     <Box>
-      <Head>
-        <title>{name}</title>
-        <link rel="icon" href="/favicon.svg" />
-        <meta property="og:type" content="website" />
-        <meta name="description" content={description} />
-        <meta property="og:title" content={name} />
-        <meta property="og:image" content={image} />
-        <meta property="og:description" content={description} />
-
-        <meta name="twitter:card" content="summary_large_image" />
-        <meta property="twitter:domain" content="wum.bo" />
-        <meta property="twitter:url" content={`REPLACEME`} />
-        <meta name="twitter:title" content={`${name}'s Wum.bo Profile`} />
-        <meta name="twitter:description" content={description} />
-        <meta name="twitter:image" content={image} />
-      </Head>
-
+      <NextSeo
+        title={name}
+        description={description}
+        openGraph={{
+          url: `${SITE_URL}/profile/${entityRaw}`,
+          title: name,
+          description: description,
+          images: [{ url: image }],
+        }}
+        twitter={{
+          cardType: "summary_large_image",
+        }}
+      />
       <Header />
 
       <Container maxW={"7xl"}>
