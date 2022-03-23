@@ -5,7 +5,7 @@ import { usePublicKey, useTokenMetadata } from "@strata-foundation/react";
 import {
   GetServerSideProps,
   InferGetServerSidePropsType,
-  NextPage
+  NextPage,
 } from "next";
 import Head from "next/head";
 import { useRouter } from "next/router";
@@ -60,11 +60,13 @@ export const MarketDisplay: NextPage = ({
         />
         <Box zIndex={1} bg="white" shadow="xl" rounded="lg" p={2}>
           <BountyDetail
-            onEdit={() => router.push(
-              route(routes.editBounty, {
-                mintKey: mintKey?.toBase58(),
-              })
-            )}
+            onEdit={() =>
+              router.push(
+                route(routes.editBounty, {
+                  mintKey: mintKey?.toBase58(),
+                })
+              )
+            }
             name={name}
             description={description}
             image={image}
