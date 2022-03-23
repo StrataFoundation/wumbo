@@ -73,7 +73,14 @@ const ProfileEntityMapper: NextPage = ({
           url: `${SITE_URL}/profile/${entityRaw}`,
           title: name,
           description: description,
-          images: [{ url: image }],
+          images: [
+            {
+              url: image,
+              width: 800,
+              height: 600,
+              alt: `${name} Wumbo Profile Alt`,
+            },
+          ],
         }}
         twitter={{
           cardType: "summary_large_image",
