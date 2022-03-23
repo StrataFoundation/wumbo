@@ -10,7 +10,7 @@ const defaultSeo = {
     title: "Wum.bo",
     description:
       "Wumbo is a Browser Extension that sits on top of Twitter and lets you mint tokens for your favorite creators.",
-    images: [{ url: `${SITE_URL}/seo-splash.png.jpg` }],
+    images: [{ url: `${SITE_URL}/seo-splash.png` }],
     site_name: "Wumbo",
   },
   twitter: {
