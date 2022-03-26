@@ -1,23 +1,32 @@
-// config-overrides.js
-const { override } = require("customize-cra");
 const path = require("path");
+const ModuleScopePlugin = require("react-dev-utils/ModuleScopePlugin");
 
-const emptyFs = () => (webpackConfig) => ({
-  ...webpackConfig,
-  node: {
-    ...webpackConfig.node,
-    fs: "empty",
-  },
-});
+module.exports = function override(config, env) {
+  //do stuff with the webpack config...
 
-const supportMjs = () => (webpackConfig) => {
-  webpackConfig.module.rules.push({
+  // disable ModuleScopePlugin
+  config.resolve.plugins = config.resolve.plugins.filter(
+    (plugin) => !(plugin instanceof ModuleScopePlugin)
+  );
+
+  // emptyFs
+  config.resolve.fallback = {
+    ...config.resolve.fallback,
+    fs: false,
+    os: require.resolve("os-browserify/browser"),
+    crypto: require.resolve("crypto-browserify"),
+    stream: require.resolve("stream-browserify"),
+  };
+
+  // supportMjs
+  config.module.rules.push({
     test: /\.mjs$/,
-    include: /node_modules/,
+    include: "/node_modules/",
     type: "javascript/auto",
   });
-  webpackConfig.resolve = {
-    ...webpackConfig.resolve,
+
+  config.resolve = {
+    ...config.resolve,
     alias: {
       react: path.resolve("../../node_modules/react"),
       "@solana/wallet-adapter-react": path.resolve(
@@ -45,7 +54,8 @@ const supportMjs = () => (webpackConfig) => {
         : {}),
     },
   };
-  return webpackConfig;
-};
 
-module.exports = override(emptyFs(), supportMjs());
+  config.ignoreWarnings = [{ message: /source-map-loader/ }];
+
+  return config;
+};

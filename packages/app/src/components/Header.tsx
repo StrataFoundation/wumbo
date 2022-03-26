@@ -2,7 +2,7 @@ import React from "react";
 import { Box, Center, Flex, HStack, Icon, Text } from "@chakra-ui/react";
 import { Link, LinkProps, useHistory } from "react-router-dom";
 import { WumboIcon } from "wumbo-common";
-import { DownloadButton } from "components/common/DownloadButton";
+import { DownloadButton } from "../components/common/DownloadButton";
 
 interface IMenuItemProps extends LinkProps {
   isLast?: boolean;
