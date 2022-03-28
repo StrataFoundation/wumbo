@@ -5,6 +5,7 @@ import { useWallet } from "@solana/wallet-adapter-react";
 import { useErrorHandler, useTokenRefForName } from "@strata-foundation/react";
 import React, { FC } from "react";
 import {
+  APP_URL,
   PriceButton,
   SITE_URL,
   Spinner,
@@ -53,7 +54,7 @@ export const ClaimButton: FC<Props> = ({
       <Button
         as={Link}
         isExternal
-        href={SITE_URL + "/app/claim?handle=" + creatorName}
+        href={APP_URL + "/claim?handle=" + creatorName}
         size="xs"
         fontFamily="body"
         colorScheme="twitter"

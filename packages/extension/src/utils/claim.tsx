@@ -68,20 +68,18 @@ export function useClaimFlow(name?: string | null): IClaimFlowOutput {
   };
 
   const link = async () => {
-    if (!ownerTwitterHandle) {
-      const oauthResult = await oauthFlow();
-      await executeRemoteTxn(
-        provider!,
-        WUMBO_IDENTITY_SERVICE_URL + "/twitter/oauth",
-        {
-          pubkey: adapter!.publicKey!.toBase58(),
-          redirectUri,
-          ...oauthResult,
-          twitterHandle: name,
-        }
-      );
-      history.push(routes.profile.path);
-    }
+    const oauthResult = await oauthFlow();
+    await executeRemoteTxn(
+      provider!,
+      WUMBO_IDENTITY_SERVICE_URL + "/twitter/oauth",
+      {
+        pubkey: adapter!.publicKey!.toBase58(),
+        redirectUri,
+        ...oauthResult,
+        twitterHandle: name,
+      }
+    );
+    history.push(routes.profile.path);
   };
 
   const { loading, execute, error } = useAsyncCallback(smartClaim);

@@ -40,7 +40,7 @@ import {
   useUsdLocked,
 } from "@strata-foundation/react";
 import { ITokenWithMetaAndAccount } from "@strata-foundation/spl-token-collective";
-import { SITE_URL, TROPHY_CREATOR } from "../constants";
+import { APP_URL, SITE_URL, TROPHY_CREATOR } from "../constants";
 import React, { useMemo } from "react";
 import { AiOutlineSend } from "react-icons/ai";
 import { FaChevronRight } from "react-icons/fa";
@@ -380,7 +380,7 @@ export const Profile = React.memo(
                     <Button
                       as={PlainLink}
                       isExternal
-                      href={SITE_URL + "/app/claim?handle=" + handle}
+                      href={APP_URL + "/claim?handle=" + handle}
                       size="xs"
                       colorScheme="indigo"
                       variant="outline"
@@ -398,7 +398,7 @@ export const Profile = React.memo(
                   </PopoverContent>
                 </Popover>
               )}
-            {!ownerWalletKey && baseIsCollective && !walletTwitterHandle && (
+            {baseIsCollective && publicKey && (
               <Popover placement="bottom" trigger="hover">
                 <PopoverTrigger>
                   <Button
@@ -415,11 +415,47 @@ export const Profile = React.memo(
                   </Button>
                 </PopoverTrigger>
                 <PopoverContent>
-                  <PopoverBody>
-                    Link your wallet to Wum.bo without claiming this token. Your
-                    collectibles will appear on your profile. If you are the
-                    creator on any NFTs, they will link back to your profile.
-                  </PopoverBody>
+                  {!walletTwitterHandle && !ownerWalletKey && (
+                    <PopoverBody>
+                      Link your wallet to Wum.bo without claiming this token.
+                      Your collectibles will appear on your profile. If you are
+                      the creator on any NFTs, they will link back to your
+                      profile.
+                    </PopoverBody>
+                  )}
+                  {walletTwitterHandle && !ownerWalletKey && (
+                    <PopoverBody>
+                      Set this twitter handle as your primary twitter. Any
+                      existing handles associated with this wallet will still
+                      point to this wallet. If a social token for this twitter
+                      handle is associated with a different wallet, it will be
+                      orphaned. Please use{" "}
+                      <PlainLink
+                        color="indigo.500"
+                        href={APP_URL + "/relink"}
+                        isExternal
+                      >
+                        Relink
+                      </PlainLink>{" "}
+                      instead.
+                    </PopoverBody>
+                  )}
+                  {ownerWalletKey && (
+                    <PopoverBody>
+                      Rewrite this twitter handle to point at the current
+                      wallet. If a social token for this twitter handle is
+                      associated with a different wallet, it will be orphaned.
+                      Please use{" "}
+                      <PlainLink
+                        color="indigo.500"
+                        href={APP_URL + "/relink"}
+                        isExternal
+                      >
+                        Relink
+                      </PlainLink>{" "}
+                      instead.
+                    </PopoverBody>
+                  )}
                 </PopoverContent>
               </Popover>
             )}

@@ -31,7 +31,7 @@
       "all_frames": true
     },
     {
-      "matches": ["https://wum.bo/app/claim*"],
+      "matches": ["https://app.wum.bo/claim*", "http://localhost:3000/claim*"],
       "js": ["oauth.js"],
       "run_at": "document_start",
       "all_frames": true
@@ -48,7 +48,8 @@
     }
   ],
   "host_permissions": [
-    "https://wum.bo/app/claim*", 
+    "https://app.wum.bo/claim*",
+    "http://localhost:3000/claim*",
     "https://twitter.com/*"
   ]
 }

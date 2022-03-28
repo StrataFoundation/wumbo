@@ -13,6 +13,7 @@ import React, { useMemo } from "react";
 import { useAsyncCallback } from "react-async-hook";
 import { useHistory } from "react-router-dom";
 import {
+  APP_URL,
   getTwitterRegistryKey,
   getTwitterTld,
   SITE_URL,
@@ -139,7 +140,7 @@ export default React.memo(() => {
           <Button
             as={Link}
             isExternal
-            href={SITE_URL + "/app/claim?handle=" + query.get("name")}
+            href={APP_URL + "/claim?handle=" + query.get("name")}
             w="full"
             size="md"
             colorScheme="twitter"
@@ -148,21 +149,17 @@ export default React.memo(() => {
           </Button>
         </>
       )}
-      {!ownerTwitterHandle && (
-        <>
-          {showCreate && or}
-          <Button
-            w="full"
-            size="md"
-            colorScheme="twitter"
-            onClick={link}
-            isLoading={linkLoading}
-            loadingText={awaitingApproval ? "Awaiting Approval" : "Linking"}
-          >
-            Link my Wallet, but don't claim Token
-          </Button>
-        </>
-      )}
+      {showCreate && or}
+      <Button
+        w="full"
+        size="md"
+        colorScheme="twitter"
+        onClick={link}
+        isLoading={linkLoading}
+        loadingText={awaitingApproval ? "Awaiting Approval" : "Linking"}
+      >
+        Link my Wallet, but don't claim Token
+      </Button>
     </>
   );
 });
