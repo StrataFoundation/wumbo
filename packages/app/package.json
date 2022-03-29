@@ -20,12 +20,10 @@
     ]
   },
   "scripts": {
-    "start": "react-app-rewired start",
-    "build": "NODE_OPTIONS='--max-old-space-size=8192' react-app-rewired build",
-    "test": "react-app-rewired test",
-    "eject": "react-app-rewired eject",
-    "predeploy": "react-scripts build",
-    "deploy": "echo 'wum.bo' > ./build/CNAME && gh-pages -d build",
+    "start": "craco start",
+    "build": "craco build",
+    "test": "craco test",
+    "eject": "react-scripts eject",
     "format": "prettier --write \"src/**/*.{ts,tsx}\"",
     "precommit": "yarn format"
   },
@@ -52,11 +50,11 @@
     "react-hot-toast": "2.1.0",
     "react-router-dom": "5.3.0",
     "react-scripts": "4.0.3",
-    "typescript": "^4.4.3",
     "web-vitals": "^1.0.1",
     "wumbo-common": "^1.0.0"
   },
   "devDependencies": {
+    "@craco/craco": "^6.4.3",
     "@types/jest": "^26.0.15",
     "@types/node": "^12.0.0",
     "@types/react-dom": "^17.0.2",
@@ -64,10 +62,11 @@
     "@types/react-router-dom": "5.1.7",
     "@welldone-software/why-did-you-render": "^6.2.3",
     "autoprefixer": "9.8.6",
+    "craco-esbuild": "^0.5.0",
     "customize-cra": "^1.0.0",
-    "gh-pages": "3.2.0",
     "postcss": "7.0.35",
     "react-app-rewired": "^2.1.8",
-    "webpack": "4.44.2"
+    "webpack": "4.44.2",
+    "typescript": "^4.4.3"
   }
 }
