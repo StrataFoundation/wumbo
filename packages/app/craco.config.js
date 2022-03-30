@@ -62,6 +62,9 @@ module.exports = {
                 "@strata-foundation/spl-token-bonding": path.resolve(
                   "./node_modules/@strata-foundation/spl-token-bonding"
                 ),
+                "@strata-foundation/spl-token-collective": path.resolve(
+                  "./node_modules/@strata-foundation/spl-token-collective"
+                ),
                 "@strata-foundation/spl-utils": path.resolve(
                   "./node_modules/@strata-foundation/spl-utils"
                 ),

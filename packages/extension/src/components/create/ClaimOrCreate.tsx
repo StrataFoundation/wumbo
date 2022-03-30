@@ -1,6 +1,5 @@
 import { routes, swapPath } from "@/constants/routes";
 import { useClaimFlow } from "@/utils/claim";
-import { useUserInfo } from "@/utils/userState";
 import { Box, Button, Link, Text } from "@chakra-ui/react";
 import { useWallet } from "@solana/wallet-adapter-react";
 import {
@@ -16,10 +15,10 @@ import {
   APP_URL,
   getTwitterRegistryKey,
   getTwitterTld,
-  SITE_URL,
   useConfig,
   useQuery,
   useReverseTwitter,
+  useUserInfo,
 } from "wumbo-common";
 
 function toPercent(u32: number) {

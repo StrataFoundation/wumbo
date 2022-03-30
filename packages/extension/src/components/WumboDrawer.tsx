@@ -23,7 +23,6 @@ import { RiWallet3Line } from "react-icons/ri";
 import { Toaster } from "react-hot-toast";
 import { useDrawer } from "@/contexts/drawerContext";
 import { routes, IRoutes } from "@/constants/routes";
-import { useUserInfo } from "@/utils/userState";
 import {
   replaceAll,
   Spinner,
@@ -31,6 +30,7 @@ import {
   useReverseTwitter,
   SITE_URL,
   APP_URL,
+  useUserInfo,
 } from "wumbo-common";
 import { useHistoryList } from "@/utils/history";
 import { useWallet } from "@solana/wallet-adapter-react";

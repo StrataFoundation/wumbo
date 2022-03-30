@@ -10,13 +10,7 @@ import {
 } from "@strata-foundation/react";
 import { ITokenBonding, ICurve } from "@strata-foundation/spl-token-bonding";
 import { ITokenRef } from "@strata-foundation/spl-token-collective";
-import { useAsync } from "react-async-hook";
-import { getTwitterTld, useTwitterTld } from "wumbo-common";
-
-interface UserState {
-  tokenRef?: ITokenRef;
-  loading: boolean;
-}
+import { useTwitterTld } from "./useTwitterTld";
 
 export interface UserInfo {
   name: string;
@@ -27,6 +21,7 @@ export interface UserInfo {
   curve: ICurve;
   mint: MintInfo;
 }
+
 export interface UserInfoState {
   userInfo?: UserInfo;
   loading: boolean;
