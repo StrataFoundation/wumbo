@@ -3,14 +3,14 @@ import {
   getNameAccountKey,
   NameRegistryState,
   NAME_PROGRAM_ID,
-  ReverseTwitterRegistryState
+  ReverseTwitterRegistryState,
 } from "@bonfida/spl-name-service";
 import { AccountInfo, Connection, PublicKey } from "@solana/web3.js";
 import {
   getOwnerForName,
   useAccount,
   useAccountFetchCache,
-  UseAccountState
+  UseAccountState,
 } from "@strata-foundation/react";
 import { deserializeUnchecked } from "borsh";
 import { useAsync } from "react-async-hook";
@@ -18,7 +18,7 @@ import { fetchConfig } from "../contexts";
 import { useTwitterTld, useTwitterVerifier } from "../hooks";
 import {
   createVerifiedTwitterRegistry,
-  getTwitterRegistry
+  getTwitterRegistry,
 } from "./testableNameServiceTwitter";
 
 let twitterTld: PublicKey, twitterVerifier: PublicKey;
@@ -154,13 +154,16 @@ export async function getTwitterReverse(
   );
 }
 
-const ReverseTwitterParser = (pubkey: PublicKey, account: AccountInfo<Buffer>) => {
+const ReverseTwitterParser = (
+  pubkey: PublicKey,
+  account: AccountInfo<Buffer>
+) => {
   return deserializeUnchecked(
     ReverseTwitterRegistryState.schema,
     ReverseTwitterRegistryState,
     account.data.slice(NameRegistryState.HEADER_LEN)
-  )
-}
+  );
+};
 
 function useReverseTwitterAccount(
   key: PublicKey | undefined
@@ -176,14 +179,15 @@ interface ReverseTwitterState {
 export function useReverseTwitter(
   owner: PublicKey | undefined
 ): ReverseTwitterState {
-  const tld = useTwitterTld()
+  const tld = useTwitterTld();
   const verifier = useTwitterVerifier();
   const {
     loading: loading1,
     error: error1,
     result: hashedName,
   } = useAsync(
-    async (owner: string | undefined) => owner ? getHashedName(owner) : undefined,
+    async (owner: string | undefined) =>
+      owner ? getHashedName(owner) : undefined,
     [owner?.toBase58()]
   );
   const {
@@ -203,7 +207,7 @@ export function useReverseTwitter(
     [hashedName, tld, verifier]
   );
 
-  const { info, loading: loading3 } = useReverseTwitterAccount(key)
+  const { info, loading: loading3 } = useReverseTwitterAccount(key);
   return {
     loading: loading1 && loading2 && loading3,
     error: error1 || error2,

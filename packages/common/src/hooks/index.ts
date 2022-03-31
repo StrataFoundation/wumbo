@@ -6,3 +6,4 @@ export * from "./useTwitterTld";
 export * from "./useTokenTier";
 export * from "./useConfig";
 export * from "./useTwitterVerifier";
+export * from "./useUserInfo";

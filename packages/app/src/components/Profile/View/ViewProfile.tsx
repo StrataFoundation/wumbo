@@ -1,3 +1,5 @@
+import React from "react";
+import { useHistory, useParams } from "react-router-dom";
 import { Box } from "@chakra-ui/react";
 import { useWallet } from "@solana/wallet-adapter-react";
 import { PublicKey } from "@solana/web3.js";
@@ -6,12 +8,11 @@ import {
   useTokenBondingFromMint,
   useTokenRefForName,
 } from "@strata-foundation/react";
-import React from "react";
-import { useHistory, useParams } from "react-router-dom";
 import {
   Profile,
   Spinner,
   useQuery,
+  useReverseTwitter,
   useTwitterOwner,
   useTwitterTld,
 } from "wumbo-common";
@@ -29,26 +30,42 @@ import WalletRedirect from "../../Wallet/WalletRedirect";
 
 export const ViewProfileRoute: React.FC = () => {
   const params = useParams<{ mint: string | undefined }>();
+  const { connected, publicKey } = useWallet();
   const query = useQuery();
   const name = query.get("name");
-  const { connected } = useWallet();
   const tld = useTwitterTld();
-  const { info: tokenRef, loading } = useTokenRefForName(name, null, tld);
   const passedMintKey = usePublicKey(params.mint);
   const history = useHistory();
-  const { info: tokenBonding } = useTokenBondingFromMint(
-    passedMintKey || tokenRef?.mint
+
+  const { handle: twitterHandle, loading: reverseTwitterLoading } =
+    useReverseTwitter(publicKey || undefined);
+
+  const { info: tokenRef, loading: tokenRefLoading } = useTokenRefForName(
+    name || twitterHandle,
+    null,
+    tld
   );
-  const { owner: twitterWallet } = useTwitterOwner(name || undefined);
+
+  const { info: tokenBonding, loading: tokenBondingLoading } =
+    useTokenBondingFromMint(passedMintKey || tokenRef?.mint);
+  const { owner: twitterWallet, loading: twitterOwnerLoading } =
+    useTwitterOwner(name || undefined);
+
+  const loading =
+    reverseTwitterLoading ||
+    tokenRefLoading ||
+    tokenBondingLoading ||
+    twitterOwnerLoading;
 
   if (loading) {
     return <Spinner />;
   }
 
-  if (!passedMintKey && !name) {
+  if (!passedMintKey && !name && !twitterHandle) {
     if (!connected) {
       return <WalletRedirect />;
     }
+
     return (
       <AppContainer>
         <Box p={4}>
