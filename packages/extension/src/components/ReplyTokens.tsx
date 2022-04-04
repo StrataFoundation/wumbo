@@ -1,4 +1,4 @@
-import React, { MutableRefObject, useEffect, useState } from "react";
+import React from "react";
 import ReactShadow from "react-shadow/emotion";
 import {
   HStack,
@@ -16,9 +16,8 @@ import {
   ASSOCIATED_TOKEN_PROGRAM_ID,
   Token,
   TOKEN_PROGRAM_ID,
-  AccountInfo as TokenAccountInfo,
 } from "@solana/spl-token";
-import { AccountInfo, Connection, PublicKey } from "@solana/web3.js";
+import { AccountInfo, PublicKey } from "@solana/web3.js";
 import {
   ThemeProvider,
   MetadataAvatar,
@@ -26,12 +25,8 @@ import {
   truthy,
   getTwitterTld,
   useTwitterTld,
-  getTwitterRegistryKey,
 } from "wumbo-common";
-import {
-  ITokenRef,
-  SplTokenCollective,
-} from "@strata-foundation/spl-token-collective";
+import { SplTokenCollective } from "@strata-foundation/spl-token-collective";
 import {
   useStrataSdks,
   useTokenRefForName,
@@ -47,14 +42,6 @@ import {
 } from "@strata-foundation/react";
 import { AccountFetchCache } from "@strata-foundation/spl-utils";
 import { useAsync } from "react-async-hook";
-import { NameRegistryState } from "@bonfida/spl-name-service";
-import { deserializeUnchecked } from "borsh";
-
-const humanizeAmount = (amount: number) => {
-  if (amount >= 1) return amount.toFixed(0);
-
-  if (amount < 1) return amount.toFixed(2);
-};
 
 interface IMentionTokenProps extends Pick<AvatarProps, "size"> {
   owner?: PublicKey;
@@ -164,32 +151,6 @@ interface IReplyTokensProps extends Pick<AvatarProps, "size"> {
   outsideRef: React.MutableRefObject<HTMLInputElement>;
 }
 
-async function getTwitterRegistry(
-  connection: Connection,
-  twitterHandle: string
-): Promise<NameRegistryState | undefined> {
-  const name = await getTwitterRegistryKey(
-    twitterHandle,
-    await getTwitterTld()
-  );
-  const acct = await connection.getAccountInfo(name);
-
-  if (acct) {
-    return deserializeUnchecked(
-      NameRegistryState.schema,
-      NameRegistryState,
-      acct.data
-    );
-  }
-}
-
-const getTwitterHandle = async (
-  connection: Connection,
-  twitterHandle: string
-): Promise<NameRegistryState | null> => {
-  return (await getTwitterRegistry(connection, twitterHandle)) || null;
-};
-
 const tokenAccountParser = (
   pubkey: PublicKey,
   acct: AccountInfo<Buffer>
@@ -204,7 +165,6 @@ const tokenAccountParser = (
 
 async function ownsTokensOf(
   owner: PublicKey,
-  tokenCollectiveSdk: SplTokenCollective,
   cache: AccountFetchCache,
   mint: PublicKey
 ): Promise<boolean> {
@@ -259,12 +219,7 @@ const getMentionsWithTokens = async (
           let tokenRef = claimedRef || unclaimedRef;
           if (
             tokenRef?.info &&
-            (await ownsTokensOf(
-              owner,
-              tokenCollectiveSdk,
-              cache,
-              tokenRef.info.mint as PublicKey
-            ))
+            (await ownsTokensOf(owner, cache, tokenRef.info.mint as PublicKey))
           ) {
             return mention;
           }
@@ -327,7 +282,6 @@ export const ReplyTokens = ({
   return (
     <HStack
       fontFamily="body"
-      paddingTop={1}
       onClick={(e) => {
         e.preventDefault();
         e.stopPropagation();

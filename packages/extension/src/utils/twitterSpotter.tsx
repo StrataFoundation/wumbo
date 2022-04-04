@@ -2,7 +2,6 @@ import { useEffect, useState } from "react";
 import isEqual from "lodash/isEqual";
 import { useInterval } from "@strata-foundation/react";
 import { getVisibleElementsBySelector } from "./elements";
-import * as Sentry from "@sentry/react";
 import { truthy } from "wumbo-common";
 
 const twitterMentionRegex =
@@ -180,9 +179,9 @@ export const useTweets = (): IParsedTweet[] | null => {
 
                 if (mentions?.length) {
                   mentions = sanitizeMentions(mentions);
-                  replyTokensTarget = tweet.querySelectorAll(
-                    `[href="/${name}"]`
-                  )[1].parentNode.parentNode.parentNode.parentNode;
+                  replyTokensTarget =
+                    tweet.querySelectorAll(`[role="group"]`)[0].parentNode
+                      .parentNode;
                 }
 
                 const ret = {
