@@ -7,7 +7,6 @@ import {
   InferGetServerSidePropsType,
   NextPage,
 } from "next";
-import Head from "next/head";
 import { useRouter } from "next/router";
 import React from "react";
 import { mintMetadataServerSideProps } from "../../../utils/mintMetadataServerSideProps";
@@ -35,13 +34,12 @@ export const MarketDisplay: NextPage = ({
       paddingBottom="200px"
     >
       <Header showWallet />
-      <Head>
-        <meta
-          property="twitter:url"
-          content={`https://wum.bo/bounties/${mintKey}/`}
-        />
-        <MetadataMeta name={name} description={description} image={image} />
-      </Head>
+      <MetadataMeta
+        title={`Wumbo Bounty | ${name}`}
+        description={description}
+        image={image}
+        url={`https://wum.bo/bounties/${mintKey}/`}
+      />
       <Box padding="54px" backgroundColor="black.500" />
       <Container justify="stretch" maxW="640px">
         <Image
