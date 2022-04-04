@@ -2,7 +2,11 @@ import React, { Fragment, useRef } from "react";
 import ReactShadow from "react-shadow/emotion";
 import { Box } from "@chakra-ui/react";
 
-import { AppendChildPortal, ThemeProvider } from "wumbo-common";
+import {
+  AppendChildPortal,
+  PrependedPortal,
+  ThemeProvider,
+} from "wumbo-common";
 import { useTweets } from "../../utils/twitterSpotter";
 import { MainButton } from "../MainButton";
 import { ReplyTokens } from "../ReplyTokens";
@@ -38,14 +42,13 @@ export const TweetsEnhancer = () => {
 
         const replyTokensEl =
           tweet.replyTokensTarget &&
-          tweet.mentions &&
-          tweet.mentions.length > 0 ? (
+          (tweet.mentions && tweet.mentions.length > 0 ? (
             <ReplyTokens
               outsideRef={outsideRef}
               creatorName={tweet.name}
-              mentions={tweet.mentions || []}
+              mentions={tweet.mentions}
             />
-          ) : null;
+          ) : null);
 
         if (buttonEl) {
           return (
@@ -59,17 +62,13 @@ export const TweetsEnhancer = () => {
                   </ThemeProvider>
                 </ReactShadow.div>
               </AppendChildPortal>
-              {tweet.replyTokensTarget &&
-                tweet.mentions &&
-                tweet.mentions.length > 0 && (
-                  <AppendChildPortal
-                    container={tweet.replyTokensTarget as Element}
-                  >
-                    <ReactShadow.div>
-                      <ThemeProvider>{replyTokensEl}</ThemeProvider>
-                    </ReactShadow.div>
-                  </AppendChildPortal>
-                )}
+              {tweet.replyTokensTarget && (
+                <PrependedPortal container={tweet.replyTokensTarget as Element}>
+                  <ReactShadow.div>
+                    <ThemeProvider>{replyTokensEl}</ThemeProvider>
+                  </ReactShadow.div>
+                </PrependedPortal>
+              )}
             </Fragment>
           );
         }
