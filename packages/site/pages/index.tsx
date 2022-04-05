@@ -9,6 +9,7 @@ import {
   XRay,
   NFT,
   Tutorial,
+  Investors,
   Support,
   Team,
   DownloadRow,
@@ -26,7 +27,7 @@ const Home: NextPage = () => (
       <DownloadRow />
       <NFT />
       <Tutorial />
-      {/* <Investors /> */}
+      <Investors />
       <Support />
       <DownloadRow />
       <Team />

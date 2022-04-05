@@ -43,28 +43,43 @@ export const Investors: React.FC = () => (
             </Text>
             <Divider />
           </Stack>
-          <HStack
-            spacing={{
-              base: 4,
-              md: 20,
-            }}
-            wrap="wrap"
-            justifyContent="center"
-          >
-            <Image w={{ base: "35%", md: "20%" }} src="/MC.png" alt="mc" />
-            <Image
-              w={{ base: "35%", md: "20%" }}
-              src="/Solana.png"
-              alt="solana"
-            />
-            <Image
-              w={{ base: "35%", md: "20%" }}
-              src="/Asymmetric.png"
-              alt="Asymmetric"
-            />
-            <Image w={{ base: "35%", md: "20%" }} src="/AR.png" alt="AR" />
-            <Image w={{ base: "35%", md: "20%" }} src="/SL.png" alt="SL" />
-          </HStack>
+          <VStack justifyContent="center" spacing={4}>
+            <Flex w="full" justifyContent="center">
+              <Image w="600px" src="/MC.png" alt="multicoin capital" />
+            </Flex>
+            <HStack
+              wrap="wrap"
+              justifyContent="center"
+              gap={{ base: 0, md: 8 }}
+            >
+              <Image
+                w={{ base: "300px", md: "500px" }}
+                src="/Solana.png"
+                alt="solana"
+              />
+              <Image
+                w={{ base: "300px", md: "400px" }}
+                src="/SL.png"
+                alt="starting line"
+              />
+            </HStack>
+            <HStack
+              wrap="wrap"
+              justifyContent="center"
+              gap={{ base: 0, md: 16 }}
+            >
+              <Image
+                w={{ base: "300px", md: "400px" }}
+                src="/AR.png"
+                alt="alameda research"
+              />
+              <Image
+                w={{ base: "300px", md: "400px" }}
+                src="/Asymmetric.png"
+                alt="asymmetric capital partners"
+              />
+            </HStack>
+          </VStack>
         </VStack>
       </Flex>
     </LandingLayout>
