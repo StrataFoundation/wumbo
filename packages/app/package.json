@@ -37,6 +37,7 @@
     "@solana/wallet-adapter-react": "^0.15.3",
     "@solana/wallet-adapter-wallets": "^0.15.4",
     "@solana/web3.js": "1.32.0",
+    "@strata-foundation/web3-token-auth": "^3.4.6",
     "@testing-library/jest-dom": "^5.11.4",
     "@testing-library/react": "^11.1.0",
     "@testing-library/user-event": "^12.1.10",

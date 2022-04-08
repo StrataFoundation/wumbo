@@ -112,6 +112,7 @@ module.exports = {
       "REACT_APP_WUMBO_IDENTITY_SERVICE_URL",
       "REACT_APP_BASE_SLIPPAGE",
       "REACT_APP_ARWEAVE_UPLOAD_URL",
+      "REACT_APP_GET_TOKEN_ENDPOINT",
     ]),
     new NodePolyfillPlugin(),
     new CopyPlugin({

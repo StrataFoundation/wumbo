@@ -11,11 +11,22 @@ import {
   SolletWalletAdapter,
   TorusWalletAdapter,
 } from "@solana/wallet-adapter-wallets";
+import { tokenAuthFetchMiddleware } from "@strata-foundation/web3-token-auth";
 import React, { FC, useMemo } from "react";
 
 // export const DEFAULT_ENDPOINT = "https://wumbo.genesysgo.net";
 export const DEFAULT_ENDPOINT =
   process.env.NEXT_PUBLIC_SOLANA_URL || "https://api.devnet.solana.com";
+
+export const getToken = (endpoint: string) => async () => {
+  if (endpoint.includes("genesysgo")) {
+    const req = await fetch("/api/get-token");
+    const { access_token }: { access_token: string } = await req.json();
+    return access_token;
+  }
+
+  return "";
+};
 
 export const Wallet = ({
   children,
@@ -40,8 +51,17 @@ export const Wallet = ({
     []
   );
 
+  const endpoint = cluster || DEFAULT_ENDPOINT;
+
   return (
-    <ConnectionProvider endpoint={cluster || DEFAULT_ENDPOINT}>
+    <ConnectionProvider
+      endpoint={endpoint}
+      config={{
+        fetchMiddleware: tokenAuthFetchMiddleware({
+          getToken: getToken(endpoint),
+        }),
+      }}
+    >
       <WalletProvider wallets={wallets} autoConnect>
         {children}
       </WalletProvider>
