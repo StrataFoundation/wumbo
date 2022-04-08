@@ -6,6 +6,7 @@ export const WUMBO_TRANSACTION_FEE: number = Number(
   process.env.REACT_APP_WUMBO_TRANSACTION_FEE!
 );
 export const DEFAULT_COMMITMENT = "processed";
+export const GET_TOKEN_ENDPOINT = process.env.REACT_APP_GET_TOKEN_ENDPOINT;
 export const SITE_URL = process.env.REACT_APP_SITE_URL;
 export const APP_URL = process.env.REACT_APP_APP_URL;
 export const ARWEAVE_UPLOAD_URL = process.env.REACT_APP_ARWEAVE_UPLOAD_URL!;

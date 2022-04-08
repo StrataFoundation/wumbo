@@ -7,6 +7,7 @@ import {
   Notification,
   SOLANA_API_URL,
   ConfigProvider,
+  GET_TOKEN_ENDPOINT,
 } from "wumbo-common";
 import {
   AccountProvider,
@@ -20,6 +21,17 @@ import {
   WalletProvider,
 } from "@solana/wallet-adapter-react";
 import { MarketplaceSdkProvider } from "@strata-foundation/marketplace-ui";
+import { tokenAuthFetchMiddleware } from "@strata-foundation/web3-token-auth";
+
+export const getToken = (endpoint: string) => async () => {
+  if (endpoint.includes("genesysgo")) {
+    const req = await fetch(GET_TOKEN_ENDPOINT!);
+    const { access_token }: { access_token: string } = await req.json();
+    return access_token;
+  }
+
+  return "";
+};
 
 export const ContextProviders: React.FC = ({ children }) => {
   const wallets = useMemo(() => WALLET_PROVIDERS, []);
@@ -57,7 +69,14 @@ export const ContextProviders: React.FC = ({ children }) => {
 
   return (
     <ConfigProvider>
-      <ConnectionProvider endpoint={SOLANA_API_URL}>
+      <ConnectionProvider
+        endpoint={SOLANA_API_URL}
+        config={{
+          fetchMiddleware: tokenAuthFetchMiddleware({
+            getToken: getToken(SOLANA_API_URL),
+          }),
+        }}
+      >
         <ErrorHandlerProvider onError={onError}>
           <ApolloProvider client={wumboApi}>
             <AccountProvider commitment="confirmed">
