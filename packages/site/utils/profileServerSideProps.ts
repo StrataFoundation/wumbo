@@ -16,39 +16,17 @@ import {
 } from "@solana/spl-name-service";
 import { Metadata } from "@metaplex-foundation/mpl-token-metadata";
 import { SplTokenBonding } from "@strata-foundation/spl-token-bonding";
-import { Base64 } from "js-base64";
-import axios from "axios";
 import { tokenAuthFetchMiddleware } from "@strata-foundation/web3-token-auth";
-
-async function getToken(): Promise<string> {
-  if (process.env.NEXT_PUBLIC_ISSUER) {
-    const token = Base64.encode(
-      `${process.env.NEXT_PUBLIC_CLIENT_ID}:${process.env.NEXT_PUBLIC_CLIENT_SECRET}`
-    );
-    const { access_token } = (
-      await axios.post(
-        `${process.env.NEXT_PUBLIC_ISSUER}/token`,
-        "grant_type=client_credentials",
-        {
-          headers: {
-            "Content-Type": "application/x-www-form-urlencoded",
-            Authorization: `Basic ${token}`,
-          },
-        }
-      )
-    ).data;
-    return access_token;
-  }
-
-  return "";
-}
+import { getToken } from "@/utils";
 
 export const profileServerSideProps: GetServerSideProps = async (context) => {
   const connection = new Connection(DEFAULT_ENDPOINT, {
+    commitment: "confirmed",
     fetchMiddleware: tokenAuthFetchMiddleware({
       getToken,
     }),
   });
+
   const provider = new Provider(
     connection,
     new NodeWallet(Keypair.generate()),
