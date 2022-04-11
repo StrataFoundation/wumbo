@@ -72,6 +72,7 @@ export const ContextProviders: React.FC = ({ children }) => {
       <ConnectionProvider
         endpoint={SOLANA_API_URL}
         config={{
+          commitment: "confirmed",
           fetchMiddleware: tokenAuthFetchMiddleware({
             getToken: getToken(SOLANA_API_URL),
           }),
