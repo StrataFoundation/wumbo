@@ -328,12 +328,12 @@ WumboDrawer.Loading = () => (
 
 function mapUrl(currentUri: string): string | undefined {
   if (currentUri.startsWith("/bounty/view")) {
-    return `${SITE_URL}/${currentUri.replace("/bounty/view", "/bounties")}`;
+    return `${SITE_URL}${currentUri.replace("/bounty/view", "/bounties")}`;
   } else if (currentUri.startsWith("/profile/view")) {
-    return `${SITE_URL}/${currentUri.replace("/profile/view", "/profile")}`;
+    return `${SITE_URL}${currentUri.replace("/profile/view", "/profile")}`;
   } else if (currentUri.startsWith("/profile")) {
-    return `${SITE_URL}/${currentUri.replace("?name=", "/")}`;
+    return `${SITE_URL}${currentUri.replace("?name=", "/")}`;
   }
 
-  return `${APP_URL}/${currentUri}`;
+  return `${APP_URL}${currentUri}`;
 }
