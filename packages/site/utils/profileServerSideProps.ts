@@ -111,7 +111,6 @@ export const profileServerSideProps: GetServerSideProps = async (context) => {
   // we're making an assumption that by this point
   // one of the logic branches was successful and found a tokenRef
   // via the passed in entity
-
   const metadataAcc = await tokenMetadataSdk.getMetadata(
     await Metadata.getPDA(tokenRef!.mint.toBase58())
   );
@@ -120,10 +119,20 @@ export const profileServerSideProps: GetServerSideProps = async (context) => {
 
   try {
     metadata = await SplTokenMetadata.getArweaveMetadata(metadataAcc?.data.uri);
-    reverseTwitter = await getTwitterReverse(connection, tokenRef!.owner!);
+  } catch (e: any) {
+    console.error(e);
+  }
+
+  try {
     tokenBonding = await tokenBondingSdk.getTokenBonding(
       tokenRef!.tokenBonding!
     );
+  } catch (e: any) {
+    console.error(e);
+  }
+
+  try {
+    reverseTwitter = await getTwitterReverse(connection, tokenRef!.owner!);
   } catch (e: any) {
     console.error(e);
   }
@@ -138,7 +147,7 @@ export const profileServerSideProps: GetServerSideProps = async (context) => {
       tokenBondingKeyRaw: tokenBonding?.publicKey.toBase58(),
       baseMintKeyRaw: tokenBonding?.baseMint.toBase58(),
       targetMintKeyRaw: tokenBonding?.targetMint.toBase58(),
-      handle: reverseTwitter?.twitterHandle,
+      handle: reverseTwitter?.twitterHandle || null,
       name: name || null,
       symbol: metadataAcc?.data?.symbol || null,
       description: metadata?.description || null,
