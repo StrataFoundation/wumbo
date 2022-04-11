@@ -8,7 +8,7 @@
   },
   "scripts": {
     "watch": "webpack --config webpack/webpack.dev.js --watch",
-    "build": "tsc --project tsconfig.json --noEmit && webpack --config webpack/webpack.prod.js && rm -rf dist/*.map",
+    "build": "tsc --project tsconfig.json --noEmit && node --max_old_space_size=8096 node_modules/.bin/webpack --config webpack/webpack.prod.js && rm -rf dist/*.map",
     "build:tsc": "tsc --project tsconfig.json && webpack --config webpack/webpack.prod.js",
     "format": "prettier --write \"src/**/*.{ts,tsx}\"",
     "precommit": "yarn format"
