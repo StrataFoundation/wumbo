@@ -16,39 +16,17 @@ import {
 } from "@solana/spl-name-service";
 import { Metadata } from "@metaplex-foundation/mpl-token-metadata";
 import { SplTokenBonding } from "@strata-foundation/spl-token-bonding";
-import { Base64 } from "js-base64";
-import axios from "axios";
 import { tokenAuthFetchMiddleware } from "@strata-foundation/web3-token-auth";
-
-async function getToken(): Promise<string> {
-  if (process.env.NEXT_PUBLIC_ISSUER) {
-    const token = Base64.encode(
-      `${process.env.NEXT_PUBLIC_CLIENT_ID}:${process.env.NEXT_PUBLIC_CLIENT_SECRET}`
-    );
-    const { access_token } = (
-      await axios.post(
-        `${process.env.NEXT_PUBLIC_ISSUER}/token`,
-        "grant_type=client_credentials",
-        {
-          headers: {
-            "Content-Type": "application/x-www-form-urlencoded",
-            Authorization: `Basic ${token}`,
-          },
-        }
-      )
-    ).data;
-    return access_token;
-  }
-
-  return "";
-}
+import { getToken } from "@/utils";
 
 export const profileServerSideProps: GetServerSideProps = async (context) => {
   const connection = new Connection(DEFAULT_ENDPOINT, {
+    commitment: "confirmed",
     fetchMiddleware: tokenAuthFetchMiddleware({
       getToken,
     }),
   });
+
   const provider = new Provider(
     connection,
     new NodeWallet(Keypair.generate()),
@@ -133,7 +111,6 @@ export const profileServerSideProps: GetServerSideProps = async (context) => {
   // we're making an assumption that by this point
   // one of the logic branches was successful and found a tokenRef
   // via the passed in entity
-
   const metadataAcc = await tokenMetadataSdk.getMetadata(
     await Metadata.getPDA(tokenRef!.mint.toBase58())
   );
@@ -142,10 +119,20 @@ export const profileServerSideProps: GetServerSideProps = async (context) => {
 
   try {
     metadata = await SplTokenMetadata.getArweaveMetadata(metadataAcc?.data.uri);
-    reverseTwitter = await getTwitterReverse(connection, tokenRef!.owner!);
+  } catch (e: any) {
+    console.error(e);
+  }
+
+  try {
     tokenBonding = await tokenBondingSdk.getTokenBonding(
       tokenRef!.tokenBonding!
     );
+  } catch (e: any) {
+    console.error(e);
+  }
+
+  try {
+    reverseTwitter = await getTwitterReverse(connection, tokenRef!.owner!);
   } catch (e: any) {
     console.error(e);
   }
@@ -160,7 +147,7 @@ export const profileServerSideProps: GetServerSideProps = async (context) => {
       tokenBondingKeyRaw: tokenBonding?.publicKey.toBase58(),
       baseMintKeyRaw: tokenBonding?.baseMint.toBase58(),
       targetMintKeyRaw: tokenBonding?.targetMint.toBase58(),
-      handle: reverseTwitter?.twitterHandle,
+      handle: reverseTwitter?.twitterHandle || null,
       name: name || null,
       symbol: metadataAcc?.data?.symbol || null,
       description: metadata?.description || null,
