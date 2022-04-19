@@ -70,9 +70,13 @@ export const Swap = ({
         // Only inject fees on the transaction going from the collective to a social token
         if (sellingTarget || buyingTarget) {
           let priceInSol;
-          if (buyingTarget && tokenBonding.baseMint.equals(lowestMint!)) {
+          if (
+            buyingTarget &&
+            tokenBonding.baseMint.equals(lowestMint!) &&
+            amount
+          ) {
             priceInSol = toNumber(amount, baseMintInfo) * basePriceInSol!;
-          } else {
+          } else if (amount) {
             priceInSol =
               pricing!.swap(
                 // Buying target will be a buyWithBase, selling target will be a sell target amount
@@ -85,7 +89,7 @@ export const Swap = ({
               ) * basePriceInSol!;
           }
 
-          const solAmount = priceInSol * (WUMBO_TRANSACTION_FEE / 100);
+          const solAmount = (priceInSol || 0) * (WUMBO_TRANSACTION_FEE / 100);
           console.log(`Taking ${solAmount} in Wum.bo fees.`);
 
           return {
