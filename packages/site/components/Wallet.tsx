@@ -60,6 +60,7 @@ export const Wallet = ({
         fetchMiddleware: tokenAuthFetchMiddleware({
           getToken: getToken(endpoint),
         }),
+        commitment: "confirmed"
       }}
     >
       <WalletProvider wallets={wallets} autoConnect>
