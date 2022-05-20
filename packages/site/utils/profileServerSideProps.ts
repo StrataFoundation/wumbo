@@ -16,15 +16,10 @@ import {
 } from "@solana/spl-name-service";
 import { Metadata } from "@metaplex-foundation/mpl-token-metadata";
 import { SplTokenBonding } from "@strata-foundation/spl-token-bonding";
-import { tokenAuthFetchMiddleware } from "@strata-foundation/web3-token-auth";
-import { getToken } from "@/utils";
 
 export const profileServerSideProps: GetServerSideProps = async (context) => {
   const connection = new Connection(DEFAULT_ENDPOINT, {
     commitment: "confirmed",
-    fetchMiddleware: tokenAuthFetchMiddleware({
-      getToken,
-    }),
   });
 
   const provider = new Provider(

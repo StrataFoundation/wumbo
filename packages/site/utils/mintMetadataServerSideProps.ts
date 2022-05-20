@@ -5,17 +5,12 @@ import NodeWallet from "@project-serum/anchor/dist/cjs/nodewallet";
 import { DEFAULT_ENDPOINT } from "@/constants";
 import { SplTokenMetadata } from "@strata-foundation/spl-utils";
 import { Metadata } from "@metaplex-foundation/mpl-token-metadata";
-import { tokenAuthFetchMiddleware } from "@strata-foundation/web3-token-auth";
-import { getToken } from "@/utils";
 
 export const mintMetadataServerSideProps: GetServerSideProps = async (
   context
 ) => {
   const connection = new Connection(DEFAULT_ENDPOINT, {
     commitment: "confirmed",
-    fetchMiddleware: tokenAuthFetchMiddleware({
-      getToken,
-    }),
   });
   const provider = new Provider(
     connection,
