@@ -34,23 +34,8 @@ export default async function handler(
   // Run cors
   await cors(req, res);
 
-  const token = Base64.encode(
-    `${process.env.NEXT_PUBLIC_CLIENT_ID}:${process.env.NEXT_PUBLIC_CLIENT_SECRET}`
-  );
   try {
-    const { access_token } = (
-      await axios.post(
-        `${process.env.NEXT_PUBLIC_ISSUER}/token`,
-        "grant_type=client_credentials",
-        {
-          headers: {
-            "Content-Type": "application/x-www-form-urlencoded",
-            Authorization: `Basic ${token}`,
-          },
-        }
-      )
-    ).data;
-    res.status(200).json({ access_token });
+    res.status(200).json({ access_token: "" });
   } catch (e) {
     console.log(e);
     res.status(500);
