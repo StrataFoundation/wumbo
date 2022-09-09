@@ -1,4 +1,5 @@
 import { routes } from "@/constants/routes";
+import { Box, Flex, Link, Stack, Text } from "@chakra-ui/react";
 import React, { FC } from "react";
 import { MemoryRouter as Router, Route, Switch } from "react-router-dom";
 import { CreateBounty, EditBounty, ViewBounty } from "./bounty";
@@ -24,11 +25,52 @@ import { WumboDrawer } from "./WumboDrawer";
 const App: FC = () => (
   <Router initialEntries={[routes.myTokens.path]} initialIndex={0}>
     <ContextProviders>
-      <NftEnhancer />
-      <Twitter />
+      {/* <NftEnhancer />
+      <Twitter /> */}
 
       <WumboDrawer>
-        <Switch>
+        <Flex
+          padding={4}
+          borderBottom="1px"
+          borderColor="gray.200"
+          fontFamily="body"
+          minH="61px"
+        >
+          <Flex w="full" alignItems="center" justifyContent="space-between">
+            <Text fontSize="lg" fontWeight="medium" color="indigo.500">
+              Sunsetting Wumbo
+            </Text>
+          </Flex>
+        </Flex>
+        <Stack
+          padding={4}
+          pos="relative"
+          flexGrow={1}
+          gap={4}
+          overflowY="auto"
+          fontFamily="body"
+        >
+          <Text>
+            Today we're sad to announce that, after multiple conversations and
+            contemplating amongst the team, we have decided its time to sunset
+            wumbo.
+          </Text>
+          <Text>
+            Thanks for giving Wumbo a try. Our team greatly appreciated you and
+            your early support!
+          </Text>
+          <Text>
+            You Can read the blog post and recoup your SOL from the link below.
+          </Text>
+          <Link
+            href="https://blog.strataprotocol.com/sunsetting-wumbo"
+            target="_blank"
+            color="purple.600"
+          >
+            Sunsetting Wumbo
+          </Link>
+        </Stack>
+        {/* <Switch>
           <Route path={routes.relink.path} component={RelinkRoute} />
           <Route path={routes.create.path} component={Create} />
           <Route
@@ -53,7 +95,7 @@ const App: FC = () => (
           <Route path={routes.profile.path} exact component={Profile} />
           <Route path={routes.sendSearch.path} exact component={SendSearch} />
           <Route path={routes.send.path} component={Send} />
-        </Switch>
+        </Switch> */}
       </WumboDrawer>
     </ContextProviders>
   </Router>

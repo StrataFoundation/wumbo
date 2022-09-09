@@ -5499,14 +5499,6 @@
     superstruct "0.14.2"
     tweetnacl "^1.0.3"
 
-"@strata-foundation/web3-token-auth@^3.4.6":
-  version "3.4.6"
-  resolved "https://registry.yarnpkg.com/@strata-foundation/web3-token-auth/-/web3-token-auth-3.4.6.tgz#8b87f43fad60d8762f0e7a7539f0f85ca8e6932c"
-  integrity sha512-gh4khNGb5hB0K/+DdXJfU68of7xUF1GKPL0moR47fO/1fuZdmZq9bUBc/Xdsr1vhRFegoMJR/dwL58kDi1bGXw==
-  dependencies:
-    "@solana/web3.js" "^1.32.0"
-    localstorage-memory "^1.0.3"
-
 "@strata-foundation/web3-token-auth@^3.5.4":
   version "3.5.4"
   resolved "https://registry.yarnpkg.com/@strata-foundation/web3-token-auth/-/web3-token-auth-3.5.4.tgz#652bb63e1d6ae03fe942b68f1d309c0ac2f02b95"

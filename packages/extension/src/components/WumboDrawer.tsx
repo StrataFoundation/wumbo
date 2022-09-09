@@ -50,6 +50,7 @@ export const WumboDrawer = (props: { children: ReactNode }) => {
   const outsideOfDrawerRef =
     useRef() as React.MutableRefObject<HTMLInputElement>;
   const { isOpen, toggleDrawer } = useDrawer();
+
   const tab = (
     <Box
       bg="indigo.500"
@@ -58,11 +59,51 @@ export const WumboDrawer = (props: { children: ReactNode }) => {
       backgroundImage="linear-gradient(49deg, #2323ff -12%, #4f51ff 34%, #a53ef4 98%)"
       roundedTopLeft="lg"
       roundedBottomLeft="lg"
-      shaddow="md"
+      shadow="md"
       onClick={() => toggleDrawer({ isOpen: !isOpen })}
       _hover={{ cursor: "pointer" }}
+      {...(!isOpen
+        ? {
+            sx: {
+              animation: "pulse 2s infinite",
+              "@keyframes pulse": {
+                "0%": {
+                  transform: "scale(0.95)",
+                  boxShadow: "0 0 0 0 rgba(74, 76, 255, 0.7)",
+                },
+                "70%": {
+                  transform: "scale(1)",
+                  boxShadow: "0 0 0 16px rgba(74, 76, 255, 0)",
+                },
+                "100%": {
+                  transform: "scale(0.95)",
+                  boxShadow: "0 0 0 0 rgba(74, 76, 255, 0)",
+                },
+              },
+            },
+          }
+        : {})}
     >
-      <Icon h="38px" w="38px" as={Logo} />
+      <Icon
+        h="38px"
+        w="38px"
+        as={Logo}
+        {...(!isOpen
+          ? {
+              sx: {
+                animation: "rotate 2s infinite linear alternate",
+                "@keyframes rotate": {
+                  from: {
+                    transform: "rotate(-45deg)",
+                  },
+                  to: {
+                    transform: "rotate(45deg)",
+                  },
+                },
+              },
+            }
+          : {})}
+      />
     </Box>
   );
 
